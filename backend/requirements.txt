@@ -1,2 +1,6 @@
 flask
 python-dotenv
+flask-cors
+pymongo
+Flask-PyMongo
+pydantic
