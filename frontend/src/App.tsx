@@ -13,7 +13,7 @@ function App() {
         {/* Login route - standalone without Layout */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* All other routes wrapped in Layout (with MenuBar and LineBar) */}
+        {/* All other routes wrapped in Layout (with MenuBar and HeaderBar) */}
         <Route element={<Layout />}>
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<HomePage />} />
