@@ -1,18 +1,22 @@
+export type UserRole = 'admin' | 'regular';
+
 export interface UserData {
   id: string;
-  name: string;
+  fullName: string;
   username: string;
-  password: string;
-  isAdmin: boolean;
+  passwordHash: string;
+  role: UserRole;
   color: string;
+  profileImage: string | null;
 }
 
 export interface UserFormData {
-  name: string;
+  fullName: string;
   username: string;
-  password: string;
-  isAdmin: boolean;
+  passwordHash: string;
+  role: UserRole;
   color: string;
+  profileImage: string | null;
 }
 
 export const AVAILABLE_COLORS = [
@@ -27,9 +31,10 @@ export const AVAILABLE_COLORS = [
 ];
 
 export const DEFAULT_FORM_DATA: UserFormData = {
-  name: "",
+  fullName: "",
   username: "",
-  password: "",
-  isAdmin: false,
+  passwordHash: "",
+  role: "regular",
   color: AVAILABLE_COLORS[2],
+  profileImage: null,
 };

@@ -1,7 +1,8 @@
 import React from "react";
-import { User, Trash2, Pencil } from "lucide-react";
+import { Trash2, Pencil } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { type UserData } from "../../../schemas/userentity";
+import defaultProfileImage from "../../../assets/defualt-profile.jpg";
 
 interface UsersListProps {
   users: UserData[];
@@ -105,10 +106,14 @@ const UsersList: React.FC<UsersListProps> = ({
               {user.isAdmin ? "מנהל" : "משתמש"}
             </span>
             <div
-              className="w-10 h-10 rounded-full flex items-center justify-center"
+              className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center"
               style={{ backgroundColor: user.color }}
             >
-              <User size={20} className="text-slate-600" />
+              <img
+                src={user.profileImage || defaultProfileImage}
+                alt={user.name}
+                className="w-full h-full object-cover"
+              />
             </div>
           </div>
         </div>

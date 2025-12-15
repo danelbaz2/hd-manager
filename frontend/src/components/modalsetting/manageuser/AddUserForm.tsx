@@ -1,5 +1,5 @@
 import React, { useRef, useState } from "react";
-import { Plus, Save, Camera, Loader2 } from "lucide-react";
+import { Plus, Camera, Loader2, Eye, EyeOff } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
 import {
   type UserFormData,
@@ -11,26 +11,21 @@ import {
   getBase64SizeKB,
 } from "../../../utils/imageCompression";
 
-interface UserFormProps {
+interface AddUserFormProps {
   formData: UserFormData;
   setFormData: React.Dispatch<React.SetStateAction<UserFormData>>;
-  isEditing: boolean;
   onAdd: () => void;
-  onSave: () => void;
-  onCancel: () => void;
 }
 
-const UserForm: React.FC<UserFormProps> = ({
+const AddUserForm: React.FC<AddUserFormProps> = ({
   formData,
   setFormData,
-  isEditing,
   onAdd,
-  onSave,
-  onCancel,
 }) => {
   const { isDarkMode } = useTheme();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isCompressing, setIsCompressing] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -39,7 +34,6 @@ const UserForm: React.FC<UserFormProps> = ({
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // Validate that it's an image
       if (!file.type.startsWith("image/")) {
         alert("נא לבחור קובץ תמונה בלבד");
         return;
@@ -47,8 +41,6 @@ const UserForm: React.FC<UserFormProps> = ({
 
       try {
         setIsCompressing(true);
-
-        // Compress image to WebP format, 200x200 max, 70% quality
         const compressedBase64 = await compressImage(file, {
           maxWidth: 200,
           maxHeight: 200,
@@ -56,7 +48,6 @@ const UserForm: React.FC<UserFormProps> = ({
           format: "webp",
         });
 
-        // Log compression results for debugging
         const originalSizeKB = Math.round(file.size / 1024);
         const compressedSizeKB = getBase64SizeKB(compressedBase64);
         console.log(
@@ -78,11 +69,6 @@ const UserForm: React.FC<UserFormProps> = ({
     onAdd();
   };
 
-  const handleSaveClick = () => {
-    console.log("Updating User - UserForm Data:", formData);
-    onSave();
-  };
-
   return (
     <div
       className={`
@@ -100,7 +86,7 @@ const UserForm: React.FC<UserFormProps> = ({
             isDarkMode ? "text-slate-200" : "text-slate-700"
           }`}
         >
-          {isEditing ? "עריכת עובד" : "הוספת עובד חדש"}
+          הוספת עובד חדש
         </span>
 
         {/* Profile Image Picker */}
@@ -135,13 +121,11 @@ const UserForm: React.FC<UserFormProps> = ({
                 isCompressing ? "opacity-50" : ""
               }`}
             />
-            {/* Loading overlay */}
             {isCompressing && (
               <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                 <Loader2 size={18} className="text-white animate-spin" />
               </div>
             )}
-            {/* Camera overlay on hover */}
             {!isCompressing && (
               <div
                 className={`
@@ -162,8 +146,10 @@ const UserForm: React.FC<UserFormProps> = ({
         <input
           type="text"
           placeholder="שם מלא"
-          value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          value={formData.fullName}
+          onChange={(e) =>
+            setFormData({ ...formData, fullName: e.target.value })
+          }
           className={`
             flex-1 min-w-[150px] px-4 py-2.5
             rounded-lg border text-right
@@ -199,27 +185,44 @@ const UserForm: React.FC<UserFormProps> = ({
         />
 
         {/* Password Input */}
-        <input
-          type="password"
-          placeholder="סיסמה"
-          value={formData.password}
-          onChange={(e) =>
-            setFormData({ ...formData, password: e.target.value })
-          }
-          className={`
-            flex-1 min-w-[120px] px-4 py-2.5
-            rounded-lg border text-right
-            transition-colors
-            ${
-              isDarkMode
-                ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
-                : "bg-white border-slate-200 text-slate-800 placeholder-slate-400"
+        <div className="relative flex-1 min-w-[120px]">
+          <input
+            type={showPassword ? "text" : "password"}
+            placeholder="סיסמה"
+            value={formData.passwordHash}
+            onChange={(e) =>
+              setFormData({ ...formData, passwordHash: e.target.value })
             }
-            focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-          `}
-        />
+            className={`
+              w-full px-4 py-2.5 pl-10
+              rounded-lg border text-right
+              transition-colors
+              ${
+                isDarkMode
+                  ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
+                  : "bg-white border-slate-200 text-slate-800 placeholder-slate-400"
+              }
+              focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+            `}
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className={`
+              absolute left-2 top-1/2 -translate-y-1/2
+              p-1 rounded-md transition-colors
+              ${
+                isDarkMode
+                  ? "text-slate-400 hover:text-slate-200"
+                  : "text-slate-500 hover:text-slate-700"
+              }
+            `}
+          >
+            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+          </button>
+        </div>
 
-        {/* Role Toggle Switch - Segmented Control */}
+        {/* Role Toggle Switch */}
         <div className="flex items-center gap-3" dir="rtl">
           <div
             className={`
@@ -227,22 +230,20 @@ const UserForm: React.FC<UserFormProps> = ({
               ${isDarkMode ? "bg-slate-700" : "bg-slate-100"}
             `}
           >
-            {/* User Option */}
             <button
               type="button"
-              onClick={() => setFormData({ ...formData, isAdmin: false })}
+              onClick={() => setFormData({ ...formData, role: "regular" })}
               className={`
                 relative z-10 flex items-center justify-center
                 w-10 h-8 rounded-md
                 transition-all duration-200 ease-in-out
                 ${
-                  !formData.isAdmin
+                  formData.role === "regular"
                     ? "bg-blue-500 text-white"
                     : "bg-white text-blue-500"
                 }
               `}
             >
-              {/* User Icon - Single Person */}
               <svg
                 width="18"
                 height="18"
@@ -258,22 +259,20 @@ const UserForm: React.FC<UserFormProps> = ({
               </svg>
             </button>
 
-            {/* Admin Option */}
             <button
               type="button"
-              onClick={() => setFormData({ ...formData, isAdmin: true })}
+              onClick={() => setFormData({ ...formData, role: "admin" })}
               className={`
                 relative z-10 flex items-center justify-center
                 w-10 h-8 rounded-md
                 transition-all duration-200 ease-in-out
                 ${
-                  formData.isAdmin
+                  formData.role === "admin"
                     ? "bg-blue-500 text-white"
                     : "bg-white text-blue-500"
                 }
               `}
             >
-              {/* Admin Icon - Shield with checkmark */}
               <svg
                 width="18"
                 height="18"
@@ -322,55 +321,23 @@ const UserForm: React.FC<UserFormProps> = ({
           ))}
         </div>
 
-        {/* Action Buttons */}
-        {isEditing ? (
-          <div className="flex gap-2">
-            <button
-              onClick={handleSaveClick}
-              className="
-                flex items-center gap-2
-                px-6 py-2.5 rounded-lg
-                bg-blue-500 hover:bg-blue-600
-                text-white font-medium
-                transition-colors
-              "
-            >
-              <Save size={18} />
-              <span>שמור</span>
-            </button>
-            <button
-              onClick={onCancel}
-              className={`
-                px-4 py-2.5 rounded-lg
-                font-medium transition-colors
-                ${
-                  isDarkMode
-                    ? "bg-slate-600 hover:bg-slate-500 text-slate-200"
-                    : "bg-slate-200 hover:bg-slate-300 text-slate-700"
-                }
-              `}
-            >
-              ביטול
-            </button>
-          </div>
-        ) : (
-          <button
-            onClick={handleAddClick}
-            className="
-              flex items-center gap-2
-              px-6 py-2.5 rounded-lg
-              bg-blue-500 hover:bg-blue-600
-              text-white font-medium
-              transition-colors
-            "
-          >
-            <Plus size={18} />
-            <span>הוסף</span>
-          </button>
-        )}
+        {/* Add Button */}
+        <button
+          onClick={handleAddClick}
+          className="
+            flex items-center gap-2
+            px-6 py-2.5 rounded-lg
+            bg-blue-500 hover:bg-blue-600
+            text-white font-medium
+            transition-colors
+          "
+        >
+          <Plus size={18} />
+          <span>הוסף</span>
+        </button>
       </div>
     </div>
   );
 };
 
-export default UserForm;
+export default AddUserForm;

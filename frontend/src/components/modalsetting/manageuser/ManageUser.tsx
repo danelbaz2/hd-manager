@@ -5,7 +5,8 @@ import {
   type UserFormData,
   DEFAULT_FORM_DATA,
 } from "../../../schemas/userentity";
-import UserForm from "./UserForm";
+import AddUserForm from "./AddUserForm";
+import EditUserForm from "./EditUserForm";
 import UsersList from "./UsersList";
 
 const ManageUser: React.FC = () => {
@@ -18,6 +19,7 @@ const ManageUser: React.FC = () => {
       password: "123456",
       isAdmin: true,
       color: "#DBEAFE",
+      profileImage: null,
     },
     {
       id: "2",
@@ -26,6 +28,7 @@ const ManageUser: React.FC = () => {
       password: "123456",
       isAdmin: false,
       color: "#D1FAE5",
+      profileImage: null,
     },
     {
       id: "3",
@@ -34,6 +37,7 @@ const ManageUser: React.FC = () => {
       password: "123456",
       isAdmin: false,
       color: "#FCE7F3",
+      profileImage: null,
     },
     {
       id: "4",
@@ -42,6 +46,7 @@ const ManageUser: React.FC = () => {
       password: "123456",
       isAdmin: false,
       color: "#FEE2E2",
+      profileImage: null,
     },
     {
       id: "5",
@@ -50,6 +55,7 @@ const ManageUser: React.FC = () => {
       password: "123456",
       isAdmin: false,
       color: "#E0E7FF",
+      profileImage: null,
     },
     {
       id: "6",
@@ -58,6 +64,7 @@ const ManageUser: React.FC = () => {
       password: "123456",
       isAdmin: false,
       color: "#F3E8FF",
+      profileImage: null,
     },
   ]);
 
@@ -74,6 +81,7 @@ const ManageUser: React.FC = () => {
       password: formData.password,
       isAdmin: formData.isAdmin,
       color: formData.color,
+      profileImage: formData.profileImage,
     };
 
     setUsers([...users, user]);
@@ -88,6 +96,7 @@ const ManageUser: React.FC = () => {
       password: user.password,
       isAdmin: user.isAdmin,
       color: user.color,
+      profileImage: user.profileImage,
     });
   };
 
@@ -110,6 +119,7 @@ const ManageUser: React.FC = () => {
               password: formData.password,
               isAdmin: formData.isAdmin,
               color: formData.color,
+              profileImage: formData.profileImage,
             }
           : user
       )
@@ -146,15 +156,21 @@ const ManageUser: React.FC = () => {
         ניהול עובדים
       </h1>
 
-      {/* Add/Edit User Form */}
-      <UserForm
-        formData={formData}
-        setFormData={setFormData}
-        isEditing={isEditing}
-        onAdd={handleAddUser}
-        onSave={handleSaveEdit}
-        onCancel={handleCancelEdit}
-      />
+      {/* Add or Edit User Form */}
+      {isEditing ? (
+        <EditUserForm
+          formData={formData}
+          setFormData={setFormData}
+          onSave={handleSaveEdit}
+          onCancel={handleCancelEdit}
+        />
+      ) : (
+        <AddUserForm
+          formData={formData}
+          setFormData={setFormData}
+          onAdd={handleAddUser}
+        />
+      )}
 
       {/* Users List */}
       <UsersList

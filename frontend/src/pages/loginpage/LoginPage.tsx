@@ -62,7 +62,8 @@ const LoginPage: React.FC = () => {
             ${isDarkMode ? "text-slate-400" : "text-slate-500"}
           `}
         >
-          Flow Task הזן את פרטי כדי להיכנס אל
+          {import.meta.env.VITE_SYSTEM_NAME || "Flow Task"} הזן את פרטי כדי
+          להיכנס אל
         </p>
 
         {/* Login Form */}

@@ -40,7 +40,7 @@ const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
       {/* Logo/Header */}
       <div className="flex items-center justify-center gap-3 mb-10 px-2">
         <h1 className="text-3xl font-bold text-blue-600 tracking-wide">
-          Flow Task{" "}
+          {import.meta.env.VITE_SYSTEM_NAME || "Flow Task"}{" "}
         </h1>
         <Layers className="text-blue-600" size={32} strokeWidth={2} />
       </div>
