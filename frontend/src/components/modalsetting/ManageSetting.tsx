@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { X, Settings, Users, UserPlus, Tag } from "lucide-react";
 import { useTheme } from "../../contexts/ThemeContext";
-import ManageUser from "./ManageUser.tsx";
-import ManageContact from "./ManageContact.tsx";
-import ManageTags from "./ManageTags.tsx";
+import ManageUser from "./manageuser/ManageUser.tsx";
+import ManageContact from "./managecontact/ManageContact.tsx";
+import ManageTags from "./managetags/ManageTags.tsx";
 
 interface ManageSettingProps {
   isOpen: boolean;

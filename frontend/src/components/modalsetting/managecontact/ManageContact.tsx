@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { User, Trash2, Pencil, UserPlus, Phone, Mail } from "lucide-react";
-import { useTheme } from "../../contexts/ThemeContext";
+import { useTheme } from "../../../contexts/ThemeContext";
 
 interface ContactData {
   id: string;

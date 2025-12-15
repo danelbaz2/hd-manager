@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Tag, Trash2, Pencil } from "lucide-react";
-import { useTheme } from "../../contexts/ThemeContext";
+import { useTheme } from "../../../contexts/ThemeContext";
 
 interface TagData {
   id: string;
