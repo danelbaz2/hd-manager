@@ -2,7 +2,7 @@ from database import mongo
 from datetime import datetime
 from bson.objectid import ObjectId
 
-def log_history(entity_type, entity_id, action, old_val=None, new_val=None, change_val=None, user_id=None):
+def log_history(entity_type, entity_id, action, user_id, old_val=None, new_val=None, change_val=None):
     """
     Logs a history entry.
     
@@ -15,25 +15,41 @@ def log_history(entity_type, entity_id, action, old_val=None, new_val=None, chan
         if not doc: return None
         d = doc.copy()
         if '_id' in d:
-             d['id'] = str(d.pop('_id'))
+            d['entityId'] = d.pop('_id')
         return d
 
+    # Helper to convert dot notation keys to nested dicts
+    # e.g., {'base.updatedAt': 123} -> {'base': {'updatedAt': 123}}
+    def unflatten_doc(doc):
+        if not doc:
+            return None
+        result = {}
+        for key, value in doc.items():
+            if '.' in key:
+                parts = key.split('.')
+                current = result
+                for part in parts[:-1]:
+                    if part not in current:
+                        current[part] = {}
+                    current = current[part]
+                current[parts[-1]] = value
+            else:
+                result[key] = value
+        return result
+
+    now = int(datetime.now().timestamp() * 1000)
+    
+    # c includes the changes performed and metadata about who/when/what action
+    # Unflatten to convert 'base.updatedAt' to nested {'base': {'updatedAt': ...}}
+    change_data = unflatten_doc(clean_doc(change_val)) or {}
+    change_data['updatedBy'] = user_id
+    change_data['action'] = action
+    change_data['timestamp'] = now
+    
     entry = {
-        "actionType": action,
-        "timestamp": datetime.now().isoformat(),
-        "performedByUserId": user_id, # Placeholder, passed from route if available
-        "oldValue": clean_doc(old_val),
-        "newValue": clean_doc(new_val),
-        "changeValue": clean_doc(change_val),
-        "details": f"{action} operation on {entity_type}"
+        "o": clean_doc(old_val),      # Old: entity before changes
+        "c": change_data,              # Change: what changed + who performed it
+        "n": clean_doc(new_val)        # New: entity after changes
     }
 
-    # Upsert: Find history doc for this entity, create if missing, push entry
-    mongo.db.history_entries.update_one(
-        {"entityId": str(entity_id), "entityType": entity_type},
-        {
-            "$push": {"entries": entry},
-            "$setOnInsert": {"entityId": str(entity_id), "entityType": entity_type}
-        },
-        upsert=True
-    )
+    mongo.db.ents_archive.insert_one(entry)
