@@ -1,0 +1,251 @@
+import React, { useState, useRef, useEffect } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  LayoutGrid,
+  AlignJustify,
+} from "lucide-react";
+import { useTheme } from "../../../contexts/ThemeContext";
+import defaultProfile from "../../../assets/defualt-profile.jpg";
+import Calender from "./Calender";
+import MenuItemProfile from "./MenuItemProfile";
+
+interface HeaderBarProps {
+  className?: string;
+}
+
+const HEBREW_DAYS_FULL = [
+  "ראשון",
+  "שני",
+  "שלישי",
+  "רביעי",
+  "חמישי",
+  "שישי",
+  "שבת",
+];
+
+const formatDateHebrew = (date: Date): string => {
+  const dayName = HEBREW_DAYS_FULL[date.getDay()];
+  const day = date.getDate();
+  const month = date.getMonth() + 1;
+  return `${dayName}, ${day}.${month}`;
+};
+
+const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
+  const { isDarkMode } = useTheme();
+  // Store date as timestamp (int)
+  const [selectedDate, setSelectedDate] = useState<number>(
+    new Date().getTime()
+  );
+  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const calendarRef = useRef<HTMLDivElement>(null);
+
+  // Convert timestamp to Date object for display
+  const currentDate = new Date(selectedDate);
+
+  const changeDate = (diff: number) => {
+    const newDate = new Date(selectedDate);
+    newDate.setDate(newDate.getDate() + diff);
+    setSelectedDate(newDate.getTime());
+  };
+
+  console.log("Selected Date:", selectedDate);
+  console.log("View Mode:", viewMode);
+
+  // Close menus when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false);
+      }
+      if (
+        calendarRef.current &&
+        !calendarRef.current.contains(event.target as Node)
+      ) {
+        setIsCalendarOpen(false);
+      }
+    };
+
+    if (isUserMenuOpen || isCalendarOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isUserMenuOpen, isCalendarOpen]);
+
+  return (
+    <header
+      className={`
+        relative
+        h-16 md:h-20 lg:h-24
+        shrink-0 flex items-center justify-between
+        px-4 md:px-6 lg:px-8
+        shadow-sm z-30
+        ${isDarkMode ? "bg-slate-800" : "bg-white"}
+        ${className || ""}
+      `}
+    >
+      {/* Left side - User Profile */}
+      <div className="flex items-center gap-2 md:gap-4 relative" ref={menuRef}>
+        <button
+          onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
+          className={`
+            flex items-center gap-2 md:gap-3
+            p-1.5 md:p-2 rounded-xl
+            transition-colors
+            ${isDarkMode ? "hover:bg-slate-700" : "hover:bg-slate-50"}
+          `}
+        >
+          <img
+            src={defaultProfile}
+            alt="Profile"
+            className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full object-cover"
+          />
+          <span
+            className={`
+              hidden sm:block font-bold
+              text-sm md:text-base lg:text-lg
+              ${isDarkMode ? "text-white" : "text-slate-800"}
+            `}
+          >
+            דן אלבז
+          </span>
+        </button>
+
+        {/* User Dropdown Menu */}
+        <MenuItemProfile
+          isOpen={isUserMenuOpen}
+          onClose={() => setIsUserMenuOpen(false)}
+        />
+      </div>
+
+      {/* Center - Date Picker */}
+      <div
+        ref={calendarRef}
+        className="absolute left-1/2 transform -translate-x-1/2"
+      >
+        <div
+          className={`
+            flex items-center
+            rounded-full shadow-sm border
+            px-1 md:px-2 py-1
+            ${
+              isDarkMode
+                ? "bg-slate-700 border-slate-600"
+                : "bg-white border-slate-200"
+            }
+          `}
+        >
+          <button
+            onClick={() => changeDate(1)}
+            className={`
+              p-1.5 md:p-2
+              rounded-full transition-colors
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-600 text-slate-300"
+                  : "hover:bg-slate-100 text-slate-500"
+              }
+            `}
+            aria-label="Previous day"
+          >
+            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
+          </button>
+          <div
+            onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+            className="px-5 md:px-4 min-w-[100px] md:min-w-[120px] text-center cursor-pointer select-none"
+          >
+            <span
+              className={`
+                font-bold text-sm md:text-sm lg:text-base
+                ${isDarkMode ? "text-slate-200" : "text-slate-700"}
+              `}
+            >
+              {formatDateHebrew(currentDate)}
+            </span>
+          </div>
+          <button
+            onClick={() => changeDate(-1)}
+            className={`
+              p-1.5 md:p-1
+              rounded-full transition-colors
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-600 text-slate-300"
+                  : "hover:bg-slate-100 text-slate-500"
+              }
+            `}
+            aria-label="Next day"
+          >
+            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
+          </button>
+        </div>
+
+        {/* Calendar Popup */}
+        {isCalendarOpen && (
+          <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 z-50">
+            <Calender
+              selectedDate={selectedDate}
+              onDateSelect={(timestamp) => {
+                setSelectedDate(timestamp);
+                setIsCalendarOpen(false);
+              }}
+              onClose={() => setIsCalendarOpen(false)}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Right side - View Mode Toggle */}
+      <div className="flex items-center gap-2 md:gap-3">
+        <div
+          className={`flex items-center p-1 rounded-lg ${
+            isDarkMode ? "bg-slate-700" : "bg-slate-100"
+          }`}
+        >
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`
+              p-1.5 md:p-2
+              rounded-md transition-all
+              ${
+                viewMode === "grid"
+                  ? isDarkMode
+                    ? "bg-slate-600 text-white shadow-sm"
+                    : "bg-white shadow-sm text-blue-600"
+                  : "text-slate-400 hover:text-slate-600"
+              }
+            `}
+            aria-label="Grid view"
+          >
+            <LayoutGrid className="w-4 h-4 md:w-5 md:h-5" />
+          </button>
+          <button
+            onClick={() => setViewMode("list")}
+            className={`
+              p-1.5 md:p-2
+              rounded-md transition-all
+              ${
+                viewMode === "list"
+                  ? isDarkMode
+                    ? "bg-slate-600 text-white shadow-sm"
+                    : "bg-white shadow-sm text-blue-600"
+                  : "text-slate-400 hover:text-slate-600"
+              }
+            `}
+            aria-label="List view"
+          >
+            <AlignJustify className="w-4 h-4 md:w-5 md:h-5" />
+          </button>
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default HeaderBar;
