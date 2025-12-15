@@ -6,7 +6,7 @@ import random
 from bson.objectid import ObjectId
 
 def get_relative_date(diff_days):
-    return (datetime.now() + timedelta(days=diff_days)).strftime('%Y-%m-%d')
+    return int((datetime.now() + timedelta(days=diff_days)).timestamp() * 1000)
 
 def get_timestamp_ms():
     return int(datetime.now().timestamp() * 1000)
@@ -16,19 +16,16 @@ def seed():
         # Clear existing data
         print("Clearing database...")
         mongo.db.users.delete_many({})
-        mongo.db.tags.delete_many({})
-        mongo.db.system_contacts.delete_many({})
-        mongo.db.missions.delete_many({})
-        mongo.db.history_entries.delete_many({})
-        mongo.db.chat_messages.delete_many({})
+        mongo.db.ents.delete_many({})
+        mongo.db.ents_archive.delete_many({})
         
         # 1. Users
         print("Seeding Users...")
         users_data = [
-            { "fullName": 'מאור', "username": "maor", "passwordHash": "hash123", "role": 'admin', "iconColor": 'bg-blue-100 text-blue-600', "createdAt": get_relative_date(-30), "isActive": True, "isDeleted": False },
-            { "fullName": 'עילי', "username": "ilay", "passwordHash": "hash123", "role": 'regular', "iconColor": 'bg-indigo-100 text-indigo-600', "createdAt": get_relative_date(-30), "isActive": True, "isDeleted": False },
-            { "fullName": 'דן', "username": "dan", "passwordHash": "hash123", "role": 'regular', "iconColor": 'bg-cyan-100 text-cyan-600', "createdAt": get_relative_date(-30), "isActive": True, "isDeleted": False },
-            { "fullName": 'אוראל', "username": "orel", "passwordHash": "hash123", "role": 'regular', "iconColor": 'bg-rose-100 text-rose-600', "createdAt": get_relative_date(-30), "isActive": True, "isDeleted": False },
+            { "fullName": 'מאור', "username": "maor", "passwordHash": "hash123", "role": 'admin', "iconColor": 'bg-blue-100 text-blue-600', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'עילי', "username": "ilay", "passwordHash": "hash123", "role": 'regular', "iconColor": 'bg-indigo-100 text-indigo-600', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'דן', "username": "dan", "passwordHash": "hash123", "role": 'regular', "iconColor": 'bg-cyan-100 text-cyan-600', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'אוראל', "username": "orel", "passwordHash": "hash123", "role": 'regular', "iconColor": 'bg-rose-100 text-rose-600', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
         ]
         
         user_ids = []
@@ -38,45 +35,45 @@ def seed():
             uid = u['_id']
             user_ids.append(uid)
             # Log Create History
-            log_history('user', uid, 'CREATE', None, u, u)
+            log_history('user', uid, 'CREATE', 'system', None, u, u)
 
         # Map for easy access: 0=Maor, 1=Ilay, 2=Dan, 3=Orel
         
         # 2. Tags
         print("Seeding Tags...")
         tags_data = [
-            { "name": 'פיתוח', "description": "קשור לפיתוח תוכנה", "color": 'bg-blue-100 text-blue-700 border-blue-200', "createdAt": get_relative_date(-10), "isActive": True, "isDeleted": False },
-            { "name": 'עיצוב', "description": "קשור ל-UI/UX", "color": 'bg-purple-100 text-purple-700 border-purple-200', "createdAt": get_relative_date(-10), "isActive": True, "isDeleted": False },
-            { "name": 'בדיקות', "description": "QA וטסטים", "color": 'bg-orange-100 text-orange-700 border-orange-200', "createdAt": get_relative_date(-10), "isActive": True, "isDeleted": False },
-            { "name": 'שרתים', "description": "DevOps ותשתיות", "color": 'bg-slate-100 text-slate-700 border-slate-200', "createdAt": get_relative_date(-10), "isActive": True, "isDeleted": False },
-            { "name": 'ניהול', "description": "ניהול פרויקטים", "color": 'bg-emerald-100 text-emerald-700 border-emerald-200', "createdAt": get_relative_date(-10), "isActive": True, "isDeleted": False },
-            { "name": 'דחיפות גבוהה', "description": "לטפל מיד", "color": 'bg-red-100 text-red-700 border-red-200', "createdAt": get_relative_date(-10), "isActive": True, "isDeleted": False },
+            { "name": 'פיתוח', "description": "קשור לפיתוח תוכנה", "color": 'bg-blue-100 text-blue-700 border-blue-200', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
+            { "name": 'עיצוב', "description": "קשור ל-UI/UX", "color": 'bg-purple-100 text-purple-700 border-purple-200', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
+            { "name": 'בדיקות', "description": "QA וטסטים", "color": 'bg-orange-100 text-orange-700 border-orange-200', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
+            { "name": 'שרתים', "description": "DevOps ותשתיות", "color": 'bg-slate-100 text-slate-700 border-slate-200', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
+            { "name": 'ניהול', "description": "ניהול פרויקטים", "color": 'bg-emerald-100 text-emerald-700 border-emerald-200', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
+            { "name": 'דחיפות גבוהה', "description": "לטפל מיד", "color": 'bg-red-100 text-red-700 border-red-200', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
         ]
         
         tag_ids = []
         for t in tags_data:
             t['_id'] = str(ObjectId())
-            mongo.db.tags.insert_one(t)
+            mongo.db.ents.insert_one(t)
             tid = t['_id']
             tag_ids.append(tid)
-            log_history('tag', tid, 'CREATE', None, t, t)
+            log_history('tag', tid, 'CREATE', 'system', None, t, t)
 
         # 3. System Contacts
         print("Seeding Contacts...")
         contacts_data = [
-            { "fullName": 'תמיכה טכנית', "position": 'חיצוני', "department": "IT", "phoneNumber": '050-0000000', "email": 'support@example.com', "tagsIds": [tag_ids[3]], "createdAt": get_relative_date(-30), "isActive": True, "isDeleted": False },
-            { "fullName": 'ספק שרתים', "position": 'ספק', "department": "Infra", "phoneNumber": '052-1111111', "email": 'cloud@example.com', "tagsIds": [tag_ids[3]], "createdAt": get_relative_date(-30), "isActive": True, "isDeleted": False },
+            { "fullName": 'תמיכה טכנית', "position": 'חיצוני', "department": "IT", "phoneNumber": '050-0000000', "email": 'support@example.com', "tagsIds": [tag_ids[3]], "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "system_contact"}},
+            { "fullName": 'ספק שרתים', "position": 'ספק', "department": "Infra", "phoneNumber": '052-1111111', "email": 'cloud@example.com', "tagsIds": [tag_ids[3]], "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "system_contact"}},
         ]
         
         for c in contacts_data:
             c['_id'] = str(ObjectId())
             mongo.db.system_contacts.insert_one(c)
             cid = c['_id']
-            log_history('system_contact', cid, 'CREATE', None, c, c)
+            log_history('system_contact', cid, 'CREATE', 'system', None, c, c)
 
-        # 4. Missions
-        print("Seeding Missions...")
-        missions_data = [
+        # 4. Tasks
+        print("Seeding Tasks...")
+        tasks_data = [
             {
                 "title": 'בדיקת שרתים שבועית',
                 "description": 'בדיקה מקיפה של שרתי ה-Production וה-Staging לוודא יציבות לאחר העדכון האחרון.',
@@ -86,10 +83,14 @@ def seed():
                 "tagId": tag_ids[3], # Servers
                 "date": get_relative_date(0),
                 "deadline": get_relative_date(2),
-                "createdAt": get_relative_date(-2),
-                "updatedAt": get_relative_date(0),
                 "priority": 'high',
-                "isDeleted": False
+                "base": {
+                    "isDeleted": False,
+                    "createdAt": get_relative_date(-2),
+                    "updatedAt": get_relative_date(0),
+                    "lut": get_relative_date(0),
+                    "entityType": "task"
+                }
             },
             {
                 "title": 'עדכון מסד נתונים',
@@ -100,10 +101,14 @@ def seed():
                 "tagId": tag_ids[0], # Dev
                 "date": get_relative_date(0),
                 "deadline": get_relative_date(1),
-                "createdAt": get_relative_date(-1),
-                "updatedAt": get_relative_date(-1),
                 "priority": 'medium',
-                "isDeleted": False
+                "base": {
+                    "isDeleted": False,
+                    "createdAt": get_relative_date(-1),
+                    "updatedAt": get_relative_date(-1),
+                    "lut": get_relative_date(-1),
+                    "entityType": "task"
+                }
             },
             {
                 "title": 'פגישת צוות',
@@ -114,18 +119,22 @@ def seed():
                 "tagId": tag_ids[4], # Management
                 "date": get_relative_date(0),
                 "deadline": get_relative_date(0),
-                "createdAt": get_relative_date(-1),
-                "updatedAt": get_relative_date(-1),
                 "priority": 'low',
-                "isDeleted": False
+                "base": {
+                    "isDeleted": False,
+                    "createdAt": get_relative_date(-1),
+                    "updatedAt": get_relative_date(-1),
+                    "lut": get_relative_date(-1),
+                    "entityType": "task"
+                }
             }
         ]
         
-        for m in missions_data:
-            m['_id'] = str(ObjectId())
-            mongo.db.missions.insert_one(m)
-            mid = m['_id']
-            log_history('mission', mid, 'CREATE', None, m, m)
+        for t in tasks_data:
+            t['_id'] = str(ObjectId())
+            mongo.db.ents.insert_one(t)
+            tid = t['_id']
+            log_history('task', tid, 'CREATE', 'system', None, t, t)
 
         # 5. Chat Messages
         print("Seeding Chat...")
@@ -133,20 +142,30 @@ def seed():
             {
                 "senderUserId": user_ids[0],
                 "message": "בוקר טוב לכולם!",
-                "createdAt": get_timestamp_ms() - 100000,
-                "isDeleted": False
+                "base": {
+                    "isDeleted": False,
+                    "createdAt": get_timestamp_ms() - 100000,
+                    "updatedAt": get_timestamp_ms() - 100000,
+                    "lut": get_timestamp_ms() - 100000,
+                    "entityType": "chat_message"
+                }
             },
             {
                 "senderUserId": user_ids[1],
                 "message": "בוקר אור, מה המצב?",
-                "createdAt": get_timestamp_ms(),
-                "isDeleted": False
+                "base": {
+                    "isDeleted": False,
+                    "createdAt": get_timestamp_ms(),
+                    "updatedAt": get_timestamp_ms(),
+                    "lut": get_timestamp_ms(),
+                    "entityType": "chat_message"
+                }
             }
         ]
         
         for msg in chat_data:
             msg['_id'] = str(ObjectId())
-            mongo.db.chat_messages.insert_one(msg)
+            mongo.db.ents.insert_one(msg)
             
         print("Database seeded successfully with updated Schema and IDs!")
 

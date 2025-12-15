@@ -1,9 +1,9 @@
 from pydantic import BaseModel, Field
 from typing import Optional
+from models.base_entity import BaseEntityMeta
 
 class ChatMessageModel(BaseModel):
-    id: Optional[str] = None
+    entityId: Optional[str] = None
     senderUserId: int  # Sender ID
     message: str  # Text content
-    createdAt: Optional[int] = None
-    isDeleted: bool = False
+    base: Optional[BaseEntityMeta] = None
