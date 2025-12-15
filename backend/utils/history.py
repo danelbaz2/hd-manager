@@ -2,7 +2,7 @@ from database import mongo
 from datetime import datetime
 from bson.objectid import ObjectId
 
-def log_history(entity_type, entity_id, action, user_id, old_val=None, new_val=None, change_val=None):
+def log_history(entity_type, entity_id, action, user_id='system', old_val=None, new_val=None, change_val=None):
     """
     Logs a history entry.
     

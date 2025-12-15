@@ -19,7 +19,7 @@ def get_tasks():
     date_param = request.args.get('date')
     start_date = request.args.get('startDate')
     end_date = request.args.get('endDate')
-    worker_id = request.args.get('workerId')
+    responsible_users_id = request.args.get('responsibleUsersId')
     
     query = {'base.entityType': 'task', 'base.isDeleted': {'$ne': True}}
 
@@ -39,10 +39,10 @@ def get_tasks():
         except ValueError:
             pass
 
-    if worker_id:
+    if responsible_users_id:
         # Filter by worker (Responsible user)
         # MongoDB automatically searches inside the array if responsibleUsersId is a list
-        query['responsibleUsersId'] = worker_id
+        query['responsibleUsersId'] = responsible_users_id
 
     tasks = list(mongo.db.ents.find(query))
     return jsonify([serialize_doc(t) for t in tasks])

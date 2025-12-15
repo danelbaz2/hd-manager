@@ -1,8 +1,10 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, Union
 from models.base_entity import BaseEntityMeta
 
 class SystemContactModel(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     entityId: Optional[str] = None
     fullName: str = Field(..., min_length=2)
     position: Optional[str] = None
@@ -12,7 +14,10 @@ class SystemContactModel(BaseModel):
     base: Optional[BaseEntityMeta] = None
 
 # Update Model - all fields optional but validated when provided
+# extra='forbid' rejects any fields not defined in the model
 class SystemContactUpdateModel(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
     fullName: Optional[str] = Field(None, min_length=2)
     position: Optional[str] = None
     department: Optional[str] = None
