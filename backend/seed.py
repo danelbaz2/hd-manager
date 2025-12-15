@@ -22,10 +22,10 @@ def seed():
         # 1. Users
         print("Seeding Users...")
         users_data = [
-            { "fullName": 'מאור', "username": "maor", "passwordHash": "hash123", "role": 'admin', "iconColor": 'bg-blue-100 text-blue-600', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'עילי', "username": "ilay", "passwordHash": "hash123", "role": 'regular', "iconColor": 'bg-indigo-100 text-indigo-600', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'דן', "username": "dan", "passwordHash": "hash123", "role": 'regular', "iconColor": 'bg-cyan-100 text-cyan-600', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'אוראל', "username": "orel", "passwordHash": "hash123", "role": 'regular', "iconColor": 'bg-rose-100 text-rose-600', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'מאור', "username": "maor", "passwordHash": "hash123", "role": 'admin', "color": '#3b82f6', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'עילי', "username": "ilay", "passwordHash": "hash123", "role": 'regular', "color": '#6366f1', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'דן', "username": "dan", "passwordHash": "hash123", "role": 'regular', "color": '#06b6d4', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'אוראל', "username": "orel", "passwordHash": "hash123", "role": 'regular', "color": '#f43f5e', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
         ]
         
         user_ids = []
@@ -42,12 +42,12 @@ def seed():
         # 2. Tags
         print("Seeding Tags...")
         tags_data = [
-            { "name": 'פיתוח', "description": "קשור לפיתוח תוכנה", "color": 'bg-blue-100 text-blue-700 border-blue-200', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
-            { "name": 'עיצוב', "description": "קשור ל-UI/UX", "color": 'bg-purple-100 text-purple-700 border-purple-200', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
-            { "name": 'בדיקות', "description": "QA וטסטים", "color": 'bg-orange-100 text-orange-700 border-orange-200', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
-            { "name": 'שרתים', "description": "DevOps ותשתיות", "color": 'bg-slate-100 text-slate-700 border-slate-200', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
-            { "name": 'ניהול', "description": "ניהול פרויקטים", "color": 'bg-emerald-100 text-emerald-700 border-emerald-200', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
-            { "name": 'דחיפות גבוהה', "description": "לטפל מיד", "color": 'bg-red-100 text-red-700 border-red-200', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
+            { "name": 'פיתוח', "description": "קשור לפיתוח תוכנה", "color": '#3b82f6', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
+            { "name": 'עיצוב', "description": "קשור ל-UI/UX", "color": '#a855f7', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
+            { "name": 'בדיקות', "description": "QA וטסטים", "color": '#f97316', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
+            { "name": 'שרתים', "description": "DevOps ותשתיות", "color": '#64748b', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
+            { "name": 'ניהול', "description": "ניהול פרויקטים", "color": '#10b981', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
+            { "name": 'דחיפות גבוהה', "description": "לטפל מיד", "color": '#ef4444', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
         ]
         
         tag_ids = []
@@ -80,12 +80,12 @@ def seed():
                 "status": 'in_progress',
                 "responsibleUsersId": [user_ids[0]], # Maor
                 "participantsIds": [user_ids[3], user_ids[2]], # Orel, Dan
-                "tagId": tag_ids[3], # Servers
+                "tagsId": [tag_ids[3], tag_ids[5]], # Servers, High Priority
                 "date": get_relative_date(0),
                 "deadline": get_relative_date(2),
-                "priority": 'high',
                 "base": {
                     "isDeleted": False,
+                    "isActive": True,
                     "createdAt": get_relative_date(-2),
                     "updatedAt": get_relative_date(0),
                     "lut": get_relative_date(0),
@@ -98,12 +98,12 @@ def seed():
                 "status": 'open',
                 "responsibleUsersId": [user_ids[1]], # Ilay
                 "participantsIds": [user_ids[0]], # Maor
-                "tagId": tag_ids[0], # Dev
+                "tagsId": [tag_ids[0]], # Dev
                 "date": get_relative_date(0),
                 "deadline": get_relative_date(1),
-                "priority": 'medium',
                 "base": {
                     "isDeleted": False,
+                    "isActive": True,
                     "createdAt": get_relative_date(-1),
                     "updatedAt": get_relative_date(-1),
                     "lut": get_relative_date(-1),
@@ -116,12 +116,12 @@ def seed():
                 "status": 'open',
                 "responsibleUsersId": [user_ids[0], user_ids[1]],
                 "participantsIds": [],
-                "tagId": tag_ids[4], # Management
+                "tagsId": [tag_ids[4]], # Management
                 "date": get_relative_date(0),
                 "deadline": get_relative_date(0),
-                "priority": 'low',
                 "base": {
                     "isDeleted": False,
+                    "isActive": True,
                     "createdAt": get_relative_date(-1),
                     "updatedAt": get_relative_date(-1),
                     "lut": get_relative_date(-1),
