@@ -6,6 +6,6 @@ class ChatMessageModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
     
     id: Optional[str] = None
-    senderUserId: int  # Sender ID
+    senderUserId: str  # Sender user ID (string)
     message: str  # Text content
     base: Optional[BaseEntityMeta] = None

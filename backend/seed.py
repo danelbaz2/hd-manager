@@ -2,7 +2,7 @@ from app import app
 from database import mongo
 from datetime import datetime, timedelta
 from utils.history import log_history
-import random
+import sys
 from bson.objectid import ObjectId
 import bcrypt
 
@@ -16,13 +16,24 @@ def get_relative_date(diff_days):
 def get_timestamp_ms():
     return int(datetime.now().timestamp() * 1000)
 
-def seed():
+def clear_database():
+    """Clear all data from all collections"""
+    print("Clearing database...")
+    mongo.db.users.delete_many({})
+    mongo.db.ents.delete_many({})
+    mongo.db.ents_archive.delete_many({})
+    mongo.db.system_contacts.delete_many({})
+    print("Database cleared successfully!")
+
+def seed(clean_only=False):
     with app.app_context():
-        # Clear existing data
-        print("Clearing database...")
-        mongo.db.users.delete_many({})
-        mongo.db.ents.delete_many({})
-        mongo.db.ents_archive.delete_many({})
+        # Always clear existing data first
+        clear_database()
+        
+        # If clean_only flag is set, exit after clearing
+        if clean_only:
+            print("Clean mode: Collections cleared, no sample data added.")
+            return
         
         # 1. Users
         print("Seeding Users...")
@@ -147,10 +158,11 @@ def seed():
         print("Seeding Chat...")
         chat_data = [
             {
-                "senderUserId": user_ids[0],
+                "senderUserId": user_ids[0],  # String user ID
                 "message": "בוקר טוב לכולם!",
                 "base": {
                     "isDeleted": False,
+                    "isActive": True,
                     "createdAt": get_timestamp_ms() - 100000,
                     "updatedAt": get_timestamp_ms() - 100000,
                     "lut": get_timestamp_ms() - 100000,
@@ -158,10 +170,11 @@ def seed():
                 }
             },
             {
-                "senderUserId": user_ids[1],
+                "senderUserId": user_ids[1],  # String user ID
                 "message": "בוקר אור, מה המצב?",
                 "base": {
                     "isDeleted": False,
+                    "isActive": True,
                     "createdAt": get_timestamp_ms(),
                     "updatedAt": get_timestamp_ms(),
                     "lut": get_timestamp_ms(),
@@ -174,7 +187,23 @@ def seed():
             msg['_id'] = str(ObjectId())
             mongo.db.ents.insert_one(msg)
             
-        print("Database seeded successfully with updated Schema and IDs!")
+        print("Database seeded successfully with sample data!")
+
+def print_usage():
+    print("Usage: python seed.py [options]")
+    print("")
+    print("Options:")
+    print("  --clean    Clear all data without adding sample data")
+    print("  --help     Show this help message")
+    print("")
+    print("Examples:")
+    print("  python seed.py           # Clear and seed with sample data")
+    print("  python seed.py --clean   # Clear all data only")
 
 if __name__ == '__main__':
-    seed()
+    if '--help' in sys.argv or '-h' in sys.argv:
+        print_usage()
+    elif '--clean' in sys.argv:
+        seed(clean_only=True)
+    else:
+        seed(clean_only=False)

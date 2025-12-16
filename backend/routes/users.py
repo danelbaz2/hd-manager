@@ -20,16 +20,10 @@ def get_users():
 @bp.route('/', methods=['POST'])
 def create_user():
     try:
-        # Validate data
-        # model_dump(exclude_none=True) drops optional fields that weren't provided, 
-        # but keeps ones that were provided as null if that's valid.
-        # usually just model_dump() is sufficient unless you want to lean on default values heavily.
-        data = UserModel(**request.json).model_dump()
+        data = UserModel(**request.json).model_dump(exclude_none=True)
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-    
-    
     now = int(datetime.now().timestamp() * 1000)
     data['base'] = {
         'isDeleted': False,
@@ -39,6 +33,7 @@ def create_user():
         'lut': now,
         'entityType': 'user'
     }
+    
     # Hash the password before storing
     plain_password = data['passwordHash']
     hashed = bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt())
@@ -54,25 +49,22 @@ def create_user():
 @bp.route('/<id>', methods=['PUT'])
 def update_user(id):
     try:
-        # Validate with UserUpdateModel - only allows valid user fields
         validated = UserUpdateModel(**request.json)
         data = validated.model_dump(exclude_none=True)
         
-        # Fetch Old
+        # Fetch old document first
         old_doc = mongo.db.users.find_one({'_id': id})
+        if not old_doc:
+            return jsonify({"error": "User not found"}), 404
         
-        try:
-            now = int(datetime.now().timestamp() * 1000)
-            data['base.updatedAt'] = now
-            data['base.lut'] = now
-            mongo.db.users.update_one({'_id': id}, {'$set': data})
-        except:
-            return jsonify({"error": "Invalid ID"}), 400
-            
+        now = int(datetime.now().timestamp() * 1000)
+        data['base.updatedAt'] = now
+        data['base.lut'] = now
+        
+        mongo.db.users.update_one({'_id': id}, {'$set': data})
         updated = mongo.db.users.find_one({'_id': id})
         
-        if old_doc and updated:
-            log_history('user', id, 'UPDATE', 'system', old_doc, updated, data)
+        log_history('user', id, 'UPDATE', 'system', old_doc, updated, data)
             
         return jsonify(serialize_doc(updated))
     except Exception as e:
@@ -80,11 +72,10 @@ def update_user(id):
 
 @bp.route('/<id>', methods=['DELETE'])
 def delete_user(id):
-    query_id = int(id) if id.isdigit() else id
     try:
         old_doc = mongo.db.users.find_one({'_id': id})
         if not old_doc:
-             return jsonify({"error": "User not found"}), 404
+            return jsonify({"error": "User not found"}), 404
              
         mongo.db.users.update_one({'_id': id}, {'$set': {'base.isDeleted': True}})
         

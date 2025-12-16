@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field, ConfigDict
-from typing import Optional, Union
+from typing import Optional, Union, List
 from models.base_entity import BaseEntityMeta
 
 class SystemContactModel(BaseModel):
@@ -10,7 +10,8 @@ class SystemContactModel(BaseModel):
     position: Optional[str] = None
     department: Optional[str] = None
     phoneNumber: Optional[str] = None
-    tagsIds: Optional[list[Union[int, str]]] = None
+    email: Optional[str] = None
+    tagsIds: Optional[List[Union[int, str]]] = None
     base: Optional[BaseEntityMeta] = None
 
 # Update Model - all fields optional but validated when provided
@@ -22,4 +23,5 @@ class SystemContactUpdateModel(BaseModel):
     position: Optional[str] = None
     department: Optional[str] = None
     phoneNumber: Optional[str] = None
-    tagsIds: Optional[list[Union[int, str]]] = None
+    email: Optional[str] = None
+    tagsIds: Optional[List[Union[int, str]]] = None

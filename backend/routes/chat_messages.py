@@ -23,12 +23,10 @@ def create_message():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-    
-
-    # SRS specified ms timestamp for chat
     now = int(datetime.now().timestamp() * 1000)
     data['base'] = {
         'isDeleted': False,
+        'isActive': True,
         'createdAt': now,
         'updatedAt': now,
         'lut': now,

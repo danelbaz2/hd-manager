@@ -19,11 +19,9 @@ def get_tags():
 @bp.route('/', methods=['POST'])
 def create_tag():
     try:
-        data = TagModel(**request.json).model_dump()
+        data = TagModel(**request.json).model_dump(exclude_none=True)
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-
-    
 
     now = int(datetime.now().timestamp() * 1000)
     data['base'] = {
@@ -44,34 +42,37 @@ def create_tag():
 @bp.route('/<id>', methods=['PUT'])
 def update_tag(id):
     try:
-        # Validate with TagUpdateModel - only allows valid tag fields
         validated = TagUpdateModel(**request.json)
         data = validated.model_dump(exclude_none=True)
-        
-        old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'tag'})
-        
-        try:
-            now = int(datetime.now().timestamp() * 1000)
-            data['base.updatedAt'] = now
-            data['base.lut'] = now
-            mongo.db.ents.update_one({'_id': id}, {'$set': data})
-        except:
-            return jsonify({"error": "Invalid ID"}), 400
-        updated = mongo.db.ents.find_one({'_id': id})
-        
-        if old_doc and updated:
-             log_history('tag', id, 'UPDATE', 'system', old_doc, updated, data)
-             
-        return jsonify(serialize_doc(updated))
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+        
+    # Fetch old document first
+    old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'tag'})
+    if not old_doc:
+        return jsonify({"error": "Tag not found"}), 404
+        
+    now = int(datetime.now().timestamp() * 1000)
+    data['base.updatedAt'] = now
+    data['base.lut'] = now
+    
+    try:
+        mongo.db.ents.update_one({'_id': id}, {'$set': data})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+        
+    updated = mongo.db.ents.find_one({'_id': id})
+    
+    log_history('tag', id, 'UPDATE', 'system', old_doc, updated, data)
+             
+    return jsonify(serialize_doc(updated))
 
 @bp.route('/<id>', methods=['DELETE'])
 def delete_tag(id):
     try:
         old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'tag'})
         if not old_doc:
-             return jsonify({"error": "Tag not found"}), 404
+            return jsonify({"error": "Tag not found"}), 404
              
         mongo.db.ents.update_one({'_id': id}, {'$set': {'base.isDeleted': True}})
         
