@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
 
-interface CalenderProps {
+interface CalendarProps {
   selectedDate: number;
   onDateSelect: (timestamp: number) => void;
   onClose?: () => void;
@@ -25,7 +25,7 @@ const HEBREW_MONTHS = [
   "דצמבר",
 ];
 
-const Calender: React.FC<CalenderProps> = ({
+const Calendar: React.FC<CalendarProps> = ({
   selectedDate,
   onDateSelect,
   onClose,
@@ -267,4 +267,4 @@ const Calender: React.FC<CalenderProps> = ({
   );
 };
 
-export default Calender;
+export default Calendar;

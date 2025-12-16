@@ -1,23 +1,88 @@
-import React from "react";
-import { Trash2, Pencil } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Trash2, Pencil, Loader2 } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { type UserData } from "../../../schemas/userentity";
 import defaultProfileImage from "../../../assets/defualt-profile.jpg";
+import { getAllUsers, type User } from "../../../api/usersApi";
 
 interface UsersListProps {
-  users: UserData[];
   editingUserId: string | null;
   onEdit: (user: UserData) => void;
   onDelete: (id: string) => void;
+  refreshTrigger?: number; // Optional prop to trigger refresh
 }
 
+// Helper function to convert API User to UserData
+const mapUserToUserData = (user: User): UserData => ({
+  id: user.entityId,
+  fullName: user.fullName,
+  username: user.username,
+  passwordHash: "", // Password is not returned from API
+  role: user.role as "admin" | "regular",
+  color: user.color,
+  profileImage: user.profileImage,
+});
+
 const UsersList: React.FC<UsersListProps> = ({
-  users,
   editingUserId,
   onEdit,
   onDelete,
+  refreshTrigger = 0,
 }) => {
   const { isDarkMode } = useTheme();
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch users from API
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setIsLoading(true);
+      try {
+        const response = await getAllUsers();
+        if (response.success && response.data) {
+          const mappedUsers = response.data.map(mapUserToUserData);
+          setUsers(mappedUsers);
+        } else {
+          console.error("Failed to fetch users:", response.error);
+          setUsers([]);
+        }
+      } catch (error) {
+        console.error("Error fetching users:", error);
+        setUsers([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [refreshTrigger]);
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center py-12">
+        <Loader2
+          size={32}
+          className={`animate-spin ${
+            isDarkMode ? "text-blue-400" : "text-blue-500"
+          }`}
+        />
+      </div>
+    );
+  }
+
+  if (users.length === 0) {
+    return (
+      <div className="flex-1 flex items-center justify-center py-12">
+        <p
+          className={`text-center ${
+            isDarkMode ? "text-slate-400" : "text-slate-500"
+          }`}
+        >
+          אין משתמשים להצגה
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 overflow-y-auto space-y-3">
@@ -79,7 +144,7 @@ const UsersList: React.FC<UsersListProps> = ({
                   isDarkMode ? "text-white" : "text-slate-800"
                 }`}
               >
-                {user.name}
+                {user.fullName}
               </p>
               <p
                 className={`text-sm ${
@@ -93,7 +158,7 @@ const UsersList: React.FC<UsersListProps> = ({
               className={`
                 px-2 py-0.5 rounded-full text-xs font-medium
                 ${
-                  user.isAdmin
+                  user.role === "admin"
                     ? isDarkMode
                       ? "bg-blue-900/50 text-blue-300"
                       : "bg-blue-100 text-blue-700"
@@ -103,7 +168,7 @@ const UsersList: React.FC<UsersListProps> = ({
                 }
               `}
             >
-              {user.isAdmin ? "מנהל" : "משתמש"}
+              {user.role === "admin" ? "מנהל" : "משתמש"}
             </span>
             <div
               className="w-10 h-10 rounded-full overflow-hidden flex items-center justify-center"
@@ -111,7 +176,7 @@ const UsersList: React.FC<UsersListProps> = ({
             >
               <img
                 src={user.profileImage || defaultProfileImage}
-                alt={user.name}
+                alt={user.fullName}
                 className="w-full h-full object-cover"
               />
             </div>

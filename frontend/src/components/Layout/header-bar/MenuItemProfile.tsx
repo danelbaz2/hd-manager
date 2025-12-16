@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Settings, Moon, Sun, LogOut, User } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
-import ManageSetting from "../../modalsetting/ManageSetting";
+import ManageSetting from "../../modal-setting/ManageSetting";
 
 interface MenuItemProfileProps {
   isOpen: boolean;
