@@ -1,11 +1,11 @@
-# System Contacts API
+# Contacts API
 
 ## Base URL
-http://localhost:5000/api/system-contacts
+http://localhost:5000/api/contacts
 
 ## Entity Structure
 
-### System Contact Object
+### Contact Object
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | string | Auto-generated | Unique identifier |
@@ -13,6 +13,7 @@ http://localhost:5000/api/system-contacts
 | `position` | string | ❌ No | Job position |
 | `department` | string | ❌ No | Department |
 | `phoneNumber` | string | ❌ No | Phone number |
+| `email` | string | ❌ No | Email address |
 | `tagsIds` | array | ❌ No | Array of associated tag IDs |
 | `base` | object | Auto-generated | Metadata (see below) |
 
@@ -24,14 +25,14 @@ http://localhost:5000/api/system-contacts
 | `createdAt` | integer | Creation timestamp (ms) |
 | `updatedAt` | integer | Last update timestamp (ms) |
 | `lut` | integer | Last update time (ms) |
-| `entityType` | string | Always `"system_contact"` |
+| `entityType` | string | Always `"contact"` |
 
 ---
 
 ## Endpoints
 
-### GET /api/system-contacts
-Get all active system contacts (non-deleted).
+### GET /api/contacts
+Get all active contacts (non-deleted).
 
 **Response:** `200 OK`
 ```json
@@ -42,6 +43,7 @@ Get all active system contacts (non-deleted).
     "position": "חיצוני",
     "department": "IT",
     "phoneNumber": "050-0000000",
+    "email": "support@example.com",
     "tagsIds": ["675f1a2b3c4d5e6f7a8b9c10"],
     "base": {
       "isDeleted": false,
@@ -49,7 +51,7 @@ Get all active system contacts (non-deleted).
       "createdAt": 1734256394000,
       "updatedAt": 1734256394000,
       "lut": 1734256394000,
-      "entityType": "system_contact"
+      "entityType": "contact"
     }
   }
 ]
@@ -57,8 +59,8 @@ Get all active system contacts (non-deleted).
 
 ---
 
-### POST /api/system-contacts
-Create a new system contact.
+### POST /api/contacts
+Create a new contact.
 
 **Request Body:**
 ```json
@@ -67,6 +69,7 @@ Create a new system contact.
   "position": "Manager",
   "department": "Sales",
   "phoneNumber": "050-1234567",
+  "email": "contact@example.com",
   "tagsIds": ["675f1a2b3c4d5e6f7a8b9c10"]
 }
 ```
@@ -79,6 +82,7 @@ Create a new system contact.
   "position": "Manager",
   "department": "Sales",
   "phoneNumber": "050-1234567",
+  "email": "contact@example.com",
   "tagsIds": ["675f1a2b3c4d5e6f7a8b9c10"],
   "base": {
     "isDeleted": false,
@@ -86,7 +90,7 @@ Create a new system contact.
     "createdAt": 1734256394000,
     "updatedAt": 1734256394000,
     "lut": 1734256394000,
-    "entityType": "system_contact"
+    "entityType": "contact"
   }
 }
 ```
@@ -100,8 +104,8 @@ Create a new system contact.
 
 ---
 
-### PUT /api/system-contacts/:id
-Update an existing system contact. Only provided fields will be updated.
+### PUT /api/contacts/:id
+Update an existing contact. Only provided fields will be updated.
 
 **URL Parameters:**
 | Parameter | Type | Description |
@@ -121,6 +125,7 @@ Update an existing system contact. Only provided fields will be updated.
 - `position`
 - `department`
 - `phoneNumber`
+- `email`
 - `tagsIds` (array)
 
 > ⚠️ **Note:** Extra fields not in the list above will be rejected.
@@ -135,10 +140,17 @@ Update an existing system contact. Only provided fields will be updated.
 }
 ```
 
+**Error:** `404 Not Found`
+```json
+{
+  "error": "Contact not found"
+}
+```
+
 ---
 
-### DELETE /api/system-contacts/:id
-Soft delete a system contact (sets `base.isDeleted` to `true`).
+### DELETE /api/contacts/:id
+Soft delete a contact (sets `base.isDeleted` to `true`).
 
 **URL Parameters:**
 | Parameter | Type | Description |

@@ -1,25 +1,25 @@
 from flask import Blueprint, request, jsonify
 from database import mongo
 from datetime import datetime
-from models.system_contact_model import SystemContactModel, SystemContactUpdateModel
+from models.contact_model import ContactModel, ContactUpdateModel
 from bson.objectid import ObjectId
 from utils.history import log_history
 
-bp = Blueprint('system_contacts', __name__, url_prefix='/api/system-contacts')
+bp = Blueprint('contacts', __name__, url_prefix='/api/contacts')
 
 def serialize_doc(doc):
     doc['id'] = doc.pop('_id')
     return doc
 
 @bp.route('/', methods=['GET'])
-def get_system_contacts():
-    contacts = list(mongo.db.system_contacts.find({'base.isDeleted': {'$ne': True}}))
+def get_contacts():
+    contacts = list(mongo.db.contacts.find({'base.isDeleted': {'$ne': True}}))
     return jsonify([serialize_doc(c) for c in contacts])
 
 @bp.route('/', methods=['POST'])
-def create_system_contact():
+def create_contact():
     try:
-        data = SystemContactModel(**request.json).model_dump(exclude_none=True)
+        data = ContactModel(**request.json).model_dump(exclude_none=True)
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
@@ -30,25 +30,25 @@ def create_system_contact():
         'createdAt': now,
         'updatedAt': now,
         'lut': now,
-        'entityType': 'system_contact'
+        'entityType': 'contact'
     }
     data['_id'] = str(ObjectId())
-    mongo.db.system_contacts.insert_one(data)
+    mongo.db.contacts.insert_one(data)
     
-    log_history('system_contact', data['_id'], 'CREATE', 'system', None, data, data)
+    log_history('contact', data['_id'], 'CREATE', 'system', None, data, data)
     
     return jsonify(serialize_doc(data)), 201
 
 @bp.route('/<id>', methods=['PUT'])
-def update_system_contact(id):
+def update_contact(id):
     try:
-        validated = SystemContactUpdateModel(**request.json)
+        validated = ContactUpdateModel(**request.json)
         data = validated.model_dump(exclude_none=True)
     except Exception as e:
         return jsonify({"error": str(e)}), 400
         
     # Fetch old document first
-    old_doc = mongo.db.system_contacts.find_one({'_id': id})
+    old_doc = mongo.db.contacts.find_one({'_id': id})
     if not old_doc:
         return jsonify({"error": "Contact not found"}), 404
         
@@ -57,27 +57,27 @@ def update_system_contact(id):
     data['base.lut'] = now
     
     try:
-        mongo.db.system_contacts.update_one({'_id': id}, {'$set': data})
+        mongo.db.contacts.update_one({'_id': id}, {'$set': data})
     except Exception as e:
         return jsonify({"error": str(e)}), 400
         
-    updated = mongo.db.system_contacts.find_one({'_id': id})
+    updated = mongo.db.contacts.find_one({'_id': id})
     
-    log_history('system_contact', id, 'UPDATE', 'system', old_doc, updated, data)
+    log_history('contact', id, 'UPDATE', 'system', old_doc, updated, data)
              
     return jsonify(serialize_doc(updated))
 
 @bp.route('/<id>', methods=['DELETE'])
-def delete_system_contact(id):
+def delete_contact(id):
     try:
-        old_doc = mongo.db.system_contacts.find_one({'_id': id})
+        old_doc = mongo.db.contacts.find_one({'_id': id})
         if not old_doc:
             return jsonify({"error": "Contact not found"}), 404
              
-        mongo.db.system_contacts.update_one({'_id': id}, {'$set': {'base.isDeleted': True}})
+        mongo.db.contacts.update_one({'_id': id}, {'$set': {'base.isDeleted': True}})
         
-        updated = mongo.db.system_contacts.find_one({'_id': id})
-        log_history('system_contact', id, 'DELETE', 'system', old_doc, updated, {'base': {'isDeleted': True}})
+        updated = mongo.db.contacts.find_one({'_id': id})
+        log_history('contact', id, 'DELETE', 'system', old_doc, updated, {'base': {'isDeleted': True}})
         
     except Exception as e:
         return jsonify({"error": str(e)}), 400

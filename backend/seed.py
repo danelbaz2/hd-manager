@@ -22,7 +22,7 @@ def clear_database():
     mongo.db.users.delete_many({})
     mongo.db.ents.delete_many({})
     mongo.db.ents_archive.delete_many({})
-    mongo.db.system_contacts.delete_many({})
+    mongo.db.contacts.delete_many({})
     print("Database cleared successfully!")
 
 def seed(clean_only=False):
@@ -76,18 +76,18 @@ def seed(clean_only=False):
             tag_ids.append(tid)
             log_history('tag', tid, 'CREATE', 'system', None, t, t)
 
-        # 3. System Contacts
+        # 3. Contacts
         print("Seeding Contacts...")
         contacts_data = [
-            { "fullName": 'תמיכה טכנית', "position": 'חיצוני', "department": "IT", "phoneNumber": '050-0000000', "email": 'support@example.com', "tagsIds": [tag_ids[3]], "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "system_contact"}},
-            { "fullName": 'ספק שרתים', "position": 'ספק', "department": "Infra", "phoneNumber": '052-1111111', "email": 'cloud@example.com', "tagsIds": [tag_ids[3]], "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "system_contact"}},
+            { "fullName": 'תמיכה טכנית', "position": 'חיצוני', "department": "IT", "phoneNumber": '050-0000000', "email": 'support@example.com', "tagsIds": [tag_ids[3]], "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "contact"}},
+            { "fullName": 'ספק שרתים', "position": 'ספק', "department": "Infra", "phoneNumber": '052-1111111', "email": 'cloud@example.com', "tagsIds": [tag_ids[3]], "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "contact"}},
         ]
         
         for c in contacts_data:
             c['_id'] = str(ObjectId())
-            mongo.db.system_contacts.insert_one(c)
+            mongo.db.contacts.insert_one(c)
             cid = c['_id']
-            log_history('system_contact', cid, 'CREATE', 'system', None, c, c)
+            log_history('contact', cid, 'CREATE', 'system', None, c, c)
 
         # 4. Tasks
         print("Seeding Tasks...")

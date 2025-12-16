@@ -2,7 +2,7 @@ from pydantic import BaseModel, Field, ConfigDict
 from typing import Optional, Union, List
 from models.base_entity import BaseEntityMeta
 
-class SystemContactModel(BaseModel):
+class ContactModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
     
     id: Optional[str] = None
@@ -16,7 +16,7 @@ class SystemContactModel(BaseModel):
 
 # Update Model - all fields optional but validated when provided
 # extra='forbid' rejects any fields not defined in the model
-class SystemContactUpdateModel(BaseModel):
+class ContactUpdateModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
     
     fullName: Optional[str] = Field(None, min_length=2)
