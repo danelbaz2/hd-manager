@@ -5,17 +5,28 @@ http://localhost:5000/api/users
 
 ## Entity Structure
 
-### User Object
+### User Object (Response)
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Unique identifier (auto-generated) |
+| `fullName` | string | User's full name |
+| `username` | string | Username |
+| `role` | string | User role: `regular` or `admin` |
+| `color` | string | Hex color code (e.g., `#3b82f6`) |
+| `profileImage` | string \| null | URL to profile image |
+| `base` | object | Metadata (see below) |
+
+> 🔒 **Note:** `passwordHash` is stored in the database but **never returned** in API responses for security.
+
+### User Object (Request - Create)
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `id` | string | Auto-generated | Unique identifier |
 | `fullName` | string | ✅ Yes | User's full name (min 2 chars) |
 | `username` | string | ✅ Yes | Username (min 2 chars) |
-| `passwordHash` | string | ✅ Yes | Password (hashed with bcrypt on creation) |
+| `passwordHash` | string | ✅ Yes | Plain text password (will be hashed with bcrypt) |
 | `role` | string | ✅ Yes | User role: `regular` or `admin` |
 | `color` | string | ✅ Yes | Hex color code (e.g., `#3b82f6`) |
 | `profileImage` | string | ❌ No | URL to profile image |
-| `base` | object | Auto-generated | Metadata (see below) |
 
 ### Base Metadata Object
 | Field | Type | Description |
@@ -41,7 +52,6 @@ Get all active users (non-deleted).
     "id": "675f1a2b3c4d5e6f7a8b9c0d",
     "fullName": "מאור",
     "username": "maor",
-    "passwordHash": "$2b$12$...",
     "role": "admin",
     "color": "#3b82f6",
     "profileImage": null,
@@ -79,7 +89,6 @@ Create a new user. Password will be automatically hashed with bcrypt.
   "id": "675f1a2b3c4d5e6f7a8b9c0d",
   "fullName": "New User",
   "username": "newuser",
-  "passwordHash": "$2b$12$...",
   "role": "regular",
   "color": "#10b981",
   "profileImage": null,
@@ -93,6 +102,8 @@ Create a new user. Password will be automatically hashed with bcrypt.
   }
 }
 ```
+
+> 🔒 **Security:** The password is hashed before storage and is **not returned** in the response.
 
 **Validation Errors:** `400 Bad Request`
 ```json
@@ -122,7 +133,7 @@ Update an existing user. Only provided fields will be updated.
 **Allowed Fields:**
 - `fullName` (min 2 chars)
 - `username` (min 2 chars)
-- `passwordHash`
+- `passwordHash` (will be stored as-is, consider hashing if updating)
 - `role` (`regular` | `admin`)
 - `color` (hex format: `#xxxxxx`)
 - `profileImage`
@@ -135,7 +146,6 @@ Update an existing user. Only provided fields will be updated.
   "id": "675f1a2b3c4d5e6f7a8b9c0d",
   "fullName": "Updated Name",
   "username": "maor",
-  "passwordHash": "$2b$12$...",
   "role": "admin",
   "color": "#3b82f6",
   "profileImage": null,
@@ -147,6 +157,13 @@ Update an existing user. Only provided fields will be updated.
     "lut": 1734260000000,
     "entityType": "user"
   }
+}
+```
+
+**Error:** `404 Not Found`
+```json
+{
+  "error": "User not found"
 }
 ```
 
@@ -184,6 +201,14 @@ Soft delete a user (sets `base.isDeleted` to `true`).
 | `username` | Minimum 2 characters |
 | `role` | Must be `regular` or `admin` |
 | `color` | Must match pattern `^#[0-9a-fA-F]{6}$` |
+
+---
+
+## Security Notes
+
+- Passwords are hashed using **bcrypt** before storage
+- The `passwordHash` field is **never returned** in any API response
+- For authentication, use the `/api/auth/login` endpoint
 
 ---
 

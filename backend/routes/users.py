@@ -62,6 +62,15 @@ def update_user(id):
         data['base.updatedAt'] = now
         data['base.lut'] = now
         
+        # If password is being updated (and not empty), hash it
+        if 'passwordHash' in data and data['passwordHash']:
+            plain_password = data['passwordHash']
+            hashed = bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt())
+            data['passwordHash'] = hashed.decode('utf-8')
+        elif 'passwordHash' in data:
+            # Empty password provided - remove from update to keep existing
+            del data['passwordHash']
+        
         mongo.db.users.update_one({'_id': id}, {'$set': data})
         updated = mongo.db.users.find_one({'_id': id})
         
