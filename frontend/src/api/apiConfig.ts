@@ -1,16 +1,16 @@
 // Base API configuration and shared types
 
-// Get base API URL from environment variable
-export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+// Get base API URL from environment variable (includes /api)
+export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
 
 // API Endpoints
 export const API_ENDPOINTS = {
-  users: `${API_BASE_URL}/api/users`,
-  tasks: `${API_BASE_URL}/api/tasks`,
-  tags: `${API_BASE_URL}/api/tags`,
-  systemContacts: `${API_BASE_URL}/api/system-contacts`,
-  historyEntries: `${API_BASE_URL}/api/history-entries`,
-  chatMessages: `${API_BASE_URL}/api/chat-messages`,
+  users: `${API_BASE_URL}/users`,
+  tasks: `${API_BASE_URL}/tasks`,
+  tags: `${API_BASE_URL}/tags`,
+  systemContacts: `${API_BASE_URL}/system-contacts`,
+  historyEntries: `${API_BASE_URL}/history-entries`,
+  chatMessages: `${API_BASE_URL}/chat-messages`,
 } as const;
 
 // Generic API Response interface

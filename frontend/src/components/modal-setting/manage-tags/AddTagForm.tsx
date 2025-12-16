@@ -69,9 +69,7 @@ const AddTagForm: React.FC<AddTagFormProps> = ({ onAdd }) => {
             className={`text-sm mr-2 ${
               isDarkMode ? "text-slate-400" : "text-slate-500"
             }`}
-          >
-            צבע
-          </span>
+          ></span>
           {TAG_COLORS.map((color) => (
             <button
               key={color.bg}
