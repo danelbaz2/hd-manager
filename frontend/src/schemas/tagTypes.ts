@@ -4,11 +4,14 @@ export interface TagData {
   id: string;
   name: string;
   color: string;
+  description?: string;
 }
 
 export interface TagFormData {
+  id?: string | null;  // Optional - only present when editing
   name: string;
   color: string;
+  description?: string;
 }
 
 export interface TagColor {
@@ -34,11 +37,13 @@ export const getTextColor = (bgColor: string): string => {
 };
 
 export const DEFAULT_TAG_FORM: TagFormData = {
+  id: null,
   name: "",
   color: TAG_COLORS[0].bg,
+  description: "",
 };
 
-// Sample tags - in a real app, these would come from an API
+// Sample tags - will be replaced by API data
 export const AVAILABLE_TAGS: TagData[] = [
   { id: "1", name: "פיתוח", color: "#DBEAFE" },
   { id: "2", name: "עיצוב", color: "#FEF3C7" },

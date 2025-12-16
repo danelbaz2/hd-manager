@@ -1,5 +1,5 @@
 import React from "react";
-import { Trash2, Pencil } from "lucide-react";
+import { Trash2, Pencil, Loader2 } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { type TagData, getTextColor } from "../../../schemas/tagTypes";
 
@@ -8,6 +8,7 @@ interface TagsListProps {
   editingTagId?: string | null;
   onEdit?: (tag: TagData) => void;
   onDelete: (id: string) => void;
+  isLoading?: boolean;
 }
 
 const TagsList: React.FC<TagsListProps> = ({
@@ -15,8 +16,22 @@ const TagsList: React.FC<TagsListProps> = ({
   editingTagId,
   onEdit,
   onDelete,
+  isLoading = false,
 }) => {
   const { isDarkMode } = useTheme();
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center py-12">
+        <Loader2
+          size={32}
+          className={`animate-spin ${
+            isDarkMode ? "text-blue-400" : "text-blue-500"
+          }`}
+        />
+      </div>
+    );
+  }
 
   if (tags.length === 0) {
     return (
