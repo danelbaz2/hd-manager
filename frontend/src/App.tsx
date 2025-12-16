@@ -1,10 +1,10 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Layout from "./components/Layout/Layout";
-import HomePage from "./pages/homepage/HomePage";
-import TaskPage from "./pages/taskpage/TaskPage";
-import ChatPage from "./pages/chatpage/ChatPage";
-import LoginPage from "./pages/loginpage/LoginPage";
-import SettingPage from "./pages/settingpage/SettingPage";
+import Layout from "./components/layout/Layout";
+import HomePage from "./pages/home-page/HomePage";
+import TaskPage from "./pages/task-page/TaskPage";
+import ChatPage from "./pages/chat-page/ChatPage";
+import LoginPage from "./pages/login-page/LoginPage";
+import SettingPage from "./pages/setting-page/SettingPage";
 
 function App() {
   return (

@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
 import defaultProfile from "../../../assets/defualt-profile.jpg";
-import Calender from "./Calender";
+import Calendar from "./Calendar";
 import MenuItemProfile from "./MenuItemProfile";
 
 interface HeaderBarProps {
@@ -189,7 +189,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
         {/* Calendar Popup */}
         {isCalendarOpen && (
           <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 z-50">
-            <Calender
+            <Calendar
               selectedDate={selectedDate}
               onDateSelect={(timestamp) => {
                 setSelectedDate(timestamp);

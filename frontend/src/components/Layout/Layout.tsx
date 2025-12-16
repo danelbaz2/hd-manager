@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet } from "react-router-dom";
-import MenuBar from "./MenuBar/MenuBar";
-import HeaderBar from "./HeaderBar/HeaderBar";
+import MenuBar from "./menu-bar/MenuBar";
+import HeaderBar from "./header-bar/HeaderBar";
 import { useTheme } from "../../contexts/ThemeContext";
 
 const Layout: React.FC = () => {
