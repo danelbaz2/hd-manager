@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Save, ChevronDown, X } from "lucide-react";
+import { Save, ChevronDown, X, Loader2 } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
 import {
   type ContactFormData,
@@ -7,6 +7,11 @@ import {
   getTagById,
   getTextColor,
 } from "../../../schemas/contactTypes";
+import {
+  updateContact,
+  type ContactFormPayload,
+} from "../../../api/contactsApi";
+import { ToastContainer, useToast } from "../../alert-feedback";
 
 interface EditContactFormProps {
   formData: ContactFormData;
@@ -23,11 +28,59 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
 }) => {
   const { isDarkMode } = useTheme();
   const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { alerts, showSuccess, showError, showWarning, dismissAlert } =
+    useToast();
 
-  const handleSaveClick = () => {
-    if (!formData.name) return;
-    console.log("Updating Contact - Form Data:", formData);
-    onSave();
+  const validateForm = (): boolean => {
+    // Validate id exists (required for update)
+    if (!formData.id) {
+      showWarning("שגיאה", "מזהה איש קשר חסר");
+      return false;
+    }
+
+    // Validate fullName (min 2 chars)
+    if (!formData.name || formData.name.length < 2) {
+      showWarning("שגיאת אימות", "שם מלא חייב להכיל לפחות 2 תווים");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSaveClick = async () => {
+    if (!validateForm()) return;
+
+    try {
+      setIsSaving(true);
+      console.log("Updating Contact - Form Data:", formData);
+
+      // Build payload for PUT /api/system-contacts/:id
+      const payload: Partial<ContactFormPayload> = {
+        fullName: formData.name,
+        position: formData.role || undefined,
+        phoneNumber: formData.phone || undefined,
+        tagsIds: formData.tags.length > 0 ? formData.tags : undefined,
+      };
+
+      const response = await updateContact(formData.id!, payload);
+
+      if (response.success) {
+        showSuccess("הצלחה", "איש הקשר עודכן בהצלחה");
+        console.log("Contact updated successfully:", response.data);
+        setTimeout(() => {
+          onSave();
+        }, 1000);
+      } else {
+        showError("שגיאה", response.error || "שגיאה בעדכון איש הקשר");
+        console.error("Failed to update contact:", response.error);
+      }
+    } catch (error) {
+      console.error("Error updating contact:", error);
+      showError("שגיאה", "אירעה שגיאה בלתי צפויה");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const toggleTag = (tagId: string) => {
@@ -74,6 +127,13 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
         }
       `}
     >
+      {/* Toast Notifications */}
+      <ToastContainer
+        alerts={alerts}
+        onDismiss={dismissAlert}
+        isDarkMode={isDarkMode}
+      />
+
       <div className="flex items-center justify-end gap-2 mb-4">
         <span
           className={`font-medium ${
@@ -92,14 +152,16 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
             placeholder="שם מלא"
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className={inputStyles}
+            disabled={isSaving}
+            className={`${inputStyles} disabled:opacity-50 disabled:cursor-not-allowed`}
           />
           <input
             type="text"
             placeholder="תפקיד/תיאור"
             value={formData.role}
             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-            className={inputStyles}
+            disabled={isSaving}
+            className={`${inputStyles} disabled:opacity-50 disabled:cursor-not-allowed`}
           />
         </div>
 
@@ -112,7 +174,8 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
             onChange={(e) =>
               setFormData({ ...formData, phone: e.target.value })
             }
-            className={inputStyles}
+            disabled={isSaving}
+            className={`${inputStyles} disabled:opacity-50 disabled:cursor-not-allowed`}
           />
 
           {/* Tags Dropdown */}
@@ -120,6 +183,7 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
             <button
               type="button"
               onClick={() => setIsTagDropdownOpen(!isTagDropdownOpen)}
+              disabled={isSaving}
               className={`
                 w-full px-4 py-2.5
                 rounded-lg border text-right
@@ -131,6 +195,7 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
                     : "bg-white border-slate-200 text-slate-800"
                 }
                 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
+                disabled:opacity-50 disabled:cursor-not-allowed
               `}
             >
               <ChevronDown
@@ -257,19 +322,26 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
         <div className="flex gap-2">
           <button
             onClick={handleSaveClick}
-            className="
+            disabled={isSaving}
+            className={`
               flex items-center gap-2
               px-6 py-2.5 rounded-lg
               bg-blue-500 hover:bg-blue-600
               text-white font-medium
               transition-colors
-            "
+              disabled:opacity-50 disabled:cursor-not-allowed
+            `}
           >
-            <Save size={18} />
-            <span>שמור</span>
+            {isSaving ? (
+              <Loader2 size={18} className="animate-spin" />
+            ) : (
+              <Save size={18} />
+            )}
+            <span>{isSaving ? "שומר..." : "שמור"}</span>
           </button>
           <button
             onClick={onCancel}
+            disabled={isSaving}
             className={`
               px-4 py-2.5 rounded-lg
               font-medium transition-colors
@@ -278,6 +350,7 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
                   ? "bg-slate-600 hover:bg-slate-500 text-slate-200"
                   : "bg-slate-200 hover:bg-slate-300 text-slate-700"
               }
+              disabled:opacity-50 disabled:cursor-not-allowed
             `}
           >
             ביטול

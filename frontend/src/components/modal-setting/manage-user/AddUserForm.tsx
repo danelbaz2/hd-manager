@@ -256,6 +256,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
             type="text"
             placeholder="שם משתמש"
             value={formData.username}
+            autoComplete="off"
             onChange={(e) =>
               setFormData({ ...formData, username: e.target.value })
             }

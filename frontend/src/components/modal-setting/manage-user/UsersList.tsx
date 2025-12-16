@@ -14,7 +14,7 @@ interface UsersListProps {
 
 // Helper function to convert API User to UserData
 const mapUserToUserData = (user: User): UserData => ({
-  id: user.entityId,
+  id: user.id,
   fullName: user.fullName,
   username: user.username,
   passwordHash: "", // Password is not returned from API

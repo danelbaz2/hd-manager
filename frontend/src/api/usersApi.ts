@@ -2,9 +2,9 @@
 import { API_ENDPOINTS, apiRequest, type ApiResponse } from "./apiConfig";
 import { type UserFormData } from "../schemas/userentity";
 
-// User response interface
+// User response interface (matches GET /api/users response)
 export interface User {
-  entityId: string;
+  id: string;
   fullName: string;
   username: string;
   role: string;

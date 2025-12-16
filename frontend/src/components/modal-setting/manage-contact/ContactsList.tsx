@@ -1,5 +1,5 @@
 import React from "react";
-import { User, Trash2, Pencil, Phone, Tag } from "lucide-react";
+import { User, Trash2, Pencil, Phone, Tag, Loader2 } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
 import {
   type ContactData,
@@ -12,6 +12,7 @@ interface ContactsListProps {
   editingContactId?: string | null;
   onEdit?: (contact: ContactData) => void;
   onDelete: (id: string) => void;
+  isLoading?: boolean;
 }
 
 const ContactsList: React.FC<ContactsListProps> = ({
@@ -19,8 +20,22 @@ const ContactsList: React.FC<ContactsListProps> = ({
   editingContactId,
   onEdit,
   onDelete,
+  isLoading = false,
 }) => {
   const { isDarkMode } = useTheme();
+
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center py-12">
+        <Loader2
+          size={32}
+          className={`animate-spin ${
+            isDarkMode ? "text-blue-400" : "text-blue-500"
+          }`}
+        />
+      </div>
+    );
+  }
 
   if (contacts.length === 0) {
     return (

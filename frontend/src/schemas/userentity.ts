@@ -11,6 +11,7 @@ export interface UserData {
 }
 
 export interface UserFormData {
+  id?: string | null; // Optional - only present when editing
   fullName: string;
   username: string;
   passwordHash: string;
@@ -31,6 +32,7 @@ export const AVAILABLE_COLORS = [
 ];
 
 export const DEFAULT_FORM_DATA: UserFormData = {
+  id: null,
   fullName: "",
   username: "",
   passwordHash: "",

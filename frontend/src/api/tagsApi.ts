@@ -1,28 +1,29 @@
 // Tags API - handles all tag-related API requests
 import { API_ENDPOINTS, apiRequest, type ApiResponse } from "./apiConfig";
 
-// Tag interfaces
-export interface TagBase {
-  isDeleted: boolean;
-  isActive: boolean;
-  createdAt: number;
-  updatedAt: number;
-  lut: number;
-  entityType: string;
-}
-
+// Tag response interface (matches GET /api/tags response from Tags-API.md)
 export interface Tag {
-  entityId: string;
-  name?: string;
-  color?: string;
-  description?: string;
-  base?: TagBase;
+  id: string;
+  name: string;
+  description: string | null;
+  relatedContactsIds: string[] | null;
+  color: string;
+  base?: {
+    isDeleted: boolean;
+    isActive: boolean;
+    createdAt: number;
+    updatedAt: number;
+    lut: number;
+    entityType: string;
+  };
 }
 
-export interface TagFormData {
-  name?: string;
-  color?: string;
+// Tag form data for create/update
+export interface TagFormPayload {
+  name: string;
   description?: string;
+  relatedContactsIds?: string[];
+  color: string;
 }
 
 /**
@@ -35,18 +36,20 @@ export const getAllTags = async (): Promise<ApiResponse<Tag[]>> => {
 /**
  * Create a new tag
  */
-export const createTag = async (tagData: TagFormData): Promise<ApiResponse<Tag>> => {
+export const createTag = async (
+  tagData: TagFormPayload
+): Promise<ApiResponse<Tag>> => {
   console.log("Creating tag:", tagData);
   const response = await apiRequest<Tag>(`${API_ENDPOINTS.tags}/`, {
     method: "POST",
     body: JSON.stringify(tagData),
   });
-  
+
   if (response.success) {
     console.log("Tag created successfully:", response.data);
     response.message = "Tag created successfully";
   }
-  
+
   return response;
 };
 
@@ -55,17 +58,17 @@ export const createTag = async (tagData: TagFormData): Promise<ApiResponse<Tag>>
  */
 export const updateTag = async (
   tagId: string,
-  tagData: Partial<TagFormData>
+  tagData: Partial<TagFormPayload>
 ): Promise<ApiResponse<Tag>> => {
   const response = await apiRequest<Tag>(`${API_ENDPOINTS.tags}/${tagId}`, {
     method: "PUT",
     body: JSON.stringify(tagData),
   });
-  
+
   if (response.success) {
     response.message = "Tag updated successfully";
   }
-  
+
   return response;
 };
 
@@ -76,10 +79,10 @@ export const deleteTag = async (tagId: string): Promise<ApiResponse<null>> => {
   const response = await apiRequest<null>(`${API_ENDPOINTS.tags}/${tagId}`, {
     method: "DELETE",
   });
-  
+
   if (response.success) {
     response.message = "Tag deleted successfully";
   }
-  
+
   return response;
 };
