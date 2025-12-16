@@ -12,8 +12,7 @@ http://localhost:5000/api/contacts
 | `fullName` | string | ✅ Yes | Contact's full name (min 2 chars) |
 | `position` | string | ❌ No | Job position |
 | `department` | string | ❌ No | Department |
-| `phoneNumber` | string | ❌ No | Phone number |
-| `email` | string | ❌ No | Email address |
+| `phoneNumber` | string | ✅ Yes | Phone number (required) |
 | `tagsIds` | array | ❌ No | Array of associated tag IDs |
 | `base` | object | Auto-generated | Metadata (see below) |
 
@@ -43,7 +42,6 @@ Get all active contacts (non-deleted).
     "position": "חיצוני",
     "department": "IT",
     "phoneNumber": "050-0000000",
-    "email": "support@example.com",
     "tagsIds": ["675f1a2b3c4d5e6f7a8b9c10"],
     "base": {
       "isDeleted": false,
@@ -69,7 +67,6 @@ Create a new contact.
   "position": "Manager",
   "department": "Sales",
   "phoneNumber": "050-1234567",
-  "email": "contact@example.com",
   "tagsIds": ["675f1a2b3c4d5e6f7a8b9c10"]
 }
 ```
@@ -82,7 +79,6 @@ Create a new contact.
   "position": "Manager",
   "department": "Sales",
   "phoneNumber": "050-1234567",
-  "email": "contact@example.com",
   "tagsIds": ["675f1a2b3c4d5e6f7a8b9c10"],
   "base": {
     "isDeleted": false,
@@ -124,8 +120,7 @@ Update an existing contact. Only provided fields will be updated.
 - `fullName` (min 2 chars)
 - `position`
 - `department`
-- `phoneNumber`
-- `email`
+- `phoneNumber` (min 1 char)
 - `tagsIds` (array)
 
 > ⚠️ **Note:** Extra fields not in the list above will be rejected.
@@ -178,6 +173,7 @@ Soft delete a contact (sets `base.isDeleted` to `true`).
 | Field | Rule |
 |-------|------|
 | `fullName` | Minimum 2 characters |
+| `phoneNumber` | Required, minimum 1 character |
 
 ---
 

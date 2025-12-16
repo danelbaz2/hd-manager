@@ -9,8 +9,7 @@ class ContactModel(BaseModel):
     fullName: str = Field(..., min_length=2)
     position: Optional[str] = None
     department: Optional[str] = None
-    phoneNumber: Optional[str] = None
-    email: Optional[str] = None
+    phoneNumber: str = Field(..., min_length=1)  # Required
     tagsIds: Optional[List[Union[int, str]]] = None
     base: Optional[BaseEntityMeta] = None
 
@@ -22,6 +21,5 @@ class ContactUpdateModel(BaseModel):
     fullName: Optional[str] = Field(None, min_length=2)
     position: Optional[str] = None
     department: Optional[str] = None
-    phoneNumber: Optional[str] = None
-    email: Optional[str] = None
+    phoneNumber: Optional[str] = Field(None, min_length=1)
     tagsIds: Optional[List[Union[int, str]]] = None
