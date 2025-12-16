@@ -7,7 +7,7 @@ from bson.objectid import ObjectId
 bp = Blueprint('chat_messages', __name__, url_prefix='/api/chat')
 
 def serialize_doc(doc):
-    doc['entityId'] = doc.pop('_id')
+    doc['id'] = doc.pop('_id')
     return doc
 
 @bp.route('/', methods=['GET'])

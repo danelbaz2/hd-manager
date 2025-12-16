@@ -8,7 +8,7 @@ from utils.history import log_history
 bp = Blueprint('tags', __name__, url_prefix='/api/tags')
 
 def serialize_doc(doc):
-    doc['entityId'] = doc.pop('_id')
+    doc['id'] = doc.pop('_id')
     return doc
 
 @bp.route('/', methods=['GET'])

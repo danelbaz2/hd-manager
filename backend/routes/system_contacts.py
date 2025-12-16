@@ -8,7 +8,7 @@ from utils.history import log_history
 bp = Blueprint('system_contacts', __name__, url_prefix='/api/system-contacts')
 
 def serialize_doc(doc):
-    doc['entityId'] = doc.pop('_id')
+    doc['id'] = doc.pop('_id')
     return doc
 
 @bp.route('/', methods=['GET'])

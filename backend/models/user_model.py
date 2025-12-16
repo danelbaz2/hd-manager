@@ -5,7 +5,7 @@ from models.base_entity import BaseEntityMeta
 class UserModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
     
-    entityId: Optional[str] = None
+    id: Optional[str] = None
     fullName: str = Field(..., min_length=2)
     username: str = Field(..., min_length=2)
     passwordHash: str

@@ -7,7 +7,7 @@ from models.base_entity import BaseEntityMeta
 class TaskModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
     
-    entityId: Optional[str] = None
+    id: Optional[str] = None
     title: str = Field(..., min_length=3)
     description: Optional[str] = ""
     status: str = Field(..., pattern="^(open|in_progress|closed)$")

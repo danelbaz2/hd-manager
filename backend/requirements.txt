@@ -4,3 +4,4 @@ flask-cors
 pymongo
 Flask-PyMongo
 pydantic
+bcrypt

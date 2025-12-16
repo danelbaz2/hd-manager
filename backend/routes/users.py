@@ -4,11 +4,12 @@ from datetime import datetime
 from bson.objectid import ObjectId
 from models.user_model import UserModel, UserUpdateModel
 from utils.history import log_history
+import bcrypt
 
 bp = Blueprint('users', __name__, url_prefix='/api/users')
 
 def serialize_doc(doc):
-    doc['entityId'] = doc.pop('_id')
+    doc['id'] = doc.pop('_id')
     return doc
 
 @bp.route('/', methods=['GET'])
@@ -38,6 +39,11 @@ def create_user():
         'lut': now,
         'entityType': 'user'
     }
+    # Hash the password before storing
+    plain_password = data['passwordHash']
+    hashed = bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt())
+    data['passwordHash'] = hashed.decode('utf-8')
+
     data['_id'] = str(ObjectId())
     mongo.db.users.insert_one(data)
     

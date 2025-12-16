@@ -6,7 +6,7 @@ from models.base_entity import BaseEntityMeta
 class TagModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
     
-    entityId: Optional[str] = None
+    id: Optional[str] = None
     name: str = Field(..., min_length=1)
     description: Optional[str] = None
     relatedContactsIds: Optional[list[Union[int, str]]] = None

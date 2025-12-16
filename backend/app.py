@@ -14,7 +14,7 @@ app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/hd_m
 mongo.init_app(app)
 
 # Import routes after app initialization to avoid circular imports
-from routes import tasks, users, tags, system_contacts, history_entries, chat_messages
+from routes import tasks, users, tags, system_contacts, history_entries, chat_messages, auth
 
 app.register_blueprint(tasks.bp)
 app.register_blueprint(users.bp)
@@ -22,6 +22,7 @@ app.register_blueprint(tags.bp)
 app.register_blueprint(system_contacts.bp)
 app.register_blueprint(history_entries.bp)
 app.register_blueprint(chat_messages.bp)
+app.register_blueprint(auth.bp)
 
 @app.route('/')
 def hello():

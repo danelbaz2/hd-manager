@@ -15,7 +15,7 @@ def log_history(entity_type, entity_id, action, user_id='system', old_val=None, 
         if not doc: return None
         d = doc.copy()
         if '_id' in d:
-            d['entityId'] = d.pop('_id')
+            d['id'] = d.pop('_id')
         return d
 
     # Helper to convert dot notation keys to nested dicts

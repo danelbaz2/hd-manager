@@ -7,7 +7,7 @@ from datetime import datetime
 bp = Blueprint('history_entries', __name__, url_prefix='/api/history')
 
 def serialize_doc(doc):
-    doc['_id'] = str(doc['_id'])
+    doc['id'] = doc.pop('_id')
     return doc
 
 @bp.route('/', methods=['GET'])

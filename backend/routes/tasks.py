@@ -10,7 +10,7 @@ bp = Blueprint('tasks', __name__, url_prefix='/api/tasks')
 # Helper to serialize ObjectId from MongoDB to string for JSON response
 
 def serialize_doc(doc):
-    doc['entityId'] = doc.pop('_id')
+    doc['id'] = doc.pop('_id')
     return doc
 
 @bp.route('/', methods=['GET'])

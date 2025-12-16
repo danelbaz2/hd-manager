@@ -5,7 +5,7 @@ from models.base_entity import BaseEntityMeta
 class SystemContactModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
     
-    entityId: Optional[str] = None
+    id: Optional[str] = None
     fullName: str = Field(..., min_length=2)
     position: Optional[str] = None
     department: Optional[str] = None

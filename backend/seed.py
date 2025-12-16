@@ -4,6 +4,11 @@ from datetime import datetime, timedelta
 from utils.history import log_history
 import random
 from bson.objectid import ObjectId
+import bcrypt
+
+def hash_password(password):
+    """Hash a password using bcrypt"""
+    return bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
 
 def get_relative_date(diff_days):
     return int((datetime.now() + timedelta(days=diff_days)).timestamp() * 1000)
@@ -31,6 +36,8 @@ def seed():
         user_ids = []
         for u in users_data:
             u['_id'] = str(ObjectId())
+            # Hash the password
+            u['passwordHash'] = hash_password(u['passwordHash'])
             mongo.db.users.insert_one(u)
             uid = u['_id']
             user_ids.append(uid)
