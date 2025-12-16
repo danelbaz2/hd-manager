@@ -1,7 +1,7 @@
-// System Contacts API - handles all contact-related API requests
+// Contacts API - handles all contact-related API requests
 import { API_ENDPOINTS, apiRequest, type ApiResponse } from "./apiConfig";
 
-// Contact response interface (matches GET /api/system-contacts response)
+// Contact response interface (matches GET /api/contacts response)
 export interface Contact {
   id: string;
   fullName: string;
@@ -32,7 +32,7 @@ export interface ContactFormPayload {
  * Get all contacts
  */
 export const getAllContacts = async (): Promise<ApiResponse<Contact[]>> => {
-  return apiRequest<Contact[]>(`${API_ENDPOINTS.systemContacts}/`);
+  return apiRequest<Contact[]>(`${API_ENDPOINTS.contacts}/`);
 };
 
 /**
@@ -42,7 +42,7 @@ export const createContact = async (
   contactData: ContactFormPayload
 ): Promise<ApiResponse<Contact>> => {
   console.log("Creating contact:", contactData);
-  const response = await apiRequest<Contact>(`${API_ENDPOINTS.systemContacts}/`, {
+  const response = await apiRequest<Contact>(`${API_ENDPOINTS.contacts}/`, {
     method: "POST",
     body: JSON.stringify(contactData),
   });
@@ -63,7 +63,7 @@ export const updateContact = async (
   contactData: Partial<ContactFormPayload>
 ): Promise<ApiResponse<Contact>> => {
   const response = await apiRequest<Contact>(
-    `${API_ENDPOINTS.systemContacts}/${contactId}`,
+    `${API_ENDPOINTS.contacts}/${contactId}`,
     {
       method: "PUT",
       body: JSON.stringify(contactData),
@@ -84,7 +84,7 @@ export const deleteContact = async (
   contactId: string
 ): Promise<ApiResponse<null>> => {
   const response = await apiRequest<null>(
-    `${API_ENDPOINTS.systemContacts}/${contactId}`,
+    `${API_ENDPOINTS.contacts}/${contactId}`,
     {
       method: "DELETE",
     }

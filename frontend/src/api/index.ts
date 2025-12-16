@@ -30,18 +30,18 @@ export {
   updateTag,
   deleteTag,
   type Tag,
-  type TagFormData,
+  type TagFormPayload,
 } from "./tagsApi";
 
-// System Contacts API
+// Contacts API
 export {
-  getAllSystemContacts,
-  createSystemContact,
-  updateSystemContact,
-  deleteSystemContact,
-  type SystemContact,
-  type SystemContactFormData,
-} from "./systemContactsApi";
+  getAllContacts,
+  createContact,
+  updateContact,
+  deleteContact,
+  type Contact,
+  type ContactFormPayload,
+} from "./contactsApi";
 
 // History API
 export {

@@ -43,7 +43,7 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
       setIsSaving(true);
       console.log("Creating Contact - Form Data:", formData);
 
-      // Build payload for POST /api/system-contacts
+      // Build payload for POST /api/contacts
       const payload: ContactFormPayload = {
         fullName: formData.name,
         position: formData.role || undefined,
@@ -98,10 +98,9 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
     px-4 py-2.5
     rounded-lg border text-right
     transition-colors
-    ${
-      isDarkMode
-        ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
-        : "bg-white border-slate-200 text-slate-800 placeholder-slate-400"
+    ${isDarkMode
+      ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
+      : "bg-white border-slate-200 text-slate-800 placeholder-slate-400"
     }
     focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
   `;
@@ -118,18 +117,16 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
       <div
         className={`
           rounded-xl border p-6 mb-6
-          ${
-            isDarkMode
-              ? "bg-slate-700/50 border-slate-600"
-              : "bg-slate-50 border-slate-200"
+          ${isDarkMode
+            ? "bg-slate-700/50 border-slate-600"
+            : "bg-slate-50 border-slate-200"
           }
         `}
       >
         <div className="flex items-center justify-end gap-2 mb-4">
           <span
-            className={`font-medium ${
-              isDarkMode ? "text-slate-200" : "text-slate-700"
-            }`}
+            className={`font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"
+              }`}
           >
             הוספת איש קשר
           </span>
@@ -185,10 +182,9 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
                   rounded-lg border text-right
                   flex items-center justify-between
                   transition-colors
-                  ${
-                    isDarkMode
-                      ? "bg-slate-800 border-slate-600 text-white"
-                      : "bg-white border-slate-200 text-slate-800"
+                  ${isDarkMode
+                    ? "bg-slate-800 border-slate-600 text-white"
+                    : "bg-white border-slate-200 text-slate-800"
                   }
                   focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
                   disabled:opacity-50 disabled:cursor-not-allowed
@@ -196,9 +192,8 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
               >
                 <ChevronDown
                   size={18}
-                  className={`transition-transform ${
-                    isTagDropdownOpen ? "rotate-180" : ""
-                  } ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}
+                  className={`transition-transform ${isTagDropdownOpen ? "rotate-180" : ""
+                    } ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}
                 />
                 <div className="flex items-center gap-2 flex-wrap">
                   {formData.tags.length === 0 ? (
@@ -247,10 +242,9 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
                     absolute top-full left-0 right-0 mt-1 z-10
                     rounded-lg border shadow-lg
                     max-h-48 overflow-y-auto
-                    ${
-                      isDarkMode
-                        ? "bg-slate-800 border-slate-600"
-                        : "bg-white border-slate-200"
+                    ${isDarkMode
+                      ? "bg-slate-800 border-slate-600"
+                      : "bg-white border-slate-200"
                     }
                   `}
                 >
@@ -263,26 +257,23 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
                         w-full px-4 py-2 text-right
                         flex items-center justify-between
                         transition-colors
-                        ${
-                          isDarkMode
-                            ? "hover:bg-slate-700"
-                            : "hover:bg-slate-50"
+                        ${isDarkMode
+                          ? "hover:bg-slate-700"
+                          : "hover:bg-slate-50"
                         }
-                        ${
-                          formData.tags.includes(tag.id)
-                            ? isDarkMode
-                              ? "bg-slate-700"
-                              : "bg-slate-100"
-                            : ""
+                        ${formData.tags.includes(tag.id)
+                          ? isDarkMode
+                            ? "bg-slate-700"
+                            : "bg-slate-100"
+                          : ""
                         }
                       `}
                     >
                       <div
                         className={`w-4 h-4 rounded border flex items-center justify-center
-                          ${
-                            formData.tags.includes(tag.id)
-                              ? "bg-blue-500 border-blue-500"
-                              : isDarkMode
+                          ${formData.tags.includes(tag.id)
+                            ? "bg-blue-500 border-blue-500"
+                            : isDarkMode
                               ? "border-slate-500"
                               : "border-slate-300"
                           }

@@ -55,7 +55,7 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
       setIsSaving(true);
       console.log("Updating Contact - Form Data:", formData);
 
-      // Build payload for PUT /api/system-contacts/:id
+      // Build payload for PUT /api/contacts/:id
       const payload: Partial<ContactFormPayload> = {
         fullName: formData.name,
         position: formData.role || undefined,
@@ -108,10 +108,9 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
     px-4 py-2.5
     rounded-lg border text-right
     transition-colors
-    ${
-      isDarkMode
-        ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
-        : "bg-white border-slate-200 text-slate-800 placeholder-slate-400"
+    ${isDarkMode
+      ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
+      : "bg-white border-slate-200 text-slate-800 placeholder-slate-400"
     }
     focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
   `;
@@ -120,10 +119,9 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
     <div
       className={`
         rounded-xl border p-6 mb-6
-        ${
-          isDarkMode
-            ? "bg-blue-900/20 border-blue-500/50"
-            : "bg-blue-50 border-blue-200"
+        ${isDarkMode
+          ? "bg-blue-900/20 border-blue-500/50"
+          : "bg-blue-50 border-blue-200"
         }
       `}
     >
@@ -136,9 +134,8 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
 
       <div className="flex items-center justify-end gap-2 mb-4">
         <span
-          className={`font-medium ${
-            isDarkMode ? "text-slate-200" : "text-slate-700"
-          }`}
+          className={`font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"
+            }`}
         >
           עריכת איש קשר
         </span>
@@ -189,10 +186,9 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
                 rounded-lg border text-right
                 flex items-center justify-between
                 transition-colors
-                ${
-                  isDarkMode
-                    ? "bg-slate-800 border-slate-600 text-white"
-                    : "bg-white border-slate-200 text-slate-800"
+                ${isDarkMode
+                  ? "bg-slate-800 border-slate-600 text-white"
+                  : "bg-white border-slate-200 text-slate-800"
                 }
                 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
                 disabled:opacity-50 disabled:cursor-not-allowed
@@ -200,9 +196,8 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
             >
               <ChevronDown
                 size={18}
-                className={`transition-transform ${
-                  isTagDropdownOpen ? "rotate-180" : ""
-                } ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}
+                className={`transition-transform ${isTagDropdownOpen ? "rotate-180" : ""
+                  } ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}
               />
               <div className="flex items-center gap-2 flex-wrap">
                 {formData.tags.length === 0 ? (
@@ -249,10 +244,9 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
                   absolute top-full left-0 right-0 mt-1 z-10
                   rounded-lg border shadow-lg
                   max-h-48 overflow-y-auto
-                  ${
-                    isDarkMode
-                      ? "bg-slate-800 border-slate-600"
-                      : "bg-white border-slate-200"
+                  ${isDarkMode
+                    ? "bg-slate-800 border-slate-600"
+                    : "bg-white border-slate-200"
                   }
                 `}
               >
@@ -266,21 +260,19 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
                       flex items-center justify-between
                       transition-colors
                       ${isDarkMode ? "hover:bg-slate-700" : "hover:bg-slate-50"}
-                      ${
-                        formData.tags.includes(tag.id)
-                          ? isDarkMode
-                            ? "bg-slate-700"
-                            : "bg-slate-100"
-                          : ""
+                      ${formData.tags.includes(tag.id)
+                        ? isDarkMode
+                          ? "bg-slate-700"
+                          : "bg-slate-100"
+                        : ""
                       }
                     `}
                   >
                     <div
                       className={`w-4 h-4 rounded border flex items-center justify-center
-                        ${
-                          formData.tags.includes(tag.id)
-                            ? "bg-blue-500 border-blue-500"
-                            : isDarkMode
+                        ${formData.tags.includes(tag.id)
+                          ? "bg-blue-500 border-blue-500"
+                          : isDarkMode
                             ? "border-slate-500"
                             : "border-slate-300"
                         }
@@ -345,10 +337,9 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
             className={`
               px-4 py-2.5 rounded-lg
               font-medium transition-colors
-              ${
-                isDarkMode
-                  ? "bg-slate-600 hover:bg-slate-500 text-slate-200"
-                  : "bg-slate-200 hover:bg-slate-300 text-slate-700"
+              ${isDarkMode
+                ? "bg-slate-600 hover:bg-slate-500 text-slate-200"
+                : "bg-slate-200 hover:bg-slate-300 text-slate-700"
               }
               disabled:opacity-50 disabled:cursor-not-allowed
             `}

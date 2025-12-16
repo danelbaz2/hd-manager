@@ -8,7 +8,7 @@ export const API_ENDPOINTS = {
   users: `${API_BASE_URL}/users`,
   tasks: `${API_BASE_URL}/tasks`,
   tags: `${API_BASE_URL}/tags`,
-  systemContacts: `${API_BASE_URL}/system-contacts`,
+  contacts: `${API_BASE_URL}/contacts`,
   historyEntries: `${API_BASE_URL}/history-entries`,
   chatMessages: `${API_BASE_URL}/chat-messages`,
 } as const;
