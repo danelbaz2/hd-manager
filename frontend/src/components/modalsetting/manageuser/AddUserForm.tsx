@@ -10,6 +10,7 @@ import {
   compressImage,
   getBase64SizeKB,
 } from "../../../utils/imageCompression";
+import { createUser } from "../../../api/usersApi";
 
 interface AddUserFormProps {
   formData: UserFormData;
@@ -26,6 +27,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isCompressing, setIsCompressing] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleImageClick = () => {
     fileInputRef.current?.click();
@@ -64,9 +66,40 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     }
   };
 
-  const handleAddClick = () => {
+  const handleAddClick = async () => {
+    // Validate required fields
+    if (!formData.fullName.trim()) {
+      alert("נא להזין שם מלא");
+      return;
+    }
+    if (!formData.username.trim()) {
+      alert("נא להזין שם משתמש");
+      return;
+    }
+    if (!formData.passwordHash.trim()) {
+      alert("נא להזין סיסמה");
+      return;
+    }
+
+    setIsSubmitting(true);
     console.log("Adding New User - UserForm Data:", formData);
-    onAdd();
+
+    try {
+      const response = await createUser(formData);
+
+      if (response.success) {
+        console.log("User created successfully:", response.data);
+        onAdd(); // Call the parent callback to refresh the list/close form
+      } else {
+        console.error("Failed to create user:", response.error);
+        alert(response.error || "שגיאה ביצירת המשתמש");
+      }
+    } catch (error) {
+      console.error("Error creating user:", error);
+      alert("שגיאה בלתי צפויה, נסה שוב");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -324,16 +357,30 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         {/* Add Button */}
         <button
           onClick={handleAddClick}
-          className="
+          disabled={isSubmitting}
+          className={`
             flex items-center gap-2
             px-6 py-2.5 rounded-lg
-            bg-blue-500 hover:bg-blue-600
             text-white font-medium
             transition-colors
-          "
+            ${
+              isSubmitting
+                ? "bg-blue-400 cursor-not-allowed"
+                : "bg-blue-500 hover:bg-blue-600"
+            }
+          `}
         >
-          <Plus size={18} />
-          <span>הוסף</span>
+          {isSubmitting ? (
+            <>
+              <Loader2 size={18} className="animate-spin" />
+              <span>שומר...</span>
+            </>
+          ) : (
+            <>
+              <Plus size={18} />
+              <span>הוסף</span>
+            </>
+          )}
         </button>
       </div>
     </div>
