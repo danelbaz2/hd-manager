@@ -10,6 +10,7 @@ bp = Blueprint('users', __name__, url_prefix='/api/users')
 
 def serialize_doc(doc):
     doc['id'] = doc.pop('_id')
+    doc.pop('passwordHash', None)  # Remove password hash from response
     return doc
 
 @bp.route('/', methods=['GET'])
