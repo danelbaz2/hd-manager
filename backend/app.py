@@ -1,5 +1,4 @@
 from flask import Flask
-from flask_pymongo import PyMongo
 from flask_cors import CORS
 import os
 from dotenv import load_dotenv
@@ -9,7 +8,7 @@ from database import mongo
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, origins=["http://localhost:5173"])
 
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/hd_manager")
 mongo.init_app(app)
