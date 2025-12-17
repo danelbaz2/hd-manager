@@ -60,8 +60,12 @@ const TagCard: React.FC<TagCardProps> = ({ tag, isEditing, isDarkMode, onEdit, o
       <div className="flex items-center justify-between px-4 py-3">
         {/* Actions */}
         <div className="flex items-center gap-1">
-          <button
-            onClick={() => onDelete(tag.id)}
+          <div
+            role="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(tag.id);
+            }}
             className={`
               p-1.5 rounded-lg transition-colors cursor-pointer
               ${isDarkMode
@@ -71,10 +75,18 @@ const TagCard: React.FC<TagCardProps> = ({ tag, isEditing, isDarkMode, onEdit, o
             `}
           >
             <Trash2 size={16} />
-          </button>
+          </div>
           {onEdit && (
-            <button
-              onClick={() => isEditing && onCancelEdit ? onCancelEdit() : onEdit(tag)}
+            <div
+              role="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isEditing && onCancelEdit) {
+                  onCancelEdit();
+                } else {
+                  onEdit(tag);
+                }
+              }}
               className={`
                 p-1.5 rounded-lg transition-colors cursor-pointer
                 ${isEditing
@@ -86,9 +98,11 @@ const TagCard: React.FC<TagCardProps> = ({ tag, isEditing, isDarkMode, onEdit, o
               `}
             >
               <Pencil size={16} />
-            </button>
+            </div>
           )}
         </div>
+
+
 
         {/* Tag Badge */}
         <span

@@ -65,8 +65,12 @@ const ContactsList: React.FC<ContactsListProps> = ({
             >
               {/* Actions */}
               <div className="flex items-center gap-2">
-                <button
-                  onClick={() => onDelete(contact.id)}
+                <div
+                  role="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onDelete(contact.id);
+                  }}
                   className={`
                     p-2 rounded-lg transition-colors
                     ${isDarkMode
@@ -76,10 +80,14 @@ const ContactsList: React.FC<ContactsListProps> = ({
                   `}
                 >
                   <Trash2 size={18} />
-                </button>
+                </div>
                 {onEdit && (
-                  <button
-                    onClick={() => editingContactId === contact.id && onCancelEdit ? onCancelEdit() : onEdit(contact)}
+                  <div
+                    role="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      editingContactId === contact.id && onCancelEdit ? onCancelEdit() : onEdit(contact);
+                    }}
                     className={`
                       p-2 rounded-lg transition-colors cursor-pointer
                       ${editingContactId === contact.id
@@ -91,9 +99,11 @@ const ContactsList: React.FC<ContactsListProps> = ({
                     `}
                   >
                     <Pencil size={18} />
-                  </button>
+                  </div>
                 )}
               </div>
+
+
 
               {/* Contact Info */}
               <div className="flex items-center gap-4">

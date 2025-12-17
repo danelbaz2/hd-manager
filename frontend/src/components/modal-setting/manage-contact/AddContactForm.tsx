@@ -170,12 +170,11 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
 
           {/* Tags Dropdown */}
           <div className="relative flex-1 min-w-[200px]">
-            <button
-              type="button"
-              onClick={() => setIsTagDropdownOpen(!isTagDropdownOpen)}
-              disabled={isSaving || isLoadingTags}
+            <div
+              role="button"
+              onClick={() => !isSaving && !isLoadingTags && setIsTagDropdownOpen(!isTagDropdownOpen)}
               className={`
-                w-full px-3 py-2
+                w-full px-3 py-2 cursor-pointer
                 rounded-lg border text-right
                 flex items-start justify-between gap-2
                 transition-colors min-h-[42px]
@@ -183,8 +182,8 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
                   ? "bg-slate-800 border-slate-600 text-white"
                   : "bg-white border-slate-200 text-slate-800"
                 }
+                ${isSaving || isLoadingTags ? "opacity-50 cursor-not-allowed" : ""}
                 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
-                disabled:opacity-50 disabled:cursor-not-allowed
               `}
             >
               {isLoadingTags ? (
@@ -230,7 +229,8 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
                   })
                 )}
               </div>
-            </button>
+            </div>
+
 
             {/* Dropdown Menu */}
             {isTagDropdownOpen && availableTags.length > 0 && (

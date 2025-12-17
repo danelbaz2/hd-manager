@@ -68,8 +68,12 @@ const UserCard: React.FC<UserCardProps> = ({
       <div className="flex items-center justify-between px-5 py-3">
         {/* Actions */}
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => onDeleteRequest(user)}
+          <div
+            role="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDeleteRequest(user);
+            }}
             className={`
               p-2 rounded-lg transition-colors cursor-pointer
               ${isDarkMode
@@ -79,9 +83,13 @@ const UserCard: React.FC<UserCardProps> = ({
             `}
           >
             <Trash2 size={18} />
-          </button>
-          <button
-            onClick={() => isEditing ? onCancelEdit() : onEdit(user)}
+          </div>
+          <div
+            role="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              isEditing ? onCancelEdit() : onEdit(user);
+            }}
             className={`
               p-2 rounded-lg transition-colors cursor-pointer
               ${isEditing
@@ -93,8 +101,10 @@ const UserCard: React.FC<UserCardProps> = ({
             `}
           >
             <Pencil size={18} />
-          </button>
+          </div>
         </div>
+
+
 
         {/* User Info */}
         <div className="flex items-center gap-3">
