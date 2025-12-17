@@ -46,6 +46,8 @@ const TagCard: React.FC<TagCardProps> = ({ tag, isEditing, isDarkMode, onEdit, o
         borderColor: hexWithAlpha(tag.color, borderOpacity),
         transition: "background-color 400ms ease, border-color 400ms ease",
       }}
+      onClick={() => console.log(tag)}
+
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

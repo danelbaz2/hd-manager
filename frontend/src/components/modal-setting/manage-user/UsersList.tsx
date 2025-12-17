@@ -54,6 +54,8 @@ const UserCard: React.FC<UserCardProps> = ({
         borderColor: hexWithAlpha(user.color, borderOpacity),
         transition: "background-color 400ms ease, border-color 400ms ease",
       }}
+      onClick={() => console.log(user)}
+
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >

@@ -60,6 +60,8 @@ const ContactsList: React.FC<ContactsListProps> = ({
                     : "bg-white border-slate-200 hover:bg-slate-50"
                 }
               `}
+              onClick={() => console.log(contact)}
+
             >
               {/* Actions */}
               <div className="flex items-center gap-2">
