@@ -35,13 +35,13 @@ def seed(clean_only=False):
             print("Clean mode: Collections cleared, no sample data added.")
             return
         
-        # 1. Users
+        # 1. Users - with clean, light, modern color palette
         print("Seeding Users...")
         users_data = [
-            { "fullName": 'מאור', "username": "maor", "passwordHash": "hash123", "role": 'admin', "color": '#3b82f6', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'עילי', "username": "ilay", "passwordHash": "hash123", "role": 'regular', "color": '#6366f1', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'דן', "username": "dan", "passwordHash": "hash123", "role": 'regular', "color": '#06b6d4', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'אוראל', "username": "orel", "passwordHash": "hash123", "role": 'regular', "color": '#f43f5e', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'מאור', "username": "maor", "passwordHash": "hash123", "role": 'admin', "color": '#93C5FD', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Blue
+            { "fullName": 'עילי', "username": "ilay", "passwordHash": "hash123", "role": 'regular', "color": '#86EFAC', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Green
+            { "fullName": 'דן', "username": "dan", "passwordHash": "hash123", "role": 'regular', "color": '#FCD34D', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Amber
+            { "fullName": 'אוראל', "username": "orel", "passwordHash": "hash123", "role": 'regular', "color": '#FDA4AF', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Rose
         ]
         
         user_ids = []
@@ -55,18 +55,20 @@ def seed(clean_only=False):
             # Log Create History
             log_history('user', uid, 'CREATE', 'system', None, u, u)
 
+
         # Map for easy access: 0=Maor, 1=Ilay, 2=Dan, 3=Orel
         
-        # 2. Tags
+        # 2. Tags - with clean, light, modern color palette
         print("Seeding Tags...")
         tags_data = [
-            { "name": 'פיתוח', "description": "קשור לפיתוח תוכנה", "color": '#3b82f6', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
-            { "name": 'עיצוב', "description": "קשור ל-UI/UX", "color": '#a855f7', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
-            { "name": 'בדיקות', "description": "QA וטסטים", "color": '#f97316', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
-            { "name": 'שרתים', "description": "DevOps ותשתיות", "color": '#64748b', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
-            { "name": 'ניהול', "description": "ניהול פרויקטים", "color": '#10b981', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
-            { "name": 'דחיפות גבוהה', "description": "לטפל מיד", "color": '#ef4444', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},
+            { "name": 'פיתוח', "description": "קשור לפיתוח תוכנה", "color": '#93C5FD', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},  # Light Blue
+            { "name": 'עיצוב', "description": "קשור ל-UI/UX", "color": '#C4B5FD', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},  # Light Violet
+            { "name": 'בדיקות', "description": "QA וטסטים", "color": '#FDBA74', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},  # Light Orange
+            { "name": 'שרתים', "description": "DevOps ותשתיות", "color": '#67E8F9', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},  # Light Cyan
+            { "name": 'ניהול', "description": "ניהול פרויקטים", "color": '#86EFAC', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},  # Light Green
+            { "name": 'דחיפות גבוהה', "description": "לטפל מיד", "color": '#FDA4AF', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "tag"}},  # Light Rose
         ]
+
         
         tag_ids = []
         for t in tags_data:
