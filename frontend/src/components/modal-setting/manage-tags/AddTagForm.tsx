@@ -6,6 +6,7 @@ import {
   TAG_COLORS,
   DEFAULT_TAG_FORM,
 } from "../../../schemas/tagTypes";
+import { darkenColor, hexWithAlpha } from "../../../utils/colorUtils";
 import { createTag, type TagFormPayload } from "../../../api/tagsApi";
 import { ToastContainer, useToast } from "../../alert-feedback";
 
@@ -42,7 +43,6 @@ const AddTagForm: React.FC<AddTagFormProps> = ({ onAdd }) => {
 
     try {
       setIsSaving(true);
-      console.log("Creating Tag - Form Data:", formData);
 
       // Build payload for POST /api/tags
       const payload: TagFormPayload = {
@@ -55,7 +55,6 @@ const AddTagForm: React.FC<AddTagFormProps> = ({ onAdd }) => {
 
       if (response.success) {
         showSuccess("הצלחה", "התגית נוספה בהצלחה");
-        console.log("Tag created successfully:", response.data);
         setFormData(DEFAULT_TAG_FORM);
         setTimeout(() => {
           onAdd();
@@ -82,83 +81,82 @@ const AddTagForm: React.FC<AddTagFormProps> = ({ onAdd }) => {
       />
 
       <div
-        className={`
-          rounded-xl border p-6 mb-6
-          ${
-            isDarkMode
-              ? "bg-slate-700/50 border-slate-600"
-              : "bg-slate-50 border-slate-200"
-          }
-        `}
+        className="rounded-xl border mb-6 overflow-hidden transition-colors duration-300"
+        style={{
+          backgroundColor: hexWithAlpha(formData.color, isDarkMode ? 0.1 : 0.08),
+          borderColor: hexWithAlpha(formData.color, isDarkMode ? 0.3 : 0.25),
+        }}
       >
-        <div className="flex items-center justify-end gap-2 mb-4">
-          <span
-            className={`font-medium ${
-              isDarkMode ? "text-slate-200" : "text-slate-700"
-            }`}
-          >
-            הוספת תגית חדשה
-          </span>
-          <Tag size={18} className="text-slate-400" />
-        </div>
+        {/* Color Banner - Darker shade */}
+        <div
+          className="h-2 w-full transition-colors duration-300"
+          style={{ backgroundColor: darkenColor(formData.color, 20) }}
+        />
 
-        <div className="flex flex-wrap items-center gap-4" dir="rtl">
-          {/* Name Input */}
-          <input
-            type="text"
-            placeholder="שם התגית"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            disabled={isSaving}
-            className={`
+        <div className="p-6">
+          <div className="flex items-center justify-end gap-2 mb-4">
+            <span
+              className={`font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"
+                }`}
+            >
+              הוספת תגית חדשה
+            </span>
+            <Tag size={18} className="text-slate-400" />
+          </div>
+
+          <div className="flex flex-wrap items-center gap-4" dir="rtl">
+            {/* Name Input */}
+            <input
+              type="text"
+              placeholder="שם התגית"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              disabled={isSaving}
+              className={`
               flex-1 min-w-[200px] px-4 py-2.5
               rounded-lg border text-right
               transition-colors
-              ${
-                isDarkMode
+              ${isDarkMode
                   ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
                   : "bg-white border-slate-200 text-slate-800 placeholder-slate-400"
-              }
+                }
               focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
               disabled:opacity-50 disabled:cursor-not-allowed
             `}
-          />
+            />
 
-          {/* Color Selection */}
-          <div className="flex items-center gap-1.5">
-            <span
-              className={`text-sm mr-2 ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
-            ></span>
-            {TAG_COLORS.map((color) => (
-              <button
-                key={color.bg}
-                onClick={() => setFormData({ ...formData, color: color.bg })}
-                disabled={isSaving}
-                className={`
+            {/* Color Selection */}
+            <div className="flex items-center gap-1.5">
+              <span
+                className={`text-sm mr-2 ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
+              ></span>
+              {TAG_COLORS.map((color) => (
+                <button
+                  key={color.bg}
+                  onClick={() => setFormData({ ...formData, color: color.bg })}
+                  disabled={isSaving}
+                  className={`
                   w-6 h-6 rounded-full transition-transform
-                  ${
-                    formData.color === color.bg
+                  ${formData.color === color.bg
                       ? "ring-2 ring-blue-500 ring-offset-2 scale-110"
                       : ""
-                  }
-                  ${
-                    isDarkMode && formData.color === color.bg
+                    }
+                  ${isDarkMode && formData.color === color.bg
                       ? "ring-offset-slate-700"
                       : ""
-                  }
+                    }
                 `}
-                style={{ backgroundColor: color.bg }}
-              />
-            ))}
-          </div>
+                  style={{ backgroundColor: color.bg }}
+                />
+              ))}
+            </div>
 
-          {/* Add Button */}
-          <button
-            onClick={handleSubmit}
-            disabled={isSaving}
-            className={`
+            {/* Add Button */}
+            <button
+              onClick={handleSubmit}
+              disabled={isSaving}
+              className={`
               flex items-center gap-2
               px-6 py-2.5 rounded-lg
               bg-blue-500 hover:bg-blue-600
@@ -166,14 +164,15 @@ const AddTagForm: React.FC<AddTagFormProps> = ({ onAdd }) => {
               transition-colors
               disabled:opacity-50 disabled:cursor-not-allowed
             `}
-          >
-            {isSaving ? (
-              <Loader2 size={18} className="animate-spin" />
-            ) : (
-              <Tag size={18} />
-            )}
-            <span>{isSaving ? "מוסיף..." : "הוסף"}</span>
-          </button>
+            >
+              {isSaving ? (
+                <Loader2 size={18} className="animate-spin" />
+              ) : (
+                <Tag size={18} />
+              )}
+              <span>{isSaving ? "מוסיף..." : "הוסף"}</span>
+            </button>
+          </div>
         </div>
       </div>
     </>
@@ -181,3 +180,4 @@ const AddTagForm: React.FC<AddTagFormProps> = ({ onAdd }) => {
 };
 
 export default AddTagForm;
+

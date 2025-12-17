@@ -37,16 +37,14 @@ export const getAllChatMessages = async (): Promise<ApiResponse<ChatMessage[]>> 
 export const createChatMessage = async (
   messageData: ChatMessageFormData
 ): Promise<ApiResponse<ChatMessage>> => {
-  console.log("Creating chat message:", messageData);
   const response = await apiRequest<ChatMessage>(`${API_ENDPOINTS.chatMessages}/`, {
     method: "POST",
     body: JSON.stringify(messageData),
   });
-  
+
   if (response.success) {
-    console.log("Chat message created successfully:", response.data);
     response.message = "Chat message created successfully";
   }
-  
+
   return response;
 };

@@ -1,10 +1,11 @@
 import React, { useState } from "react";
 import { useTheme } from "../../../contexts/ThemeContext";
+import { useSettings } from "../../../contexts/SettingsContext";
 import {
   type UserData,
   type UserFormData,
   DEFAULT_FORM_DATA,
-} from "../../../schemas/userentity";
+} from "../../../schemas/userTypes";
 import { deleteUser } from "../../../api/usersApi";
 import { ToastContainer, useToast } from "../../alert-feedback";
 import AddUserForm from "./AddUserForm";
@@ -13,46 +14,44 @@ import UsersList from "./UsersList";
 
 const ManageUser: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const { refreshUsers } = useSettings();
   const [formData, setFormData] = useState<UserFormData>(DEFAULT_FORM_DATA);
+  const [originalData, setOriginalData] = useState<UserFormData>(DEFAULT_FORM_DATA);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const { alerts, showSuccess, showError, dismissAlert } = useToast();
 
-  // Trigger a refresh of the users list
-  const triggerRefresh = () => {
-    setRefreshTrigger((prev) => prev + 1);
-  };
-
   const handleAddUser = () => {
-    // Reset form and refresh the list
+    // Reset form and refresh the list from context
     setFormData(DEFAULT_FORM_DATA);
-    triggerRefresh();
+    refreshUsers();
   };
 
   const handleEditUser = (user: UserData) => {
-    setEditingUserId(user.id);
-    setFormData({
-      id: user.id, // Include user id for API updates
+    const userData: UserFormData = {
+      id: user.id,
       fullName: user.fullName,
       username: user.username,
-      passwordHash: "", // Don't show existing password
+      passwordHash: "",
       role: user.role,
       color: user.color,
       profileImage: user.profileImage,
-    });
+    };
+    setEditingUserId(user.id);
+    setFormData(userData);
+    setOriginalData(userData);
   };
 
   const handleSaveEdit = () => {
-    // API call is handled by EditUserForm
-    // Just reset state and refresh list
     setEditingUserId(null);
     setFormData(DEFAULT_FORM_DATA);
-    triggerRefresh();
+    setOriginalData(DEFAULT_FORM_DATA);
+    refreshUsers();
   };
 
   const handleCancelEdit = () => {
     setEditingUserId(null);
     setFormData(DEFAULT_FORM_DATA);
+    setOriginalData(DEFAULT_FORM_DATA);
   };
 
   const handleDeleteUser = async (id: string) => {
@@ -61,11 +60,10 @@ const ManageUser: React.FC = () => {
 
       if (response.success) {
         showSuccess("הצלחה", "המשתמש נמחק בהצלחה");
-        // If we're editing this user, cancel the edit
         if (editingUserId === id) {
           handleCancelEdit();
         }
-        triggerRefresh();
+        refreshUsers();
       } else {
         showError("שגיאה", response.error || "שגיאה במחיקת המשתמש");
       }
@@ -100,6 +98,7 @@ const ManageUser: React.FC = () => {
       {isEditing ? (
         <EditUserForm
           formData={formData}
+          originalData={originalData}
           setFormData={setFormData}
           onSave={handleSaveEdit}
           onCancel={handleCancelEdit}
@@ -112,12 +111,12 @@ const ManageUser: React.FC = () => {
         />
       )}
 
-      {/* Users List */}
+      {/* Users List - now uses context */}
       <UsersList
         editingUserId={editingUserId}
         onEdit={handleEditUser}
+        onCancelEdit={handleCancelEdit}
         onDelete={handleDeleteUser}
-        refreshTrigger={refreshTrigger}
       />
     </div>
   );

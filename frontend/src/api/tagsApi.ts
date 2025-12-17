@@ -39,14 +39,12 @@ export const getAllTags = async (): Promise<ApiResponse<Tag[]>> => {
 export const createTag = async (
   tagData: TagFormPayload
 ): Promise<ApiResponse<Tag>> => {
-  console.log("Creating tag:", tagData);
   const response = await apiRequest<Tag>(`${API_ENDPOINTS.tags}/`, {
     method: "POST",
     body: JSON.stringify(tagData),
   });
 
   if (response.success) {
-    console.log("Tag created successfully:", response.data);
     response.message = "Tag created successfully";
   }
 

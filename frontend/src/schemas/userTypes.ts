@@ -20,15 +20,17 @@ export interface UserFormData {
   profileImage: string | null;
 }
 
+// Clean, light, modern color palette
+// These colors work well for user avatars, banners, and card backgrounds
 export const AVAILABLE_COLORS = [
-  "#FEF3C7", // Yellow
-  "#D1FAE5", // Green
-  "#DBEAFE", // Blue
-  "#E0E7FF", // Indigo
-  "#FCE7F3", // Pink
-  "#FEE2E2", // Red
-  "#F3E8FF", // Purple
-  "#ECFEFF", // Cyan
+  "#93C5FD", // Light Blue (sky-300)
+  "#86EFAC", // Light Green (green-300)
+  "#FCD34D", // Light Amber (amber-300)
+  "#FDA4AF", // Light Rose (rose-300)
+  "#C4B5FD", // Light Violet (violet-300)
+  "#67E8F9", // Light Cyan (cyan-300)
+  "#FDBA74", // Light Orange (orange-300)
+  "#F9A8D4", // Light Pink (pink-300)
 ];
 
 export const DEFAULT_FORM_DATA: UserFormData = {
@@ -37,6 +39,6 @@ export const DEFAULT_FORM_DATA: UserFormData = {
   username: "",
   passwordHash: "",
   role: "regular",
-  color: AVAILABLE_COLORS[2],
+  color: AVAILABLE_COLORS[0], // Default to Light Blue
   profileImage: null,
 };

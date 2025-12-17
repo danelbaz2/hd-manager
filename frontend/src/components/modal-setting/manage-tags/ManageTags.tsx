@@ -1,89 +1,54 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useTheme } from "../../../contexts/ThemeContext";
+import { useSettings } from "../../../contexts/SettingsContext";
 import {
   type TagData,
   type TagFormData,
   DEFAULT_TAG_FORM,
 } from "../../../schemas/tagTypes";
-import { getAllTags, deleteTag, type Tag } from "../../../api/tagsApi";
+import { deleteTag } from "../../../api/tagsApi";
 import { ToastContainer, useToast } from "../../alert-feedback";
 import AddTagForm from "./AddTagForm";
 import EditTagForm from "./EditTagForm";
 import TagsList from "./TagsList";
 
-// Helper function to convert API Tag to TagData
-const mapTagToTagData = (tag: Tag): TagData => ({
-  id: tag.id,
-  name: tag.name,
-  color: tag.color,
-  description: tag.description || undefined,
-});
-
 const ManageTags: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const [tags, setTags] = useState<TagData[]>([]);
+  const { tags, isLoadingTags, refreshTags } = useSettings();
   const [formData, setFormData] = useState<TagFormData>(DEFAULT_TAG_FORM);
+  const [originalData, setOriginalData] = useState<TagFormData>(DEFAULT_TAG_FORM);
   const [editingTagId, setEditingTagId] = useState<string | null>(null);
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [isLoading, setIsLoading] = useState(true);
   const { alerts, showSuccess, showError, dismissAlert } = useToast();
-
-  // Trigger a refresh of the tags list
-  const triggerRefresh = () => {
-    setRefreshTrigger((prev) => prev + 1);
-  };
-
-  // Fetch tags from API
-  useEffect(() => {
-    const fetchTags = async () => {
-      setIsLoading(true);
-      try {
-        const response = await getAllTags();
-        if (response.success && response.data) {
-          const mappedTags = response.data.map(mapTagToTagData);
-          setTags(mappedTags);
-        } else {
-          console.error("Failed to fetch tags:", response.error);
-          setTags([]);
-        }
-      } catch (error) {
-        console.error("Error fetching tags:", error);
-        setTags([]);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchTags();
-  }, [refreshTrigger]);
 
   const handleAddTag = () => {
     // API call is handled by AddTagForm
-    // Just refresh the list
-    triggerRefresh();
+    // Refresh from context
+    refreshTags();
   };
 
   const handleEditTag = (tag: TagData) => {
-    setEditingTagId(tag.id);
-    setFormData({
+    const tagData: TagFormData = {
       id: tag.id,
       name: tag.name,
       color: tag.color,
       description: tag.description,
-    });
+    };
+    setEditingTagId(tag.id);
+    setFormData(tagData);
+    setOriginalData(tagData);
   };
 
   const handleSaveEdit = () => {
-    // API call is handled by EditTagForm
-    // Just reset state and refresh list
     setEditingTagId(null);
     setFormData(DEFAULT_TAG_FORM);
-    triggerRefresh();
+    setOriginalData(DEFAULT_TAG_FORM);
+    refreshTags();
   };
 
   const handleCancelEdit = () => {
     setEditingTagId(null);
     setFormData(DEFAULT_TAG_FORM);
+    setOriginalData(DEFAULT_TAG_FORM);
   };
 
   const handleDeleteTag = async (id: string) => {
@@ -92,11 +57,10 @@ const ManageTags: React.FC = () => {
 
       if (response.success) {
         showSuccess("הצלחה", "התגית נמחקה בהצלחה");
-        // If we're editing this tag, cancel the edit
         if (editingTagId === id) {
           handleCancelEdit();
         }
-        triggerRefresh();
+        refreshTags();
       } else {
         showError("שגיאה", response.error || "שגיאה במחיקת התגית");
       }
@@ -131,6 +95,7 @@ const ManageTags: React.FC = () => {
       {isEditing ? (
         <EditTagForm
           formData={formData}
+          originalData={originalData}
           setFormData={setFormData}
           onSave={handleSaveEdit}
           onCancel={handleCancelEdit}
@@ -139,13 +104,14 @@ const ManageTags: React.FC = () => {
         <AddTagForm onAdd={handleAddTag} />
       )}
 
-      {/* Tags List */}
+      {/* Tags List - uses context data */}
       <TagsList
         tags={tags}
         editingTagId={editingTagId}
         onEdit={handleEditTag}
+        onCancelEdit={handleCancelEdit}
         onDelete={handleDeleteTag}
-        isLoading={isLoading}
+        isLoading={isLoadingTags}
       />
     </div>
   );

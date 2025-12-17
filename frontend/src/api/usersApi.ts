@@ -1,6 +1,6 @@
 // Users API - handles all user-related API requests
 import { API_ENDPOINTS, apiRequest, type ApiResponse } from "./apiConfig";
-import { type UserFormData } from "../schemas/userentity";
+import { type UserFormData } from "../schemas/userTypes";
 
 // User response interface (matches GET /api/users response)
 export interface User {
@@ -31,17 +31,15 @@ export const getAllUsers = async (): Promise<ApiResponse<User[]>> => {
  * Create a new user
  */
 export const createUser = async (userData: UserFormData): Promise<ApiResponse<User>> => {
-  console.log("Creating user:", userData);
   const response = await apiRequest<User>(`${API_ENDPOINTS.users}/`, {
-    method: "POST", 
+    method: "POST",
     body: JSON.stringify(userData),
   });
-  
+
   if (response.success) {
-    console.log("User created successfully:", response.data);
     response.message = "User created successfully";
   }
-  
+
   return response;
 };
 
@@ -56,11 +54,11 @@ export const updateUser = async (
     method: "PUT",
     body: JSON.stringify(userData),
   });
-  
+
   if (response.success) {
     response.message = "User updated successfully";
   }
-  
+
   return response;
 };
 
@@ -71,10 +69,10 @@ export const deleteUser = async (userId: string): Promise<ApiResponse<null>> => 
   const response = await apiRequest<null>(`${API_ENDPOINTS.users}/${userId}`, {
     method: "DELETE",
   });
-  
+
   if (response.success) {
     response.message = "User deleted successfully";
   }
-  
+
   return response;
 };

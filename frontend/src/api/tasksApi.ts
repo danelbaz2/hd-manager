@@ -44,20 +44,20 @@ export interface TaskQueryParams {
  */
 export const getAllTasks = async (params?: TaskQueryParams): Promise<ApiResponse<Task[]>> => {
   let url = `${API_ENDPOINTS.tasks}/`;
-  
+
   if (params) {
     const queryParams = new URLSearchParams();
     if (params.date !== undefined) queryParams.append("date", params.date.toString());
     if (params.startDate !== undefined) queryParams.append("startDate", params.startDate.toString());
     if (params.endDate !== undefined) queryParams.append("endDate", params.endDate.toString());
     if (params.responsibleUsersId) queryParams.append("responsibleUsersId", params.responsibleUsersId);
-    
+
     const queryString = queryParams.toString();
     if (queryString) {
       url += `?${queryString}`;
     }
   }
-  
+
   return apiRequest<Task[]>(url);
 };
 
@@ -65,17 +65,15 @@ export const getAllTasks = async (params?: TaskQueryParams): Promise<ApiResponse
  * Create a new task
  */
 export const createTask = async (taskData: TaskFormData): Promise<ApiResponse<Task>> => {
-  console.log("Creating task:", taskData);
   const response = await apiRequest<Task>(`${API_ENDPOINTS.tasks}/`, {
     method: "POST",
     body: JSON.stringify(taskData),
   });
-  
+
   if (response.success) {
-    console.log("Task created successfully:", response.data);
     response.message = "Task created successfully";
   }
-  
+
   return response;
 };
 
@@ -90,11 +88,11 @@ export const updateTask = async (
     method: "PUT",
     body: JSON.stringify(taskData),
   });
-  
+
   if (response.success) {
     response.message = "Task updated successfully";
   }
-  
+
   return response;
 };
 
@@ -105,10 +103,10 @@ export const deleteTask = async (taskId: string): Promise<ApiResponse<null>> => 
   const response = await apiRequest<null>(`${API_ENDPOINTS.tasks}/${taskId}`, {
     method: "DELETE",
   });
-  
+
   if (response.success) {
     response.message = "Task deleted successfully";
   }
-  
+
   return response;
 };

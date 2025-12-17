@@ -6,7 +6,7 @@ import {
   AlignJustify,
 } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
-import defaultProfile from "../../../assets/defualt-profile.jpg";
+import defaultProfile from "../../../assets/default-profile.jpg";
 import Calendar from "./Calendar";
 import MenuItemProfile from "./MenuItemProfile";
 
@@ -51,9 +51,6 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
     newDate.setDate(newDate.getDate() + diff);
     setSelectedDate(newDate.getTime());
   };
-
-  console.log("Selected Date:", selectedDate);
-  console.log("View Mode:", viewMode);
 
   // Close menus when clicking outside
   useEffect(() => {
@@ -134,10 +131,9 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
             flex items-center
             rounded-full shadow-sm border
             px-1 md:px-2 py-1
-            ${
-              isDarkMode
-                ? "bg-slate-700 border-slate-600"
-                : "bg-white border-slate-200"
+            ${isDarkMode
+              ? "bg-slate-700 border-slate-600"
+              : "bg-white border-slate-200"
             }
           `}
         >
@@ -146,10 +142,9 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
             className={`
               p-1.5 md:p-2
               rounded-full transition-colors
-              ${
-                isDarkMode
-                  ? "hover:bg-slate-600 text-slate-300"
-                  : "hover:bg-slate-100 text-slate-500"
+              ${isDarkMode
+                ? "hover:bg-slate-600 text-slate-300"
+                : "hover:bg-slate-100 text-slate-500"
               }
             `}
             aria-label="Previous day"
@@ -174,10 +169,9 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
             className={`
               p-1.5 md:p-1
               rounded-full transition-colors
-              ${
-                isDarkMode
-                  ? "hover:bg-slate-600 text-slate-300"
-                  : "hover:bg-slate-100 text-slate-500"
+              ${isDarkMode
+                ? "hover:bg-slate-600 text-slate-300"
+                : "hover:bg-slate-100 text-slate-500"
               }
             `}
             aria-label="Next day"
@@ -204,21 +198,19 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
       {/* Right side - View Mode Toggle */}
       <div className="flex items-center gap-2 md:gap-3">
         <div
-          className={`flex items-center p-1 rounded-lg ${
-            isDarkMode ? "bg-slate-700" : "bg-slate-100"
-          }`}
+          className={`flex items-center p-1 rounded-lg ${isDarkMode ? "bg-slate-700" : "bg-slate-100"
+            }`}
         >
           <button
             onClick={() => setViewMode("grid")}
             className={`
               p-1.5 md:p-2
               rounded-md transition-all
-              ${
-                viewMode === "grid"
-                  ? isDarkMode
-                    ? "bg-slate-600 text-white shadow-sm"
-                    : "bg-white shadow-sm text-blue-600"
-                  : "text-slate-400 hover:text-slate-600"
+              ${viewMode === "grid"
+                ? isDarkMode
+                  ? "bg-slate-600 text-white shadow-sm"
+                  : "bg-white shadow-sm text-blue-600"
+                : "text-slate-400 hover:text-slate-600"
               }
             `}
             aria-label="Grid view"
@@ -230,12 +222,11 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
             className={`
               p-1.5 md:p-2
               rounded-md transition-all
-              ${
-                viewMode === "list"
-                  ? isDarkMode
-                    ? "bg-slate-600 text-white shadow-sm"
-                    : "bg-white shadow-sm text-blue-600"
-                  : "text-slate-400 hover:text-slate-600"
+              ${viewMode === "list"
+                ? isDarkMode
+                  ? "bg-slate-600 text-white shadow-sm"
+                  : "bg-white shadow-sm text-blue-600"
+                : "text-slate-400 hover:text-slate-600"
               }
             `}
             aria-label="List view"

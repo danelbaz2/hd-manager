@@ -41,14 +41,12 @@ export const getAllContacts = async (): Promise<ApiResponse<Contact[]>> => {
 export const createContact = async (
   contactData: ContactFormPayload
 ): Promise<ApiResponse<Contact>> => {
-  console.log("Creating contact:", contactData);
   const response = await apiRequest<Contact>(`${API_ENDPOINTS.contacts}/`, {
     method: "POST",
     body: JSON.stringify(contactData),
   });
 
   if (response.success) {
-    console.log("Contact created successfully:", response.data);
     response.message = "Contact created successfully";
   }
 

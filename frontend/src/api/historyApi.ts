@@ -36,11 +36,11 @@ export const getHistoryEntries = async (
   params?: HistoryQueryParams
 ): Promise<ApiResponse<HistoryEntry[]>> => {
   let url = `${API_ENDPOINTS.historyEntries}/`;
-  
+
   if (params?.entityId) {
     url += `?entityId=${encodeURIComponent(params.entityId)}`;
   }
-  
+
   return apiRequest<HistoryEntry[]>(url);
 };
 
@@ -50,16 +50,14 @@ export const getHistoryEntries = async (
 export const createHistoryEntry = async (
   entryData: HistoryEntryFormData
 ): Promise<ApiResponse<HistoryEntry>> => {
-  console.log("Creating history entry:", entryData);
   const response = await apiRequest<HistoryEntry>(`${API_ENDPOINTS.historyEntries}/`, {
     method: "POST",
     body: JSON.stringify(entryData),
   });
-  
+
   if (response.success) {
-    console.log("History entry created successfully:", response.data);
     response.message = "History entry created successfully";
   }
-  
+
   return response;
 };
