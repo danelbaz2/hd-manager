@@ -24,6 +24,51 @@ def create_tag():
         return jsonify({"error": str(e)}), 400
 
     now = int(datetime.now().timestamp() * 1000)
+
+    # Check for existing tag with same name
+    existing_tag = mongo.db.ents.find_one({
+        'name': data['name'],
+        'base.entityType': 'tag'
+    })
+
+    if existing_tag:
+        if existing_tag.get('base', {}).get('isDeleted'):
+            # Reactivate deleted tag
+            tag_id = existing_tag['_id']
+            update_fields = {
+                'base.isDeleted': False,
+                'base.updatedAt': now,
+                'base.lut': now,
+                **data  # Update other fields like color if they changed
+            }
+            
+            # Remove base from data so it doesn't overwrite the nested base update structure if pydantic model had it (it shouldn't for creation usually but safely)
+            if 'base' in update_fields:
+                del update_fields['base']
+                
+            # Re-construct base update properly to merge with reactivation
+            final_update = {
+                '$set': {
+                    'base.isDeleted': False,
+                    'base.updatedAt': now,
+                    'base.lut': now,
+                }
+            }
+            
+            # Add other data fields to $set
+            for k, v in data.items():
+                if k != 'base':
+                    final_update['$set'][k] = v
+
+            mongo.db.ents.update_one({'_id': tag_id}, final_update)
+            
+            updated_tag = mongo.db.ents.find_one({'_id': tag_id})
+            log_history('tag', tag_id, 'RESTORE', 'system', existing_tag, updated_tag, final_update['$set'])
+            return jsonify(serialize_doc(updated_tag)), 201
+        else:
+            # Tag exists and is active
+             return jsonify({"error": "Tag with this name already exists"}), 409
+
     data['base'] = {
         'isDeleted': False,
         'isActive': True,
@@ -38,6 +83,7 @@ def create_tag():
     log_history('tag', data['_id'], 'CREATE', 'system', None, data, data)
     
     return jsonify(serialize_doc(data)), 201
+
 
 @bp.route('/<id>', methods=['PUT'])
 def update_tag(id):
