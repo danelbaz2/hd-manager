@@ -1,1 +1,236 @@
 @import "tailwindcss";
+
+/* =====================================================
+   RESPONSIVE DESIGN SYSTEM
+   Screen sizes supported:
+   - 14" laptop: ~1366-1440px (lg breakpoint)
+   - Standard PC: ~1920px (xl breakpoint)
+   - 65" display: ~3840px 4K (3xl breakpoint)
+   ===================================================== */
+
+/* Custom 3xl breakpoint for very large screens (65" 4K displays) */
+@media (min-width: 1920px) {
+  .container-3xl {
+    max-width: 1800px;
+  }
+}
+
+@media (min-width: 2560px) {
+  .container-3xl {
+    max-width: 2400px;
+  }
+  
+  /* Scale up base font size for 4K displays */
+  html {
+    font-size: 18px;
+  }
+}
+
+@media (min-width: 3840px) {
+  html {
+    font-size: 24px;
+  }
+  
+  .container-3xl {
+    max-width: 3200px;
+  }
+}
+
+/* Responsive text utilities for different screen sizes */
+.text-responsive-sm {
+  font-size: 0.875rem; /* 14px */
+}
+
+.text-responsive-base {
+  font-size: 1rem; /* 16px */
+}
+
+.text-responsive-lg {
+  font-size: 1.125rem; /* 18px */
+}
+
+.text-responsive-xl {
+  font-size: 1.25rem; /* 20px */
+}
+
+@media (min-width: 1280px) {
+  .text-responsive-sm {
+    font-size: 0.9375rem; /* 15px */
+  }
+  
+  .text-responsive-base {
+    font-size: 1.0625rem; /* 17px */
+  }
+  
+  .text-responsive-lg {
+    font-size: 1.1875rem; /* 19px */
+  }
+  
+  .text-responsive-xl {
+    font-size: 1.375rem; /* 22px */
+  }
+}
+
+@media (min-width: 1920px) {
+  .text-responsive-sm {
+    font-size: 1rem; /* 16px */
+  }
+  
+  .text-responsive-base {
+    font-size: 1.125rem; /* 18px */
+  }
+  
+  .text-responsive-lg {
+    font-size: 1.25rem; /* 20px */
+  }
+  
+  .text-responsive-xl {
+    font-size: 1.5rem; /* 24px */
+  }
+}
+
+@media (min-width: 2560px) {
+  .text-responsive-sm {
+    font-size: 1.125rem; /* 18px */
+  }
+  
+  .text-responsive-base {
+    font-size: 1.25rem; /* 20px */
+  }
+  
+  .text-responsive-lg {
+    font-size: 1.5rem; /* 24px */
+  }
+  
+  .text-responsive-xl {
+    font-size: 1.875rem; /* 30px */
+  }
+}
+
+/* Responsive spacing utilities */
+.gap-responsive {
+  gap: 0.75rem;
+}
+
+.p-responsive {
+  padding: 1rem;
+}
+
+.m-responsive {
+  margin: 1rem;
+}
+
+@media (min-width: 1280px) {
+  .gap-responsive {
+    gap: 1rem;
+  }
+  
+  .p-responsive {
+    padding: 1.25rem;
+  }
+  
+  .m-responsive {
+    margin: 1.25rem;
+  }
+}
+
+@media (min-width: 1920px) {
+  .gap-responsive {
+    gap: 1.5rem;
+  }
+  
+  .p-responsive {
+    padding: 1.5rem;
+  }
+  
+  .m-responsive {
+    margin: 1.5rem;
+  }
+}
+
+@media (min-width: 2560px) {
+  .gap-responsive {
+    gap: 2rem;
+  }
+  
+  .p-responsive {
+    padding: 2rem;
+  }
+  
+  .m-responsive {
+    margin: 2rem;
+  }
+}
+
+/* =====================================================
+   CUSTOM SCROLLBAR STYLES
+   ===================================================== */
+
+/* Custom Scrollbar Styles for Dark Mode */
+.dark-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+@media (min-width: 1920px) {
+  .dark-scrollbar::-webkit-scrollbar,
+  .light-scrollbar::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@media (min-width: 2560px) {
+  .dark-scrollbar::-webkit-scrollbar,
+  .light-scrollbar::-webkit-scrollbar {
+    width: 12px;
+    height: 12px;
+  }
+}
+
+.dark-scrollbar::-webkit-scrollbar-track {
+  background: rgba(30, 41, 59, 0.5); /* slate-800 with opacity */
+  border-radius: 4px;
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(71, 85, 105, 0.8); /* slate-600 with opacity */
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.dark-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(100, 116, 139, 0.9); /* slate-500 with opacity */
+}
+
+/* Light mode scrollbar (optional - for consistency) */
+.light-scrollbar::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.light-scrollbar::-webkit-scrollbar-track {
+  background: rgba(241, 245, 249, 0.8); /* slate-100 with opacity */
+  border-radius: 4px;
+}
+
+.light-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(203, 213, 225, 0.8); /* slate-300 with opacity */
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.light-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(148, 163, 184, 0.9); /* slate-400 with opacity */
+}
+
+/* Firefox scrollbar support */
+.dark-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(71, 85, 105, 0.8) rgba(30, 41, 59, 0.5);
+}
+
+.light-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(203, 213, 225, 0.8) rgba(241, 245, 249, 0.8);
+}

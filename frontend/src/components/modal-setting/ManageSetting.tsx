@@ -62,9 +62,10 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
             className={`
               absolute top-4 left-4 z-10
               p-2 rounded-lg transition-colors
-              ${isDarkMode
-                ? "hover:bg-slate-700 text-slate-400"
-                : "hover:bg-slate-100 text-slate-500"
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-700 text-slate-400"
+                  : "hover:bg-slate-100 text-slate-500"
               }
             `}
           >
@@ -83,9 +84,10 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
               border-l
               p-6
               flex flex-col
-              ${isDarkMode
-                ? "bg-slate-900 border-slate-700"
-                : "bg-slate-50 border-slate-200"
+              ${
+                isDarkMode
+                  ? "bg-slate-900 border-slate-700"
+                  : "bg-slate-50 border-slate-200"
               }
             `}
           >
@@ -113,9 +115,10 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
                     px-4 py-3 rounded-xl
                     text-sm font-medium
                     transition-all duration-200
-                    ${activeTab === tab.id
-                      ? "bg-blue-500 text-white shadow-lg"
-                      : isDarkMode
+                    ${
+                      activeTab === tab.id
+                        ? "bg-blue-500 text-white shadow-lg"
+                        : isDarkMode
                         ? "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
                         : "text-slate-600 hover:bg-slate-100"
                     }

@@ -129,7 +129,7 @@ const Calendar: React.FC<CalendarProps> = ({
       {/* Month/Year Header with Navigation */}
       <div className="flex items-center justify-between mb-4">
         <button
-          onClick={() => changeMonth(1)}
+          onClick={() => changeMonth(-1)}
           className={`
             p-1.5 rounded-lg transition-colors
             ${
@@ -140,7 +140,7 @@ const Calendar: React.FC<CalendarProps> = ({
           `}
           aria-label="Previous month"
         >
-          <ChevronLeft size={16} />
+          <ChevronRight size={16} />
         </button>
 
         <h3
@@ -153,7 +153,7 @@ const Calendar: React.FC<CalendarProps> = ({
         </h3>
 
         <button
-          onClick={() => changeMonth(-1)}
+          onClick={() => changeMonth(1)}
           className={`
             p-1.5 rounded-lg transition-colors
             ${
@@ -164,7 +164,7 @@ const Calendar: React.FC<CalendarProps> = ({
           `}
           aria-label="Next month"
         >
-          <ChevronRight size={16} />
+          <ChevronLeft size={16} />
         </button>
       </div>
 
