@@ -1,6 +1,6 @@
 import React, { useCallback, useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useTheme, useSettings } from "../../contexts";
 import { KanbanBoard } from "./parts";
 import { updateTask, type Task, type TaskStatus } from "../../api/tasksApi";
@@ -113,14 +113,6 @@ const TaskPage: React.FC = () => {
       >
         {/* Right side - Title with back button */}
         <div className="flex items-center gap-3">
-          <h1
-            className={`
-              text-xl lg:text-2xl font-bold
-              ${isDarkMode ? "text-white" : "text-slate-800"}
-            `}
-          >
-            המשימות של {userName}
-          </h1>
           <button
             onClick={handleBack}
             className={`
@@ -133,8 +125,17 @@ const TaskPage: React.FC = () => {
             `}
             aria-label="חזרה לדף הבית"
           >
-            <ArrowLeft className="w-5 h-5 lg:w-6 lg:h-6" />
+            <ArrowRight className="w-5 h-5 lg:w-6 lg:h-6" />
           </button>
+          <h1
+            className={`
+              text-xl lg:text-2xl font-bold
+              ${isDarkMode ? "text-white" : "text-slate-800"}
+            `}
+          >
+            המשימות של {userName}
+          </h1>
+
         </div>
 
         {/* Left side - Empty for now, can add filters later */}
