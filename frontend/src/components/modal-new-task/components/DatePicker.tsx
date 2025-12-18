@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { CalendarIcon } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
-import Calendar from "../../layout/header-bar/Calendar";
+import Calendar from "../../Layout/header-bar/Calendar";
 
 interface DatePickerProps {
   label: string;
@@ -84,24 +84,21 @@ const DatePicker: React.FC<DatePickerProps> = ({
           rounded-xl border-2
           text-sm lg:text-base
           transition-all duration-200
-          ${
-            isDarkMode
-              ? "bg-slate-700/50 border-slate-600 hover:border-slate-500"
-              : "bg-white border-slate-200 hover:border-slate-300"
+          ${isDarkMode
+            ? "bg-slate-700/50 border-slate-600 hover:border-slate-500"
+            : "bg-white border-slate-200 hover:border-slate-300"
           }
-          ${
-            isOpen
-              ? isDarkMode
-                ? "border-blue-500 ring-2 ring-blue-500/20"
-                : "border-blue-500 ring-2 ring-blue-500/20"
-              : ""
+          ${isOpen
+            ? isDarkMode
+              ? "border-blue-500 ring-2 ring-blue-500/20"
+              : "border-blue-500 ring-2 ring-blue-500/20"
+            : ""
           }
         `}
       >
         <CalendarIcon
-          className={`w-5 h-5 ${
-            isDarkMode ? "text-slate-400" : "text-slate-500"
-          }`}
+          className={`w-5 h-5 ${isDarkMode ? "text-slate-400" : "text-slate-500"
+            }`}
         />
         <span
           className={
@@ -110,8 +107,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
                 ? "text-white"
                 : "text-slate-800"
               : isDarkMode
-              ? "text-slate-400"
-              : "text-slate-400"
+                ? "text-slate-400"
+                : "text-slate-400"
           }
         >
           {value ? formatDisplayDate(value) : placeholder}

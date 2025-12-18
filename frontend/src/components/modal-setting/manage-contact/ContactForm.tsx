@@ -1,14 +1,12 @@
 import React from "react";
-import {
-  type ContactFormData,
-  DEFAULT_CONTACT_FORM,
-} from "../../../schemas/contactTypes";
+import { type ContactFormData } from "../../../schemas/contactTypes";
 import AddContactForm from "./AddContactForm";
 import EditContactForm from "./EditContactForm";
 
 interface ContactFormProps {
   isEditing: boolean;
   formData: ContactFormData;
+  originalData?: ContactFormData;
   setFormData: React.Dispatch<React.SetStateAction<ContactFormData>>;
   onAdd: () => void;
   onSave: () => void;
@@ -18,15 +16,17 @@ interface ContactFormProps {
 const ContactForm: React.FC<ContactFormProps> = ({
   isEditing,
   formData,
+  originalData,
   setFormData,
   onAdd,
   onSave,
   onCancel,
 }) => {
-  if (isEditing) {
+  if (isEditing && originalData) {
     return (
       <EditContactForm
         formData={formData}
+        originalData={originalData}
         setFormData={setFormData}
         onSave={onSave}
         onCancel={onCancel}
@@ -38,3 +38,4 @@ const ContactForm: React.FC<ContactFormProps> = ({
 };
 
 export default ContactForm;
+

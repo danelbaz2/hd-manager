@@ -6,8 +6,9 @@ import EditTagForm from "./EditTagForm";
 interface TagFormProps {
   isEditing: boolean;
   formData: TagFormData;
+  originalData?: TagFormData;
   setFormData: React.Dispatch<React.SetStateAction<TagFormData>>;
-  onAdd: (tag: TagFormData) => void;
+  onAdd: () => void;
   onSave: () => void;
   onCancel: () => void;
 }
@@ -15,15 +16,17 @@ interface TagFormProps {
 const TagForm: React.FC<TagFormProps> = ({
   isEditing,
   formData,
+  originalData,
   setFormData,
   onAdd,
   onSave,
   onCancel,
 }) => {
-  if (isEditing) {
+  if (isEditing && originalData) {
     return (
       <EditTagForm
         formData={formData}
+        originalData={originalData}
         setFormData={setFormData}
         onSave={onSave}
         onCancel={onCancel}
@@ -35,3 +38,4 @@ const TagForm: React.FC<TagFormProps> = ({
 };
 
 export default TagForm;
+

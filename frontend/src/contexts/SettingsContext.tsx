@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, ReactNode } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { getAllUsers, type User } from "../api/usersApi";
 import { getAllTags, type Tag } from "../api/tagsApi";
 import { getAllContacts, type Contact } from "../api/contactsApi";

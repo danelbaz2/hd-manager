@@ -1,5 +1,5 @@
 import React from "react";
-import Button from "../components/layout/header-bar/Button";
+import Button from "../components/Layout/header-bar/Button";
 
 const Home: React.FC = () => {
   return (
