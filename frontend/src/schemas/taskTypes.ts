@@ -12,7 +12,7 @@ export interface TaskData {
   date: number; // Timestamp for start date
   deadline?: number; // Timestamp for deadline
   responsibleUsersId: string[];
-  tags: string[];
+  tagsId: string[];
   createdAt: number;
   updatedAt: number;
 }
@@ -25,7 +25,7 @@ export interface TaskFormData {
   date: number; // Timestamp for start date
   deadline?: number; // Timestamp for deadline
   responsibleUsersId: string[];
-  tags: string[];
+  tagsId: string[];
 }
 
 // Priority options with Hebrew labels
@@ -37,9 +37,9 @@ export const PRIORITY_OPTIONS: { id: TaskPriority; label: string }[] = [
 
 // Status options with Hebrew labels
 export const STATUS_OPTIONS: { id: TaskStatus; label: string }[] = [
-  { id: "pending", label: "ממתין" },
+  { id: "pending", label: "פתוח" },
   { id: "in_progress", label: "בביצוע" },
-  { id: "completed", label: "הושלם" },
+  { id: "completed", label: "סגור" },
   { id: "cancelled", label: "בוטל" },
 ];
 
@@ -67,5 +67,5 @@ export const DEFAULT_TASK_FORM: TaskFormData = {
   date: Date.now(),
   deadline: undefined,
   responsibleUsersId: [],
-  tags: [],
+  tagsId: [],
 };

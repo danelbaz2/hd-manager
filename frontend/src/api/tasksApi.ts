@@ -10,15 +10,23 @@ export interface TaskBase {
   entityType: string;
 }
 
+// Valid status values: pending (פתוח), in_progress (בטיפול), completed (סגור), cancelled (מבוטל)
+export type TaskStatus = "pending" | "in_progress" | "completed" | "cancelled";
+
+// Valid priority values: low, medium, high
+export type TaskPriority = "low" | "medium" | "high";
+
 export interface Task {
-  entityId: string;
+  id: string;
   title?: string;
   description?: string;
   date?: number;
-  responsibleUsersId?: string[];
-  priority?: string;
-  status?: string;
-  tags?: string[];
+  deadline?: number;
+  responsibleUsersId?: string[];  // User IDs responsible for the task
+  participantsIds?: string[];      // Optional: Contact IDs participating
+  tagsId?: string[];
+  priority?: TaskPriority;
+  status?: TaskStatus;
   base?: TaskBase;
 }
 
@@ -26,10 +34,12 @@ export interface TaskFormData {
   title?: string;
   description?: string;
   date?: number;
+  deadline?: number;
   responsibleUsersId?: string[];
-  priority?: string;
-  status?: string;
-  tags?: string[];
+  participantsIds?: string[];      // Optional: Contact IDs
+  tagsId?: string[];
+  priority?: TaskPriority;
+  status?: TaskStatus;
 }
 
 export interface TaskQueryParams {

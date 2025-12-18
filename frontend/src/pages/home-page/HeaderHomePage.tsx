@@ -7,10 +7,13 @@ import {
   Calendar,
   CalendarDays,
   CalendarRange,
+  LayoutGrid,
+  AlignJustify,
 } from "lucide-react";
-import { useTheme } from "../../contexts/ThemeContext";
+import { useTheme } from "../../contexts";
 
 type ViewMode = "daily" | "weekly" | "monthly";
+type DisplayMode = "grid" | "list";
 type FilterType = "free" | "title" | "status" | "tag";
 
 interface FilterOption {
@@ -35,15 +38,29 @@ interface HeaderHomePageProps {
   onCreateTask?: () => void;
   onSearch?: (query: string, filterType: FilterType) => void;
   onViewModeChange?: (mode: ViewMode) => void;
+  onDisplayModeChange?: (mode: DisplayMode) => void;
+  onDateChange?: (timestamp: number) => void;
+  viewMode?: ViewMode;
+  displayMode?: DisplayMode;
+  selectedDate?: number;
 }
 
 const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
   onCreateTask,
   onSearch,
   onViewModeChange,
+  onDisplayModeChange,
+  viewMode: externalViewMode,
+  displayMode: externalDisplayMode,
 }) => {
   const { isDarkMode } = useTheme();
-  const [viewMode, setViewMode] = useState<ViewMode>("daily");
+
+  // Use external state if provided, otherwise use internal
+  const [internalViewMode, setInternalViewMode] = useState<ViewMode>("daily");
+  const [internalDisplayMode, setInternalDisplayMode] = useState<DisplayMode>("grid");
+  const viewMode = externalViewMode ?? internalViewMode;
+  const displayMode = externalDisplayMode ?? internalDisplayMode;
+
   const [searchQuery, setSearchQuery] = useState("");
   const [filterType, setFilterType] = useState<FilterType>("free");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
@@ -51,8 +68,14 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
 
   // Handle view mode change
   const handleViewModeChange = (mode: ViewMode) => {
-    setViewMode(mode);
+    setInternalViewMode(mode);
     onViewModeChange?.(mode);
+  };
+
+  // Handle display mode change
+  const handleDisplayModeChange = (mode: DisplayMode) => {
+    setInternalDisplayMode(mode);
+    onDisplayModeChange?.(mode);
   };
 
   // Handle search
@@ -101,8 +124,54 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
       `}
       dir="rtl"
     >
-      {/* Right Side - Search & Filter */}
+      {/* Right Side - Display Toggle, Filter & Search */}
       <div className="flex items-center gap-3 lg:gap-4">
+        {/* Display Mode Toggle (Grid/List) - Moved here next to filter */}
+        <div
+          className={`
+            flex items-center p-1 rounded-lg border
+            ${isDarkMode
+              ? "bg-slate-700 border-slate-600"
+              : "bg-white border-slate-200"
+            }
+          `}
+        >
+          <button
+            onClick={() => handleDisplayModeChange("list")}
+            className={`
+              p-1.5 lg:p-2 rounded-md transition-all
+              ${displayMode === "list"
+                ? isDarkMode
+                  ? "bg-slate-600 text-white shadow-sm"
+                  : "bg-blue-50 text-blue-600"
+                : isDarkMode
+                  ? "text-slate-400 hover:text-slate-200"
+                  : "text-slate-500 hover:text-slate-700"
+              }
+            `}
+            title="תצוגת רשימה"
+          >
+            <AlignJustify className="w-4 h-4 lg:w-5 lg:h-5" />
+          </button>
+          <button
+            onClick={() => handleDisplayModeChange("grid")}
+            className={`
+              p-1.5 lg:p-2 rounded-md transition-all
+              ${displayMode === "grid"
+                ? isDarkMode
+                  ? "bg-slate-600 text-white shadow-sm"
+                  : "bg-blue-50 text-blue-600"
+                : isDarkMode
+                  ? "text-slate-400 hover:text-slate-200"
+                  : "text-slate-500 hover:text-slate-700"
+              }
+            `}
+            title="תצוגת כרטיסים"
+          >
+            <LayoutGrid className="w-4 h-4 lg:w-5 lg:h-5" />
+          </button>
+        </div>
+
         {/* Filter Dropdown */}
         <div className="relative" ref={filterRef}>
           <button
@@ -113,19 +182,17 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
               rounded-lg border
               text-sm lg:text-base font-medium
               transition-colors
-              ${
-                isDarkMode
-                  ? "bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600"
-                  : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
+              ${isDarkMode
+                ? "bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600"
+                : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
               }
             `}
           >
             <Filter className="w-4 h-4 lg:w-5 lg:h-5" />
             <span>{currentFilter?.label}</span>
             <ChevronDown
-              className={`w-4 h-4 transition-transform ${
-                isFilterOpen ? "rotate-180" : ""
-              }`}
+              className={`w-4 h-4 transition-transform ${isFilterOpen ? "rotate-180" : ""
+                }`}
             />
           </button>
 
@@ -136,10 +203,9 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
                 absolute top-full mt-2 right-0 z-20
                 min-w-[160px] lg:min-w-[180px]
                 py-2 rounded-lg border shadow-lg
-                ${
-                  isDarkMode
-                    ? "bg-slate-800 border-slate-600"
-                    : "bg-white border-slate-200"
+                ${isDarkMode
+                  ? "bg-slate-800 border-slate-600"
+                  : "bg-white border-slate-200"
                 }
               `}
             >
@@ -152,12 +218,11 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
                     px-4 py-2 lg:py-2.5
                     text-sm lg:text-base
                     transition-colors
-                    ${
-                      filterType === option.id
-                        ? isDarkMode
-                          ? "bg-blue-900/30 text-blue-400"
-                          : "bg-blue-50 text-blue-600"
-                        : isDarkMode
+                    ${filterType === option.id
+                      ? isDarkMode
+                        ? "bg-blue-900/30 text-blue-400"
+                        : "bg-blue-50 text-blue-600"
+                      : isDarkMode
                         ? "text-slate-300 hover:bg-slate-700"
                         : "text-slate-700 hover:bg-slate-50"
                     }
@@ -183,10 +248,9 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
               rounded-lg border
               text-sm lg:text-base
               transition-colors
-              ${
-                isDarkMode
-                  ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500"
-                  : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-500"
+              ${isDarkMode
+                ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500"
+                : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-500"
               }
               focus:outline-none focus:ring-2 focus:ring-blue-500/20
             `}
@@ -203,7 +267,7 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
 
       {/* Left Side - View Mode Toggle & Create Button */}
       <div className="flex items-center gap-3 lg:gap-4">
-        {/* View Mode Toggle */}
+        {/* View Mode Toggle (Daily/Weekly/Monthly) */}
         <div
           className={`
             flex items-center p-1 rounded-lg
@@ -220,12 +284,11 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
                 rounded-md
                 text-xs lg:text-sm font-medium
                 transition-all duration-200
-                ${
-                  viewMode === mode.id
-                    ? isDarkMode
-                      ? "bg-slate-600 text-white shadow-sm"
-                      : "bg-white text-blue-600 shadow-sm"
-                    : isDarkMode
+                ${viewMode === mode.id
+                  ? isDarkMode
+                    ? "bg-slate-600 text-white shadow-sm"
+                    : "bg-white text-blue-600 shadow-sm"
+                  : isDarkMode
                     ? "text-slate-400 hover:text-slate-200"
                     : "text-slate-500 hover:text-slate-700"
                 }

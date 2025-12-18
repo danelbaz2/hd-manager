@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback, typ
 import { getAllUsers, type User } from "../api/usersApi";
 import { getAllTags, type Tag } from "../api/tagsApi";
 import { getAllContacts, type Contact } from "../api/contactsApi";
+import { getAllTasks, type Task } from "../api/tasksApi";
 import { type UserData } from "../schemas/userTypes";
 import { type TagData } from "../schemas/tagTypes";
 import { type ContactData } from "../schemas/contactTypes";
@@ -40,17 +41,20 @@ interface SettingsContextState {
     users: UserData[];
     tags: TagData[];
     contacts: ContactData[];
+    tasks: Task[];
 
     // Loading states
     isLoading: boolean;
     isLoadingUsers: boolean;
     isLoadingTags: boolean;
     isLoadingContacts: boolean;
+    isLoadingTasks: boolean;
 
     // Refresh functions
     refreshUsers: () => Promise<void>;
     refreshTags: () => Promise<void>;
     refreshContacts: () => Promise<void>;
+    refreshTasks: () => Promise<void>;
     refreshAll: () => Promise<void>;
 }
 
@@ -59,13 +63,16 @@ const defaultContextValue: SettingsContextState = {
     users: [],
     tags: [],
     contacts: [],
+    tasks: [],
     isLoading: true,
     isLoadingUsers: false,
     isLoadingTags: false,
     isLoadingContacts: false,
+    isLoadingTasks: false,
     refreshUsers: async () => { },
     refreshTags: async () => { },
     refreshContacts: async () => { },
+    refreshTasks: async () => { },
     refreshAll: async () => { },
 };
 
@@ -82,11 +89,13 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     const [users, setUsers] = useState<UserData[]>([]);
     const [tags, setTags] = useState<TagData[]>([]);
     const [contacts, setContacts] = useState<ContactData[]>([]);
+    const [tasks, setTasks] = useState<Task[]>([]);
 
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingUsers, setIsLoadingUsers] = useState(false);
     const [isLoadingTags, setIsLoadingTags] = useState(false);
     const [isLoadingContacts, setIsLoadingContacts] = useState(false);
+    const [isLoadingTasks, setIsLoadingTasks] = useState(false);
 
     // Fetch users
     const refreshUsers = useCallback(async () => {
@@ -139,12 +148,34 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
         }
     }, []);
 
+    // Fetch tasks - gets all tasks without date filtering
+    const refreshTasks = useCallback(async () => {
+        setIsLoadingTasks(true);
+        try {
+            const response = await getAllTasks();
+            if (response.success && response.data) {
+                setTasks(response.data);
+            } else {
+                console.error("Failed to fetch tasks:", response.error);
+            }
+        } catch (error) {
+            console.error("Error fetching tasks:", error);
+        } finally {
+            setIsLoadingTasks(false);
+        }
+    }, []);
+
     // Fetch all data
     const refreshAll = useCallback(async () => {
         setIsLoading(true);
-        await Promise.all([refreshUsers(), refreshTags(), refreshContacts()]);
+        await Promise.all([
+            refreshUsers(),
+            refreshTags(),
+            refreshContacts(),
+            refreshTasks(),
+        ]);
         setIsLoading(false);
-    }, [refreshUsers, refreshTags, refreshContacts]);
+    }, [refreshUsers, refreshTags, refreshContacts, refreshTasks]);
 
     // Initial fetch on mount
     useEffect(() => {
@@ -155,13 +186,16 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
         users,
         tags,
         contacts,
+        tasks,
         isLoading,
         isLoadingUsers,
         isLoadingTags,
         isLoadingContacts,
+        isLoadingTasks,
         refreshUsers,
         refreshTags,
         refreshContacts,
+        refreshTasks,
         refreshAll,
     };
 

@@ -9,17 +9,16 @@ const Layout: React.FC = () => {
 
   return (
     <div
-      className={`flex flex-row-reverse min-h-screen ${
-        isDarkMode ? "bg-slate-900" : "bg-slate-50"
-      }`}
+      className={`flex flex-row-reverse h-screen max-h-screen overflow-hidden ${isDarkMode ? "bg-slate-900" : "bg-slate-50"
+        }`}
     >
       {/* Right sidebar menu */}
       <MenuBar />
 
       {/* Main content area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <HeaderBar />
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-hidden">
           <Outlet />
         </main>
       </div>

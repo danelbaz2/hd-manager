@@ -1,11 +1,7 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { X, Plus } from "lucide-react";
-import { useTheme } from "../../contexts/ThemeContext";
-import { type UserData } from "../../schemas/userTypes";
-import { type TagData } from "../../schemas/tagTypes";
+import { useTheme, useSettings } from "../../contexts";
 import { type TaskPriority, type TaskFormData } from "../../schemas/taskTypes";
-import { getAllUsers, type User } from "../../api/usersApi";
-import { getAllTags, type Tag } from "../../api/tagsApi";
 import { createTask } from "../../api/tasksApi";
 import { ToastContainer, useToast } from "../alert-feedback";
 import DelayedLoader from "../delay-loader";
@@ -25,24 +21,7 @@ interface NewTaskModalProps {
   initialDate?: number;
 }
 
-// Helper function to convert API User to UserData
-const mapUserToUserData = (user: User): UserData => ({
-  id: user.id,
-  fullName: user.fullName,
-  username: user.username,
-  passwordHash: "",
-  role: user.role as "admin" | "regular",
-  color: user.color,
-  profileImage: user.profileImage,
-});
 
-// Helper function to convert API Tag to TagData
-const mapTagToTagData = (tag: Tag): TagData => ({
-  id: tag.id,
-  name: tag.name,
-  color: tag.color,
-  description: tag.description || undefined,
-});
 
 const NewTaskModal: React.FC<NewTaskModalProps> = ({
   isOpen,
@@ -51,6 +30,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
   initialDate,
 }) => {
   const { isDarkMode } = useTheme();
+  const { users, tags, isLoading: isLoadingData, isLoadingUsers, isLoadingTags } = useSettings();
   const { alerts, showSuccess, showError, showWarning, dismissAlert } =
     useToast();
 
@@ -63,38 +43,13 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
   const [deadline, setDeadline] = useState<string>("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 
-  // Data state
-  const [users, setUsers] = useState<UserData[]>([]);
-  const [tags, setTags] = useState<TagData[]>([]);
-  const [isLoadingData, setIsLoadingData] = useState(true);
+  // Loading and submission state
+  const isDataLoading = isLoadingData || isLoadingUsers || isLoadingTags;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch users and tags
-  const fetchData = useCallback(async () => {
-    setIsLoadingData(true);
-    try {
-      const [usersResponse, tagsResponse] = await Promise.all([
-        getAllUsers(),
-        getAllTags(),
-      ]);
-
-      if (usersResponse.success && usersResponse.data) {
-        setUsers(usersResponse.data.map(mapUserToUserData));
-      }
-
-      if (tagsResponse.success && tagsResponse.data) {
-        setTags(tagsResponse.data.map(mapTagToTagData));
-      }
-    } catch (error) {
-      console.error("Error fetching data:", error);
-    } finally {
-      setIsLoadingData(false);
-    }
-  }, []);
-
+  // Set initial date when modal opens
   useEffect(() => {
     if (isOpen) {
-      fetchData();
       if (initialDate) {
         const date = new Date(initialDate);
         setStartDate(date.toISOString().split("T")[0]);
@@ -102,7 +57,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
         setStartDate(new Date().toISOString().split("T")[0]);
       }
     }
-  }, [isOpen, fetchData, initialDate]);
+  }, [isOpen, initialDate]);
 
   // Reset form
   useEffect(() => {
@@ -133,7 +88,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
         date: startDate ? new Date(startDate).getTime() : Date.now(),
         deadline: deadline ? new Date(deadline).getTime() : undefined,
         responsibleUsersId: selectedUserIds.length > 0 ? selectedUserIds : [],
-        tags: selectedTagIds.length > 0 ? selectedTagIds : [],
+        tagsId: selectedTagIds.length > 0 ? selectedTagIds : [],
       };
 
       // Log task object
@@ -183,7 +138,6 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
         className={`
           relative z-10 w-full
           max-w-2xl lg:max-w-3xl
-          max-h-[90vh] overflow-hidden
           rounded-3xl border shadow-2xl
           flex flex-col
           ${isDarkMode
@@ -197,7 +151,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
         <div
           className={`
             flex items-center justify-between
-            px-6 md:px-8 py-5 md:py-6
+            px-6 md:px-8 py-4 md:py-5
             border-b
             ${isDarkMode ? "border-slate-800/50" : "border-slate-200/50"}
           `}
@@ -227,15 +181,14 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
         </div>
 
         {/* Scrollable Content */}
-        <DelayedLoader isLoading={isLoadingData} delay={200}>
+        <DelayedLoader isLoading={isDataLoading} delay={200}>
           <div
             className={`
-              flex-1 overflow-y-auto
-              px-6 lg:px-8 py-6
+              px-6 lg:px-8 py-4
               ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}
             `}
           >
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Title & Priority Row */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Title Input */}
@@ -285,7 +238,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
                   placeholder="פרט את דרישות המשימה..."
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  rows={3}
+                  rows={2}
                   className={`
                   w-full px-4 py-3
                   rounded-xl border-2 resize-none
@@ -307,7 +260,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
                   tags={tags}
                   selectedTagIds={selectedTagIds}
                   onChange={setSelectedTagIds}
-                  isLoading={isLoadingData}
+                  isLoading={isDataLoading}
                 />
 
                 {/* Start Date */}
@@ -332,7 +285,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
                 users={users}
                 selectedUserIds={selectedUserIds}
                 onChange={setSelectedUserIds}
-                isLoading={isLoadingData}
+                isLoading={isDataLoading}
               />
             </div>
           </div>
@@ -342,7 +295,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
         <div
           className={`
             flex items-center justify-end gap-10
-            px-6 lg:px-8 py-5 lg:py-6
+            px-6 lg:px-8 py-4 lg:py-5
             border-t
             ${isDarkMode
               ? "border-slate-700/50 bg-slate-800/50"

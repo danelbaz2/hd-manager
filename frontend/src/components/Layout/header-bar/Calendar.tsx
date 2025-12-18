@@ -115,34 +115,32 @@ const Calendar: React.FC<CalendarProps> = ({
 
   return (
     <div
+      dir="ltr"
       className={`
         w-[256px] md:w-[288px]
         rounded-2xl shadow-2xl border
         p-3 md:p-4
-        ${
-          isDarkMode
-            ? "bg-slate-800 border-slate-700"
-            : "bg-white border-slate-200"
+        ${isDarkMode
+          ? "bg-slate-800 border-slate-700"
+          : "bg-white border-slate-200"
         }
       `}
     >
       {/* Month/Year Header with Navigation */}
       <div className="flex items-center justify-between mb-4">
         <button
-          onClick={() => changeMonth(-1)}
+          onClick={() => changeMonth(1)}
           className={`
             p-1.5 rounded-lg transition-colors
-            ${
-              isDarkMode
-                ? "hover:bg-slate-700 text-slate-300"
-                : "hover:bg-slate-100 text-slate-600"
+            ${isDarkMode
+              ? "hover:bg-slate-700 text-slate-300"
+              : "hover:bg-slate-100 text-slate-600"
             }
           `}
-          aria-label="Previous month"
+          aria-label="Next month"
         >
-          <ChevronRight size={16} />
+          <ChevronLeft size={16} />
         </button>
-
         <h3
           className={`
             text-sm md:text-base font-bold
@@ -151,20 +149,18 @@ const Calendar: React.FC<CalendarProps> = ({
         >
           {HEBREW_MONTHS[viewDate.getMonth()]} {viewDate.getFullYear()}
         </h3>
-
         <button
-          onClick={() => changeMonth(1)}
+          onClick={() => changeMonth(-1)}
           className={`
             p-1.5 rounded-lg transition-colors
-            ${
-              isDarkMode
-                ? "hover:bg-slate-700 text-slate-300"
-                : "hover:bg-slate-100 text-slate-600"
+            ${isDarkMode
+              ? "hover:bg-slate-700 text-slate-300"
+              : "hover:bg-slate-100 text-slate-600"
             }
           `}
-          aria-label="Next month"
+          aria-label="Previous month"
         >
-          <ChevronLeft size={16} />
+          <ChevronRight size={16} />
         </button>
       </div>
 
@@ -204,33 +200,29 @@ const Calendar: React.FC<CalendarProps> = ({
                 text-xs md:text-sm font-medium
                 rounded-lg
                 transition-all duration-200
-                ${
-                  isPrevNextMonth
-                    ? isDarkMode
-                      ? "text-slate-600 cursor-default"
-                      : "text-slate-300 cursor-default"
-                    : ""
+                ${isPrevNextMonth
+                  ? isDarkMode
+                    ? "text-slate-600 cursor-default"
+                    : "text-slate-300 cursor-default"
+                  : ""
                 }
-                ${
-                  !isPrevNextMonth && !selectedCheck && !todayCheck
-                    ? isDarkMode
-                      ? "text-slate-200 hover:bg-slate-700"
-                      : "text-slate-700 hover:bg-slate-100"
-                    : ""
+                ${!isPrevNextMonth && !selectedCheck && !todayCheck
+                  ? isDarkMode
+                    ? "text-slate-200 hover:bg-slate-700"
+                    : "text-slate-700 hover:bg-slate-100"
+                  : ""
                 }
-                ${
-                  todayCheck && !selectedCheck
-                    ? isDarkMode
-                      ? "text-blue-400 hover:bg-slate-700"
-                      : "text-blue-600 hover:bg-blue-50"
-                    : ""
+                ${todayCheck && !selectedCheck
+                  ? isDarkMode
+                    ? "text-blue-400 hover:bg-slate-700"
+                    : "text-blue-600 hover:bg-blue-50"
+                  : ""
                 }
-                ${
-                  selectedCheck
-                    ? isDarkMode
-                      ? "bg-blue-600 text-white hover:bg-blue-700 shadow-lg"
-                      : "bg-blue-600 text-white hover:bg-blue-700 shadow-lg"
-                    : ""
+                ${selectedCheck
+                  ? isDarkMode
+                    ? "bg-blue-600 text-white hover:bg-blue-700 shadow-lg"
+                    : "bg-blue-600 text-white hover:bg-blue-700 shadow-lg"
+                  : ""
                 }
               `}
             >
@@ -253,10 +245,9 @@ const Calendar: React.FC<CalendarProps> = ({
             w-full py-1.5 px-3 rounded-lg
             text-xs font-medium
             transition-colors
-            ${
-              isDarkMode
-                ? "bg-slate-700 text-slate-200 hover:bg-slate-600"
-                : "bg-slate-100 text-slate-700 hover:bg-slate-200"
+            ${isDarkMode
+              ? "bg-slate-700 text-slate-200 hover:bg-slate-600"
+              : "bg-slate-100 text-slate-700 hover:bg-slate-200"
             }
           `}
         >

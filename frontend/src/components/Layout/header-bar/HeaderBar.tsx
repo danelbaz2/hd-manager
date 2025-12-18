@@ -1,18 +1,9 @@
 import React, { useState, useRef, useEffect } from "react";
-import {
-  ChevronLeft,
-  ChevronRight,
-  LayoutGrid,
-  AlignJustify,
-} from "lucide-react";
-import { useTheme } from "../../../contexts/ThemeContext";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useTheme, useViewState } from "../../../contexts";
 import defaultProfile from "../../../assets/default-profile.jpg";
 import Calendar from "./Calendar";
 import MenuItemProfile from "./MenuItemProfile";
-
-interface HeaderBarProps {
-  className?: string;
-}
 
 const HEBREW_DAYS_FULL = [
   "ראשון",
@@ -24,6 +15,7 @@ const HEBREW_DAYS_FULL = [
   "שבת",
 ];
 
+// Format date for daily view: "חמישי, 18.12"
 const formatDateHebrew = (date: Date): string => {
   const dayName = HEBREW_DAYS_FULL[date.getDay()];
   const day = date.getDate();
@@ -31,13 +23,29 @@ const formatDateHebrew = (date: Date): string => {
   return `${dayName}, ${day}.${month}`;
 };
 
+// Format date range for weekly view: "14.12 - 20.12"
+const formatWeekRange = (date: Date): string => {
+  // Find Sunday of the week
+  const start = new Date(date);
+  const dayOfWeek = start.getDay();
+  start.setDate(start.getDate() - dayOfWeek);
+
+  // Find Saturday of the week
+  const end = new Date(start);
+  end.setDate(start.getDate() + 6);
+
+  const formatDay = (d: Date) => `${d.getDate()}.${d.getMonth() + 1}`;
+  return `${formatDay(end)} - ${formatDay(start)}`;
+};
+
+interface HeaderBarProps {
+  className?: string;
+}
+
 const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
   const { isDarkMode } = useTheme();
-  // Store date as timestamp (int)
-  const [selectedDate, setSelectedDate] = useState<number>(
-    new Date().getTime()
-  );
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const { viewMode, selectedDate, setSelectedDate } = useViewState();
+
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -46,10 +54,26 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
   // Convert timestamp to Date object for display
   const currentDate = new Date(selectedDate);
 
-  const changeDate = (diff: number) => {
+  // Change date - for weekly mode, move by 7 days
+  const changeDate = (direction: number) => {
     const newDate = new Date(selectedDate);
-    newDate.setDate(newDate.getDate() + diff);
+    const daysToAdd = viewMode === "weekly" ? 7 : 1;
+    newDate.setDate(newDate.getDate() + (direction * daysToAdd));
     setSelectedDate(newDate.getTime());
+  };
+
+  // Handle date selection from calendar
+  const handleDateSelect = (timestamp: number) => {
+    setSelectedDate(timestamp);
+    setIsCalendarOpen(false);
+  };
+
+  // Get display text based on view mode
+  const getDateDisplayText = (): string => {
+    if (viewMode === "weekly") {
+      return formatWeekRange(currentDate);
+    }
+    return formatDateHebrew(currentDate);
   };
 
   // Close menus when clicking outside
@@ -147,13 +171,13 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
                 : "hover:bg-slate-100 text-slate-500"
               }
             `}
-            aria-label="Previous day"
+            aria-label={viewMode === "weekly" ? "Next week" : "Next day"}
           >
             <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
           </button>
           <div
             onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-            className="px-5 md:px-4 min-w-[100px] md:min-w-[120px] text-center cursor-pointer select-none"
+            className="px-3 md:px-4 min-w-[100px] md:min-w-[140px] text-center cursor-pointer select-none"
           >
             <span
               className={`
@@ -161,7 +185,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
                 ${isDarkMode ? "text-slate-200" : "text-slate-700"}
               `}
             >
-              {formatDateHebrew(currentDate)}
+              {getDateDisplayText()}
             </span>
           </div>
           <button
@@ -174,7 +198,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
                 : "hover:bg-slate-100 text-slate-500"
               }
             `}
-            aria-label="Next day"
+            aria-label={viewMode === "weekly" ? "Previous week" : "Previous day"}
           >
             <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
           </button>
@@ -185,56 +209,13 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
           <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 z-50">
             <Calendar
               selectedDate={selectedDate}
-              onDateSelect={(timestamp) => {
-                setSelectedDate(timestamp);
-                setIsCalendarOpen(false);
-              }}
+              onDateSelect={handleDateSelect}
               onClose={() => setIsCalendarOpen(false)}
             />
           </div>
         )}
       </div>
 
-      {/* Right side - View Mode Toggle */}
-      <div className="flex items-center gap-2 md:gap-3">
-        <div
-          className={`flex items-center p-1 rounded-lg ${isDarkMode ? "bg-slate-700" : "bg-slate-100"
-            }`}
-        >
-          <button
-            onClick={() => setViewMode("grid")}
-            className={`
-              p-1.5 md:p-2
-              rounded-md transition-all
-              ${viewMode === "grid"
-                ? isDarkMode
-                  ? "bg-slate-600 text-white shadow-sm"
-                  : "bg-white shadow-sm text-blue-600"
-                : "text-slate-400 hover:text-slate-600"
-              }
-            `}
-            aria-label="Grid view"
-          >
-            <LayoutGrid className="w-4 h-4 md:w-5 md:h-5" />
-          </button>
-          <button
-            onClick={() => setViewMode("list")}
-            className={`
-              p-1.5 md:p-2
-              rounded-md transition-all
-              ${viewMode === "list"
-                ? isDarkMode
-                  ? "bg-slate-600 text-white shadow-sm"
-                  : "bg-white shadow-sm text-blue-600"
-                : "text-slate-400 hover:text-slate-600"
-              }
-            `}
-            aria-label="List view"
-          >
-            <AlignJustify className="w-4 h-4 md:w-5 md:h-5" />
-          </button>
-        </div>
-      </div>
     </header>
   );
 };
