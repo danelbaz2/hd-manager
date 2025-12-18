@@ -1,7 +1,7 @@
-import React, { useCallback, useState, useEffect } from "react";
+import React, { useCallback, useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowLeft, ArrowRight } from "lucide-react";
-import { useTheme, useSettings } from "../../contexts";
+import { ArrowRight, Calendar, CalendarDays, CalendarRange } from "lucide-react";
+import { useTheme, useSettings, useViewState } from "../../contexts";
 import { KanbanBoard } from "./parts";
 import { updateTask, type Task, type TaskStatus } from "../../api/tasksApi";
 
@@ -10,9 +10,76 @@ interface LocationState {
   userName?: string;
 }
 
+type ViewMode = "daily" | "weekly" | "monthly";
+
+const VIEW_MODES = [
+  { id: "daily" as ViewMode, label: "יומי", icon: Calendar },
+  { id: "weekly" as ViewMode, label: "שבועי", icon: CalendarDays },
+  { id: "monthly" as ViewMode, label: "חודשי", icon: CalendarRange },
+];
+
+// Get week start date (Sunday) for a given date
+const getWeekStart = (date: Date): Date => {
+  const d = new Date(date);
+  const day = d.getDay();
+  d.setDate(d.getDate() - day);
+  d.setHours(0, 0, 0, 0);
+  return d;
+};
+
+// Filter tasks by date range
+const filterTasksByDateRange = (
+  tasks: Task[],
+  selectedDate: number,
+  viewMode: ViewMode
+): Task[] => {
+  const date = new Date(selectedDate);
+
+  if (viewMode === "daily") {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    return tasks.filter((task) => {
+      if (!task.date) return false;
+      const taskDate = new Date(task.date);
+      return taskDate >= start && taskDate <= end;
+    });
+  }
+
+  if (viewMode === "weekly") {
+    const weekStart = getWeekStart(date);
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 6);
+    weekEnd.setHours(23, 59, 59, 999);
+
+    return tasks.filter((task) => {
+      const taskStart = new Date(task.date || 0);
+      const taskEnd = task.deadline ? new Date(task.deadline) : new Date(taskStart);
+      taskStart.setHours(0, 0, 0, 0);
+      taskEnd.setHours(23, 59, 59, 999);
+      // Task overlaps with week if it starts before week ends AND ends after week starts
+      return taskStart <= weekEnd && taskEnd >= weekStart;
+    });
+  }
+
+  // Monthly - filter by month
+  const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
+  const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
+  monthEnd.setHours(23, 59, 59, 999);
+
+  return tasks.filter((task) => {
+    if (!task.date) return false;
+    const taskDate = new Date(task.date);
+    return taskDate >= monthStart && taskDate <= monthEnd;
+  });
+};
+
 const TaskPage: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { tasks, users, refreshTasks } = useSettings();
+  const { viewMode, setViewMode, selectedDate } = useViewState();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -29,9 +96,24 @@ const TaskPage: React.FC = () => {
   const selectedUserId = state?.selectedUserId || "";
   const userName = state?.userName || "";
 
+  // Filter tasks by selected date/week AND selected user
+  const filteredTasks = useMemo(() => {
+    // First filter by date range
+    const dateFilteredTasks = filterTasksByDateRange(optimisticTasks, selectedDate, viewMode);
+    // Then filter by selected user
+    return dateFilteredTasks.filter((task) =>
+      task.responsibleUsersId?.includes(selectedUserId)
+    );
+  }, [optimisticTasks, selectedDate, viewMode, selectedUserId]);
+
   // Handle back navigation
   const handleBack = () => {
     navigate("/");
+  };
+
+  // Handle view mode change
+  const handleViewModeChange = (mode: ViewMode) => {
+    setViewMode(mode);
   };
 
   // Handle task status change (drag & drop) with Optimistic UI
@@ -135,17 +217,49 @@ const TaskPage: React.FC = () => {
           >
             המשימות של {userName}
           </h1>
-
         </div>
 
-        {/* Left side - Empty for now, can add filters later */}
-        <div />
+        {/* Left side - View Mode Toggle (Same as HomePage) */}
+        <div className="flex items-center gap-3 lg:gap-4">
+          {/* View Mode Toggle (Daily/Weekly/Monthly) */}
+          <div
+            className={`
+              flex items-center p-1 rounded-lg
+              ${isDarkMode ? "bg-slate-700" : "bg-slate-100"}
+            `}
+          >
+            {VIEW_MODES.map((mode) => (
+              <button
+                key={mode.id}
+                onClick={() => handleViewModeChange(mode.id)}
+                className={`
+                  flex items-center gap-1.5 lg:gap-2
+                  px-3 lg:px-4 py-1.5 lg:py-2
+                  rounded-md
+                  text-xs lg:text-sm font-medium
+                  transition-all duration-200
+                  ${viewMode === mode.id
+                    ? isDarkMode
+                      ? "bg-slate-600 text-white shadow-sm"
+                      : "bg-white text-blue-600 shadow-sm"
+                    : isDarkMode
+                      ? "text-slate-400 hover:text-slate-200"
+                      : "text-slate-500 hover:text-slate-700"
+                  }
+                `}
+              >
+                <mode.icon className="w-3.5 h-3.5 lg:w-4 lg:h-4" />
+                <span>{mode.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </header>
 
       {/* Kanban Board */}
       <div className="flex-1 overflow-hidden">
         <KanbanBoard
-          tasks={optimisticTasks}
+          tasks={filteredTasks}
           users={users}
           selectedUserId={selectedUserId}
           onTaskStatusChange={handleTaskStatusChange}

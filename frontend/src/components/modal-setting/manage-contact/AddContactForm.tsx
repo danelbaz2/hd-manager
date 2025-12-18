@@ -195,7 +195,7 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
                     } ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}
                 />
               )}
-              <div className="flex-1 flex flex-wrap gap-1.5 justify-end max-h-[80px] overflow-y-auto">
+              <div className={`flex-1 flex flex-wrap gap-1.5 justify-end max-h-[80px] overflow-y-auto ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}>
                 {formData.tags.length === 0 ? (
                   <span className={`py-0.5 ${isDarkMode ? "text-slate-400" : "text-slate-400"}`}>
                     {isLoadingTags ? "טוען תגיות..." : availableTags.length === 0 ? "אין תגיות" : "בחר תגיות"}
@@ -239,6 +239,7 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
                   absolute top-full left-0 right-0 mt-1 z-10
                   rounded-lg border shadow-lg
                   max-h-48 overflow-y-auto
+                  ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}
                   ${isDarkMode
                     ? "bg-slate-800 border-slate-600"
                     : "bg-white border-slate-200"

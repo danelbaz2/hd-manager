@@ -21,14 +21,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 }) => {
     const { isDarkMode } = useTheme();
 
-    // Filter tasks for the selected user
-    const userTasks = useMemo(() => {
-        return tasks.filter((task) =>
-            task.responsibleUsersId?.includes(selectedUserId)
-        );
-    }, [tasks, selectedUserId]);
-
-    // Group tasks by status
+    // Group tasks by status (tasks are already filtered by user and date)
     const tasksByStatus = useMemo(() => {
         const grouped: Record<TaskStatus, Task[]> = {
             pending: [],
@@ -37,7 +30,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
             cancelled: [],
         };
 
-        userTasks.forEach((task) => {
+        tasks.forEach((task) => {
             const status = (task.status as TaskStatus) || "pending";
             if (grouped[status]) {
                 grouped[status].push(task);
@@ -48,7 +41,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         });
 
         return grouped;
-    }, [userTasks]);
+    }, [tasks]);
 
     // Handle drop - get task ID from dataTransfer and update status
     const handleDrop = (e: React.DragEvent, targetStatus: TaskStatus) => {
@@ -62,8 +55,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         <div
             className={`
         h-full w-full overflow-x-auto overflow-y-hidden
+        ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}
         ${isDarkMode ? "bg-slate-900" : "bg-slate-50"}
-      `}
+    `}
             dir="rtl"
         >
             <div className="flex h-full gap-4 lg:gap-6 p-4 lg:p-6">

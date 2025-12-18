@@ -193,7 +193,7 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
             </div>
 
             {/* Calendar Body */}
-            <div className="flex-1 relative overflow-y-auto p-2">
+            <div className={`flex-1 relative overflow-y-auto p-2 ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}>
                 {/* Background Grid Lines */}
                 <div className="absolute inset-0 grid grid-cols-7 pointer-events-none">
                     {[...Array(7)].map((_, i) => (

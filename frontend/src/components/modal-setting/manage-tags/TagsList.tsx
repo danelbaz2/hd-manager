@@ -41,18 +41,18 @@ const TagCard: React.FC<TagCardProps> = ({
       ? 0.1
       : 0.08
     : isDarkMode
-    ? 0.06
-    : 0.04;
+      ? 0.06
+      : 0.04;
 
   const borderOpacity = isEditing
     ? 0.5
     : isHovered
-    ? isDarkMode
-      ? 0.3
-      : 0.25
-    : isDarkMode
-    ? 0.2
-    : 0.15;
+      ? isDarkMode
+        ? 0.3
+        : 0.25
+      : isDarkMode
+        ? 0.2
+        : 0.15;
 
   return (
     <div
@@ -83,10 +83,9 @@ const TagCard: React.FC<TagCardProps> = ({
             }}
             className={`
               p-1.5 rounded-lg transition-colors cursor-pointer
-              ${
-                isDarkMode
-                  ? "text-red-400 hover:bg-red-900/30"
-                  : "text-red-500 hover:bg-red-50"
+              ${isDarkMode
+                ? "text-red-400 hover:bg-red-900/30"
+                : "text-red-500 hover:bg-red-50"
               }
             `}
           >
@@ -105,10 +104,9 @@ const TagCard: React.FC<TagCardProps> = ({
               }}
               className={`
                 p-1.5 rounded-lg transition-colors cursor-pointer
-                ${
-                  isEditing
-                    ? "bg-blue-500 text-white"
-                    : isDarkMode
+                ${isEditing
+                  ? "bg-blue-500 text-white"
+                  : isDarkMode
                     ? "text-blue-400 hover:bg-blue-900/30"
                     : "text-blue-500 hover:bg-blue-50"
                 }
@@ -181,18 +179,15 @@ const TagsList: React.FC<TagsListProps> = ({
         {tags.length === 0 ? (
           <div className="flex-1 flex items-center justify-center py-12">
             <p
-              className={`text-center ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`text-center ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               אין תגיות להצגה
             </p>
           </div>
         ) : (
           <div
-            className={`flex-1 overflow-y-auto ${
-              isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-            }`}
+            className={`flex-1 overflow-y-auto ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}
           >
             <div className="grid grid-cols-2 gap-3">
               {tags.map((tag) => (
@@ -209,7 +204,7 @@ const TagsList: React.FC<TagsListProps> = ({
             </div>
           </div>
         )}
-      </DelayedLoader>
+      </DelayedLoader >
     </>
   );
 };

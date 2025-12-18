@@ -86,7 +86,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
             </div>
 
             {/* Tasks Container */}
-            <div className="flex-1 overflow-y-auto p-1">
+            <div className={`flex-1 overflow-y-auto p-1 ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}>
                 {tasks.length === 0 ? (
                     <div
                         className={`

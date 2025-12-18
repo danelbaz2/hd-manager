@@ -26,7 +26,7 @@ def clear_database():
     mongo.db.contacts.delete_many({})
     print("Database cleared successfully!")
 
-def seed(clean_only=False):
+def seed(clean_only=False, bulk_tasks=False):
     with app.app_context():
         # Always clear existing data first
         clear_database()
@@ -109,207 +109,291 @@ def seed(clean_only=False):
         statuses = ['pending', 'in_progress', 'completed', 'cancelled']
         priorities = ['low', 'medium', 'high']
         
-        tasks_data = [
-            # === Today's tasks ===
-            {
-                "title": 'בדיקת שרתים שבועית',
-                "description": 'בדיקה מקיפה של שרתי ה-Production וה-Staging לוודא יציבות.',
-                "status": 'in_progress',
-                "priority": 'high',
-                "responsibleUsersId": [user_ids[1]],  # Maor
-                "participantsIds": [contact_ids[0]],  # Tech Support contact
-                "tagsId": [tag_ids[3], tag_ids[5]],  # Servers, High Priority
-                "date": get_relative_date(0),
-                "deadline": get_relative_date(2),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-2), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
-            },
-            {
-                "title": 'פגישת סינכרון צוות',
-                "description": 'סינכרון שבועי עם כל הצוות - סקירת התקדמות ותיאום משימות.',
-                "status": 'pending',
-                "priority": 'medium',
-                "responsibleUsersId": [user_ids[0]],  # Eden
-                "participantsIds": [],
-                "tagsId": [tag_ids[4]],  # Management
-                "date": get_relative_date(0),
-                "deadline": get_relative_date(0),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-1), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
-            },
-            {
-                "title": 'תיקון באג בהתחברות',
-                "description": 'משתמשים מדווחים על בעיה בהתחברות עם סיסמה ארוכה.',
-                "status": 'in_progress',
-                "priority": 'high',
-                "responsibleUsersId": [user_ids[2]],  # Ilay
-                "participantsIds": [],
-                "tagsId": [tag_ids[0], tag_ids[5]],  # Dev, High Priority
-                "date": get_relative_date(0),
-                "deadline": get_relative_date(1),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-1), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
-            },
+        if bulk_tasks:
+            # PERFORMANCE TEST MODE: Generate 100 tasks
+            print("🔥 BULK MODE: Generating 100 tasks for performance testing...")
             
-            # === Multi-day tasks (for weekly calendar spanning) ===
-            {
-                "title": 'פיתוח מודול דוחות',
-                "description": 'פיתוח מודול חדש להפקת דוחות PDF אוטומטיים.',
-                "status": 'in_progress',
-                "priority": 'medium',
-                "responsibleUsersId": [user_ids[3]],  # Dan
-                "participantsIds": [], 
-                "tagsId": [tag_ids[0]],  # Dev
-                "date": get_relative_date(-1),
-                "deadline": get_relative_date(4),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-3), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
-            },
-            {
-                "title": 'עיצוב דף הבית החדש',
-                "description": 'עיצוב מחדש של דף הבית עם חווית משתמש משופרת.',
-                "status": 'in_progress',
-                "priority": 'medium',
-                "responsibleUsersId": [user_ids[7]],  # Adi
-                "participantsIds": [],
-                "tagsId": [tag_ids[1]],  # Design
-                "date": get_relative_date(-2),
-                "deadline": get_relative_date(3),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-5), "updatedAt": get_relative_date(-2), "lut": get_relative_date(-2), "entityType": "task"}
-            },
-            {
-                "title": 'אינטגרציה עם API חיצוני',
-                "description": 'חיבור למערכת תשלומים חיצונית.',
-                "status": 'pending',
-                "priority": 'high',
-                "responsibleUsersId": [user_ids[2], user_ids[3]],  # Ilay, Dan
-                "participantsIds": [contact_ids[1]], # Server Provider contact
-                "tagsId": [tag_ids[0], tag_ids[3]],  # Dev, Servers
-                "date": get_relative_date(1),
-                "deadline": get_relative_date(5),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-1), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
-            },
+            task_titles = [
+                "בדיקת שרתים", "פיתוח פיצ'ר חדש", "תיקון באג", "סקירת קוד",
+                "עדכון תיעוד", "פגישת צוות", "בדיקות אוטומטיות", "אינטגרציה",
+                "אופטימיזציה", "עיצוב UI", "ניהול פרויקט", "תמיכה טכנית",
+                "פיתוח API", "הגדרת סביבה", "העלאה לייצור", "גיבוי נתונים"
+            ]
             
-            # === Tomorrow's tasks ===
-            {
-                "title": 'סקירת קוד - Sprint 12',
-                "description": 'סקירת קוד של כל ה-PRים מהספרינט האחרון.',
-                "status": 'pending',
-                "priority": 'medium',
-                "responsibleUsersId": [user_ids[4]],  # Orel
-                "participantsIds": [], 
-                "tagsId": [tag_ids[0], tag_ids[2]],  # Dev, Testing
-                "date": get_relative_date(1),
-                "deadline": get_relative_date(1),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(0), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
-            },
-            {
-                "title": 'עדכון תיעוד API',
-                "description": 'עדכון התיעוד הטכני לאחר השינויים האחרונים.',
-                "status": 'pending',
-                "priority": 'low',
-                "responsibleUsersId": [user_ids[5]],  # Elia
-                "participantsIds": [],
-                "tagsId": [tag_ids[0]],  # Dev
-                "date": get_relative_date(1),
-                "deadline": get_relative_date(3),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(0), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
-            },
+            task_descriptions = [
+                "משימה לטובת בדיקת ביצועים",
+                "פיתוח קומפוננטה חדשה",
+                "פתרון בעיה קריטית",
+                "עבודה שוטפת",
+                "משימה דחופה",
+                "משימה ארוכה",
+                "משימה קצרה"
+            ]
             
-            # === Later this week ===
-            {
-                "title": 'בדיקות אוטומטיות - E2E',
-                "description": 'כתיבת טסטים אוטומטיים לתרחישי קצה חדשים.',
-                "status": 'pending',
-                "priority": 'medium',
-                "responsibleUsersId": [user_ids[6]],  # Ori
-                "participantsIds": [],
-                "tagsId": [tag_ids[2]],  # Testing
-                "date": get_relative_date(2),
-                "deadline": get_relative_date(4),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(0), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
-            },
-            {
-                "title": 'העברת מצגת לניהול',
-                "description": 'מצגת סיכום רבעון למנהלים.',
-                "status": 'pending',
-                "priority": 'high',
-                "responsibleUsersId": [user_ids[0]],  # Eden
-                "participantsIds": [],
-                "tagsId": [tag_ids[4]],  # Management
-                "date": get_relative_date(3),
-                "deadline": get_relative_date(3),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-2), "updatedAt": get_relative_date(-2), "lut": get_relative_date(-2), "entityType": "task"}
-            },
+            bulk_tasks_data = []
+            batch_size = 10  # Insert in batches for better performance
             
-            # === Completed tasks ===
-            {
-                "title": 'התקנת SSL בשרת Production',
-                "description": 'חידוש והתקנת אישור SSL.',
-                "status": 'completed',
-                "priority": 'high',
-                "responsibleUsersId": [user_ids[4]],  # Orel
-                "participantsIds": [],
-                "tagsId": [tag_ids[3]],  # Servers
-                "date": get_relative_date(-3),
-                "deadline": get_relative_date(-2),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-5), "updatedAt": get_relative_date(-2), "lut": get_relative_date(-2), "entityType": "task"}
-            },
-            {
-                "title": 'תיקון בעיית ביצועים',
-                "description": 'אופטימיזציה לשאילתות מסד נתונים איטיות.',
-                "status": 'completed',
-                "priority": 'high',
-                "responsibleUsersId": [user_ids[3]],  # Dan
-                "participantsIds": [],
-                "tagsId": [tag_ids[0], tag_ids[3]],  # Dev, Servers
-                "date": get_relative_date(-2),
-                "deadline": get_relative_date(-1),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-4), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
-            },
+            for i in range(100):
+                # Randomize task properties for realistic data
+                num_responsible = random.choice([1, 1, 2])  # 1 or 2 users
+                responsible_users = random.sample(user_ids, num_responsible)
+                
+                num_tags = random.choice([0, 1, 1, 2])  # 0, 1, or 2 tags
+                task_tags = random.sample(tag_ids, num_tags) if num_tags > 0 else []
+                
+                # Date spread: 80% this week, 15% last week, 5% next week
+                date_range = random.choices(
+                    [0, -7, 7],  # This week, last week, next week
+                    weights=[80, 15, 5]
+                )[0]
+                task_date = get_relative_date(date_range + random.randint(-3, 3))
+                
+                # 30% of tasks have deadlines
+                has_deadline = random.random() < 0.3
+                deadline = get_relative_date(date_range + random.randint(1, 7)) if has_deadline else None
+                
+                task = {
+                    "_id": str(ObjectId()),
+                    "title": f"{random.choice(task_titles)} #{i+1}",
+                    "description": random.choice(task_descriptions),
+                    "status": random.choices(statuses, weights=[50, 30, 15, 5])[0],  # Most pending
+                    "priority": random.choices(priorities, weights=[30, 50, 20])[0],  # Most medium
+                    "responsibleUsersId": responsible_users,
+                    "participantsIds": [],
+                    "tagsId": task_tags,
+                    "date": task_date,
+                    "deadline": deadline,
+                    "base": {
+                        "isDeleted": False,
+                        "isActive": True,
+                        "createdAt": get_relative_date(-random.randint(1, 30)),
+                        "updatedAt": get_relative_date(-random.randint(0, 5)),
+                        "lut": get_relative_date(-random.randint(0, 5)),
+                        "entityType": "task"
+                    }
+                }
+                
+                bulk_tasks_data.append(task)
+                
+                # Insert in batches
+                if len(bulk_tasks_data) >= batch_size:
+                    mongo.db.ents.insert_many(bulk_tasks_data)
+                    print(f"  - Inserted {len(bulk_tasks_data)} tasks (total: {i+1})")
+                    bulk_tasks_data = []
             
-            # === Next week tasks ===
-            {
-                "title": 'השקת גרסה 2.0',
-                "description": 'השקה מלאה של הגרסה החדשה לייצור.',
-                "status": 'pending',
-                "priority": 'high',
-                "responsibleUsersId": [user_ids[0], user_ids[1]],  # Eden, Maor
-                "participantsIds": [],
-                "tagsId": [tag_ids[0], tag_ids[3], tag_ids[4]],  # Dev, Servers, Management
-                "date": get_relative_date(7),
-                "deadline": get_relative_date(7),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-5), "lut": get_relative_date(-5), "entityType": "task"}
-            },
-            {
-                "title": 'הכנת סביבת Staging',
-                "description": 'הקמת סביבת בדיקות חדשה לגרסה 2.0.',
-                "status": 'pending',
-                "priority": 'medium',
-                "responsibleUsersId": [user_ids[4]],  # Orel
-                "participantsIds": [contact_ids[1]], # Server Provider
-                "tagsId": [tag_ids[3]],  # Servers
-                "date": get_relative_date(5),
-                "deadline": get_relative_date(6),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-3), "updatedAt": get_relative_date(-3), "lut": get_relative_date(-3), "entityType": "task"}
-            },
+            # Insert remaining tasks
+            if bulk_tasks_data:
+                mongo.db.ents.insert_many(bulk_tasks_data)
+                print(f"  - Inserted final {len(bulk_tasks_data)} tasks")
             
-            # === Long running task spanning entire week ===
-            {
-                "title": 'ספרינט 13 - פיצ׳רים חדשים',
-                "description": 'ספרינט של שבועיים לפיתוח פיצ׳רים חדשים.',
-                "status": 'in_progress',
-                "priority": 'medium',
-                "responsibleUsersId": [user_ids[0]],  # Eden (manager)
-                "participantsIds": [],
-                "tagsId": [tag_ids[0], tag_ids[4]],  # Dev, Management
-                "date": get_relative_date(-3),
-                "deadline": get_relative_date(11),
-                "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-4), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
-            },
-        ]
-        
-        for t in tasks_data:
-            t['_id'] = str(ObjectId())
-            mongo.db.ents.insert_one(t)
-            tid = t['_id']
-            log_history('task', tid, 'CREATE', 'system', None, t, t)
+            print(f"✅ Successfully created 100 tasks for performance testing!")
+            print("⚠️  Note: History logging skipped for bulk tasks to improve performance")
+            
+        else:
+            # NORMAL MODE: Seed with realistic sample tasks
+            tasks_data = [
+                # === Today's tasks ===
+                {
+                    "title": 'בדיקת שרתים שבועית',
+                    "description": 'בדיקה מקיפה של שרתי ה-Production וה-Staging לוודא יציבות.',
+                    "status": 'in_progress',
+                    "priority": 'high',
+                    "responsibleUsersId": [user_ids[1]],  # Maor
+                    "participantsIds": [contact_ids[0]],  # Tech Support contact
+                    "tagsId": [tag_ids[3], tag_ids[5]],  # Servers, High Priority
+                    "date": get_relative_date(0),
+                    "deadline": get_relative_date(2),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-2), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
+                },
+                {
+                    "title": 'פגישת סינכרון צוות',
+                    "description": 'סינכרון שבועי עם כל הצוות - סקירת התקדמות ותיאום משימות.',
+                    "status": 'pending',
+                    "priority": 'medium',
+                    "responsibleUsersId": [user_ids[0]],  # Eden
+                    "participantsIds": [],
+                    "tagsId": [tag_ids[4]],  # Management
+                    "date": get_relative_date(0),
+                    "deadline": get_relative_date(0),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-1), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
+                },
+                {
+                    "title": 'תיקון באג בהתחברות',
+                    "description": 'משתמשים מדווחים על בעיה בהתחברות עם סיסמה ארוכה.',
+                    "status": 'in_progress',
+                    "priority": 'high',
+                    "responsibleUsersId": [user_ids[2]],  # Ilay
+                    "participantsIds": [],
+                    "tagsId": [tag_ids[0], tag_ids[5]],  # Dev, High Priority
+                    "date": get_relative_date(0),
+                    "deadline": get_relative_date(1),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-1), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
+                },
+                
+                # === Multi-day tasks (for weekly calendar spanning) ===
+                {
+                    "title": 'פיתוח מודול דוחות',
+                    "description": 'פיתוח מודול חדש להפקת דוחות PDF אוטומטיים.',
+                    "status": 'in_progress',
+                    "priority": 'medium',
+                    "responsibleUsersId": [user_ids[3]],  # Dan
+                    "participantsIds": [], 
+                    "tagsId": [tag_ids[0]],  # Dev
+                    "date": get_relative_date(-1),
+                    "deadline": get_relative_date(4),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-3), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
+                },
+                {
+                    "title": 'עיצוב דף הבית החדש',
+                    "description": 'עיצוב מחדש של דף הבית עם חווית משתמש משופרת.',
+                    "status": 'in_progress',
+                    "priority": 'medium',
+                    "responsibleUsersId": [user_ids[7]],  # Adi
+                    "participantsIds": [],
+                    "tagsId": [tag_ids[1]],  # Design
+                    "date": get_relative_date(-2),
+                    "deadline": get_relative_date(3),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-5), "updatedAt": get_relative_date(-2), "lut": get_relative_date(-2), "entityType": "task"}
+                },
+                {
+                    "title": 'אינטגרציה עם API חיצוני',
+                    "description": 'חיבור למערכת תשלומים חיצונית.',
+                    "status": 'pending',
+                    "priority": 'high',
+                    "responsibleUsersId": [user_ids[2], user_ids[3]],  # Ilay, Dan
+                    "participantsIds": [contact_ids[1]], # Server Provider contact
+                    "tagsId": [tag_ids[0], tag_ids[3]],  # Dev, Servers
+                    "date": get_relative_date(1),
+                    "deadline": get_relative_date(5),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-1), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
+                },
+                
+                # === Tomorrow's tasks ===
+                {
+                    "title": 'סקירת קוד - Sprint 12',
+                    "description": 'סקירת קוד של כל ה-PRים מהספרינט האחרון.',
+                    "status": 'pending',
+                    "priority": 'medium',
+                    "responsibleUsersId": [user_ids[4]],  # Orel
+                    "participantsIds": [], 
+                    "tagsId": [tag_ids[0], tag_ids[2]],  # Dev, Testing
+                    "date": get_relative_date(1),
+                    "deadline": get_relative_date(1),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(0), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
+                },
+                {
+                    "title": 'עדכון תיעוד API',
+                    "description": 'עדכון התיעוד הטכני לאחר השינויים האחרונים.',
+                    "status": 'pending',
+                    "priority": 'low',
+                    "responsibleUsersId": [user_ids[5]],  # Elia
+                    "participantsIds": [],
+                    "tagsId": [tag_ids[0]],  # Dev
+                    "date": get_relative_date(1),
+                    "deadline": get_relative_date(3),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(0), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
+                },
+                
+                # === Later this week ===
+                {
+                    "title": 'בדיקות אוטומטיות - E2E',
+                    "description": 'כתיבת טסטים אוטומטיים לתרחישי קצה חדשים.',
+                    "status": 'pending',
+                    "priority": 'medium',
+                    "responsibleUsersId": [user_ids[6]],  # Ori
+                    "participantsIds": [],
+                    "tagsId": [tag_ids[2]],  # Testing
+                    "date": get_relative_date(2),
+                    "deadline": get_relative_date(4),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(0), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
+                },
+                {
+                    "title": 'העברת מצגת לניהול',
+                    "description": 'מצגת סיכום רבעון למנהלים.',
+                    "status": 'pending',
+                    "priority": 'high',
+                    "responsibleUsersId": [user_ids[0]],  # Eden
+                    "participantsIds": [],
+                    "tagsId": [tag_ids[4]],  # Management
+                    "date": get_relative_date(3),
+                    "deadline": get_relative_date(3),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-2), "updatedAt": get_relative_date(-2), "lut": get_relative_date(-2), "entityType": "task"}
+                },
+                
+                # === Completed tasks ===
+                {
+                    "title": 'התקנת SSL בשרת Production',
+                    "description": 'חידוש והתקנת אישור SSL.',
+                    "status": 'completed',
+                    "priority": 'high',
+                    "responsibleUsersId": [user_ids[4]],  # Orel
+                    "participantsIds": [],
+                    "tagsId": [tag_ids[3]],  # Servers
+                    "date": get_relative_date(-3),
+                    "deadline": get_relative_date(-2),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-5), "updatedAt": get_relative_date(-2), "lut": get_relative_date(-2), "entityType": "task"}
+                },
+                {
+                    "title": 'תיקון בעיית ביצועים',
+                    "description": 'אופטימיזציה לשאילתות מסד נתונים איטיות.',
+                    "status": 'completed',
+                    "priority": 'high',
+                    "responsibleUsersId": [user_ids[3]],  # Dan
+                    "participantsIds": [],
+                    "tagsId": [tag_ids[0], tag_ids[3]],  # Dev, Servers
+                    "date": get_relative_date(-2),
+                    "deadline": get_relative_date(-1),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-4), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
+                },
+                
+                # === Next week tasks ===
+                {
+                    "title": 'השקת גרסה 2.0',
+                    "description": 'השקה מלאה של הגרסה החדשה לייצור.',
+                    "status": 'pending',
+                    "priority": 'high',
+                    "responsibleUsersId": [user_ids[0], user_ids[1]],  # Eden, Maor
+                    "participantsIds": [],
+                    "tagsId": [tag_ids[0], tag_ids[3], tag_ids[4]],  # Dev, Servers, Management
+                    "date": get_relative_date(7),
+                    "deadline": get_relative_date(7),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-5), "lut": get_relative_date(-5), "entityType": "task"}
+                },
+                {
+                    "title": 'הכנת סביבת Staging',
+                    "description": 'הקמת סביבת בדיקות חדשה לגרסה 2.0.',
+                    "status": 'pending',
+                    "priority": 'medium',
+                    "responsibleUsersId": [user_ids[4]],  # Orel
+                    "participantsIds": [contact_ids[1]], # Server Provider
+                    "tagsId": [tag_ids[3]],  # Servers
+                    "date": get_relative_date(5),
+                    "deadline": get_relative_date(6),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-3), "updatedAt": get_relative_date(-3), "lut": get_relative_date(-3), "entityType": "task"}
+                },
+                
+                # === Long running task spanning entire week ===
+                {
+                    "title": 'ספרינט 13 - פיצ׳רים חדשים',
+                    "description": 'ספרינט של שבועיים לפיתוח פיצ׳רים חדשים.',
+                    "status": 'in_progress',
+                    "priority": 'medium',
+                    "responsibleUsersId": [user_ids[0]],  # Eden (manager)
+                    "participantsIds": [],
+                    "tagsId": [tag_ids[0], tag_ids[4]],  # Dev, Management
+                    "date": get_relative_date(-3),
+                    "deadline": get_relative_date(11),
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-4), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
+                },
+            ]
+            
+            for t in tasks_data:
+                t['_id'] = str(ObjectId())
+                mongo.db.ents.insert_one(t)
+                tid = t['_id']
+                log_history('task', tid, 'CREATE', 'system', None, t, t)
+            
+            print(f"  - {len(tasks_data)} tasks seeded")
 
         # 5. Chat Messages
         print("Seeding Chat...")
@@ -348,24 +432,31 @@ def seed(clean_only=False):
         print(f"  - {len(users_data)} users")
         print(f"  - {len(tags_data)} tags")
         print(f"  - {len(contacts_data)} contacts")
-        print(f"  - {len(tasks_data)} tasks")
+        if bulk_tasks:
+            print(f"  - 100 tasks (bulk mode)")
+        else:
+            print(f"  - {len(tasks_data)} tasks")
         print(f"  - {len(chat_data)} chat messages")
 
 def print_usage():
     print("Usage: python seed.py [options]")
     print("")
     print("Options:")
-    print("  --clean    Clear all data without adding sample data")
+    print("  --clean    Clear all data and add only users (no sample data)")
+    print("  --bulk     Seed with 100 tasks for performance testing")
     print("  --help     Show this help message")
     print("")
     print("Examples:")
-    print("  python seed.py           # Clear and seed with sample data")
-    print("  python seed.py --clean   # Clear all data only")
+    print("  python seed.py           # Clear and seed with sample data (15 tasks)")
+    print("  python seed.py --clean   # Clear all data and add only users")
+    print("  python seed.py --bulk    # Clear and seed with 100 tasks for performance testing")
 
 if __name__ == '__main__':
     if '--help' in sys.argv or '-h' in sys.argv:
         print_usage()
     elif '--clean' in sys.argv:
-        seed(clean_only=True)
+        seed(clean_only=True, bulk_tasks=False)
+    elif '--bulk' in sys.argv:
+        seed(clean_only=False, bulk_tasks=True)
     else:
-        seed(clean_only=False)
+        seed(clean_only=False, bulk_tasks=False)

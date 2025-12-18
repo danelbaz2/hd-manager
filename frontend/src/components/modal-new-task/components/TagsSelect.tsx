@@ -75,24 +75,21 @@ const TagsSelect: React.FC<TagsSelectProps> = ({
           rounded-xl border-2
           text-sm lg:text-base
           transition-all duration-200
-          ${
-            isDarkMode
-              ? "bg-slate-700/50 border-slate-600 hover:border-slate-500"
-              : "bg-white border-slate-200 hover:border-slate-300"
+          ${isDarkMode
+            ? "bg-slate-700/50 border-slate-600 hover:border-slate-500"
+            : "bg-white border-slate-200 hover:border-slate-300"
           }
-          ${
-            isOpen
-              ? isDarkMode
-                ? "border-blue-500 ring-2 ring-blue-500/20"
-                : "border-blue-500 ring-2 ring-blue-500/20"
-              : ""
+          ${isOpen
+            ? isDarkMode
+              ? "border-blue-500 ring-2 ring-blue-500/20"
+              : "border-blue-500 ring-2 ring-blue-500/20"
+            : ""
           }
         `}
       >
         <ChevronDown
-          className={`w-5 h-5 shrink-0 transition-transform duration-200 ${
-            isOpen ? "rotate-180" : ""
-          } ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}
+          className={`w-5 h-5 shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""
+            } ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}
         />
 
         <div className="flex-1 flex flex-wrap gap-1.5 justify-end">
@@ -130,27 +127,25 @@ const TagsSelect: React.FC<TagsSelectProps> = ({
           className={`
             absolute top-full mt-2 right-0 left-0 z-30
             max-h-48 overflow-y-auto
+            ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}
             py-2 rounded-xl border-2 shadow-xl
-            ${
-              isDarkMode
-                ? "bg-slate-800 border-slate-600 dark-scrollbar"
-                : "bg-white border-slate-200 light-scrollbar"
+            ${isDarkMode
+              ? "bg-slate-800 border-slate-600 dark-scrollbar"
+              : "bg-white border-slate-200 light-scrollbar"
             }
           `}
         >
           {isLoading ? (
             <div
-              className={`px-4 py-3 text-sm ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`px-4 py-3 text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               טוען תגיות...
             </div>
           ) : tags.length === 0 ? (
             <div
-              className={`px-4 py-3 text-sm ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`px-4 py-3 text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               אין תגיות זמינות
             </div>
@@ -166,12 +161,11 @@ const TagsSelect: React.FC<TagsSelectProps> = ({
                     px-4 py-2.5
                     text-sm lg:text-base
                     transition-colors
-                    ${
-                      isSelected
-                        ? isDarkMode
-                          ? "bg-blue-900/40"
-                          : "bg-blue-50"
-                        : isDarkMode
+                    ${isSelected
+                      ? isDarkMode
+                        ? "bg-blue-900/40"
+                        : "bg-blue-50"
+                      : isDarkMode
                         ? "hover:bg-slate-700"
                         : "hover:bg-slate-50"
                     }
@@ -190,10 +184,9 @@ const TagsSelect: React.FC<TagsSelectProps> = ({
                     className={`
                       w-5 h-5 rounded-md border-2 flex items-center justify-center
                       transition-colors
-                      ${
-                        isSelected
-                          ? "bg-blue-500 border-blue-500"
-                          : isDarkMode
+                      ${isSelected
+                        ? "bg-blue-500 border-blue-500"
+                        : isDarkMode
                           ? "border-slate-500"
                           : "border-slate-300"
                       }

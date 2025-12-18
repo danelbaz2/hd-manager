@@ -173,6 +173,7 @@ const HomePage: React.FC = () => {
       <div
         className={`
           flex-1 overflow-y-auto
+          ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}
           p-4 lg:p-6 xl:p-8
           ${isDarkMode ? "bg-slate-900" : "bg-slate-50"}
         `}

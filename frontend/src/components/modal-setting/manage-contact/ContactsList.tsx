@@ -69,18 +69,15 @@ const ContactsList: React.FC<ContactsListProps> = ({
         {contacts.length === 0 ? (
           <div className="flex-1 flex items-center justify-center py-12">
             <p
-              className={`text-center ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`text-center ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               אין אנשי קשר להצגה
             </p>
           </div>
         ) : (
           <div
-            className={`flex-1 overflow-y-auto space-y-3 ${
-              isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-            }`}
+            className={`flex-1 overflow-y-auto space-y-3 ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}
           >
             {contacts.map((contact) => (
               <div
@@ -89,12 +86,11 @@ const ContactsList: React.FC<ContactsListProps> = ({
                   flex items-center justify-between
                   px-5 py-4 rounded-xl border
                   transition-colors
-                  ${
-                    editingContactId === contact.id
-                      ? isDarkMode
-                        ? "bg-blue-900/20 border-blue-500/50"
-                        : "bg-blue-50 border-blue-200"
-                      : isDarkMode
+                  ${editingContactId === contact.id
+                    ? isDarkMode
+                      ? "bg-blue-900/20 border-blue-500/50"
+                      : "bg-blue-50 border-blue-200"
+                    : isDarkMode
                       ? "bg-slate-700/30 border-slate-600 hover:bg-slate-700/50"
                       : "bg-white border-slate-200 hover:bg-slate-50"
                   }
@@ -111,10 +107,9 @@ const ContactsList: React.FC<ContactsListProps> = ({
                     }}
                     className={`
                       p-2 rounded-lg transition-colors cursor-pointer
-                      ${
-                        isDarkMode
-                          ? "text-red-400 hover:bg-red-900/30"
-                          : "text-red-500 hover:bg-red-50"
+                      ${isDarkMode
+                        ? "text-red-400 hover:bg-red-900/30"
+                        : "text-red-500 hover:bg-red-50"
                       }
                     `}
                   >
@@ -131,10 +126,9 @@ const ContactsList: React.FC<ContactsListProps> = ({
                       }}
                       className={`
                         p-2 rounded-lg transition-colors cursor-pointer
-                        ${
-                          editingContactId === contact.id
-                            ? "bg-blue-500 text-white"
-                            : isDarkMode
+                        ${editingContactId === contact.id
+                          ? "bg-blue-500 text-white"
+                          : isDarkMode
                             ? "text-blue-400 hover:bg-blue-900/30"
                             : "text-blue-500 hover:bg-blue-50"
                         }
@@ -149,16 +143,14 @@ const ContactsList: React.FC<ContactsListProps> = ({
                 <div className="flex items-center gap-4">
                   <div className="text-right">
                     <p
-                      className={`font-medium ${
-                        isDarkMode ? "text-white" : "text-slate-800"
-                      }`}
+                      className={`font-medium ${isDarkMode ? "text-white" : "text-slate-800"
+                        }`}
                     >
                       {contact.name}
                     </p>
                     <p
-                      className={`text-sm ${
-                        isDarkMode ? "text-slate-400" : "text-slate-500"
-                      }`}
+                      className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                        }`}
                     >
                       {contact.role}
                     </p>
@@ -206,7 +198,7 @@ const ContactsList: React.FC<ContactsListProps> = ({
             ))}
           </div>
         )}
-      </DelayedLoader>
+      </DelayedLoader >
     </>
   );
 };
