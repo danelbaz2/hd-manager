@@ -32,9 +32,8 @@ const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
 
   return (
     <aside
-      className={`w-72 shrink-0 flex flex-col py-8 px-6 ${
-        isDarkMode ? "bg-slate-800 text-white" : "bg-slate-50 text-slate-900"
-      } ${className || ""}`}
+      className={`w-72 shrink-0 flex flex-col py-8 px-6 ${isDarkMode ? "bg-slate-800 text-white" : "bg-slate-50 text-slate-900"
+        } ${className || ""}`}
       dir="ltr"
     >
       {/* Logo/Header */}
@@ -51,15 +50,14 @@ const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
           <Link
             key={item.id}
             to={item.id}
-            className={`w-full flex items-center justify-end gap-4 px-6 py-4 rounded-xl transition-all duration-200 group ${
-              isActive(item.id)
-                ? isDarkMode
-                  ? "bg-blue-900/30 text-blue-400"
-                  : "bg-blue-50 text-blue-600"
-                : isDarkMode
+            className={`w-full flex items-center justify-end gap-4 px-6 py-4 rounded-xl transition-all duration-200 group ${isActive(item.id)
+              ? isDarkMode
+                ? "bg-blue-900/30 text-blue-400"
+                : "bg-blue-50 text-blue-600"
+              : isDarkMode
                 ? "text-slate-400 hover:bg-slate-700/50"
                 : "text-slate-600 hover:bg-slate-100"
-            }`}
+              }`}
           >
             <span className="font-medium text-lg">{item.label}</span>
             <item.icon
@@ -76,11 +74,10 @@ const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
         {/* Logout Button */}
         <button
           onClick={handleLogout}
-          className={`flex items-center justify-end gap-4 px-6 py-4 rounded-xl w-full transition-all ${
-            isDarkMode
-              ? "text-red-400 hover:bg-red-900/20"
-              : "text-red-500 hover:bg-red-50"
-          }`}
+          className={`flex items-center justify-end gap-4 px-6 py-4 rounded-xl w-full transition-all ${isDarkMode
+            ? "text-red-400 hover:bg-red-900/20"
+            : "text-red-500 hover:bg-red-50"
+            }`}
         >
           <span className="text-lg font-medium">יציאה</span>
           <LogOut size={24} strokeWidth={2} className="transform rotate-180" />
