@@ -496,11 +496,7 @@ Retrieve all contacts.
   {
     "id": "contact-id-123",
     "fullName": "Jane Smith",
-    "phoneNumbers": ["+1234567890", "+0987654321"],
-    "emails": ["jane@example.com"],
-    "contactType": "person",
-    "company": "Acme Corp",
-    "notes": "Important client",
+    "phoneNumber": "+0987654321",
     "base": {
       "isDeleted": false,
       "isActive": true,
@@ -524,40 +520,30 @@ Create a new contact.
 ```json
 {
   "fullName": "Jane Smith",
-  "phoneNumbers": ["+1234567890"],
-  "emails": ["jane@example.com"],
-  "contactType": "person",
-  "company": "Acme Corp",
-  "notes": "Important client"
+  "phoneNumber": "+1234567890",
 }
 ```
 
 **Required Fields**:
 - `fullName` (min 2 characters)
-- `phoneNumbers` (array of strings)
-- `emails` (array of strings)
-- `contactType` (must be "person" or "company")
+- `phoneNumber` (min 1 character)
 
 **Optional Fields**:
-- `company` (default: null)
-- `notes` (default: null)
+- `position` (default: null)
+- `department` (default: null)
+- `tagsIds` (default: null)
 
 **Response** (201 Created):
 ```json
 {
   "id": "contact-id-123",
   "fullName": "Jane Smith",
-  "phoneNumbers": ["+1234567890"],
-  "emails": ["jane@example.com"],
-  "contactType": "person",
-  "company": "Acme Corp",
-  "notes": "Important client",
+  "phoneNumber": "+1234567890",
   "base": { /* ... */ }
 }
 ```
 
 **Validation Rules**:
-- Contact type must be "person" or "company"
 - Unknown fields are rejected
 
 ---
@@ -570,8 +556,7 @@ Update an existing contact.
 **Request Body**:
 ```json
 {
-  "phoneNumbers": ["+1234567890", "+1111111111"],
-  "notes": "Very important client - handle with care"
+  "phoneNumber": "+1111111111"
 }
 ```
 
@@ -579,8 +564,7 @@ Update an existing contact.
 ```json
 {
   "id": "contact-id-123",
-  "phoneNumbers": ["+1234567890", "+1111111111"],
-  "notes": "Very important client - handle with care",
+  "phoneNumber": "+1111111111",
   // ... other fields
 }
 ```
