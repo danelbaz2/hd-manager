@@ -23,7 +23,7 @@ This document has been updated to reflect the actual implementation of the HD Ma
 | **Tag - color** | Not specified | Added `color` field (hex color code) |
 | **Tag - isActive** | Separate field | Now part of `base.isActive` |
 | **Contact - isActive** | Separate field | Now part of `base.isActive` |
-| **History Model** | Per-action records | Changed to entity-based history with entries array |
+| **History/Archive Model** | Per-action records in `history_entries` | Changed to `ents_archive` with o/c/n document structure |
 | **Base Entity Meta** | `createdAt`, `updatedAt` only | Added `lut`, `isDeleted`, `isActive`, `entityType` |
 | **Database Collections** | 6 separate collections | `ents` collection + `users`, `contacts`, `history_entries` |
 | **Validation** | Not specified | Pydantic models with `extra='forbid'` |
@@ -164,34 +164,54 @@ This document has been updated to reflect the actual implementation of the HD Ma
 
 ---
 
-### 2.6 HistoryEntry (רישום היסטוריה)
+### 2.6 Archive Entry (רישום ארכיון)
 
 **תיאור:** רישום של פעולות שבוצעו על ישויות, לטובת Trace מלא.
 
-> ⚠️ **שינוי משמעותי:** המודל שונה ממודל רשומות בודדות למודל מבוסס ישות עם מערך entries.
+> ⚠️ **שינוי משמעותי:** המודל שונה לחלוטין:
+> - אוסף `history_entries` → `ents_archive`
+> - מבנה `entries[]` array → **מסמך נפרד לכל שינוי**
+> - מבנה חדש: `{ o, c, n }` (Old, Change, New)
 
-#### EntityHistoryModel (מודל ראשי):
+#### Archive Document Structure:
+
+כל שינוי יוצר מסמך חדש באוסף `ents_archive`:
 
 | שדה | תיאור | סוג |
 |-----|--------|-----|
-| `id` | מזהה ייחודי | string |
-| `entityId` | מזהה הישות שעליה בוצעו הפעולות | string |
-| `entries` | רשימת שינויים שבוצעו | List[HistoryChange] |
+| `o` | **Old** - הישות לפני השינוי | Dict (full entity) |
+| `c` | **Change** - מידע על השינוי | Dict (see below) |
+| `n` | **New** - הישות אחרי השינוי | Dict (full entity) |
 
-#### HistoryChange (רשומת שינוי):
+#### Change Object (`c`) Structure:
 
-| שדה | תיאור | סוג | שינויים מהמקור |
-|-----|--------|-----|----------------|
-| `actionType` | סוג הפעולה | enum: CREATE, UPDATE, DELETE | ⚠️ שונה מ-create, update, status_change, assign |
-| `timestamp` | זמן ביצוע הפעולה (ms) | int | - |
-| `updatedBy` | מזהה המשתמש שביצע | string | ⚠️ שונה מ-`performedByUserId` |
-| `oldValue` | ערך קודם (object) | Dict | - |
-| `newValue` | ערך חדש (object) | Dict | - |
-| `changeValue` | השדות שהשתנו בלבד | Dict | - |
-| `details` | תיאור חופשי קצר | string | - |
+| שדה | תיאור | סוג |
+|-----|--------|-----|
+| `action` | סוג הפעולה | enum: CREATE, UPDATE, DELETE |
+| `timestamp` | זמן ביצוע הפעולה (ms) | int |
+| `updatedBy` | מזהה המשתמש שביצע (או 'system') | string |
+| `...changedFields` | השדות שהשתנו בפועל (nested structure) | varies |
 
-> 🗑️ **שדות שהוסרו:**
-> - `entityType` - כעת חלק מהמודל הראשי (EntityHistoryModel)
+#### דוגמה:
+
+```json
+{
+  "o": { "id": "123", "title": "Old Title", "status": "open", ... },
+  "c": {
+    "action": "UPDATE",
+    "timestamp": 1734512345000,
+    "updatedBy": "user123",
+    "title": "New Title",
+    "base": { "updatedAt": 1734512345000 }
+  },
+  "n": { "id": "123", "title": "New Title", "status": "open", ... }
+}
+```
+
+> 🗑️ **שינויים מהמקור:**
+> - `entityType` field → now part of `o.base.entityType` and `n.base.entityType`
+> - `entityId` field → now `o.id` / `n.id`
+> - `entries[]` array → **Removed** - each change is a separate document
 
 ---
 
@@ -274,7 +294,7 @@ This document has been updated to reflect the actual implementation of the HD Ma
 | `ents` | אוסף מאוחד לרוב הישויות (tasks, tags, chat_messages) | ⚡ **חדש** - מבדיל לפי `base.entityType` |
 | `users` | משתמשי המערכת | - |
 | `contacts` | אנשי קשר מקצועיים | - |
-| `history_entries` | רישומי היסטוריה | - |
+| `ents_archive` | ארכיון שינויים (o/c/n structure) | ⚠️ **שונה מ-`history_entries`** |
 
 ---
 
@@ -333,12 +353,14 @@ This document has been updated to reflect the actual implementation of the HD Ma
 | GET | `/api/chat/` | קבלת הודעות צ'אט (ממוינות כרונולוגית) |
 | POST | `/api/chat/` | שליחת הודעה חדשה |
 
-### 4.7 History API
+### 4.7 Archive/History API
 
 | Method | Endpoint | תיאור | פרמטרים |
 |--------|----------|--------|---------|
-| GET | `/api/history/` | קבלת רישומי היסטוריה | `entityId` (optional filter) |
-| POST | `/api/history/` | יצירת רישום היסטוריה חדש | body: EntityHistoryModel |
+| GET | `/api/history/` | קבלת רישומי ארכיון | `entityId` (optional filter) |
+| POST | `/api/history/` | יצירת רישום ארכיון חדש | body: Archive document |
+
+> ⚠️ **Note:** History is primarily created automatically via `log_history()` utility when entities are modified. The API is for retrieval and manual entries if needed.
 
 ---
 
@@ -440,7 +462,7 @@ hd-manager/
 1. **Task.priority** - הוסר מהמימוש
 
 ### 7.3 שינויי מבנה
-1. **History Model** - שונה ממודל רשומות נפרדות למודל entity-based
+1. **Archive Model** - שונה מ-`history_entries` ל-`ents_archive` עם מבנה o/c/n
 2. **Database Collections** - שימוש באוסף `ents` מאוחד עם `entityType`
 3. **Timestamps** - כל הזמנים ב-milliseconds (Unix timestamp * 1000)
 

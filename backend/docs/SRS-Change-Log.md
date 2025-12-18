@@ -13,13 +13,13 @@
 | Tag field | `tagId` (single) | `tagsId[]` (array) | Tasks now support multiple tags |
 | Priority | `priority` field existed | **REMOVED** | No priority system implemented |
 
-### History Model
+### History/Archive Model
 | Change | Original | Current | Impact |
 |--------|----------|---------|--------|
-| Structure | Individual records per action | Entity-based with `entries[]` array | All history for an entity grouped together |
-| Action types | `create, update, status_change, assign` | `CREATE, UPDATE, DELETE` | Simplified action types |
-| User field | `performedByUserId` | `updatedBy` | Field renamed |
-| Entity type | Separate `entityType` field | Part of main model structure | - |
+| Collection | `history_entries` | `ents_archive` | New collection name |
+| Structure | Individual records per action | **o/c/n document per change** | Each change creates a new document |
+| Document format | `entityId` + `entries[]` array | `{ o: old, c: change, n: new }` | Simpler, flatter structure |
+| Change data | Separate fields | Merged into `c` object with `action`, `timestamp`, `updatedBy` + changed fields | More compact |
 
 ### isActive/createdAt Fields
 | Entity | Original | Current | Impact |
@@ -70,7 +70,7 @@ All entities now have a `base` field containing:
 | `tasks` | → `ents` (with `entityType: 'task'`) |
 | `tags` | → `ents` (with `entityType: 'tag'`) |
 | `system_contacts` | → `contacts` (renamed) |
-| `history_entries` | `history_entries` (unchanged) |
+| `history_entries` | → **`ents_archive`** (renamed + restructured) |
 | `chat_messages` | → `ents` (with `entityType: 'chat_message'`) |
 
 ### API Endpoints
@@ -110,7 +110,40 @@ This means:
 
 ---
 
-## 🟣 Special Behaviors
+## 🟣 Archive System (New)
+
+### Document Structure
+Each change creates a **new document** in `ents_archive`:
+
+```json
+{
+  "o": { "id": "123", "title": "Old", ... },
+  "c": {
+    "action": "UPDATE",
+    "timestamp": 1734512345000,
+    "updatedBy": "system",
+    "title": "New Title"
+  },
+  "n": { "id": "123", "title": "New Title", ... }
+}
+```
+
+| Field | Meaning |
+|-------|--------|
+| `o` | **Old** - Full entity before change (null for CREATE) |
+| `c` | **Change** - What changed + metadata |
+| `n` | **New** - Full entity after change |
+
+### Change Object (`c`) Contains:
+- `action`: CREATE / UPDATE / DELETE
+- `timestamp`: When the change occurred (ms)
+- `updatedBy`: User ID or 'system'
+- `...changedFields`: The actual fields that were modified (nested structure)
+
+### History Logging
+All CRUD operations automatically log to archive:
+- `log_history(entityType, entityId, actionType, userId, oldValue, newValue, changeValue)`
+- Stored in `ents_archive` collection
 
 ### Tag Restore Logic
 When creating a tag with a name that already exists but is deleted:
@@ -122,10 +155,6 @@ When creating a tag with a name that already exists but is deleted:
 All entities use soft delete:
 - `DELETE` requests set `base.isDeleted = true`
 - `GET` requests filter out `base.isDeleted = true`
-
-### History Logging
-All CRUD operations automatically log to history:
-- `log_history(entityType, entityId, actionType, userId, oldValue, newValue, changeValue)`
 
 ---
 
@@ -141,9 +170,8 @@ All CRUD operations automatically log to history:
 | Tag color | No | **Yes (required)** |
 | Unified base meta | No | **Yes** |
 | Soft delete | Implied | **Explicit (base.isDeleted)** |
-| Validation | Not specified | **Pydantic with extra='forbid'** |
-| Password hashing | Not specified | **bcrypt** |
-| DB structure | 6 collections | **3 collections + ents** |
+| Archive collection | `history_entries` | **`ents_archive` (o/c/n)** |
+| Archive structure | `entries[]` array | **Separate doc per change** |
 
 ---
 
