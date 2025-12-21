@@ -8,7 +8,7 @@ export interface Contact {
   position: string | null;
   department: string | null;
   phoneNumber: string | null;
-  tagsIds: string[] | null;
+  primaryTagIds: string[] | null;  // Link to Primary Tags only
   base?: {
     isDeleted: boolean;
     isActive: boolean;
@@ -25,7 +25,7 @@ export interface ContactFormPayload {
   position?: string;
   department?: string;
   phoneNumber?: string;
-  tagsIds?: string[];
+  primaryTagIds?: string[];  // Link to Primary Tags only
 }
 
 /**

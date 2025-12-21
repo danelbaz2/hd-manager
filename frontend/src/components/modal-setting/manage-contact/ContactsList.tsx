@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { User, Trash2, Pencil, Phone, Tag } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { type ContactData, getTextColor } from "../../../schemas/contactTypes";
-import { type TagData } from "../../../schemas/tagTypes";
+import { type PrimaryTagData } from "../../../schemas/tagTypes";
 import DelayedLoader from "../../delay-loader";
 import DeleteConfirmModal from "../../delete-confirm-modal";
 
 interface ContactsListProps {
   contacts: ContactData[];
-  tags: TagData[];
+  tags: PrimaryTagData[];  // Primary tags for contacts
   editingContactId?: string | null;
   onEdit?: (contact: ContactData) => void;
   onCancelEdit?: () => void;
@@ -28,8 +28,8 @@ const ContactsList: React.FC<ContactsListProps> = ({
   const { isDarkMode } = useTheme();
   const [deleteTarget, setDeleteTarget] = useState<ContactData | null>(null);
 
-  // Helper to get tag by ID from the tags prop
-  const getTagById = (tagId: string): TagData | undefined => {
+  // Helper to get primary tag by ID from the tags prop
+  const getTagById = (tagId: string): PrimaryTagData | undefined => {
     return tags.find((tag) => tag.id === tagId);
   };
 
@@ -162,11 +162,11 @@ const ContactsList: React.FC<ContactsListProps> = ({
                         </span>
                       )}
                     </div>
-                    {/* Tags */}
-                    {contact.tags.length > 0 && (
+                    {/* Primary Tags */}
+                    {contact.primaryTags && contact.primaryTags.length > 0 && (
                       <div className="flex items-center gap-1.5 mt-2 flex-wrap">
                         <Tag size={12} className="text-slate-400" />
-                        {contact.tags.map((tagId) => {
+                        {contact.primaryTags.map((tagId) => {
                           const tag = getTagById(tagId);
                           if (!tag) return null;
                           return (

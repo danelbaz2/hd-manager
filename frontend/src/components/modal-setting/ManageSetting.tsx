@@ -3,7 +3,7 @@ import { X, Settings, Users, UserPlus, Tag } from "lucide-react";
 import { useTheme } from "../../contexts";
 import ManageUser from "./manage-user/ManageUser.tsx";
 import ManageContact from "./manage-contact/ManageContact.tsx";
-import ManageTags from "./manage-tags/ManageTags.tsx";
+import ManageTagsTwoTier from "./manage-tags";  // New two-tier tag management
 
 interface ManageSettingProps {
   isOpen: boolean;
@@ -31,7 +31,7 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
       case "contacts":
         return <ManageContact />;
       case "tags":
-        return <ManageTags />;
+        return <ManageTagsTwoTier />;
       default:
         return <ManageUser />;
     }

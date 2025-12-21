@@ -23,7 +23,7 @@ export {
   type TaskQueryParams,
 } from "./tasksApi";
 
-// Tags API
+// Tags API (Legacy - will be removed after migration)
 export {
   getAllTags,
   createTag,
@@ -32,6 +32,30 @@ export {
   type Tag,
   type TagFormPayload,
 } from "./tagsApi";
+
+// Primary Tags API (New two-tier tag system)
+export {
+  getAllPrimaryTags,
+  getPrimaryTag,
+  createPrimaryTag,
+  updatePrimaryTag,
+  deletePrimaryTag,
+  type PrimaryTag,
+  type PrimaryTagFormPayload,
+} from "./primaryTagsApi";
+
+// Secondary Tags API (New two-tier tag system)
+export {
+  getAllSecondaryTags,
+  getSecondaryTagsByPrimary,
+  getSecondaryTag,
+  createSecondaryTag,
+  updateSecondaryTag,
+  deleteSecondaryTag,
+  type SecondaryTag,
+  type SecondaryTagFormPayload,
+  type SecondaryTagQueryParams,
+} from "./secondaryTagsApi";
 
 // Contacts API
 export {

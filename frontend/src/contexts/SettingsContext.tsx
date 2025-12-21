@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { getAllUsers, type User } from "../api/usersApi";
 import { getAllTags, type Tag } from "../api/tagsApi";
+import { getAllPrimaryTags, type PrimaryTag } from "../api/primaryTagsApi";
+import { getAllSecondaryTags, type SecondaryTag } from "../api/secondaryTagsApi";
 import { getAllContacts, type Contact } from "../api/contactsApi";
 import { getAllTasks, type Task } from "../api/tasksApi";
 import { type UserData } from "../schemas/userTypes";
-import { type TagData } from "../schemas/tagTypes";
+import { type TagData, type PrimaryTagData, type SecondaryTagData } from "../schemas/tagTypes";
 import { type ContactData } from "../schemas/contactTypes";
 
 // Helper function to convert API User to UserData
@@ -18,11 +20,27 @@ const mapUserToUserData = (user: User): UserData => ({
     profileImage: user.profileImage,
 });
 
-// Helper function to convert API Tag to TagData
+// Helper function to convert API Tag to TagData (Legacy)
 const mapTagToTagData = (tag: Tag): TagData => ({
     id: tag.id,
     name: tag.name,
     color: tag.color,
+    description: tag.description || undefined,
+});
+
+// Helper function to convert API PrimaryTag to PrimaryTagData
+const mapPrimaryTagToData = (tag: PrimaryTag): PrimaryTagData => ({
+    id: tag.id,
+    name: tag.name,
+    color: tag.color,
+    description: tag.description || undefined,
+});
+
+// Helper function to convert API SecondaryTag to SecondaryTagData
+const mapSecondaryTagToData = (tag: SecondaryTag): SecondaryTagData => ({
+    id: tag.id,
+    name: tag.name,
+    primaryTagId: tag.primaryTagId,
     description: tag.description || undefined,
 });
 
@@ -32,14 +50,16 @@ const mapContactToContactData = (contact: Contact): ContactData => ({
     name: contact.fullName,
     role: contact.position || "",
     phone: contact.phoneNumber || "",
-    tags: contact.tagsIds || [],
+    primaryTags: contact.primaryTagIds || [],
 });
 
 // Context State Interface
 interface SettingsContextState {
     // Data
     users: UserData[];
-    tags: TagData[];
+    tags: TagData[];  // Legacy - for backward compatibility
+    primaryTags: PrimaryTagData[];  // New two-tier system
+    secondaryTags: SecondaryTagData[];  // New two-tier system
     contacts: ContactData[];
     tasks: Task[];
 
@@ -62,6 +82,8 @@ interface SettingsContextState {
 const defaultContextValue: SettingsContextState = {
     users: [],
     tags: [],
+    primaryTags: [],
+    secondaryTags: [],
     contacts: [],
     tasks: [],
     isLoading: true,
@@ -87,7 +109,9 @@ interface SettingsProviderProps {
 // Provider Component
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) => {
     const [users, setUsers] = useState<UserData[]>([]);
-    const [tags, setTags] = useState<TagData[]>([]);
+    const [tags, setTags] = useState<TagData[]>([]);  // Legacy
+    const [primaryTags, setPrimaryTags] = useState<PrimaryTagData[]>([]);
+    const [secondaryTags, setSecondaryTags] = useState<SecondaryTagData[]>([]);
     const [contacts, setContacts] = useState<ContactData[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);
 
@@ -114,15 +138,32 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
         }
     }, []);
 
-    // Fetch tags
+    // Fetch tags (both legacy and new two-tier system)
     const refreshTags = useCallback(async () => {
         setIsLoadingTags(true);
         try {
-            const response = await getAllTags();
-            if (response.success && response.data) {
-                setTags(response.data.map(mapTagToTagData));
+            // Fetch legacy tags (for backward compatibility)
+            const legacyResponse = await getAllTags();
+            if (legacyResponse.success && legacyResponse.data) {
+                setTags(legacyResponse.data.map(mapTagToTagData));
+            }
+
+            // Fetch new two-tier tags
+            const [primaryResponse, secondaryResponse] = await Promise.all([
+                getAllPrimaryTags(),
+                getAllSecondaryTags(),
+            ]);
+
+            if (primaryResponse.success && primaryResponse.data) {
+                setPrimaryTags(primaryResponse.data.map(mapPrimaryTagToData));
             } else {
-                console.error("Failed to fetch tags:", response.error);
+                console.error("Failed to fetch primary tags:", primaryResponse.error);
+            }
+
+            if (secondaryResponse.success && secondaryResponse.data) {
+                setSecondaryTags(secondaryResponse.data.map(mapSecondaryTagToData));
+            } else {
+                console.error("Failed to fetch secondary tags:", secondaryResponse.error);
             }
         } catch (error) {
             console.error("Error fetching tags:", error);
@@ -185,6 +226,8 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     const value: SettingsContextState = {
         users,
         tags,
+        primaryTags,
+        secondaryTags,
         contacts,
         tasks,
         isLoading,

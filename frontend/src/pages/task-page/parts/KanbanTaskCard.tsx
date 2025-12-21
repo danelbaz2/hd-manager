@@ -1,8 +1,9 @@
 import React from "react";
 import { User, Clock } from "lucide-react";
-import { useTheme } from "../../../contexts";
+import { useTheme, useSettings } from "../../../contexts";
 import { type Task } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
+import { getLighterColor, getTextColor } from "../../../schemas/tagTypes";
 
 interface KanbanTaskCardProps {
     task: Task;
@@ -26,12 +27,26 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
     onClick,
 }) => {
     const { isDarkMode } = useTheme();
+    const { primaryTags, secondaryTags } = useSettings();
 
     // Find responsible user
     const responsibleUser =
         task.responsibleUsersId && task.responsibleUsersId.length > 0
             ? users.find((u) => u.id === task.responsibleUsersId![0])
             : null;
+
+    // Get secondary tags for this task with their primary tag info
+    const taskSecondaryTags = (task.secondaryTagIds || [])
+        .map((tagId) => {
+            const secondaryTag = secondaryTags.find((st) => st.id === tagId);
+            if (!secondaryTag) return null;
+            const primaryTag = primaryTags.find((pt) => pt.id === secondaryTag.primaryTagId);
+            return {
+                ...secondaryTag,
+                primaryColor: primaryTag?.color || "#1E40AF",
+            };
+        })
+        .filter((tag): tag is NonNullable<typeof tag> => tag !== null);
 
     // Drag start handler - set task ID in dataTransfer
     const handleDragStart = (e: React.DragEvent<HTMLDivElement>) => {
@@ -72,12 +87,41 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
             {task.description && (
                 <p
                     className={`
-            text-xs mb-4 line-clamp-2
+            text-xs mb-3 line-clamp-2
             ${isDarkMode ? "text-slate-400" : "text-slate-500"}
           `}
                 >
                     {task.description}
                 </p>
+            )}
+
+            {/* Secondary Tags */}
+            {taskSecondaryTags.length > 0 && (
+                <div className="flex flex-wrap gap-1 mb-3">
+                    {taskSecondaryTags.slice(0, 3).map((tag) => {
+                        const lightColor = getLighterColor(tag.primaryColor);
+                        return (
+                            <span
+                                key={tag.id}
+                                className="px-2 py-0.5 rounded-md text-[10px] font-semibold"
+                                style={{
+                                    backgroundColor: lightColor,
+                                    color: getTextColor(lightColor),
+                                }}
+                            >
+                                {tag.name}
+                            </span>
+                        );
+                    })}
+                    {taskSecondaryTags.length > 3 && (
+                        <span
+                            className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${isDarkMode ? "bg-slate-700 text-slate-300" : "bg-slate-100 text-slate-500"
+                                }`}
+                        >
+                            +{taskSecondaryTags.length - 3}
+                        </span>
+                    )}
+                </div>
             )}
 
             {/* Footer: Deadline & User */}

@@ -14,7 +14,7 @@ import ContactsList from "./ContactsList";
 
 const ManageContact: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { contacts, tags, isLoadingContacts, refreshContacts } = useSettings();
+  const { contacts, primaryTags, isLoadingContacts, refreshContacts } = useSettings();
   const [formData, setFormData] = useState<ContactFormData>(DEFAULT_CONTACT_FORM);
   const [originalData, setOriginalData] = useState<ContactFormData>(DEFAULT_CONTACT_FORM);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
@@ -32,7 +32,7 @@ const ManageContact: React.FC = () => {
       name: contact.name,
       role: contact.role,
       phone: contact.phone,
-      tags: contact.tags,
+      primaryTags: contact.primaryTags,
     };
     setEditingContactId(contact.id);
     setFormData(contactData);
@@ -108,7 +108,7 @@ const ManageContact: React.FC = () => {
       {/* Contacts List - uses context data */}
       <ContactsList
         contacts={contacts}
-        tags={tags}
+        tags={primaryTags}
         editingContactId={editingContactId}
         onEdit={handleEditContact}
         onCancelEdit={handleCancelEdit}

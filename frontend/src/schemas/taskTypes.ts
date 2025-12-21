@@ -12,7 +12,7 @@ export interface TaskData {
   date: number; // Timestamp for start date
   deadline?: number; // Timestamp for deadline
   responsibleUsersId: string[];
-  tagsId: string[];
+  secondaryTagIds: string[];  // Secondary Tag IDs (new two-tier tag system)
   createdAt: number;
   updatedAt: number;
 }
@@ -25,7 +25,7 @@ export interface TaskFormData {
   date: number; // Timestamp for start date
   deadline?: number; // Timestamp for deadline
   responsibleUsersId: string[];
-  tagsId: string[];
+  secondaryTagIds: string[];  // Secondary Tag IDs (new two-tier tag system)
 }
 
 // Priority options with Hebrew labels
@@ -67,5 +67,5 @@ export const DEFAULT_TASK_FORM: TaskFormData = {
   date: Date.now(),
   deadline: undefined,
   responsibleUsersId: [],
-  tagsId: [],
+  secondaryTagIds: [],
 };

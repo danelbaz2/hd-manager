@@ -10,7 +10,7 @@ class ContactModel(BaseModel):
     position: Optional[str] = None
     department: Optional[str] = None
     phoneNumber: str = Field(..., min_length=1)  # Required
-    tagsIds: Optional[List[Union[int, str]]] = None
+    primaryTagIds: Optional[List[Union[int, str]]] = None  # Link to Primary Tags only
     base: Optional[BaseEntityMeta] = None
 
 # Update Model - all fields optional but validated when provided
@@ -22,4 +22,5 @@ class ContactUpdateModel(BaseModel):
     position: Optional[str] = None
     department: Optional[str] = None
     phoneNumber: Optional[str] = Field(None, min_length=1)
-    tagsIds: Optional[List[Union[int, str]]] = None
+    primaryTagIds: Optional[List[Union[int, str]]] = None  # Link to Primary Tags only
+

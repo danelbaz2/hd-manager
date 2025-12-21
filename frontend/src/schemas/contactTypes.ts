@@ -1,8 +1,8 @@
 // Contact types - imports shared tag types from schemas
-import { type TagData, getTextColor } from "./tagTypes";
+import { type TagData, type PrimaryTagData, getTextColor } from "./tagTypes";
 
 // Re-export tag utilities for convenience
-export { type TagData, getTextColor };
+export { type TagData, type PrimaryTagData, getTextColor };
 
 // Contact data interface (for display)
 export interface ContactData {
@@ -10,7 +10,7 @@ export interface ContactData {
   name: string;      // maps to fullName in API
   role: string;      // maps to position in API
   phone: string;     // maps to phoneNumber in API
-  tags: string[];    // maps to tagsIds in API
+  primaryTags: string[];  // maps to primaryTagIds in API (Primary Tags only)
 }
 
 // Contact form data interface (for forms)
@@ -19,7 +19,7 @@ export interface ContactFormData {
   name: string;
   role: string;
   phone: string;
-  tags: string[];
+  primaryTags: string[];  // Primary Tag IDs
 }
 
 export const DEFAULT_CONTACT_FORM: ContactFormData = {
@@ -27,5 +27,5 @@ export const DEFAULT_CONTACT_FORM: ContactFormData = {
   name: "",
   role: "",
   phone: "",
-  tags: [],
+  primaryTags: [],
 };

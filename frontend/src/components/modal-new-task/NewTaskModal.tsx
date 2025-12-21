@@ -9,7 +9,7 @@ import DelayedLoader from "../delay-loader";
 // Import modular components
 import {
   PrioritySelect,
-  TagsSelect,
+  TwoTierTagsSelect,
   UserSelect,
   DatePicker,
 } from "./components";
@@ -30,7 +30,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
   initialDate,
 }) => {
   const { isDarkMode } = useTheme();
-  const { users, tags, isLoading: isLoadingData, isLoadingUsers, isLoadingTags } = useSettings();
+  const { users, primaryTags, secondaryTags, isLoading: isLoadingData, isLoadingUsers, isLoadingTags } = useSettings();
   const { alerts, showSuccess, showError, showWarning, dismissAlert } =
     useToast();
 
@@ -38,7 +38,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
+  const [selectedSecondaryTagIds, setSelectedSecondaryTagIds] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<string>("");
   const [deadline, setDeadline] = useState<string>("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -65,7 +65,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
       setTitle("");
       setDescription("");
       setPriority("medium");
-      setSelectedTagIds([]);
+      setSelectedSecondaryTagIds([]);
       setDeadline("");
       setSelectedUserIds([]);
     }
@@ -88,7 +88,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
         date: startDate ? new Date(startDate).getTime() : Date.now(),
         deadline: deadline ? new Date(deadline).getTime() : undefined,
         responsibleUsersId: selectedUserIds.length > 0 ? selectedUserIds : [],
-        tagsId: selectedTagIds.length > 0 ? selectedTagIds : [],
+        secondaryTagIds: selectedSecondaryTagIds.length > 0 ? selectedSecondaryTagIds : [],
       };
 
       // Log task object
@@ -255,11 +255,12 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
 
               {/* Tags & Dates Row */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {/* Tags Select */}
-                <TagsSelect
-                  tags={tags}
-                  selectedTagIds={selectedTagIds}
-                  onChange={setSelectedTagIds}
+                {/* Tags Select - Two Tier */}
+                <TwoTierTagsSelect
+                  primaryTags={primaryTags}
+                  secondaryTags={secondaryTags}
+                  selectedSecondaryTagIds={selectedSecondaryTagIds}
+                  onChange={setSelectedSecondaryTagIds}
                   isLoading={isDataLoading}
                 />
 

@@ -1,8 +1,9 @@
 import React from "react";
 import { User, Flag, CalendarRange } from "lucide-react";
-import { useTheme } from "../../../contexts";
+import { useTheme, useSettings } from "../../../contexts";
 import { type Task } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
+import { getLighterColor, getTextColor } from "../../../schemas/tagTypes";
 
 interface TaskListWeeklyProps {
     tasks: Task[];
@@ -31,6 +32,22 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
     onTaskClick,
 }) => {
     const { isDarkMode } = useTheme();
+    const { primaryTags, secondaryTags } = useSettings();
+
+    // Helper to get secondary tags with primary color for a task
+    const getTaskSecondaryTags = (task: Task) => {
+        return (task.secondaryTagIds || [])
+            .map((tagId) => {
+                const secondaryTag = secondaryTags.find((st) => st.id === tagId);
+                if (!secondaryTag) return null;
+                const primaryTag = primaryTags.find((pt) => pt.id === secondaryTag.primaryTagId);
+                return {
+                    ...secondaryTag,
+                    primaryColor: primaryTag?.color || "#1E40AF",
+                };
+            })
+            .filter((tag): tag is NonNullable<typeof tag> => tag !== null);
+    };
 
     // Generate the 7 days of the week (Sunday to Saturday)
     const startWindow = new Date(weekStart);
@@ -218,6 +235,7 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
                             task.responsibleUsersId && task.responsibleUsersId.length > 0
                                 ? getUserById(task.responsibleUsersId[0], users)
                                 : null;
+                        const taskTags = getTaskSecondaryTags(task);
 
                         return (
                             <div
@@ -257,15 +275,36 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
                                 </div>
 
                                 <div className="pr-3 flex items-center gap-2 mt-1">
+                                    {/* Secondary Tags - show up to 2 */}
+                                    {taskTags.slice(0, 2).map((tag) => {
+                                        const lightColor = getLighterColor(tag.primaryColor);
+                                        return (
+                                            <span
+                                                key={tag.id}
+                                                className="px-1.5 py-0.5 rounded text-[8px] font-semibold truncate max-w-[60px]"
+                                                style={{
+                                                    backgroundColor: lightColor,
+                                                    color: getTextColor(lightColor),
+                                                }}
+                                            >
+                                                {tag.name}
+                                            </span>
+                                        );
+                                    })}
+                                    {taskTags.length > 2 && (
+                                        <span className={`text-[8px] ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+                                            +{taskTags.length - 2}
+                                        </span>
+                                    )}
                                     {responsible && (
                                         <div
                                             className={`
-                        flex items-center gap-1 text-[10px]
+                        flex items-center gap-1 text-[10px] mr-auto
                         ${isDarkMode ? "text-slate-400" : "text-slate-500"}
                       `}
                                         >
                                             <User size={10} />
-                                            <span className="truncate max-w-[80px]">
+                                            <span className="truncate max-w-[60px]">
                                                 {responsible.fullName}
                                             </span>
                                         </div>

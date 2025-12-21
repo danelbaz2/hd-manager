@@ -6,7 +6,7 @@ import {
   type ContactFormData,
   getTextColor,
 } from "../../../schemas/contactTypes";
-import { type TagData } from "../../../schemas/tagTypes";
+import { type PrimaryTagData } from "../../../schemas/tagTypes";
 import {
   updateContact,
   type ContactFormPayload,
@@ -29,14 +29,14 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
   onCancel,
 }) => {
   const { isDarkMode } = useTheme();
-  const { tags: availableTags, isLoadingTags } = useSettings(); // Use context
+  const { primaryTags, isLoadingTags } = useSettings(); // Use primary tags for contacts
   const [isTagDropdownOpen, setIsTagDropdownOpen] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const { alerts, showSuccess, showError, showWarning, dismissAlert } = useToast();
 
-  // Helper to get tag by ID from context tags
-  const getTagById = (tagId: string): TagData | undefined => {
-    return availableTags.find((tag) => tag.id === tagId);
+  // Helper to get primary tag by ID
+  const getTagById = (tagId: string): PrimaryTagData | undefined => {
+    return primaryTags.find((tag) => tag.id === tagId);
   };
 
   const validateForm = (): boolean => {
@@ -74,8 +74,8 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
     if (formData.phone !== originalData.phone) {
       payload.phoneNumber = formData.phone || undefined;
     }
-    if (!arraysEqual(formData.tags, originalData.tags)) {
-      payload.tagsIds = formData.tags.length > 0 ? formData.tags : undefined;
+    if (!arraysEqual(formData.primaryTags, originalData.primaryTags)) {
+      payload.primaryTagIds = formData.primaryTags.length > 0 ? formData.primaryTags : undefined;
     }
 
     return payload;
@@ -115,15 +115,15 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
   };
 
   const toggleTag = (tagId: string) => {
-    if (formData.tags.includes(tagId)) {
+    if (formData.primaryTags.includes(tagId)) {
       setFormData({
         ...formData,
-        tags: formData.tags.filter((id) => id !== tagId),
+        primaryTags: formData.primaryTags.filter((id) => id !== tagId),
       });
     } else {
       setFormData({
         ...formData,
-        tags: [...formData.tags, tagId],
+        primaryTags: [...formData.primaryTags, tagId],
       });
     }
   };
@@ -131,7 +131,7 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
   const removeTag = (tagId: string) => {
     setFormData({
       ...formData,
-      tags: formData.tags.filter((id) => id !== tagId),
+      primaryTags: formData.primaryTags.filter((id) => id !== tagId),
     });
   };
 
@@ -231,12 +231,12 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
                 />
               )}
               <div className={`flex-1 flex flex-wrap gap-1.5 justify-end max-h-[80px] overflow-y-auto ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}>
-                {formData.tags.length === 0 ? (
+                {formData.primaryTags.length === 0 ? (
                   <span className={`py-0.5 ${isDarkMode ? "text-slate-400" : "text-slate-400"}`}>
-                    {isLoadingTags ? "טוען תגיות..." : availableTags.length === 0 ? "אין תגיות" : "בחר תגיות"}
+                    {isLoadingTags ? "טוען..." : primaryTags.length === 0 ? "אין תגיות" : "בחר קטגוריות"}
                   </span>
                 ) : (
-                  formData.tags.map((tagId) => {
+                  formData.primaryTags.map((tagId: string) => {
                     const tag = getTagById(tagId);
                     if (!tag) return null;
                     return (
@@ -268,7 +268,7 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
 
 
             {/* Dropdown Menu */}
-            {isTagDropdownOpen && availableTags.length > 0 && (
+            {isTagDropdownOpen && primaryTags.length > 0 && (
               <div
                 className={`
                   absolute top-full left-0 right-0 mt-1 z-10
@@ -281,7 +281,7 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
                   }
                 `}
               >
-                {availableTags.map((tag) => (
+                {primaryTags.map((tag: PrimaryTagData) => (
                   <button
                     key={tag.id}
                     type="button"
@@ -291,7 +291,7 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
                       flex items-center justify-between
                       transition-colors
                       ${isDarkMode ? "hover:bg-slate-700" : "hover:bg-slate-50"}
-                      ${formData.tags.includes(tag.id)
+                      ${formData.primaryTags.includes(tag.id)
                         ? isDarkMode
                           ? "bg-slate-700"
                           : "bg-slate-100"
@@ -301,7 +301,7 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
                   >
                     <div
                       className={`w-4 h-4 rounded border flex items-center justify-center
-                        ${formData.tags.includes(tag.id)
+                        ${formData.primaryTags.includes(tag.id)
                           ? "bg-blue-500 border-blue-500"
                           : isDarkMode
                             ? "border-slate-500"
@@ -309,7 +309,7 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
                         }
                       `}
                     >
-                      {formData.tags.includes(tag.id) && (
+                      {formData.primaryTags.includes(tag.id) && (
                         <svg
                           className="w-3 h-3 text-white"
                           fill="none"

@@ -3,7 +3,7 @@
     "position": "Vendor",
     "department": "External",
     "phoneNumber": "055-1234567",
-    "tagsIds": [
+    "primaryTagIds": [
         "648a1b2c3d4e5f6g7h8i9j0n"
     ],
     "isActive": true
