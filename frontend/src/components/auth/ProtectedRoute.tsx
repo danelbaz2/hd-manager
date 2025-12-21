@@ -1,7 +1,6 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts";
-import { Loader2 } from "lucide-react";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,8 +17,21 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   // Show loading while checking auth state from sessionStorage
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-slate-100 dark:bg-slate-900">
-        <Loader2 size={40} className="animate-spin text-blue-600" />
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+        <div className="flex items-center gap-2">
+          <div
+            className="w-4 h-4 rounded-full animate-bounce bg-blue-500 dark:bg-blue-400"
+            style={{ animationDelay: "0ms", animationDuration: "600ms" }}
+          />
+          <div
+            className="w-4 h-4 rounded-full animate-bounce bg-blue-500 dark:bg-blue-400"
+            style={{ animationDelay: "150ms", animationDuration: "600ms" }}
+          />
+          <div
+            className="w-4 h-4 rounded-full animate-bounce bg-blue-500 dark:bg-blue-400"
+            style={{ animationDelay: "300ms", animationDuration: "600ms" }}
+          />
+        </div>
       </div>
     );
   }

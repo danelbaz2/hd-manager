@@ -78,7 +78,7 @@ const filterTasksByDateRange = (
 
 const TaskPage: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { tasks, users, refreshTasks } = useSettings();
+  const { tasks, users, refreshTasks, isLoading } = useSettings();
   const { viewMode, setViewMode, selectedDate } = useViewState();
   const navigate = useNavigate();
   const location = useLocation();
@@ -190,6 +190,48 @@ const TaskPage: React.FC = () => {
         >
           חזרה לדף הבית
         </button>
+      </div>
+    );
+  }
+
+  // Show loading state only during initial data fetch (not on updates)
+  if (isLoading) {
+    return (
+      <div
+        className={`
+          flex flex-col items-center justify-center h-full gap-6
+          ${isDarkMode
+            ? "bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900"
+            : "bg-gradient-to-br from-slate-50 via-white to-slate-100"
+          }
+        `}
+        dir="rtl"
+      >
+        {/* Animated dots loader */}
+        <div className="flex items-center gap-2">
+          <div
+            className={`w-4 h-4 rounded-full animate-bounce ${isDarkMode ? "bg-blue-400" : "bg-blue-500"}`}
+            style={{ animationDelay: "0ms", animationDuration: "600ms" }}
+          />
+          <div
+            className={`w-4 h-4 rounded-full animate-bounce ${isDarkMode ? "bg-blue-400" : "bg-blue-500"}`}
+            style={{ animationDelay: "150ms", animationDuration: "600ms" }}
+          />
+          <div
+            className={`w-4 h-4 rounded-full animate-bounce ${isDarkMode ? "bg-blue-400" : "bg-blue-500"}`}
+            style={{ animationDelay: "300ms", animationDuration: "600ms" }}
+          />
+        </div>
+
+        {/* Loading text with subtle animation */}
+        <div className="flex flex-col items-center gap-2">
+          <p className={`text-xl font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>
+            טוען משימות
+          </p>
+          <p className={`text-sm ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>
+            אנא המתן...
+          </p>
+        </div>
       </div>
     );
   }

@@ -213,16 +213,18 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
                 const dropInfo = dropTargetRef.current;
 
                 if (dropInfo?.isNewColumn && dropInfo.status && onTaskStatusChange) {
-                    // Update state - card will appear in new column
+                    // Update state - card will appear in new column (but still invisible due to isAnimating)
                     onTaskStatusChange(task.id, dropInfo.status as TaskStatus);
                 }
 
-                // Reset all states
-                setIsAnimating(false);
-                setIsCollapsing(false);
-                hasDraggedRef.current = false;
-                dropTargetRef.current = null;
-            }, ANIMATION_DURATION + 50);
+                // Small delay before showing the new card - allows React to settle
+                setTimeout(() => {
+                    setIsAnimating(false);
+                    setIsCollapsing(false);
+                    hasDraggedRef.current = false;
+                    dropTargetRef.current = null;
+                }, 50);
+            }, ANIMATION_DURATION);
         };
 
         window.addEventListener("mousemove", handleMouseMove);
@@ -358,7 +360,9 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
                         left: overlayPosition.x,
                         top: overlayPosition.y,
                         width: cardRef.current?.offsetWidth || 280,
-                        transition: isAnimating ? `left ${ANIMATION_DURATION}ms ease-out, top ${ANIMATION_DURATION}ms ease-out` : "none",
+                        transition: isAnimating
+                            ? `left ${ANIMATION_DURATION}ms ease-out, top ${ANIMATION_DURATION}ms ease-out`
+                            : "none",
                     }}
                 >
                     {renderCardContent(true)}
