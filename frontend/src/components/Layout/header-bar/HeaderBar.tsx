@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { useTheme, useViewState } from "../../../contexts";
+import { useTheme, useViewState, useAuth } from "../../../contexts";
 import defaultProfile from "../../../assets/default-profile.jpg";
 import Calendar from "./Calendar";
 import MenuItemProfile from "./MenuItemProfile";
@@ -45,6 +45,7 @@ interface HeaderBarProps {
 const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
   const { isDarkMode } = useTheme();
   const { viewMode, selectedDate, setSelectedDate } = useViewState();
+  const { user } = useAuth();
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -58,7 +59,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
   const changeDate = (direction: number) => {
     const newDate = new Date(selectedDate);
     const daysToAdd = viewMode === "weekly" ? 7 : 1;
-    newDate.setDate(newDate.getDate() + (direction * daysToAdd));
+    newDate.setDate(newDate.getDate() + direction * daysToAdd);
     setSelectedDate(newDate.getTime());
   };
 
@@ -67,7 +68,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
     setSelectedDate(timestamp);
     setIsCalendarOpen(false);
   };
-
+  console.log(user);
   // Get display text based on view mode
   const getDateDisplayText = (): string => {
     if (viewMode === "weekly") {
@@ -123,7 +124,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
           `}
         >
           <img
-            src={defaultProfile}
+            src={user?.profileImage || defaultProfile}
             alt="Profile"
             className="w-8 h-8 md:w-10 md:h-10 lg:w-12 lg:h-12 rounded-full object-cover"
           />
@@ -134,7 +135,7 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
               ${isDarkMode ? "text-white" : "text-slate-800"}
             `}
           >
-            דן אלבז
+            {user?.fullName || "אורח"}
           </span>
         </button>
 
@@ -155,9 +156,10 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
             flex items-center
             rounded-full shadow-sm border
             px-1 md:px-2 py-1
-            ${isDarkMode
-              ? "bg-slate-700 border-slate-600"
-              : "bg-white border-slate-200"
+            ${
+              isDarkMode
+                ? "bg-slate-700 border-slate-600"
+                : "bg-white border-slate-200"
             }
           `}
         >
@@ -166,9 +168,10 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
             className={`
               p-1.5 md:p-2
               rounded-full transition-colors
-              ${isDarkMode
-                ? "hover:bg-slate-600 text-slate-300"
-                : "hover:bg-slate-100 text-slate-500"
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-600 text-slate-300"
+                  : "hover:bg-slate-100 text-slate-500"
               }
             `}
             aria-label={viewMode === "weekly" ? "Next week" : "Next day"}
@@ -193,12 +196,15 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
             className={`
               p-1.5 md:p-1
               rounded-full transition-colors
-              ${isDarkMode
-                ? "hover:bg-slate-600 text-slate-300"
-                : "hover:bg-slate-100 text-slate-500"
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-600 text-slate-300"
+                  : "hover:bg-slate-100 text-slate-500"
               }
             `}
-            aria-label={viewMode === "weekly" ? "Previous week" : "Previous day"}
+            aria-label={
+              viewMode === "weekly" ? "Previous week" : "Previous day"
+            }
           >
             <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
           </button>
@@ -215,7 +221,6 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
           </div>
         )}
       </div>
-
     </header>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Settings, Moon, Sun, LogOut, User } from "lucide-react";
-import { useTheme } from "../../../contexts/ThemeContext";
+import { useTheme, useAuth } from "../../../contexts";
 import ManageSetting from "../../modal-setting/ManageSetting";
 
 interface MenuItemProfileProps {
@@ -14,18 +14,25 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
   onClose,
 }) => {
   const { isDarkMode, toggleDarkMode } = useTheme();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
+  // Check if user is admin
+  const isAdmin = user?.role === "admin";
+
   const handleLogout = () => {
-    // TODO: Add logout logic (clear tokens, etc.)
+    logout(); // Clear auth context and sessionStorage
     navigate("/login");
+    onClose();
   };
 
   const handleOpenSettings = () => {
     setIsSettingsOpen(true);
     onClose(); // Close the profile menu
   };
+
+  // Get role display text in Hebrew
 
   if (!isOpen && !isSettingsOpen) return null;
 
@@ -59,8 +66,19 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
                   w-10 h-10 rounded-full flex items-center justify-center
                   ${isDarkMode ? "bg-slate-700" : "bg-slate-100"}
                 `}
+                style={
+                  user?.color ? { backgroundColor: `${user.color}20` } : {}
+                }
               >
-                <User size={20} className="text-blue-500" />
+                {user?.profileImage ? (
+                  <img
+                    src={user.profileImage}
+                    alt={user.fullName}
+                    className="w-full h-full rounded-full object-cover"
+                  />
+                ) : (
+                  <User size={20} className="text-blue-500" />
+                )}
               </div>
               <div>
                 <p
@@ -69,9 +87,8 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
                     ${isDarkMode ? "text-white" : "text-slate-800"}
                   `}
                 >
-                  דן אלבז
+                  {user?.fullName || "משתמש"}
                 </p>
-                <p className="text-xs text-slate-400">מנהל</p>
               </div>
             </div>
           </div>
@@ -100,23 +117,25 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
               )}
             </button>
 
-            {/* Settings */}
-            <button
-              onClick={handleOpenSettings}
-              className={`
-                w-full flex items-center justify-between
-                px-4 py-3
-                text-sm transition-colors
-                ${
-                  isDarkMode
-                    ? "hover:bg-slate-700 text-slate-200"
-                    : "hover:bg-slate-50 text-slate-700"
-                }
-              `}
-            >
-              <span>הגדרות</span>
-              <Settings size={18} className="text-slate-400" />
-            </button>
+            {/* Settings - Only visible for admin users */}
+            {isAdmin && (
+              <button
+                onClick={handleOpenSettings}
+                className={`
+                  w-full flex items-center justify-between
+                  px-4 py-3
+                  text-sm transition-colors
+                  ${
+                    isDarkMode
+                      ? "hover:bg-slate-700 text-slate-200"
+                      : "hover:bg-slate-50 text-slate-700"
+                  }
+                `}
+              >
+                <span>הגדרות</span>
+                <Settings size={18} className="text-slate-400" />
+              </button>
+            )}
 
             {/* Logout */}
             <button
@@ -136,11 +155,13 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
         </div>
       )}
 
-      {/* Settings Modal */}
-      <ManageSetting
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-      />
+      {/* Settings Modal - Only render for admin */}
+      {isAdmin && (
+        <ManageSetting
+          isOpen={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+        />
+      )}
     </>
   );
 };

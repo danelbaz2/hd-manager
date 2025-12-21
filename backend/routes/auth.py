@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from database import mongo
 from models.auth_model import LoginModel
+from utils.jwt_utils import generate_token, jwt_required
 import bcrypt
 
 bp = Blueprint('auth', __name__, url_prefix='/api/auth')
@@ -23,7 +24,7 @@ def serialize_user(doc):
 @bp.route('/login', methods=['POST'])
 def login():
     """
-    Login endpoint - validates user credentials
+    Login endpoint - validates user credentials and returns JWT token
     
     Request body:
     {
@@ -32,7 +33,7 @@ def login():
     }
     
     Returns:
-    - 200: User data (without passwordHash)
+    - 200: User data + JWT token
     - 401: Invalid credentials
     - 400: Missing fields
     """
@@ -56,29 +57,36 @@ def login():
         if not bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8')):
             return jsonify({"error": "Invalid credentials"}), 401
         
-        # Return user data (without sensitive fields)
+        # Generate JWT token
+        token = generate_token(
+            user_id=user['_id'],
+            username=user['username'],
+            role=user.get('role', 'regular')
+        )
+        
+        # Return user data with token
         return jsonify({
             "message": "Login successful",
-            "user": serialize_user(user)
+            "user": serialize_user(user),
+            "token": token
         }), 200
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
 @bp.route('/me', methods=['GET'])
+@jwt_required
 def get_current_user():
     """
-    Get current user - requires user ID in header (simple auth)
+    Get current user - requires JWT token in Authorization header
     
     Headers:
-    - X-User-Id: user's ID
+    - Authorization: Bearer <token>
     
-    For production, use JWT token instead
+    Returns user data if token is valid
     """
-    user_id = request.headers.get('X-User-Id')
-    
-    if not user_id:
-        return jsonify({"error": "Authentication required"}), 401
+    # user_id is set by @jwt_required decorator
+    user_id = request.user_id
     
     user = mongo.db.users.find_one({
         '_id': user_id,
@@ -94,7 +102,24 @@ def get_current_user():
 def logout():
     """
     Logout endpoint
-    For session-based auth, this would clear the session
     For JWT, the client simply discards the token
+    This endpoint exists for API consistency
     """
     return jsonify({"message": "Logout successful"}), 200
+
+@bp.route('/verify', methods=['GET'])
+@jwt_required
+def verify_token():
+    """
+    Verify if the current token is valid
+    
+    Headers:
+    - Authorization: Bearer <token>
+    
+    Returns 200 if token is valid, 401 if expired/invalid
+    """
+    return jsonify({
+        "valid": True,
+        "user_id": request.user_id,
+        "username": request.username
+    }), 200

@@ -3,6 +3,8 @@ from database import mongo
 from datetime import datetime, timedelta
 from utils.history import log_history
 import sys
+import os
+import base64
 from bson.objectid import ObjectId
 import bcrypt
 import random
@@ -16,6 +18,19 @@ def get_relative_date(diff_days):
 
 def get_timestamp_ms():
     return int(datetime.now().timestamp() * 1000)
+
+def load_profile_image_base64(username):
+    """Load a profile image and convert to base64 data URI"""
+    # Path to profile images
+    profiles_dir = os.path.join(os.path.dirname(__file__), 'static', 'profiles')
+    image_path = os.path.join(profiles_dir, f'{username}.png')
+    
+    if os.path.exists(image_path):
+        with open(image_path, 'rb') as img_file:
+            image_data = img_file.read()
+            base64_data = base64.b64encode(image_data).decode('utf-8')
+            return f'data:image/png;base64,{base64_data}'
+    return None
 
 def clear_database():
     """Clear all data from all collections"""
@@ -33,16 +48,18 @@ def seed(clean_only=False, bulk_tasks=False):
         
         # 1. Users - ALWAYS seed users (even in clean mode)
         print("Seeding Users...")
+        print("  Loading profile images as base64...")
+        
         users_data = [
-            { "fullName": 'עדן טירם', "username": "eden", "passwordHash": "hash123", "role": 'admin', "color": '#93C5FD', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Rose
-            { "fullName": 'מאור נובחוב', "username": "maor", "passwordHash": "hash123", "role": 'regular', "color": '#FDBA74', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Blue
-            { "fullName": 'עילי אדמוני', "username": "ilay", "passwordHash": "hash123", "role": 'regular', "color": '#86EFAC', "profileImage": "/profiles/ilay.png", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Green
-            { "fullName": 'דן אלבז', "username": "dan", "passwordHash": "hash123", "role": 'regular', "color": '#FCD34D', "profileImage": "/profiles/dan.png", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Amber
-            { "fullName": 'אוראל חסידיאן', "username": "orel", "passwordHash": "hash123", "role": 'regular', "color": '#C4B5FD', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Rose
-            { "fullName": 'אליה דנאל', "username": "elia", "passwordHash": "hash123", "role": 'regular', "color": '#FDA4AF', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Rose
-            { "fullName": 'אורי רוגוזיק', "username": "ori", "passwordHash": "hash123", "role": 'regular', "color": '#FCD34D', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Rose
-            { "fullName": 'עדי פליישמן', "username": "adi", "passwordHash": "hash123", "role": 'regular', "color": '#F9A8D4', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Rose
-            { "fullName": 'גל פרץ', "username": "gal", "passwordHash": "hash123", "role": 'regular', "color": '#93C5FD', "profileImage": None, "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},  # Light Rose
+            { "fullName": 'עדן טירם', "username": "eden", "passwordHash": "Aa123456123456", "role": 'admin', "color": '#93C5FD', "profileImage": load_profile_image_base64("eden"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'מאור נובחוב', "username": "maor", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#FDBA74', "profileImage": load_profile_image_base64("maor"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'עילי אדמוני', "username": "ilay", "passwordHash": "Aa123456123456", "role": 'admin', "color": '#86EFAC', "profileImage": load_profile_image_base64("ilay"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'דן אלבז', "username": "dan", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("dan"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'אוראל חסידיאן', "username": "orel", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#C4B5FD', "profileImage": load_profile_image_base64("orel"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'אליה דנאל', "username": "eliya", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#FDA4AF', "profileImage": load_profile_image_base64("eliya"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'אורי רוגוזיק', "username": "ori", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("ori"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'עדי פליישמן', "username": "adi", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#F9A8D4', "profileImage": load_profile_image_base64("adi"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'גל פרץ', "username": "gal", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#93C5FD', "profileImage": load_profile_image_base64("gal"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
         ]
         
         user_ids = []

@@ -7,7 +7,8 @@ from database import mongo
 
 load_dotenv()
 
-app = Flask(__name__)
+# Initialize Flask with static files support
+app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app, origins=["http://localhost:5173"])
 
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/hd_manager")

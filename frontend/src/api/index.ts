@@ -59,3 +59,13 @@ export {
   type ChatMessage,
   type ChatMessageFormData,
 } from "./chatApi";
+
+// Auth API
+export {
+  loginUser,
+  getCurrentUser,
+  type AuthUser,
+  type LoginRequest,
+  type LoginResponse,
+  type MeResponse,
+} from "./authApi";

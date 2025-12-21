@@ -1,5 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
+import { ProtectedRoute } from "./components/auth";
 import HomePage from "./pages/home-page/HomePage";
 import TaskPage from "./pages/task-page/TaskPage";
 import ChatPage from "./pages/chat-page/ChatPage";
@@ -13,8 +14,14 @@ function App() {
         {/* Login route - standalone without Layout */}
         <Route path="/login" element={<LoginPage />} />
 
-        {/* All other routes wrapped in Layout (with MenuBar and HeaderBar) */}
-        <Route element={<Layout />}>
+        {/* Protected routes - require authentication */}
+        <Route
+          element={
+            <ProtectedRoute>
+              <Layout />
+            </ProtectedRoute>
+          }
+        >
           <Route path="/" element={<HomePage />} />
           <Route path="/home" element={<HomePage />} />
           <Route path="/tasks" element={<TaskPage />} />

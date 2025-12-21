@@ -5,3 +5,4 @@ pymongo
 Flask-PyMongo
 pydantic
 bcrypt
+PyJWT
