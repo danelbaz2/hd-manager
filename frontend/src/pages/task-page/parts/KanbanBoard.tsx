@@ -15,7 +15,6 @@ interface KanbanBoardProps {
 const KanbanBoard: React.FC<KanbanBoardProps> = ({
     tasks,
     users,
-    selectedUserId,
     onTaskStatusChange,
     onTaskClick,
 }) => {
@@ -30,7 +29,14 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
             cancelled: [],
         };
 
-        tasks.forEach((task) => {
+        // Sort tasks by updatedAt Ascending (oldest first -> newest last)
+        const sortedTasks = [...tasks].sort((a, b) => {
+            const timeA = a.base?.updatedAt || a.base?.createdAt || 0;
+            const timeB = b.base?.updatedAt || b.base?.createdAt || 0;
+            return timeA - timeB;
+        });
+
+        sortedTasks.forEach((task) => {
             const status = (task.status as TaskStatus) || "pending";
             if (grouped[status]) {
                 grouped[status].push(task);
@@ -43,9 +49,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         return grouped;
     }, [tasks]);
 
-    // Handle drop - get task ID from dataTransfer and update status
-    const handleDrop = (e: React.DragEvent, targetStatus: TaskStatus) => {
-        const taskId = e.dataTransfer.getData("text/plain");
+    // Handle drop - task ID is passed directly from the column
+    const handleDrop = (taskId: string, targetStatus: TaskStatus) => {
+        console.log("[KanbanBoard] handleDrop called - taskId:", taskId, "targetStatus:", targetStatus);
         if (taskId) {
             onTaskStatusChange(taskId, targetStatus);
         }
@@ -71,6 +77,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
                         icon={column.icon}
                         colorClass={column.colorClass}
                         onDrop={handleDrop}
+                        onTaskStatusChange={onTaskStatusChange}
                         onTaskClick={onTaskClick}
                     />
                 ))}

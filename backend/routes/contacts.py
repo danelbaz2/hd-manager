@@ -11,12 +11,16 @@ def serialize_doc(doc):
     doc['id'] = doc.pop('_id')
     return doc
 
+from utils.jwt_utils import jwt_required
+
 @bp.route('/', methods=['GET'])
+@jwt_required
 def get_contacts():
     contacts = list(mongo.db.contacts.find({'base.isDeleted': {'$ne': True}}))
     return jsonify([serialize_doc(c) for c in contacts])
 
 @bp.route('/', methods=['POST'])
+@jwt_required
 def create_contact():
     try:
         data = ContactModel(**request.json).model_dump(exclude_none=True)
@@ -29,17 +33,20 @@ def create_contact():
         'isActive': True,
         'createdAt': now,
         'updatedAt': now,
-        'lut': now,
-        'entityType': 'contact'
+
+        'entityType': 'contact',
+        'createdBy': request.user_full_name,
+        'updatedBy': request.user_full_name
     }
     data['_id'] = str(ObjectId())
     mongo.db.contacts.insert_one(data)
     
-    log_history('contact', data['_id'], 'CREATE', 'system', None, data, data)
+    log_history('contact', data['_id'], 'CREATE', request.user_full_name, None, data, data)
     
     return jsonify(serialize_doc(data)), 201
 
 @bp.route('/<id>', methods=['PUT'])
+@jwt_required
 def update_contact(id):
     try:
         validated = ContactUpdateModel(**request.json)
@@ -54,7 +61,8 @@ def update_contact(id):
         
     now = int(datetime.now().timestamp() * 1000)
     data['base.updatedAt'] = now
-    data['base.lut'] = now
+
+    data['base.updatedBy'] = request.user_full_name
     
     try:
         mongo.db.contacts.update_one({'_id': id}, {'$set': data})
@@ -63,21 +71,28 @@ def update_contact(id):
         
     updated = mongo.db.contacts.find_one({'_id': id})
     
-    log_history('contact', id, 'UPDATE', 'system', old_doc, updated, data)
+    log_history('contact', id, 'UPDATE', request.user_full_name, old_doc, updated, data)
              
     return jsonify(serialize_doc(updated))
 
 @bp.route('/<id>', methods=['DELETE'])
+@jwt_required
 def delete_contact(id):
     try:
         old_doc = mongo.db.contacts.find_one({'_id': id})
         if not old_doc:
             return jsonify({"error": "Contact not found"}), 404
              
-        mongo.db.contacts.update_one({'_id': id}, {'$set': {'base.isDeleted': True}})
+        now = int(datetime.now().timestamp() * 1000)
+        mongo.db.contacts.update_one({'_id': id}, {'$set': {
+            'base.isDeleted': True,
+            'base.updatedAt': now,
+
+            'base.updatedBy': request.user_full_name
+        }})
         
         updated = mongo.db.contacts.find_one({'_id': id})
-        log_history('contact', id, 'DELETE', 'system', old_doc, updated, {'base': {'isDeleted': True}})
+        log_history('contact', id, 'DELETE', request.user_full_name, old_doc, updated, {'base': {'isDeleted': True}})
         
     except Exception as e:
         return jsonify({"error": str(e)}), 400

@@ -1,17 +1,17 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  User, 
-  ChevronLeft, 
-  ChevronRight, 
-  Settings, 
-  Moon, 
-  Sun, 
-  LogOut, 
-  Home, 
-  List, 
-  MessageCircle, 
-  PieChart, 
-  FileText, 
+import {
+  User,
+  ChevronLeft,
+  ChevronRight,
+  Settings,
+  Moon,
+  Sun,
+  LogOut,
+  Home,
+  List,
+  MessageCircle,
+  PieChart,
+  FileText,
   Layers,
   LayoutGrid,
   AlignJustify,
@@ -63,18 +63,18 @@ const formatDateHebrew = (date) => {
 
 const formatWeekRange = (date) => {
   const start = new Date(date);
-  const day = start.getDay(); 
-  start.setDate(start.getDate() - day); 
-  
+  const day = start.getDay();
+  start.setDate(start.getDate() - day);
+
   const end = new Date(start);
-  end.setDate(start.getDate() + 6); 
+  end.setDate(start.getDate() + 6);
 
   const format = (d) => `${d.getDate()}.${d.getMonth() + 1}`;
   return `${format(start)} - ${format(end)}`;
 };
 
 const getStatusLabel = (s) => {
-  switch(s) {
+  switch (s) {
     case 'open': return 'פתוח';
     case 'in_progress': return 'בטיפול';
     case 'closed': return 'סגור';
@@ -106,85 +106,85 @@ const USERS = [
 ];
 
 const INITIAL_MISSIONS = [
-  { 
-    id: 'MS-101', 
-    title: 'בדיקת שרתים שבועית', 
+  {
+    id: 'MS-101',
+    title: 'בדיקת שרתים שבועית',
     description: 'בדיקה מקיפה של שרתי ה-Production וה-Staging לוודא יציבות לאחר העדכון האחרון.',
-    status: 'in_progress', 
-    responsibleUsersId: [1], 
+    status: 'in_progress',
+    responsibleUserIds: [1],
     participantsIds: [4, 3],
     tagId: 'tag4',
-    date: getRelativeDate(0), 
+    date: getRelativeDate(0),
     deadline: getRelativeDate(2),
     createdAt: getRelativeDate(-2),
     updatedAt: getRelativeDate(0),
     priority: 'high'
   },
-  { 
-    id: 'MS-102', 
-    title: 'עדכון מסד נתונים', 
+  {
+    id: 'MS-102',
+    title: 'עדכון מסד נתונים',
     description: 'הרצת סקריפטים של מיגרציה לטבלאות המשתמשים החדשות.',
-    status: 'open', 
-    responsibleUsersId: [2], 
+    status: 'open',
+    responsibleUserIds: [2],
     participantsIds: [1],
     tagId: 'tag1',
-    date: getRelativeDate(1), 
+    date: getRelativeDate(1),
     deadline: getRelativeDate(1),
     createdAt: getRelativeDate(-1),
     updatedAt: getRelativeDate(-1),
     priority: 'medium'
   },
-  { 
-    id: 'MS-103', 
-    title: 'סנכרון תהליכים', 
+  {
+    id: 'MS-103',
+    title: 'סנכרון תהליכים',
     description: 'וידוא סנכרון תהליכי הרקע בין השרתים השונים.',
-    status: 'closed', 
-    responsibleUsersId: [3], 
+    status: 'closed',
+    responsibleUserIds: [3],
     participantsIds: [],
     tagId: 'tag4',
-    date: getRelativeDate(-2), 
+    date: getRelativeDate(-2),
     deadline: getRelativeDate(-2),
     createdAt: getRelativeDate(-5),
     updatedAt: getRelativeDate(-2),
     priority: 'low'
   },
-  { 
-    id: 'MS-104', 
-    title: 'סריקת וירוסים', 
+  {
+    id: 'MS-104',
+    title: 'סריקת וירוסים',
     description: 'ביצוע סריקה ידנית לאיתור נוזקות בשרת הקבצים.',
-    status: 'open', 
-    responsibleUsersId: [4], 
+    status: 'open',
+    responsibleUserIds: [4],
     participantsIds: [1, 5],
     tagId: 'tag6',
-    date: getRelativeDate(1), 
+    date: getRelativeDate(1),
     deadline: getRelativeDate(3),
     createdAt: getRelativeDate(0),
     updatedAt: getRelativeDate(0),
     priority: 'high'
   },
-  { 
-    id: 'MS-105', 
-    title: 'אופטימיזציה לקוד', 
+  {
+    id: 'MS-105',
+    title: 'אופטימיזציה לקוד',
     description: 'שיפור ביצועים במודול הליבה של המערכת.',
-    status: 'in_progress', 
-    responsibleUsersId: [5], 
+    status: 'in_progress',
+    responsibleUserIds: [5],
     participantsIds: [2],
     tagId: 'tag1',
-    date: getRelativeDate(0), 
+    date: getRelativeDate(0),
     deadline: getRelativeDate(4),
     createdAt: getRelativeDate(-3),
     updatedAt: getRelativeDate(-1),
     priority: 'medium'
   },
-  { 
-    id: 'MS-106', 
-    title: 'כתיבת תיעוד', 
+  {
+    id: 'MS-106',
+    title: 'כתיבת תיעוד',
     description: 'כתיבת מסמכי אפיון ותיעוד טכני עבור ה-API החדש.',
-    status: 'closed', 
-    responsibleUsersId: [6], 
+    status: 'closed',
+    responsibleUserIds: [6],
     participantsIds: [8],
     tagId: 'tag5',
-    date: getRelativeDate(-5), 
+    date: getRelativeDate(-5),
     deadline: getRelativeDate(-3),
     createdAt: getRelativeDate(-10),
     updatedAt: getRelativeDate(-3),
@@ -237,10 +237,10 @@ const WeeklyCalendar = ({ currentDate, tasks, isDarkMode, onTaskClick }) => {
   const weekTasks = tasks.filter(task => {
     const taskStart = new Date(task.date);
     const taskEnd = task.deadline ? new Date(task.deadline) : new Date(taskStart);
-    
+
     // Normalize times to ensure full day overlap coverage
-    taskStart.setHours(0,0,0,0);
-    taskEnd.setHours(23,59,59,999);
+    taskStart.setHours(0, 0, 0, 0);
+    taskEnd.setHours(23, 59, 59, 999);
 
     return taskStart <= endWindow && taskEnd >= startWindow;
   });
@@ -249,24 +249,24 @@ const WeeklyCalendar = ({ currentDate, tasks, isDarkMode, onTaskClick }) => {
   const getGridPosition = (task) => {
     const taskStart = new Date(task.date);
     const taskEnd = task.deadline ? new Date(task.deadline) : new Date(taskStart);
-    
+
     // Normalize
-    taskStart.setHours(0,0,0,0);
-    taskEnd.setHours(0,0,0,0);
+    taskStart.setHours(0, 0, 0, 0);
+    taskEnd.setHours(0, 0, 0, 0);
 
     // Visual Start: If task starts before window, clip it to start of window
     const visualStart = taskStart < startWindow ? new Date(startWindow) : new Date(taskStart);
-    
+
     // Visual End: If task ends after window, clip it to end of window (normalized to midnight for diff calc)
     const endWindowMidnight = new Date(endWindow);
-    endWindowMidnight.setHours(0,0,0,0);
+    endWindowMidnight.setHours(0, 0, 0, 0);
     const visualEnd = taskEnd > endWindowMidnight ? endWindowMidnight : new Date(taskEnd);
 
     // Calculate column start (1-based index)
     // Difference in days between visual start and window start
     const diffTime = visualStart - startWindow;
-    const startOffset = Math.floor(diffTime / (1000 * 60 * 60 * 24)); 
-    
+    const startOffset = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+
     // Calculate duration
     const durationTime = visualEnd - visualStart;
     const durationDays = Math.floor(durationTime / (1000 * 60 * 60 * 24)) + 1;
@@ -278,8 +278,8 @@ const WeeklyCalendar = ({ currentDate, tasks, isDarkMode, onTaskClick }) => {
   };
 
   // Sort by visual start column for better packing
-  const processedTasks = weekTasks.map(t => ({...t, ...getGridPosition(t)})).sort((a, b) => a.colStart - b.colStart);
-  
+  const processedTasks = weekTasks.map(t => ({ ...t, ...getGridPosition(t) })).sort((a, b) => a.colStart - b.colStart);
+
   // Layout algorithm to assign rows (y-axis) without overlap
   const rows = [];
   processedTasks.forEach(task => {
@@ -330,19 +330,18 @@ const WeeklyCalendar = ({ currentDate, tasks, isDarkMode, onTaskClick }) => {
         </div>
 
         {/* Tasks Grid */}
-        <div 
+        <div
           className="grid grid-cols-7 gap-y-2 relative z-10"
           style={{ gridAutoRows: 'minmax(45px, auto)' }}
         >
           {processedTasks.map(task => {
-            const responsible = task.responsibleUsersId && task.responsibleUsersId.length > 0 ? getUserById(task.responsibleUsersId[0]) : null;
+            const responsible = task.responsibleUserIds && task.responsibleUserIds.length > 0 ? getUserById(task.responsibleUserIds[0]) : null;
             return (
               <div
                 key={task.id}
                 onClick={() => onTaskClick(task)}
-                className={`mx-1 p-2 rounded-lg border shadow-sm cursor-pointer hover:shadow-md hover:translate-y-[-1px] transition-all flex flex-col justify-center relative group overflow-hidden ${
-                  isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-200'
-                }`}
+                className={`mx-1 p-2 rounded-lg border shadow-sm cursor-pointer hover:shadow-md hover:translate-y-[-1px] transition-all flex flex-col justify-center relative group overflow-hidden ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-white border-slate-200'
+                  }`}
                 style={{
                   gridColumnStart: task.colStart,
                   gridColumnEnd: `span ${task.colSpan}`,
@@ -350,17 +349,16 @@ const WeeklyCalendar = ({ currentDate, tasks, isDarkMode, onTaskClick }) => {
                 }}
               >
                 {/* Status Bar */}
-                <div className={`absolute top-0 bottom-0 right-0 w-1.5 ${
-                  task.status === 'open' ? 'bg-emerald-500' : 
-                  task.status === 'in_progress' ? 'bg-amber-500' : 'bg-slate-400'
-                }`}></div>
+                <div className={`absolute top-0 bottom-0 right-0 w-1.5 ${task.status === 'open' ? 'bg-emerald-500' :
+                    task.status === 'in_progress' ? 'bg-amber-500' : 'bg-slate-400'
+                  }`}></div>
 
                 <div className="pr-3 flex items-center justify-between">
                   <span className={`text-xs font-bold truncate ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
                     {task.title}
                   </span>
                 </div>
-                
+
                 <div className="pr-3 flex items-center gap-2 mt-1">
                   {responsible && (
                     <div className={`flex items-center gap-1 text-[10px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
@@ -374,7 +372,7 @@ const WeeklyCalendar = ({ currentDate, tasks, isDarkMode, onTaskClick }) => {
             )
           })}
         </div>
-        
+
         {processedTasks.length === 0 && (
           <div className="flex flex-col items-center justify-center h-48 text-slate-400 opacity-60">
             <CalendarRange size={48} className="mb-2" />
@@ -392,7 +390,7 @@ const CreateMissionModal = ({ isOpen, onClose, isDarkMode, users, onCreate }) =>
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    responsibleUsersId: [],
+    responsibleUserIds: [],
     participantsIds: [],
     tagId: '',
     status: 'open',
@@ -428,10 +426,9 @@ const CreateMissionModal = ({ isOpen, onClose, isDarkMode, users, onCreate }) =>
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-sm transition-opacity" onClick={onClose} />
-      
-      <div className={`relative w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] ${
-        isDarkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'
-      }`}>
+
+      <div className={`relative w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden transform transition-all animate-in fade-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] ${isDarkMode ? 'bg-slate-800 text-white' : 'bg-white text-slate-900'
+        }`}>
         <div className={`p-6 border-b flex justify-between items-center flex-shrink-0 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}>
           <h2 className="text-xl font-bold flex items-center gap-2">
             <Plus className="text-blue-500" />
@@ -447,25 +444,23 @@ const CreateMissionModal = ({ isOpen, onClose, isDarkMode, users, onCreate }) =>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="md:col-span-2 space-y-2">
                 <label className="text-sm font-bold opacity-70">כותרת המשימה</label>
-                <input 
+                <input
                   type="text"
                   required
                   placeholder="לדוגמה: עדכון שרתי בסיס נתונים"
-                  className={`w-full p-3 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                    isDarkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'
-                  }`}
+                  className={`w-full p-3 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500/20 ${isDarkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'
+                    }`}
                   value={formData.title}
-                  onChange={e => setFormData({...formData, title: e.target.value})}
+                  onChange={e => setFormData({ ...formData, title: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold opacity-70">דחיפות</label>
-                <select 
-                  className={`w-full p-3 rounded-xl border outline-none cursor-pointer ${
-                    isDarkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'
-                  }`}
+                <select
+                  className={`w-full p-3 rounded-xl border outline-none cursor-pointer ${isDarkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'
+                    }`}
                   value={formData.priority}
-                  onChange={e => setFormData({...formData, priority: e.target.value})}
+                  onChange={e => setFormData({ ...formData, priority: e.target.value })}
                 >
                   <option value="low">נמוכה</option>
                   <option value="medium">בינונית</option>
@@ -476,26 +471,24 @@ const CreateMissionModal = ({ isOpen, onClose, isDarkMode, users, onCreate }) =>
 
             <div className="space-y-2">
               <label className="text-sm font-bold opacity-70">תיאור חופשי</label>
-              <textarea 
+              <textarea
                 rows={3}
                 placeholder="פרט את דרישות המשימה..."
-                className={`w-full p-3 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500/20 resize-none ${
-                  isDarkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'
-                }`}
+                className={`w-full p-3 rounded-xl border outline-none focus:ring-2 focus:ring-blue-500/20 resize-none ${isDarkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'
+                  }`}
                 value={formData.description}
-                onChange={e => setFormData({...formData, description: e.target.value})}
+                onChange={e => setFormData({ ...formData, description: e.target.value })}
               />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
                 <label className="text-sm font-bold opacity-70">תגית ראשית</label>
-                <select 
-                  className={`w-full p-3 rounded-xl border outline-none cursor-pointer ${
-                    isDarkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'
-                  }`}
+                <select
+                  className={`w-full p-3 rounded-xl border outline-none cursor-pointer ${isDarkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'
+                    }`}
                   value={formData.tagId}
-                  onChange={e => setFormData({...formData, tagId: e.target.value})}
+                  onChange={e => setFormData({ ...formData, tagId: e.target.value })}
                 >
                   <option value="">בחר תגית...</option>
                   {TAGS.map(tag => (
@@ -505,44 +498,40 @@ const CreateMissionModal = ({ isOpen, onClose, isDarkMode, users, onCreate }) =>
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold opacity-70">תאריך התחלה</label>
-                <input 
+                <input
                   type="date"
-                  className={`w-full p-3 rounded-xl border outline-none ${
-                    isDarkMode ? 'bg-slate-900/50 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'
-                  }`}
+                  className={`w-full p-3 rounded-xl border outline-none ${isDarkMode ? 'bg-slate-900/50 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'
+                    }`}
                   value={formData.date}
-                  onChange={e => setFormData({...formData, date: e.target.value})}
+                  onChange={e => setFormData({ ...formData, date: e.target.value })}
                 />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold opacity-70">תאריך יעד (Deadline)</label>
-                <input 
+                <input
                   type="date"
-                  className={`w-full p-3 rounded-xl border outline-none ${
-                    isDarkMode ? 'bg-slate-900/50 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'
-                  }`}
+                  className={`w-full p-3 rounded-xl border outline-none ${isDarkMode ? 'bg-slate-900/50 border-slate-700 text-white' : 'bg-slate-50 border-slate-200'
+                    }`}
                   value={formData.deadline}
-                  onChange={e => setFormData({...formData, deadline: e.target.value})}
+                  onChange={e => setFormData({ ...formData, deadline: e.target.value })}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-bold opacity-70">אחראים</label>
-              <div className={`p-3 rounded-xl border min-h-[80px] max-h-[120px] overflow-y-auto grid grid-cols-2 sm:grid-cols-4 gap-2 ${
-                  isDarkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'
-              }`}>
+              <div className={`p-3 rounded-xl border min-h-[80px] max-h-[120px] overflow-y-auto grid grid-cols-2 sm:grid-cols-4 gap-2 ${isDarkMode ? 'bg-slate-900/50 border-slate-700' : 'bg-slate-50 border-slate-200'
+                }`}>
                 {users.map(u => {
-                  const isSelected = formData.responsibleUsersId.includes(u.id);
+                  const isSelected = formData.responsibleUserIds.includes(u.id);
                   return (
-                    <div 
+                    <div
                       key={u.id}
-                      onClick={() => toggleUserSelection('responsibleUsersId', u.id)}
-                      className={`flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all border select-none ${
-                        isSelected 
-                          ? 'bg-blue-500 text-white border-blue-600 shadow-sm' 
+                      onClick={() => toggleUserSelection('responsibleUserIds', u.id)}
+                      className={`flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all border select-none ${isSelected
+                          ? 'bg-blue-500 text-white border-blue-600 shadow-sm'
                           : isDarkMode ? 'bg-slate-800 border-slate-700 hover:bg-slate-700' : 'bg-white border-slate-200 hover:bg-slate-100'
-                      }`}
+                        }`}
                     >
                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${u.iconColor} bg-white/90`}>
                         <User size={10} />
@@ -556,16 +545,15 @@ const CreateMissionModal = ({ isOpen, onClose, isDarkMode, users, onCreate }) =>
           </form>
         </div>
 
-        <div className={`p-4 bg-opacity-50 flex justify-end gap-3 flex-shrink-0 ${
-          isDarkMode ? 'bg-slate-900/30' : 'bg-slate-50'
-        }`}>
-           <button onClick={onClose} className={`px-6 py-2 rounded-xl text-sm font-bold ${isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}>
-             ביטול
-           </button>
-           <button onClick={handleSubmit} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 flex items-center gap-2">
-             <Plus size={16} />
-             צור משימה
-           </button>
+        <div className={`p-4 bg-opacity-50 flex justify-end gap-3 flex-shrink-0 ${isDarkMode ? 'bg-slate-900/30' : 'bg-slate-50'
+          }`}>
+          <button onClick={onClose} className={`px-6 py-2 rounded-xl text-sm font-bold ${isDarkMode ? 'text-slate-400 hover:text-white' : 'text-slate-500 hover:text-slate-900'}`}>
+            ביטול
+          </button>
+          <button onClick={handleSubmit} className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 flex items-center gap-2">
+            <Plus size={16} />
+            צור משימה
+          </button>
         </div>
       </div>
     </div>
@@ -596,15 +584,14 @@ const CustomDatePicker = ({ selectedDate, onSelect, onClose, isDarkMode }) => {
   const month = currentViewDate.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const startDay = new Date(year, month, 1).getDay();
-  
+
   const blanks = Array(startDay).fill(null);
   const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
   const totalSlots = [...blanks, ...days];
 
   return (
-    <div className={`absolute top-full mt-4 left-1/2 transform -translate-x-1/2 w-72 rounded-xl shadow-2xl border p-4 animate-in fade-in zoom-in-95 duration-200 ${
-      isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'
-    }`}>
+    <div className={`absolute top-full mt-4 left-1/2 transform -translate-x-1/2 w-72 rounded-xl shadow-2xl border p-4 animate-in fade-in zoom-in-95 duration-200 ${isDarkMode ? 'bg-slate-800 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-800'
+      }`}>
       <div className="flex items-center justify-between mb-4">
         <button onClick={handleNextMonth} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full transition-colors">
           <ChevronRight size={20} />
@@ -630,9 +617,8 @@ const CustomDatePicker = ({ selectedDate, onSelect, onClose, isDarkMode }) => {
             <button
               key={index}
               onClick={() => handleDayClick(day)}
-              className={`h-8 w-8 rounded-full flex items-center justify-center text-sm transition-all relative ${
-                isDarkMode ? 'hover:bg-slate-700 text-slate-200' : 'hover:bg-blue-50 text-slate-700'
-              }`}
+              className={`h-8 w-8 rounded-full flex items-center justify-center text-sm transition-all relative ${isDarkMode ? 'hover:bg-slate-700 text-slate-200' : 'hover:bg-blue-50 text-slate-700'
+                }`}
             >
               {day}
             </button>
@@ -644,7 +630,7 @@ const CustomDatePicker = ({ selectedDate, onSelect, onClose, isDarkMode }) => {
 };
 
 const MissionModal = ({ mission, isOpen, onClose, isDarkMode }) => {
-  const [activeTab, setActiveTab] = useState('details'); 
+  const [activeTab, setActiveTab] = useState('details');
 
   if (!isOpen || !mission) return null;
 
@@ -705,7 +691,7 @@ const MissionModal = ({ mission, isOpen, onClose, isDarkMode }) => {
               <div>
                 <h3 className={`text-sm font-bold mb-2 flex items-center gap-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}><Users size={16} /> אחראים</h3>
                 <div className="flex flex-wrap gap-2">
-                  {mission.responsibleUsersId.map(id => {
+                  {mission.responsibleUserIds.map(id => {
                     const u = getUserById(id);
                     return u ? <span key={id} className={`text-xs px-2 py-1 rounded border ${isDarkMode ? 'bg-slate-700 border-slate-600' : 'bg-slate-100 border-slate-200'}`}>{u.name}</span> : null;
                   })}
@@ -741,7 +727,7 @@ const MissionModal = ({ mission, isOpen, onClose, isDarkMode }) => {
 };
 
 const CompactCard = ({ user, isDarkMode, onClick, allMissions }) => {
-  const userMissions = allMissions.filter(m => m.responsibleUsersId.includes(user.id));
+  const userMissions = allMissions.filter(m => m.responsibleUserIds.includes(user.id));
   const stats = {
     open: userMissions.filter(m => m.status === 'open').length,
     processing: userMissions.filter(m => m.status === 'in_progress').length,
@@ -771,13 +757,13 @@ const CompactCard = ({ user, isDarkMode, onClick, allMissions }) => {
 const MissionRow = ({ mission, isDarkMode, onClick }) => {
   const statusLabel = getStatusLabel(mission.status);
   const tag = getTagById(mission.tagId);
-  const responsible = getUserById(mission.responsibleUsersId[0]);
+  const responsible = getUserById(mission.responsibleUserIds[0]);
 
   return (
     <div onClick={onClick} className={`flex items-center gap-4 p-4 rounded-xl border mb-3 transition-all cursor-pointer ${isDarkMode ? 'bg-slate-800 border-slate-700 hover:bg-slate-750' : 'bg-white border-slate-100 hover:bg-slate-50 hover:shadow-sm'}`}>
       <div className="flex flex-col items-center justify-center w-12 flex-shrink-0">
         <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`}>
-           <AlertCircle size={16} className={mission.status === 'open' ? 'text-emerald-500' : mission.status === 'in_progress' ? 'text-amber-500' : 'text-slate-500'} />
+          <AlertCircle size={16} className={mission.status === 'open' ? 'text-emerald-500' : mission.status === 'in_progress' ? 'text-amber-500' : 'text-slate-500'} />
         </div>
         <span className="text-[10px] font-mono text-slate-400">{mission.id}</span>
       </div>
@@ -807,7 +793,7 @@ const MissionRow = ({ mission, isDarkMode, onClick }) => {
 };
 
 const KanbanTask = ({ task, isDarkMode, onDragStart, onClick }) => {
-  const responsible = getUserById(task.responsibleUsersId[0]);
+  const responsible = getUserById(task.responsibleUserIds[0]);
   return (
     <div draggable onDragStart={(e) => onDragStart(e, task.id)} onClick={onClick} className={`p-4 rounded-xl border shadow-sm mb-3 cursor-pointer active:cursor-grabbing transition-all hover:shadow-md group ${isDarkMode ? 'bg-slate-800 border-slate-700 hover:border-slate-600' : 'bg-white border-slate-100 hover:border-slate-200'}`}>
       <div className="flex justify-between items-start mb-2">
@@ -816,7 +802,7 @@ const KanbanTask = ({ task, isDarkMode, onDragStart, onClick }) => {
       <p className={`text-xs mb-4 line-clamp-2 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>{task.description}</p>
       <div className="flex items-center justify-between mt-auto">
         <div className="flex items-center gap-1 text-slate-400 text-xs"><Clock size={12} /><span>{task.deadline}</span></div>
-        {responsible && <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${responsible.iconColor}`}><User size={12}/></div>}
+        {responsible && <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] ${responsible.iconColor}`}><User size={12} /></div>}
       </div>
     </div>
   );
@@ -845,13 +831,13 @@ export default function App() {
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [currentPage, setCurrentPage] = useState('home'); 
+  const [currentPage, setCurrentPage] = useState('home');
   const [viewMode, setViewMode] = useState('grid');
   const [selectedUser, setSelectedUser] = useState(null);
   const [selectedMission, setSelectedMission] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [searchType, setSearchType] = useState('all');
-  const [timeRange, setTimeRange] = useState('day'); 
+  const [timeRange, setTimeRange] = useState('day');
   const [missions, setMissions] = useState(INITIAL_MISSIONS);
 
   const toggleDarkMode = () => setIsDarkMode(!isDarkMode);
@@ -878,34 +864,34 @@ export default function App() {
       else if (searchType === 'status') matchesSearch = m.status.includes(term);
       else matchesSearch = m.title.toLowerCase().includes(term) || m.description.toLowerCase().includes(term);
     }
-    
+
     let matchesTime = true;
     const mDate = new Date(m.date);
     const curr = new Date(currentDate);
     if (timeRange === 'day') {
-        matchesTime = mDate.toDateString() === curr.toDateString();
+      matchesTime = mDate.toDateString() === curr.toDateString();
     }
     // For weekly view, we filter inside WeeklyCalendar to show the correct week, 
     // but for stats calculation in CompactCard, we also need to know which missions are active this week.
     if (timeRange === 'week') {
-        const startWindow = new Date(currentDate);
-        const dayOfWeek = startWindow.getDay();
-        const diffToSunday = startWindow.getDate() - dayOfWeek;
-        startWindow.setDate(diffToSunday);
-        startWindow.setHours(0,0,0,0);
-        
-        const endWindow = new Date(startWindow);
-        endWindow.setDate(startWindow.getDate() + 6);
-        endWindow.setHours(23,59,59,999);
+      const startWindow = new Date(currentDate);
+      const dayOfWeek = startWindow.getDay();
+      const diffToSunday = startWindow.getDate() - dayOfWeek;
+      startWindow.setDate(diffToSunday);
+      startWindow.setHours(0, 0, 0, 0);
 
-        const mStart = new Date(m.date);
-        const mEnd = m.deadline ? new Date(m.deadline) : mStart;
-        mStart.setHours(0,0,0,0);
-        mEnd.setHours(23,59,59,999);
-        
-        matchesTime = mStart <= endWindow && mEnd >= startWindow;
+      const endWindow = new Date(startWindow);
+      endWindow.setDate(startWindow.getDate() + 6);
+      endWindow.setHours(23, 59, 59, 999);
+
+      const mStart = new Date(m.date);
+      const mEnd = m.deadline ? new Date(m.deadline) : mStart;
+      mStart.setHours(0, 0, 0, 0);
+      mEnd.setHours(23, 59, 59, 999);
+
+      matchesTime = mStart <= endWindow && mEnd >= startWindow;
     }
-    
+
     return matchesSearch && matchesTime;
   });
 
@@ -919,7 +905,7 @@ export default function App() {
     <div className={`h-screen max-h-screen font-sans flex transition-colors duration-300 overflow-hidden ${isDarkMode ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-900'}`} dir="rtl">
       <MissionModal mission={selectedMission} isOpen={!!selectedMission} onClose={handleCloseModal} isDarkMode={isDarkMode} />
       <CreateMissionModal isOpen={isCreateModalOpen} onClose={() => setIsCreateModalOpen(false)} isDarkMode={isDarkMode} users={USERS} onCreate={handleCreateMission} />
-      
+
       <aside className={`w-20 md:w-64 flex-shrink-0 flex flex-col items-center md:items-start py-6 px-4 shadow-xl z-20 transition-all duration-300 ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
         <div className="flex items-center gap-3 mb-10 w-full justify-center md:justify-start px-2">
           <Layers className="text-blue-600" size={32} />
@@ -939,18 +925,18 @@ export default function App() {
       <main className="flex-1 flex flex-col h-full relative">
         <header className={`relative h-20 flex-shrink-0 flex items-center justify-between px-8 shadow-sm z-30 ${isDarkMode ? 'bg-slate-800' : 'bg-white'}`}>
           <div className="flex items-center gap-4">
-             {currentPage === 'home' && (
-                <div className="flex items-center bg-slate-100 p-1 rounded-lg dark:bg-slate-700">
-                  <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600 dark:bg-slate-600 dark:text-white' : 'text-slate-400 hover:text-slate-600'}`}><LayoutGrid size={20} /></button>
-                  <button onClick={() => setViewMode('list')} className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600 dark:bg-slate-600 dark:text-white' : 'text-slate-400 hover:text-slate-600'}`}><AlignJustify size={20} /></button>
-                </div>
-             )}
-             {currentPage === 'missions' && (
-               <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right duration-300">
-                 <button onClick={() => setCurrentPage('home')} className={`p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}><ArrowRight size={20} className="transform rotate-180" /></button>
-                 <h2 className={`text-xl font-bold hidden sm:block ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>המשימות של {selectedUser ? selectedUser.name : 'מאור'}</h2>
-               </div>
-             )}
+            {currentPage === 'home' && (
+              <div className="flex items-center bg-slate-100 p-1 rounded-lg dark:bg-slate-700">
+                <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white shadow-sm text-blue-600 dark:bg-slate-600 dark:text-white' : 'text-slate-400 hover:text-slate-600'}`}><LayoutGrid size={20} /></button>
+                <button onClick={() => setViewMode('list')} className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white shadow-sm text-blue-600 dark:bg-slate-600 dark:text-white' : 'text-slate-400 hover:text-slate-600'}`}><AlignJustify size={20} /></button>
+              </div>
+            )}
+            {currentPage === 'missions' && (
+              <div className="flex items-center gap-2 animate-in fade-in slide-in-from-right duration-300">
+                <button onClick={() => setCurrentPage('home')} className={`p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 ${isDarkMode ? 'text-white' : 'text-slate-800'}`}><ArrowRight size={20} className="transform rotate-180" /></button>
+                <h2 className={`text-xl font-bold hidden sm:block ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>המשימות של {selectedUser ? selectedUser.name : 'מאור'}</h2>
+              </div>
+            )}
           </div>
           <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center bg-white dark:bg-slate-700 rounded-full shadow-sm border border-slate-200 dark:border-slate-600 px-2 py-1 date-picker-container">
             <button onClick={() => changeDate(-1)} className="p-2 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-full transition-colors text-slate-500 dark:text-slate-300"><ChevronRight size={20} /></button>
@@ -982,29 +968,29 @@ export default function App() {
           {currentPage === 'home' && (
             <div className="flex flex-col h-full">
               <div className={`relative flex flex-col md:flex-row gap-4 mb-6 shrink-0 animate-in fade-in slide-in-from-top-2 duration-200 items-center`}>
-                  <div className={`relative flex-[1.5] max-w-md flex items-center p-1 rounded-xl border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
-                     <div className="relative pl-2 border-l border-slate-200 dark:border-slate-700">
-                        <select value={searchType} onChange={(e) => setSearchType(e.target.value)} className={`appearance-none bg-transparent pr-8 pl-2 py-2 text-sm font-medium outline-none cursor-pointer ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>{SEARCH_TYPES.map(type => (<option key={type.id} value={type.id}>{type.label}</option>))}</select>
-                        <Filter size={14} className={`absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} />
-                     </div>
-                     <div className="flex-1 relative">
-                       <Search size={18} className={`absolute right-3 top-1/2 -translate-y-1/2 ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`} />
-                       <input type="text" placeholder="חיפוש..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className={`w-full bg-transparent pr-10 pl-8 py-2 text-sm outline-none ${isDarkMode ? 'text-white placeholder-slate-500' : 'text-slate-800 placeholder-slate-400'}`} />
-                       {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400"><X size={14} /></button>}
-                     </div>
+                <div className={`relative flex-[1.5] max-w-md flex items-center p-1 rounded-xl border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                  <div className="relative pl-2 border-l border-slate-200 dark:border-slate-700">
+                    <select value={searchType} onChange={(e) => setSearchType(e.target.value)} className={`appearance-none bg-transparent pr-8 pl-2 py-2 text-sm font-medium outline-none cursor-pointer ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>{SEARCH_TYPES.map(type => (<option key={type.id} value={type.id}>{type.label}</option>))}</select>
+                    <Filter size={14} className={`absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`} />
                   </div>
-                  
-                  <div className="flex-1"></div>
-                  
-                  <div className={`flex p-1 rounded-xl border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
-                    {[{ id: 'day', label: 'יומי', icon: CalendarDays }, { id: 'week', label: 'שבועי', icon: CalendarRange }].map(option => (
-                      <button key={option.id} onClick={() => setTimeRange(option.id)} className={`relative px-4 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 z-0 ${timeRange === option.id ? (isDarkMode ? 'bg-slate-700 text-white shadow-sm ring-1 ring-slate-600' : 'bg-blue-50 text-blue-600 shadow-sm ring-1 ring-blue-100') : (isDarkMode ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-800')}`}>
-                        <option.icon size={16} /><span className="hidden sm:inline">{option.label}</span>
-                      </button>
-                    ))}
+                  <div className="flex-1 relative">
+                    <Search size={18} className={`absolute right-3 top-1/2 -translate-y-1/2 ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`} />
+                    <input type="text" placeholder="חיפוש..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} className={`w-full bg-transparent pr-10 pl-8 py-2 text-sm outline-none ${isDarkMode ? 'text-white placeholder-slate-500' : 'text-slate-800 placeholder-slate-400'}`} />
+                    {searchTerm && <button onClick={() => setSearchTerm('')} className="absolute left-2 top-1/2 -translate-y-1/2 p-1 rounded-full hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-400"><X size={14} /></button>}
                   </div>
-                  <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95"><Plus size={18} /><span className="hidden sm:inline">יצירת משימה</span></button>
                 </div>
+
+                <div className="flex-1"></div>
+
+                <div className={`flex p-1 rounded-xl border ${isDarkMode ? 'bg-slate-800 border-slate-700' : 'bg-white border-slate-200'}`}>
+                  {[{ id: 'day', label: 'יומי', icon: CalendarDays }, { id: 'week', label: 'שבועי', icon: CalendarRange }].map(option => (
+                    <button key={option.id} onClick={() => setTimeRange(option.id)} className={`relative px-4 py-1.5 rounded-lg text-sm font-medium transition-all flex items-center gap-2 z-0 ${timeRange === option.id ? (isDarkMode ? 'bg-slate-700 text-white shadow-sm ring-1 ring-slate-600' : 'bg-blue-50 text-blue-600 shadow-sm ring-1 ring-blue-100') : (isDarkMode ? 'text-slate-400 hover:text-slate-200' : 'text-slate-500 hover:text-slate-800')}`}>
+                      <option.icon size={16} /><span className="hidden sm:inline">{option.label}</span>
+                    </button>
+                  ))}
+                </div>
+                <button onClick={() => setIsCreateModalOpen(true)} className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95"><Plus size={18} /><span className="hidden sm:inline">יצירת משימה</span></button>
+              </div>
 
               <div className="flex-1 overflow-hidden relative">
                 {timeRange === 'week' && (
@@ -1012,7 +998,7 @@ export default function App() {
                     <WeeklyCalendar currentDate={currentDate} tasks={filteredMissions} isDarkMode={isDarkMode} onTaskClick={handleMissionClick} />
                   ) : (
                     <div className="h-full grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 lg:grid-rows-3 gap-4 overflow-y-auto custom-scrollbar">
-                       {USERS.map((user) => (<CompactCard key={user.id} user={user} allMissions={filteredMissions} isDarkMode={isDarkMode} onClick={() => handleUserClick(user)} />))}
+                      {USERS.map((user) => (<CompactCard key={user.id} user={user} allMissions={filteredMissions} isDarkMode={isDarkMode} onClick={() => handleUserClick(user)} />))}
                     </div>
                   )
                 )}

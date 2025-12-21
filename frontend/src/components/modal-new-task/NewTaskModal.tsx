@@ -87,7 +87,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
         priority,
         date: startDate ? new Date(startDate).getTime() : Date.now(),
         deadline: deadline ? new Date(deadline).getTime() : undefined,
-        responsibleUsersId: selectedUserIds.length > 0 ? selectedUserIds : [],
+        responsibleUserIds: selectedUserIds.length > 0 ? selectedUserIds : [],
         secondaryTagIds: selectedSecondaryTagIds.length > 0 ? selectedSecondaryTagIds : [],
       };
 

@@ -27,9 +27,15 @@ export async function apiRequest<T>(
   options: RequestInit = {}
 ): Promise<ApiResponse<T>> {
   try {
-    const defaultHeaders = {
+    const defaultHeaders: Record<string, string> = {
       "Content-Type": "application/json",
     };
+
+    // Add Authorization header if token exists
+    const token = sessionStorage.getItem("auth_token");
+    if (token) {
+      defaultHeaders["Authorization"] = `Bearer ${token}`;
+    }
 
     const response = await fetch(url, {
       ...options,

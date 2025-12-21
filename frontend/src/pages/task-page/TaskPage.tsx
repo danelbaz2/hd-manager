@@ -102,7 +102,7 @@ const TaskPage: React.FC = () => {
     const dateFilteredTasks = filterTasksByDateRange(optimisticTasks, selectedDate, viewMode);
     // Then filter by selected user
     return dateFilteredTasks.filter((task) =>
-      task.responsibleUsersId?.includes(selectedUserId)
+      task.responsibleUserIds?.includes(selectedUserId)
     );
   }, [optimisticTasks, selectedDate, viewMode, selectedUserId]);
 
@@ -130,20 +130,36 @@ const TaskPage: React.FC = () => {
 
       // 1. Optimistic update
       setOptimisticTasks((prev) =>
-        prev.map((t) => (t.id === taskId ? { ...t, status: newStatus } : t))
+        prev.map((t) => {
+          if (t.id !== taskId) return t;
+          return {
+            ...t,
+            status: newStatus,
+            base: {
+              ...(t.base || {
+                isDeleted: false,
+                createdAt: Date.now(),
+                entityType: 'task'
+              }),
+              updatedAt: Date.now()
+            }
+          };
+        })
       );
 
       try {
         // 2. API Call
         const response = await updateTask(taskId, { status: newStatus });
 
-        // 3. Sync/Revert
-        if (response.success) {
-          refreshTasks();
-        } else {
-          console.error("Failed to update task status:", response.error);
-          refreshTasks(); // Revert to server state
-        }
+        // 3. Sync - delay refresh to let optimistic UI settle
+        setTimeout(() => {
+          if (response.success) {
+            refreshTasks();
+          } else {
+            console.error("Failed to update task status:", response.error);
+            refreshTasks(); // Revert to server state
+          }
+        }, 300);
       } catch (error) {
         console.error("Error updating task status:", error);
         refreshTasks(); // Revert to server state

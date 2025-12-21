@@ -7,6 +7,7 @@ class BaseEntityMeta(BaseModel):
     isDeleted: bool = False
     createdAt: int
     updatedAt: int
-    lut: int
     entityType: str
     isActive: bool = True
+    createdBy: Optional[str] = None
+    updatedBy: Optional[str] = None

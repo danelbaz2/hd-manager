@@ -51,14 +51,14 @@ const TaskListItem: React.FC<TaskListItemProps> = ({ task, users, tags }) => {
 
     // Get assigned users
     const assignedUsers = users.filter((user) =>
-        task.responsibleUsersId?.includes(user.id)
+        task.responsibleUserIds?.includes(user.id)
     );
 
     // Get user colors for gradient
     const userColors = assignedUsers.map((user) => user.color);
 
     // Get task tags
-    const taskTags = tags.filter((tag) => task.tagsId?.includes(tag.id));
+    const taskTags = tags.filter((tag) => task.secondaryTagIds?.includes(tag.id));
 
     // Format date
     const formatDate = (timestamp?: number): string => {

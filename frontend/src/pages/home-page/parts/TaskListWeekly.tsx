@@ -232,8 +232,8 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
                 >
                     {processedTasks.map((task) => {
                         const responsible =
-                            task.responsibleUsersId && task.responsibleUsersId.length > 0
-                                ? getUserById(task.responsibleUsersId[0], users)
+                            task.responsibleUserIds && task.responsibleUserIds.length > 0
+                                ? getUserById(task.responsibleUserIds[0], users)
                                 : null;
                         const taskTags = getTaskSecondaryTags(task);
 

@@ -61,6 +61,7 @@ def login():
         token = generate_token(
             user_id=user['_id'],
             username=user['username'],
+            full_name=user.get('fullName'),
             role=user.get('role', 'regular')
         )
         

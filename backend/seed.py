@@ -19,6 +19,19 @@ def get_relative_date(diff_days):
 def get_timestamp_ms():
     return int(datetime.now().timestamp() * 1000)
 
+def create_base(entity_type, days_offset=-30):
+    """Helper to create consistent base entity structure"""
+    ts = get_relative_date(days_offset)
+    return {
+        "isDeleted": False,
+        "isActive": True,
+        "createdAt": ts,
+        "updatedAt": ts,
+        "entityType": entity_type,
+        "createdBy": "System Admin",
+        "updatedBy": "System Admin"
+    }
+
 def load_profile_image_base64(username):
     """Load a profile image and convert to base64 data URI"""
     # Path to profile images
@@ -51,15 +64,15 @@ def seed(clean_only=False, bulk_tasks=False):
         print("  Loading profile images as base64...")
         
         users_data = [
-            { "fullName": 'עדן טירם', "username": "eden", "passwordHash": "Aa123456123456", "role": 'admin', "color": '#93C5FD', "profileImage": load_profile_image_base64("eden"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'מאור נובחוב', "username": "maor", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#FDBA74', "profileImage": load_profile_image_base64("maor"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'עילי אדמוני', "username": "ilay", "passwordHash": "Aa123456123456", "role": 'admin', "color": '#86EFAC', "profileImage": load_profile_image_base64("ilay"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'דן אלבז', "username": "dan", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("dan"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'אוראל חסידיאן', "username": "orel", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#C4B5FD', "profileImage": load_profile_image_base64("orel"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'אליה דנאל', "username": "eliya", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#FDA4AF', "profileImage": load_profile_image_base64("eliya"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'אורי רוגוזיק', "username": "ori", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("ori"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'עדי פליישמן', "username": "adi", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#F9A8D4', "profileImage": load_profile_image_base64("adi"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
-            { "fullName": 'גל פרץ', "username": "gal", "passwordHash": "Aa123456123456", "role": 'regular', "color": '#93C5FD', "profileImage": load_profile_image_base64("gal"), "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "user"}},
+            { "fullName": 'עדן טירם', "username": "eden", "passwordHash": "123456", "role": 'admin', "color": '#93C5FD', "profileImage": load_profile_image_base64("eden"), "base": create_base("user")},
+            { "fullName": 'מאור נובחוב', "username": "maor", "passwordHash": "123456", "role": 'regular', "color": '#FDBA74', "profileImage": load_profile_image_base64("maor"), "base": create_base("user")},
+            { "fullName": 'עילי אדמוני', "username": "ilay", "passwordHash": "123456", "role": 'admin', "color": '#86EFAC', "profileImage": load_profile_image_base64("ilay"), "base": create_base("user")},
+            { "fullName": 'דן אלבז', "username": "dan", "passwordHash": "123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("dan"), "base": create_base("user")},
+            { "fullName": 'אוראל חסידיאן', "username": "orel", "passwordHash": "123456", "role": 'regular', "color": '#C4B5FD', "profileImage": load_profile_image_base64("orel"), "base": create_base("user")},
+            { "fullName": 'אליה דנאל', "username": "eliya", "passwordHash": "123456", "role": 'regular', "color": '#FDA4AF', "profileImage": load_profile_image_base64("eliya"), "base": create_base("user")},
+            { "fullName": 'אורי רוגוזיק', "username": "ori", "passwordHash": "123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("ori"), "base": create_base("user")},
+            { "fullName": 'עדי פליישמן', "username": "adi", "passwordHash": "123456", "role": 'regular', "color": '#F9A8D4', "profileImage": load_profile_image_base64("adi"), "base": create_base("user")},
+            { "fullName": 'גל פרץ', "username": "gal", "passwordHash": "123456", "role": 'regular', "color": '#93C5FD', "profileImage": load_profile_image_base64("gal"), "base": create_base("user")},
         ]
         
         user_ids = []
@@ -85,11 +98,11 @@ def seed(clean_only=False, bulk_tasks=False):
         # 2. Primary Tags - Categories/Domains (using PRIMARY_TAG_COLORS from frontend)
         print("Seeding Primary Tags...")
         primary_tags_data = [
-            { "name": 'פיתוח', "description": "קשור לפיתוח תוכנה", "color": '#3B82F6', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "primary_tag"}},  # Blue
-            { "name": 'עיצוב', "description": "קשור ל-UI/UX", "color": '#8B5CF6', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "primary_tag"}},  # Violet
-            { "name": 'שרתים', "description": "DevOps ותשתיות", "color": '#06B6D4', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "primary_tag"}},  # Cyan
-            { "name": 'ניהול', "description": "ניהול פרויקטים", "color": '#22C55E', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "primary_tag"}},  # Green
-            { "name": 'בדיקות', "description": "QA וטסטים", "color": '#F97316', "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "primary_tag"}},  # Orange
+            { "name": 'פיתוח', "description": "קשור לפיתוח תוכנה", "color": '#3B82F6', "base": create_base("primary_tag", -10)},  # Blue
+            { "name": 'עיצוב', "description": "קשור ל-UI/UX", "color": '#8B5CF6', "base": create_base("primary_tag", -10)},  # Violet
+            { "name": 'שרתים', "description": "DevOps ותשתיות", "color": '#06B6D4', "base": create_base("primary_tag", -10)},  # Cyan
+            { "name": 'ניהול', "description": "ניהול פרויקטים", "color": '#22C55E', "base": create_base("primary_tag", -10)},  # Green
+            { "name": 'בדיקות', "description": "QA וטסטים", "color": '#F97316', "base": create_base("primary_tag", -10)},  # Orange
         ]
 
         primary_tag_ids = []
@@ -108,28 +121,28 @@ def seed(clean_only=False, bulk_tasks=False):
         print("Seeding Secondary Tags...")
         secondary_tags_data = [
             # פיתוח (Dev) secondary tags
-            { "name": 'עדכון', "primaryTagId": primary_tag_ids[0], "description": "עדכון קוד או תכונה", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
-            { "name": 'באג', "primaryTagId": primary_tag_ids[0], "description": "תיקון באג", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
-            { "name": 'פיצ\'ר חדש', "primaryTagId": primary_tag_ids[0], "description": "פיתוח תכונה חדשה", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
+            { "name": 'עדכון', "primaryTagId": primary_tag_ids[0], "description": "עדכון קוד או תכונה", "base": create_base("secondary_tag", -10)},
+            { "name": 'באג', "primaryTagId": primary_tag_ids[0], "description": "תיקון באג", "base": create_base("secondary_tag", -10)},
+            { "name": 'פיצ\'ר חדש', "primaryTagId": primary_tag_ids[0], "description": "פיתוח תכונה חדשה", "base": create_base("secondary_tag", -10)},
             
             # עיצוב (Design) secondary tags
-            { "name": 'UI', "primaryTagId": primary_tag_ids[1], "description": "עיצוב ממשק משתמש", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
-            { "name": 'UX', "primaryTagId": primary_tag_ids[1], "description": "חווית משתמש", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
+            { "name": 'UI', "primaryTagId": primary_tag_ids[1], "description": "עיצוב ממשק משתמש", "base": create_base("secondary_tag", -10)},
+            { "name": 'UX', "primaryTagId": primary_tag_ids[1], "description": "חווית משתמש", "base": create_base("secondary_tag", -10)},
             
             # שרתים (Servers) secondary tags
-            { "name": 'בדיקה', "primaryTagId": primary_tag_ids[2], "description": "בדיקת שרתים", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
-            { "name": 'גיבוי', "primaryTagId": primary_tag_ids[2], "description": "גיבוי נתונים", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
-            { "name": 'הגדרה', "primaryTagId": primary_tag_ids[2], "description": "הגדרת סביבה", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
+            { "name": 'בדיקה', "primaryTagId": primary_tag_ids[2], "description": "בדיקת שרתים", "base": create_base("secondary_tag", -10)},
+            { "name": 'גיבוי', "primaryTagId": primary_tag_ids[2], "description": "גיבוי נתונים", "base": create_base("secondary_tag", -10)},
+            { "name": 'הגדרה', "primaryTagId": primary_tag_ids[2], "description": "הגדרת סביבה", "base": create_base("secondary_tag", -10)},
             
             # ניהול (Management) secondary tags
-            { "name": 'פגישה', "primaryTagId": primary_tag_ids[3], "description": "פגישת צוות", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
-            { "name": 'מצגת', "primaryTagId": primary_tag_ids[3], "description": "הכנת מצגת", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
-            { "name": 'תכנון', "primaryTagId": primary_tag_ids[3], "description": "תכנון ספרינט", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
+            { "name": 'פגישה', "primaryTagId": primary_tag_ids[3], "description": "פגישת צוות", "base": create_base("secondary_tag", -10)},
+            { "name": 'מצגת', "primaryTagId": primary_tag_ids[3], "description": "הכנת מצגת", "base": create_base("secondary_tag", -10)},
+            { "name": 'תכנון', "primaryTagId": primary_tag_ids[3], "description": "תכנון ספרינט", "base": create_base("secondary_tag", -10)},
             
             # בדיקות (Testing) secondary tags
-            { "name": 'אוטומטי', "primaryTagId": primary_tag_ids[4], "description": "בדיקות אוטומטיות", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
-            { "name": 'ידני', "primaryTagId": primary_tag_ids[4], "description": "בדיקות ידניות", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
-            { "name": 'E2E', "primaryTagId": primary_tag_ids[4], "description": "בדיקות End-to-End", "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-10), "lut": get_relative_date(-10), "entityType": "secondary_tag"}},
+            { "name": 'אוטומטי', "primaryTagId": primary_tag_ids[4], "description": "בדיקות אוטומטיות", "base": create_base("secondary_tag", -10)},
+            { "name": 'ידני', "primaryTagId": primary_tag_ids[4], "description": "בדיקות ידניות", "base": create_base("secondary_tag", -10)},
+            { "name": 'E2E', "primaryTagId": primary_tag_ids[4], "description": "בדיקות End-to-End", "base": create_base("secondary_tag", -10)},
         ]
         
         secondary_tag_ids = []
@@ -152,8 +165,8 @@ def seed(clean_only=False, bulk_tasks=False):
         # 4. Contacts - linked to Primary Tags
         print("Seeding Contacts...")
         contacts_data = [
-            { "fullName": 'תמיכה טכנית', "position": 'חיצוני', "department": "IT", "phoneNumber": '050-0000000', "primaryTagIds": [primary_tag_ids[2]], "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "contact"}},  # שרתים (Primary)
-            { "fullName": 'ספק שרתים', "position": 'ספק', "department": "Infra", "phoneNumber": '052-1111111', "primaryTagIds": [primary_tag_ids[2]], "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-30), "updatedAt": get_relative_date(-30), "lut": get_relative_date(-30), "entityType": "contact"}},  # שרתים (Primary)
+            { "fullName": 'תמיכה טכנית', "position": 'חיצוני', "department": "IT", "phoneNumber": '050-0000000', "primaryTagIds": [primary_tag_ids[2]], "base": create_base("contact", -30)},  # שרתים (Primary)
+            { "fullName": 'ספק שרתים', "position": 'ספק', "department": "Infra", "phoneNumber": '052-1111111', "primaryTagIds": [primary_tag_ids[2]], "base": create_base("contact", -30)},  # שרתים (Primary)
         ]
         
         contact_ids = []
@@ -220,7 +233,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "description": random.choice(task_descriptions),
                     "status": random.choices(statuses, weights=[50, 30, 15, 5])[0],  # Most pending
                     "priority": random.choices(priorities, weights=[30, 50, 20])[0],  # Most medium
-                    "responsibleUsersId": responsible_users,
+                    "responsibleUserIds": responsible_users,
                     "participantsIds": [],
                     "secondaryTagIds": task_tags,  # New two-tier tag system
                     "date": task_date,
@@ -230,8 +243,10 @@ def seed(clean_only=False, bulk_tasks=False):
                         "isActive": True,
                         "createdAt": get_relative_date(-random.randint(1, 30)),
                         "updatedAt": get_relative_date(-random.randint(0, 5)),
-                        "lut": get_relative_date(-random.randint(0, 5)),
-                        "entityType": "task"
+
+                        "entityType": "task",
+                        "createdBy": "System Admin",
+                        "updatedBy": "System Admin"
                     }
                 }
                 
@@ -266,36 +281,36 @@ def seed(clean_only=False, bulk_tasks=False):
                     "description": 'בדיקה מקיפה של שרתי ה-Production וה-Staging לוודא יציבות.',
                     "status": 'in_progress',
                     "priority": 'high',
-                    "responsibleUsersId": [user_ids[1]],  # Maor
+                    "responsibleUserIds": [user_ids[1]],  # Maor
                     "participantsIds": [contact_ids[0]],  # Tech Support contact
                     "secondaryTagIds": [secondary_tag_ids[5]],  # בדיקה (שרתים)
                     "date": get_relative_date(0),
                     "deadline": get_relative_date(2),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-2), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-2), "updatedAt": get_relative_date(0), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 {
                     "title": 'פגישת סינכרון צוות',
                     "description": 'סינכרון שבועי עם כל הצוות - סקירת התקדמות ותיאום משימות.',
                     "status": 'pending',
                     "priority": 'medium',
-                    "responsibleUsersId": [user_ids[0]],  # Eden
+                    "responsibleUserIds": [user_ids[0]],  # Eden
                     "participantsIds": [],
                     "secondaryTagIds": [secondary_tag_ids[8]],  # פגישה (ניהול)
                     "date": get_relative_date(0),
                     "deadline": get_relative_date(0),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-1), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-1), "updatedAt": get_relative_date(-1), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 {
                     "title": 'תיקון באג בהתחברות',
                     "description": 'משתמשים מדווחים על בעיה בהתחברות עם סיסמה ארוכה.',
                     "status": 'in_progress',
                     "priority": 'high',
-                    "responsibleUsersId": [user_ids[2]],  # Ilay
+                    "responsibleUserIds": [user_ids[2]],  # Ilay
                     "participantsIds": [],
                     "secondaryTagIds": [secondary_tag_ids[1]],  # באג (פיתוח)
                     "date": get_relative_date(0),
                     "deadline": get_relative_date(1),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-1), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-1), "updatedAt": get_relative_date(0), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 
                 # === Multi-day tasks (for weekly calendar spanning) ===
@@ -304,36 +319,36 @@ def seed(clean_only=False, bulk_tasks=False):
                     "description": 'פיתוח מודול חדש להפקת דוחות PDF אוטומטיים.',
                     "status": 'in_progress',
                     "priority": 'medium',
-                    "responsibleUsersId": [user_ids[3]],  # Dan
+                    "responsibleUserIds": [user_ids[3]],  # Dan
                     "participantsIds": [], 
                     "secondaryTagIds": [secondary_tag_ids[2]],  # פיצ'ר חדש (פיתוח)
                     "date": get_relative_date(-1),
                     "deadline": get_relative_date(4),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-3), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-3), "updatedAt": get_relative_date(-1), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 {
                     "title": 'עיצוב דף הבית החדש',
                     "description": 'עיצוב מחדש של דף הבית עם חווית משתמש משופרת.',
                     "status": 'in_progress',
                     "priority": 'medium',
-                    "responsibleUsersId": [user_ids[7]],  # Adi
+                    "responsibleUserIds": [user_ids[7]],  # Adi
                     "participantsIds": [],
                     "secondaryTagIds": [secondary_tag_ids[3], secondary_tag_ids[4]],  # UI, UX (עיצוב)
                     "date": get_relative_date(-2),
                     "deadline": get_relative_date(3),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-5), "updatedAt": get_relative_date(-2), "lut": get_relative_date(-2), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-5), "updatedAt": get_relative_date(-2), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 {
                     "title": 'אינטגרציה עם API חיצוני',
                     "description": 'חיבור למערכת תשלומים חיצונית.',
                     "status": 'pending',
                     "priority": 'high',
-                    "responsibleUsersId": [user_ids[2], user_ids[3]],  # Ilay, Dan
+                    "responsibleUserIds": [user_ids[2], user_ids[3]],  # Ilay, Dan
                     "participantsIds": [contact_ids[1]], # Server Provider contact
                     "secondaryTagIds": [secondary_tag_ids[2], secondary_tag_ids[7]],  # פיצ'ר חדש (פיתוח), הגדרה (שרתים)
                     "date": get_relative_date(1),
                     "deadline": get_relative_date(5),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-1), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-1), "updatedAt": get_relative_date(-1), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 
                 # === Tomorrow's tasks ===
@@ -342,24 +357,24 @@ def seed(clean_only=False, bulk_tasks=False):
                     "description": 'סקירת קוד של כל ה-PRים מהספרינט האחרון.',
                     "status": 'pending',
                     "priority": 'medium',
-                    "responsibleUsersId": [user_ids[4]],  # Orel
+                    "responsibleUserIds": [user_ids[4]],  # Orel
                     "participantsIds": [], 
                     "secondaryTagIds": [secondary_tag_ids[0], secondary_tag_ids[12]],  # עדכון (פיתוח), ידני (בדיקות)
                     "date": get_relative_date(1),
                     "deadline": get_relative_date(1),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(0), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(0), "updatedAt": get_relative_date(0), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 {
                     "title": 'עדכון תיעוד API',
                     "description": 'עדכון התיעוד הטכני לאחר השינויים האחרונים.',
                     "status": 'pending',
                     "priority": 'low',
-                    "responsibleUsersId": [user_ids[5]],  # Elia
+                    "responsibleUserIds": [user_ids[5]],  # Elia
                     "participantsIds": [],
                     "secondaryTagIds": [secondary_tag_ids[0]],  # עדכון (פיתוח)
                     "date": get_relative_date(1),
                     "deadline": get_relative_date(3),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(0), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(0), "updatedAt": get_relative_date(0), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 
                 # === Later this week ===
@@ -368,24 +383,24 @@ def seed(clean_only=False, bulk_tasks=False):
                     "description": 'כתיבת טסטים אוטומטיים לתרחישי קצה חדשים.',
                     "status": 'pending',
                     "priority": 'medium',
-                    "responsibleUsersId": [user_ids[6]],  # Ori
+                    "responsibleUserIds": [user_ids[6]],  # Ori
                     "participantsIds": [],
                     "secondaryTagIds": [secondary_tag_ids[11], secondary_tag_ids[13]],  # אוטומטי, E2E (בדיקות)
                     "date": get_relative_date(2),
                     "deadline": get_relative_date(4),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(0), "updatedAt": get_relative_date(0), "lut": get_relative_date(0), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(0), "updatedAt": get_relative_date(0), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 {
                     "title": 'העברת מצגת לניהול',
                     "description": 'מצגת סיכום רבעון למנהלים.',
                     "status": 'pending',
                     "priority": 'high',
-                    "responsibleUsersId": [user_ids[0]],  # Eden
+                    "responsibleUserIds": [user_ids[0]],  # Eden
                     "participantsIds": [],
                     "secondaryTagIds": [secondary_tag_ids[9]],  # מצגת (ניהול)
                     "date": get_relative_date(3),
                     "deadline": get_relative_date(3),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-2), "updatedAt": get_relative_date(-2), "lut": get_relative_date(-2), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-2), "updatedAt": get_relative_date(-2), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 
                 # === Completed tasks ===
@@ -394,24 +409,24 @@ def seed(clean_only=False, bulk_tasks=False):
                     "description": 'חידוש והתקנת אישור SSL.',
                     "status": 'completed',
                     "priority": 'high',
-                    "responsibleUsersId": [user_ids[4]],  # Orel
+                    "responsibleUserIds": [user_ids[4]],  # Orel
                     "participantsIds": [],
                     "secondaryTagIds": [secondary_tag_ids[7]],  # הגדרה (שרתים)
                     "date": get_relative_date(-3),
                     "deadline": get_relative_date(-2),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-5), "updatedAt": get_relative_date(-2), "lut": get_relative_date(-2), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-5), "updatedAt": get_relative_date(-2), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 {
                     "title": 'תיקון בעיית ביצועים',
                     "description": 'אופטימיזציה לשאילתות מסד נתונים איטיות.',
                     "status": 'completed',
                     "priority": 'high',
-                    "responsibleUsersId": [user_ids[3]],  # Dan
+                    "responsibleUserIds": [user_ids[3]],  # Dan
                     "participantsIds": [],
                     "secondaryTagIds": [secondary_tag_ids[1], secondary_tag_ids[5]],  # באג (פיתוח), בדיקה (שרתים)
                     "date": get_relative_date(-2),
                     "deadline": get_relative_date(-1),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-4), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-4), "updatedAt": get_relative_date(-1), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 
                 # === Next week tasks ===
@@ -420,24 +435,24 @@ def seed(clean_only=False, bulk_tasks=False):
                     "description": 'השקה מלאה של הגרסה החדשה לייצור.',
                     "status": 'pending',
                     "priority": 'high',
-                    "responsibleUsersId": [user_ids[0], user_ids[1]],  # Eden, Maor
+                    "responsibleUserIds": [user_ids[0], user_ids[1]],  # Eden, Maor
                     "participantsIds": [],
                     "secondaryTagIds": [secondary_tag_ids[2], secondary_tag_ids[7], secondary_tag_ids[10]],  # פיצ'ר חדש (פיתוח), הגדרה (שרתים), תכנון (ניהול)
                     "date": get_relative_date(7),
                     "deadline": get_relative_date(7),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-5), "lut": get_relative_date(-5), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-10), "updatedAt": get_relative_date(-5), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 {
                     "title": 'הכנת סביבת Staging',
                     "description": 'הקמת סביבת בדיקות חדשה לגרסה 2.0.',
                     "status": 'pending',
                     "priority": 'medium',
-                    "responsibleUsersId": [user_ids[4]],  # Orel
+                    "responsibleUserIds": [user_ids[4]],  # Orel
                     "participantsIds": [contact_ids[1]], # Server Provider
                     "secondaryTagIds": [secondary_tag_ids[7]],  # הגדרה (שרתים)
                     "date": get_relative_date(5),
                     "deadline": get_relative_date(6),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-3), "updatedAt": get_relative_date(-3), "lut": get_relative_date(-3), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-3), "updatedAt": get_relative_date(-3), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
                 
                 # === Long running task spanning entire week ===
@@ -446,12 +461,12 @@ def seed(clean_only=False, bulk_tasks=False):
                     "description": 'ספרינט של שבועיים לפיתוח פיצ׳רים חדשים.',
                     "status": 'in_progress',
                     "priority": 'medium',
-                    "responsibleUsersId": [user_ids[0]],  # Eden (manager)
+                    "responsibleUserIds": [user_ids[0]],  # Eden (manager)
                     "participantsIds": [],
                     "secondaryTagIds": [secondary_tag_ids[2], secondary_tag_ids[10]],  # פיצ'ר חדש (פיתוח), תכנון (ניהול)
                     "date": get_relative_date(-3),
                     "deadline": get_relative_date(11),
-                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-4), "updatedAt": get_relative_date(-1), "lut": get_relative_date(-1), "entityType": "task"}
+                    "base": {"isDeleted": False, "isActive": True, "createdAt": get_relative_date(-4), "updatedAt": get_relative_date(-1), "entityType": "task", "createdBy": "System Admin", "updatedBy": "System Admin"}
                 },
             ]
             
@@ -474,8 +489,10 @@ def seed(clean_only=False, bulk_tasks=False):
                     "isActive": True,
                     "createdAt": get_timestamp_ms() - 100000,
                     "updatedAt": get_timestamp_ms() - 100000,
-                    "lut": get_timestamp_ms() - 100000,
-                    "entityType": "chat_message"
+
+                    "entityType": "chat_message",
+                    "createdBy": "System Admin",
+                    "updatedBy": "System Admin"
                 }
             },
             {
@@ -486,8 +503,10 @@ def seed(clean_only=False, bulk_tasks=False):
                     "isActive": True,
                     "createdAt": get_timestamp_ms(),
                     "updatedAt": get_timestamp_ms(),
-                    "lut": get_timestamp_ms(),
-                    "entityType": "chat_message"
+
+                    "entityType": "chat_message",
+                    "createdBy": "System Admin",
+                    "updatedBy": "System Admin"
                 }
             }
         ]

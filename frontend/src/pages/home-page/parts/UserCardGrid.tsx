@@ -16,7 +16,7 @@ const getTaskCountsForUser = (
     tasks: Task[]
 ): { open: number; inProgress: number; closed: number } => {
     const userTasks = tasks.filter(
-        (task) => task.responsibleUsersId?.includes(userId)
+        (task) => task.responsibleUserIds?.includes(userId)
     );
 
     return {

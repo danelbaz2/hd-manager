@@ -42,7 +42,6 @@ def log_history(entity_type, entity_id, action, user_id='system', old_val=None, 
     # c includes the changes performed and metadata about who/when/what action
     # Unflatten to convert 'base.updatedAt' to nested {'base': {'updatedAt': ...}}
     change_data = unflatten_doc(clean_doc(change_val)) or {}
-    change_data['updatedBy'] = user_id
     change_data['action'] = action
     change_data['timestamp'] = now
     

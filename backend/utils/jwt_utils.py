@@ -13,13 +13,16 @@ JWT_EXPIRATION_DAYS = int(os.getenv('JWT_EXPIRATION_DAYS', 7))
 JWT_ALGORITHM = 'HS256'
 
 
-def generate_token(user_id: str, username: str, role: str = 'regular') -> str:
+from database import mongo
+
+def generate_token(user_id: str, username: str, full_name: str = None, role: str = 'regular') -> str:
     """
     Generate a JWT token for a user
     
     Args:
         user_id: The user's unique ID
         username: The user's username
+        full_name: The user's full name
         role: The user's role (default: 'regular')
     
     Returns:
@@ -28,6 +31,7 @@ def generate_token(user_id: str, username: str, role: str = 'regular') -> str:
     payload = {
         'user_id': user_id,
         'username': username,
+        'fullName': full_name,
         'role': role,
         'iat': datetime.now(timezone.utc),
         'exp': datetime.now(timezone.utc) + timedelta(days=JWT_EXPIRATION_DAYS)
@@ -105,7 +109,21 @@ def jwt_required(f):
         request.user_id = payload.get('user_id')
         request.username = payload.get('username')
         request.role = payload.get('role')
+        request.user_full_name = payload.get('fullName')
+
+        # If fullName is missing in token (legacy token), fetch from DB
+        if not request.user_full_name and request.user_id:
+            try:
+                user = mongo.db.users.find_one({'_id': request.user_id})
+                if user:
+                    request.user_full_name = user.get('fullName')
+            except Exception:
+                pass # Fallback to None or username if DB fails
         
+        # Fallback if still no full name
+        if not request.user_full_name:
+            request.user_full_name = request.username
+
         return f(*args, **kwargs)
     
     return decorated_function

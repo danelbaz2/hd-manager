@@ -11,7 +11,7 @@ export interface TaskData {
   status: TaskStatus;
   date: number; // Timestamp for start date
   deadline?: number; // Timestamp for deadline
-  responsibleUsersId: string[];
+  responsibleUserIds: string[];
   secondaryTagIds: string[];  // Secondary Tag IDs (new two-tier tag system)
   createdAt: number;
   updatedAt: number;
@@ -24,7 +24,7 @@ export interface TaskFormData {
   priority: TaskPriority;
   date: number; // Timestamp for start date
   deadline?: number; // Timestamp for deadline
-  responsibleUsersId: string[];
+  responsibleUserIds: string[];
   secondaryTagIds: string[];  // Secondary Tag IDs (new two-tier tag system)
 }
 
@@ -66,6 +66,6 @@ export const DEFAULT_TASK_FORM: TaskFormData = {
   priority: "medium",
   date: Date.now(),
   deadline: undefined,
-  responsibleUsersId: [],
+  responsibleUserIds: [],
   secondaryTagIds: [],
 };

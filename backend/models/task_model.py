@@ -17,7 +17,7 @@ class TaskModel(BaseModel):
     description: Optional[str] = ""
     status: str = Field(default="pending", pattern=VALID_STATUSES)  # Default: open (pending)
     priority: str = Field(default="medium", pattern=VALID_PRIORITIES)
-    responsibleUsersId: List[Union[int, str]] = []  # User IDs responsible for the task
+    responsibleUserIds: List[Union[int, str]] = []  # User IDs responsible for the task
     participantsIds: Optional[List[Union[int, str]]] = []  # Optional: Contact IDs participating
     secondaryTagIds: List[Union[int, str]] = []  # Secondary Tag IDs (new two-tier tag system)
     date: int
@@ -33,7 +33,7 @@ class TaskUpdateModel(BaseModel):
     description: Optional[str] = None
     status: Optional[str] = Field(None, pattern=VALID_STATUSES)
     priority: Optional[str] = Field(None, pattern=VALID_PRIORITIES)
-    responsibleUsersId: Optional[List[Union[int, str]]] = None
+    responsibleUserIds: Optional[List[Union[int, str]]] = None
     participantsIds: Optional[List[Union[int, str]]] = None  # Optional: Contact IDs
     secondaryTagIds: Optional[List[Union[int, str]]] = None  # Secondary Tag IDs
     date: Optional[int] = None

@@ -6,7 +6,7 @@ export interface TaskBase {
   isDeleted: boolean;
   createdAt: number;
   updatedAt: number;
-  lut: number;
+
   entityType: string;
 }
 
@@ -22,7 +22,7 @@ export interface Task {
   description?: string;
   date?: number;
   deadline?: number;
-  responsibleUsersId?: string[];  // User IDs responsible for the task
+  responsibleUserIds?: string[];  // User IDs responsible for the task
   participantsIds?: string[];      // Optional: Contact IDs participating
   secondaryTagIds?: string[];      // Secondary Tag IDs (new two-tier tag system)
   priority?: TaskPriority;
@@ -35,7 +35,7 @@ export interface TaskFormData {
   description?: string;
   date?: number;
   deadline?: number;
-  responsibleUsersId?: string[];
+  responsibleUserIds?: string[];
   participantsIds?: string[];      // Optional: Contact IDs
   secondaryTagIds?: string[];      // Secondary Tag IDs (new two-tier tag system)
   priority?: TaskPriority;
@@ -46,7 +46,7 @@ export interface TaskQueryParams {
   date?: number;
   startDate?: number;
   endDate?: number;
-  responsibleUsersId?: string;
+  responsibleUserIds?: string;
 }
 
 /**
@@ -60,7 +60,7 @@ export const getAllTasks = async (params?: TaskQueryParams): Promise<ApiResponse
     if (params.date !== undefined) queryParams.append("date", params.date.toString());
     if (params.startDate !== undefined) queryParams.append("startDate", params.startDate.toString());
     if (params.endDate !== undefined) queryParams.append("endDate", params.endDate.toString());
-    if (params.responsibleUsersId) queryParams.append("responsibleUsersId", params.responsibleUsersId);
+    if (params.responsibleUserIds) queryParams.append("responsibleUserIds", params.responsibleUserIds);
 
     const queryString = queryParams.toString();
     if (queryString) {
