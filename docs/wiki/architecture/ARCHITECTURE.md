@@ -174,25 +174,37 @@ frontend/src/
 │   ├── tasksApi.ts         # Task API functions
 │   ├── usersApi.ts         # User API functions
 │   ├── tagsApi.ts          # Tag API functions
+│   ├── primaryTagsApi.ts   # Primary tags API (NEW v2.1)
+│   ├── secondaryTagsApi.ts # Secondary tags API (NEW v2.1)
 │   ├── contactsApi.ts      # Contact API functions
 │   ├── chatApi.ts          # Chat API functions
 │   ├── historyApi.ts       # History API functions
+│   ├── authApi.ts          # Auth API functions (NEW v2.1)
 │   └── index.ts            # Barrel export
 ├── components/             # Reusable UI components
 │   ├── Layout/             # App layout components
 │   │   ├── Layout.tsx      # Main layout wrapper
 │   │   ├── menu-bar/       # Sidebar navigation
 │   │   └── header-bar/     # Top header
+│   ├── auth/               # Authentication components (NEW v2.1)
+│   │   ├── ProtectedRoute.tsx  # Route protection
+│   │   ├── LoginTransition.tsx # Login animations
+│   │   └── index.ts
+│   ├── global-loader/      # Unified loading component (NEW v2.1)
+│   │   ├── GlobalLoader.tsx
+│   │   └── index.ts
 │   ├── modal-new-task/     # Task creation modal
 │   ├── modal-setting/      # Settings modal
 │   ├── delete-confirm-modal/ # Reusable delete confirmation
 │   ├── alert-feedback/     # Toast notifications
-│   ├── delay-loader/       # Loading indicator
+│   ├── delay-loader/       # Loading indicator (deprecated)
 │   └── index.ts            # Barrel export
 ├── contexts/               # React contexts for global state
 │   ├── ThemeContext.tsx    # Dark mode state
-│   ├── UserContext.tsx     # Current user state
-│   └── ...
+│   ├── AuthContext.tsx     # Authentication state (NEW v2.1)
+│   ├── SettingsContext.tsx # App data state
+│   ├── ViewStateContext.tsx # View preferences
+│   └── index.ts
 ├── pages/                  # Page components
 │   ├── home-page/          # Dashboard/home view
 │   ├── task-page/          # Kanban board and task management
@@ -269,8 +281,9 @@ export const updateTask = async (
 
 The application uses **React Context API** for global state:
 - **ThemeContext**: Dark mode preference
-- **UserContext**: Current authenticated user
-- **Additional contexts** as needed
+- **AuthContext**: Authentication state (JWT token, user data) - NEW v2.1
+- **SettingsContext**: App data (users, tags, tasks, contacts)
+- **ViewStateContext**: View preferences (mode, date)
 
 **Why Context over Redux?**:
 - Simpler for small-to-medium apps
@@ -303,7 +316,7 @@ The application uses **React Context API** for global state:
   "description": "string",             # Optional
   "status": "TaskStatus",              # Default: "pending"
   "priority": "TaskPriority",          # Default: "medium"
-  "responsibleUsersId": ["string"],    # User IDs assigned
+  "responsibleUserIds": ["string"],    # User IDs assigned (renamed v2.1)
   "participantsIds": ["string"],       # Contact IDs involved
   "tagsId": ["string"],                # Tag IDs
   "date": "number",                    # Unix timestamp (ms)
@@ -312,8 +325,9 @@ The application uses **React Context API** for global state:
     "isDeleted": "boolean",
     "isActive": "boolean",
     "createdAt": "number",
-    "updatedAt": "number",
-    "lut": "number",                   # Last update time
+    "updatedAt": "number",             # Single timestamp (lut removed v2.1)
+    "createdBy": "string",             # NEW v2.1
+    "updatedBy": "string",             # NEW v2.1
     "entityType": "task"
   }
 }
@@ -442,41 +456,78 @@ Each component, function, and module has one clear purpose.
 
 ## Recent Enhancements
 
-### 1. Task Priority Field Addition (December 2025)
+### v2.1.0 Enhancements (December 22, 2025)
+
+#### 1. JWT Authentication System
+- Implemented JWT-based authentication with 7-day token expiry
+- New `/api/auth/me` endpoint for user validation
+- `AuthContext` for authentication state management
+- `ProtectedRoute` component for route protection
+- Role-based UI rendering (admin vs regular users)
+- `LoginTransition` component for animated login flow
+
+#### 2. Model Refactoring
+- Removed redundant `lut` field (use `updatedAt` instead)
+- Renamed `responsibleUsersId` → `responsibleUserIds` for consistency
+- Added `createdBy` and `updatedBy` fields to base entity
+- Simplified contact model (removed email, made phoneNumber required)
+
+#### 3. Two-Tier Tag System
+- New `/api/primary-tags` and `/api/secondary-tags` endpoints
+- Primary tags have colors, secondary tags link to primary
+- Contacts categorized by `primaryTagIds`
+- New `TwoTierTagsSelect` component
+
+#### 4. Unified Global Loader
+- New `GlobalLoader` component with modern design
+- Animated background orbs, bouncing dots, shimmer progress bar
+- `ProtectedRoute` waits for auth AND data loading
+- Single loading experience across the application
+
+#### 5. Kanban Board Improvements
+- Rewritten drag-and-drop with smooth CSS animations
+- Optimistic UI updates for instant feedback
+- Tasks sorted by `updatedAt` (newest at bottom)
+- Fixed sibling card sliding animation
+
+#### 6. Security Improvements
+- `passwordHash` removed from all API GET responses
+- Password updates protected
+- JWT validation on all protected routes
+
+---
+
+### v2.0.0 Enhancements (December 18, 2025)
+
+#### 1. Task Priority Field Addition
 - Added `priority` field to Task model with validation
 - Default value: `"medium"`
 - Valid values: `"low"`, `"medium"`, `"high"`
 - Updated frontend interfaces and components
 - Updated seed data to include priority
 
-### 2. Frontend Modularization (December 2025)
+#### 2. Frontend Modularization
 - Refactored all components to follow consistent barrel export pattern
 - Created `index.ts` files for all component folders
 - Organized sub-components into `parts/` subdirectories
 - Fixed import path casing issues
 - Improved code discoverability and maintainability
 
-### 3. Reusable Delete Confirmation Modal (December 2025)
+#### 3. Reusable Delete Confirmation Modal
 - Extracted inline delete confirmation into `DeleteConfirmModal` component
 - Made component type-safe with TypeScript
 - Added to shared components directory
 - Replaced all inline delete confirmations across the app
 - Improved consistency and reduced code duplication
 
-### 4. Strict Pydantic Validation (December 2025)
+#### 4. Strict Pydantic Validation
 - Added `extra='forbid'` to all Pydantic models
 - Prevents insertion of unknown/invalid fields
 - Applied to both creation and update models
 - Enhanced data integrity and security
 - Updated seed script to comply with strict validation
 
-### 5. Drag-and-Drop Kanban Board
-- Implemented drag-and-drop task status changes
-- Tasks grouped by status in columns
-- Visual feedback during drag operations
-- Integrated with task update API
-
-### 6. Change History System
+#### 5. Change History System
 - Complete audit trail for all entity operations
 - Stores old state, new state, and changes
 - Tracks who made changes and when

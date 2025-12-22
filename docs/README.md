@@ -2,8 +2,8 @@
 
 **Documentation Hub for HD Manager Project**
 
-**Version**: 2.0.0  
-**Last Updated**: December 18, 2025
+**Version**: 2.1.0  
+**Last Updated**: December 22, 2025
 
 ---
 
@@ -58,8 +58,9 @@ docs/
 | [Quick Reference](wiki/overview/QUICK_REFERENCE.md) | Overview | 5-min summary of all changes | 5 min |
 | [Architecture](wiki/architecture/ARCHITECTURE.md) | Technical | Complete system architecture | 30 min |
 | [API Documentation](wiki/api/API_DOCUMENTATION.md) | Integration | Full REST API reference | 20 min |
-| [Changelog](wiki/changes/versions/CHANGELOG.md) | History | Version history (v1.0 → v2.0) | 15 min |
-| [Code Review](wiki/changes/reviews/2025-12-18-v2.0.0-review.md) | History | Comprehensive v2.0 review | 30 min |
+| [Changelog](wiki/changes/versions/CHANGELOG.md) | History | Version history (v1.0 → v2.1) | 15 min |
+| [Code Review v2.1.0](wiki/changes/reviews/2025-12-22-v2.1.0-review.md) | History | Latest v2.1 review (JWT, Loader) | 30 min |
+| [Code Review v2.0.0](wiki/changes/reviews/2025-12-18-v2.0.0-review.md) | History | v2.0 review | 20 min |
 
 ### Structure
 
@@ -76,8 +77,9 @@ wiki/
 │
 ├── changes/                        # Version history
 │   ├── versions/
-│   │   └── CHANGELOG.md           v1.0.0 → v2.0.0
+│   │   └── CHANGELOG.md           v1.0.0 → v2.1.0
 │   └── reviews/
+│       ├── 2025-12-22-v2.1.0-review.md  # NEW
 │       └── 2025-12-18-v2.0.0-review.md
 │
 ├── STRUCTURE.md                    # Documentation structure guide
@@ -399,6 +401,6 @@ docs/
 
 ---
 
-**Last Updated**: December 18, 2025  
-**Documentation Version**: 2.0.0  
+**Last Updated**: December 22, 2025  
+**Documentation Version**: 2.1.0  
 **Maintained by**: HD Development Team

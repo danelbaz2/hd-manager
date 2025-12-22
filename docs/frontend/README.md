@@ -33,9 +33,12 @@ frontend/src/
 │   ├── tasksApi.ts         # Tasks endpoints
 │   ├── usersApi.ts         # Users endpoints
 │   ├── tagsApi.ts          # Tags endpoints
+│   ├── primaryTagsApi.ts   # Primary tags (NEW v2.1)
+│   ├── secondaryTagsApi.ts # Secondary tags (NEW v2.1)
 │   ├── contactsApi.ts      # Contacts endpoints
 │   ├── chatApi.ts          # Chat endpoints
 │   ├── historyApi.ts       # History endpoints
+│   ├── authApi.ts          # Auth endpoints (NEW v2.1)
 │   └── index.ts            # Barrel export
 │
 ├── components/             # Reusable UI components
@@ -43,16 +46,25 @@ frontend/src/
 │   │   ├── Layout.tsx
 │   │   ├── menu-bar/       # Sidebar navigation
 │   │   └── header-bar/     # Top header
+│   ├── auth/               # Authentication (NEW v2.1)
+│   │   ├── ProtectedRoute.tsx
+│   │   ├── LoginTransition.tsx
+│   │   └── index.ts
+│   ├── global-loader/      # Unified loader (NEW v2.1)
+│   │   ├── GlobalLoader.tsx
+│   │   └── index.ts
 │   ├── modal-new-task/     # Task creation modal
 │   ├── modal-setting/      # Settings modal
 │   ├── delete-confirm-modal/ # Delete confirmation
 │   ├── alert-feedback/     # Toast notifications
-│   ├── delay-loader/       # Loading indicator
+│   ├── delay-loader/       # Loading indicator (deprecated)
 │   └── index.ts            # Barrel export
 │
 ├── contexts/               # React contexts
 │   ├── ThemeContext.tsx    # Dark mode state
-│   ├── UserContext.tsx     # Current user state
+│   ├── AuthContext.tsx     # Auth state (NEW v2.1)
+│   ├── SettingsContext.tsx # App data state
+│   ├── ViewStateContext.tsx # View preferences
 │   └── index.ts
 │
 ├── pages/                  # Page components
@@ -420,5 +432,5 @@ export interface UserData {
 
 ---
 
-**Last Updated**: December 18, 2025  
+**Last Updated**: December 22, 2025  
 **Maintained by**: HD Development Team

@@ -6,6 +6,190 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ---
 
+## [Version 2.1.0] - December 22, 2025
+
+### 🔐 JWT Authentication System
+
+**What Changed**: Implemented complete JWT-based authentication with role-based access control.
+
+**Details**:
+- JWT token generation with 7-day expiry
+- Token stored in sessionStorage (not user data)
+- New `/api/auth/me` endpoint for user validation
+- Role-based UI rendering (admin vs regular users)
+- `AuthContext` for authentication state management
+- `ProtectedRoute` component for route protection
+
+**New Files**:
+- `backend/utils/jwt_utils.py` - JWT utilities
+- `frontend/src/contexts/AuthContext.tsx` - Auth context
+- `frontend/src/api/authApi.ts` - Auth API functions
+- `frontend/src/components/auth/ProtectedRoute.tsx` - Route protection
+- `frontend/src/components/auth/LoginTransition.tsx` - Login animations
+
+**Benefits**:
+- Stateless authentication
+- Secure token-based sessions
+- Role-based feature access
+- Animated login flow
+
+---
+
+### 📊 Model Refactoring (Breaking Changes)
+
+**What Changed**: Removed redundant fields and standardized naming conventions.
+
+**Details**:
+- **Removed `lut` field**: Was duplicate of `updatedAt` - eliminated redundancy
+- **Renamed `responsibleUsersId` → `responsibleUserIds`**: Fixed plural naming
+- Updated `BaseEntityMeta` with `createdBy` and `updatedBy` fields
+
+**Before**:
+```python
+class BaseEntityMeta:
+    lut: int           # Removed - redundant
+    updatedAt: int
+```
+
+**After**:
+```python
+class BaseEntityMeta:
+    updatedAt: int     # Single source of truth
+    createdBy: str     # New
+    updatedBy: str     # New
+```
+
+**Migration**: Update API consumers to use new field names
+
+---
+
+### 🎯 Kanban Board Improvements
+
+**What Changed**: Complete rewrite of drag-and-drop with smooth CSS animations.
+
+**Details**:
+- Smooth CSS transitions for card movement
+- Fixed sibling sliding (cards animate to make room)
+- No fading or jumping on card placement
+- Tasks sorted by `updatedAt` (newest at bottom)
+- Optimistic UI updates for instant feedback
+
+**Technical Changes**:
+- Rewritten `KanbanColumn.tsx` with CSS transitions
+- Enhanced `KanbanTaskCard.tsx` with animation support
+- New animation keyframes in `index.css`
+
+---
+
+### 🏷️ Two-Tier Tag System
+
+**What Changed**: Added hierarchical tag system with primary and secondary tags.
+
+**New API Endpoints**:
+| Endpoint | Description |
+|----------|-------------|
+| `GET/POST /api/primary-tags` | Primary tags CRUD |
+| `PUT/DELETE /api/primary-tags/<id>` | Update/delete primary |
+| `GET/POST /api/secondary-tags` | Secondary tags CRUD |
+| `PUT/DELETE /api/secondary-tags/<id>` | Update/delete secondary |
+
+**Data Structure**:
+```python
+# Primary Tag
+{ "id", "name", "color", "description" }
+
+# Secondary Tag  
+{ "id", "name", "primaryTagId", "description" }
+```
+
+**Frontend Updates**:
+- `SettingsContext` with `primaryTags` and `secondaryTags`
+- `TwoTierTagsSelect` component
+- Contacts now use `primaryTagIds`
+
+---
+
+### ⚡ Unified Global Loader
+
+**What Changed**: Created single, beautiful loading component for entire application.
+
+**Details**:
+- New `GlobalLoader` component with modern design
+- Animated background orbs with gradient effects
+- Bouncing dots with staggered animation
+- Shimmer progress bar
+- Dark mode support
+
+**Architecture Change**:
+- `ProtectedRoute` now handles ALL loading (auth + data)
+- Single loader until everything is ready
+- Removed individual page loaders
+- `LoginTransition` uses `GlobalLoader` for loading state
+
+**Usage**:
+```tsx
+<GlobalLoader />                    // Full screen, default text
+<GlobalLoader text="טוען משימות" /> // Custom text
+<GlobalLoader fullScreen={false} /> // Inline
+```
+
+---
+
+### 🔧 Contact Model Simplification
+
+**What Changed**: Simplified contact model and updated categorization.
+
+**Details**:
+- Removed `email` field
+- `phoneNumber` now required (was optional)
+- Uses `primaryTagIds` for categorization
+- Standardized field naming (`fullName`, `position`)
+
+---
+
+### 🔒 Security Improvements
+
+**What Changed**: Enhanced security for sensitive data.
+
+**Details**:
+- `passwordHash` removed from all GET responses
+- Password updates protected (can't change via regular PUT)
+- JWT validation on protected routes
+
+---
+
+### 📁 New Files Summary
+
+**Backend**:
+- `utils/jwt_utils.py` - JWT token utilities
+- `routes/primary_tags.py` - Primary tags API
+- `routes/secondary_tags.py` - Secondary tags API
+- `.env.example` - Environment template
+
+**Frontend**:
+- `components/auth/*` - Authentication components
+- `components/global-loader/*` - Unified loader
+- `contexts/AuthContext.tsx` - Auth state
+- `api/authApi.ts` - Auth API
+
+---
+
+### 🐛 Bug Fixes
+
+- Fixed Kanban card animation glitches
+- Fixed sibling cards jumping during drag
+- Fixed role-based UI not updating on login
+
+---
+
+### ⚠️ Breaking Changes
+
+1. **Field Renames**: `responsibleUsersId` → `responsibleUserIds`
+2. **Removed Fields**: `lut` field no longer exists
+3. **Auth Required**: All API endpoints now require JWT token
+
+---
+
 ## [Version 2.0.0] - December 2025
 
 ### 🚀 Major Enhancements
