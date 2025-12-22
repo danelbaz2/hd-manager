@@ -4,7 +4,6 @@ export interface UserData {
   id: string;
   fullName: string;
   username: string;
-  passwordHash: string;
   role: UserRole;
   color: string;
   profileImage: string | null;
@@ -14,7 +13,7 @@ export interface UserFormData {
   id?: string | null; // Optional - only present when editing
   fullName: string;
   username: string;
-  passwordHash: string;
+  password: string;  // User input - will be hashed by backend
   role: UserRole;
   color: string;
   profileImage: string | null;
@@ -37,8 +36,9 @@ export const DEFAULT_FORM_DATA: UserFormData = {
   id: null,
   fullName: "",
   username: "",
-  passwordHash: "",
+  password: "",  // User input - will be hashed by backend
   role: "regular",
   color: AVAILABLE_COLORS[0], // Default to Light Blue
   profileImage: null,
 };
+

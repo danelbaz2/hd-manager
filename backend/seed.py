@@ -234,7 +234,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": random.choices(statuses, weights=[50, 30, 15, 5])[0],  # Most pending
                     "priority": random.choices(priorities, weights=[30, 50, 20])[0],  # Most medium
                     "responsibleUserIds": responsible_users,
-                    "participantsIds": [],
+                    "participantIds": [],
                     "secondaryTagIds": task_tags,  # New two-tier tag system
                     "date": task_date,
                     "deadline": deadline,
@@ -282,7 +282,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'in_progress',
                     "priority": 'high',
                     "responsibleUserIds": [user_ids[1]],  # Maor
-                    "participantsIds": [contact_ids[0]],  # Tech Support contact
+                    "participantIds": [contact_ids[0]],  # Tech Support contact
                     "secondaryTagIds": [secondary_tag_ids[5]],  # בדיקה (שרתים)
                     "date": get_relative_date(0),
                     "deadline": get_relative_date(2),
@@ -294,7 +294,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'pending',
                     "priority": 'medium',
                     "responsibleUserIds": [user_ids[0]],  # Eden
-                    "participantsIds": [],
+                    "participantIds": [],
                     "secondaryTagIds": [secondary_tag_ids[8]],  # פגישה (ניהול)
                     "date": get_relative_date(0),
                     "deadline": get_relative_date(0),
@@ -306,7 +306,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'in_progress',
                     "priority": 'high',
                     "responsibleUserIds": [user_ids[2]],  # Ilay
-                    "participantsIds": [],
+                    "participantIds": [],
                     "secondaryTagIds": [secondary_tag_ids[1]],  # באג (פיתוח)
                     "date": get_relative_date(0),
                     "deadline": get_relative_date(1),
@@ -320,7 +320,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'in_progress',
                     "priority": 'medium',
                     "responsibleUserIds": [user_ids[3]],  # Dan
-                    "participantsIds": [], 
+                    "participantIds": [], 
                     "secondaryTagIds": [secondary_tag_ids[2]],  # פיצ'ר חדש (פיתוח)
                     "date": get_relative_date(-1),
                     "deadline": get_relative_date(4),
@@ -332,7 +332,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'in_progress',
                     "priority": 'medium',
                     "responsibleUserIds": [user_ids[7]],  # Adi
-                    "participantsIds": [],
+                    "participantIds": [],
                     "secondaryTagIds": [secondary_tag_ids[3], secondary_tag_ids[4]],  # UI, UX (עיצוב)
                     "date": get_relative_date(-2),
                     "deadline": get_relative_date(3),
@@ -344,7 +344,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'pending',
                     "priority": 'high',
                     "responsibleUserIds": [user_ids[2], user_ids[3]],  # Ilay, Dan
-                    "participantsIds": [contact_ids[1]], # Server Provider contact
+                    "participantIds": [contact_ids[1]], # Server Provider contact
                     "secondaryTagIds": [secondary_tag_ids[2], secondary_tag_ids[7]],  # פיצ'ר חדש (פיתוח), הגדרה (שרתים)
                     "date": get_relative_date(1),
                     "deadline": get_relative_date(5),
@@ -358,7 +358,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'pending',
                     "priority": 'medium',
                     "responsibleUserIds": [user_ids[4]],  # Orel
-                    "participantsIds": [], 
+                    "participantIds": [], 
                     "secondaryTagIds": [secondary_tag_ids[0], secondary_tag_ids[12]],  # עדכון (פיתוח), ידני (בדיקות)
                     "date": get_relative_date(1),
                     "deadline": get_relative_date(1),
@@ -370,7 +370,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'pending',
                     "priority": 'low',
                     "responsibleUserIds": [user_ids[5]],  # Elia
-                    "participantsIds": [],
+                    "participantIds": [],
                     "secondaryTagIds": [secondary_tag_ids[0]],  # עדכון (פיתוח)
                     "date": get_relative_date(1),
                     "deadline": get_relative_date(3),
@@ -384,7 +384,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'pending',
                     "priority": 'medium',
                     "responsibleUserIds": [user_ids[6]],  # Ori
-                    "participantsIds": [],
+                    "participantIds": [],
                     "secondaryTagIds": [secondary_tag_ids[11], secondary_tag_ids[13]],  # אוטומטי, E2E (בדיקות)
                     "date": get_relative_date(2),
                     "deadline": get_relative_date(4),
@@ -396,7 +396,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'pending',
                     "priority": 'high',
                     "responsibleUserIds": [user_ids[0]],  # Eden
-                    "participantsIds": [],
+                    "participantIds": [],
                     "secondaryTagIds": [secondary_tag_ids[9]],  # מצגת (ניהול)
                     "date": get_relative_date(3),
                     "deadline": get_relative_date(3),
@@ -410,7 +410,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'completed',
                     "priority": 'high',
                     "responsibleUserIds": [user_ids[4]],  # Orel
-                    "participantsIds": [],
+                    "participantIds": [],
                     "secondaryTagIds": [secondary_tag_ids[7]],  # הגדרה (שרתים)
                     "date": get_relative_date(-3),
                     "deadline": get_relative_date(-2),
@@ -422,7 +422,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'completed',
                     "priority": 'high',
                     "responsibleUserIds": [user_ids[3]],  # Dan
-                    "participantsIds": [],
+                    "participantIds": [],
                     "secondaryTagIds": [secondary_tag_ids[1], secondary_tag_ids[5]],  # באג (פיתוח), בדיקה (שרתים)
                     "date": get_relative_date(-2),
                     "deadline": get_relative_date(-1),
@@ -436,7 +436,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'pending',
                     "priority": 'high',
                     "responsibleUserIds": [user_ids[0], user_ids[1]],  # Eden, Maor
-                    "participantsIds": [],
+                    "participantIds": [],
                     "secondaryTagIds": [secondary_tag_ids[2], secondary_tag_ids[7], secondary_tag_ids[10]],  # פיצ'ר חדש (פיתוח), הגדרה (שרתים), תכנון (ניהול)
                     "date": get_relative_date(7),
                     "deadline": get_relative_date(7),
@@ -448,7 +448,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'pending',
                     "priority": 'medium',
                     "responsibleUserIds": [user_ids[4]],  # Orel
-                    "participantsIds": [contact_ids[1]], # Server Provider
+                    "participantIds": [contact_ids[1]], # Server Provider
                     "secondaryTagIds": [secondary_tag_ids[7]],  # הגדרה (שרתים)
                     "date": get_relative_date(5),
                     "deadline": get_relative_date(6),
@@ -462,7 +462,7 @@ def seed(clean_only=False, bulk_tasks=False):
                     "status": 'in_progress',
                     "priority": 'medium',
                     "responsibleUserIds": [user_ids[0]],  # Eden (manager)
-                    "participantsIds": [],
+                    "participantIds": [],
                     "secondaryTagIds": [secondary_tag_ids[2], secondary_tag_ids[10]],  # פיצ'ר חדש (פיתוח), תכנון (ניהול)
                     "date": get_relative_date(-3),
                     "deadline": get_relative_date(11),

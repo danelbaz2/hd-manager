@@ -100,7 +100,7 @@ const HomePage: React.FC = () => {
 
   // Handle task click (for weekly view)
   const handleTaskClick = (task: Task) => {
-    console.log("Task clicked:", task);
+    console.log(task);
     // TODO: Open task detail modal
   };
 

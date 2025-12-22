@@ -9,7 +9,7 @@ class TagModel(BaseModel):
     id: Optional[str] = None
     name: str = Field(..., min_length=1)
     description: Optional[str] = None
-    relatedContactsIds: Optional[List[Union[int, str]]] = None
+    relatedContactIds: Optional[List[Union[int, str]]] = None
     color: str = Field(..., pattern="^#[0-9a-fA-F]{6}$")
     base: Optional[BaseEntityMeta] = None
 
@@ -20,5 +20,5 @@ class TagUpdateModel(BaseModel):
     
     name: Optional[str] = Field(None, min_length=1)
     description: Optional[str] = None
-    relatedContactsIds: Optional[List[Union[int, str]]] = None
+    relatedContactIds: Optional[List[Union[int, str]]] = None
     color: Optional[str] = Field(None, pattern="^#[0-9a-fA-F]{6}$")

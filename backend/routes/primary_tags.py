@@ -4,6 +4,7 @@ from datetime import datetime
 from models.primary_tag_model import PrimaryTagModel, PrimaryTagUpdateModel
 from bson.objectid import ObjectId
 from utils.history import log_history
+from utils.jwt_utils import jwt_required
 
 bp = Blueprint('primary_tags', __name__, url_prefix='/api/primary-tags')
 
@@ -12,12 +13,14 @@ def serialize_doc(doc):
     return doc
 
 @bp.route('/', methods=['GET'])
+@jwt_required
 def get_primary_tags():
     """Get all active primary tags (non-deleted)"""
     tags = list(mongo.db.ents.find({'base.entityType': 'primary_tag', 'base.isDeleted': {'$ne': True}}))
     return jsonify([serialize_doc(t) for t in tags])
 
 @bp.route('/', methods=['POST'])
+@jwt_required
 def create_primary_tag():
     """Create a new primary tag"""
     try:
@@ -41,7 +44,7 @@ def create_primary_tag():
                 '$set': {
                     'base.isDeleted': False,
                     'base.updatedAt': now,
-                    'base.lut': now,
+                    'base.updatedBy': getattr(request, 'user_full_name', 'system'),
                 }
             }
             
@@ -53,7 +56,7 @@ def create_primary_tag():
             mongo.db.ents.update_one({'_id': tag_id}, final_update)
             
             updated_tag = mongo.db.ents.find_one({'_id': tag_id})
-            log_history('primary_tag', tag_id, 'RESTORE', 'system', existing_tag, updated_tag, final_update['$set'])
+            log_history('primary_tag', tag_id, 'RESTORE', getattr(request, 'user_full_name', 'system'), existing_tag, updated_tag, final_update['$set'])
             return jsonify(serialize_doc(updated_tag)), 201
         else:
             # Tag exists and is active
@@ -64,18 +67,20 @@ def create_primary_tag():
         'isActive': True,
         'createdAt': now,
         'updatedAt': now,
-        'lut': now,
-        'entityType': 'primary_tag'
+        'entityType': 'primary_tag',
+        'createdBy': getattr(request, 'user_full_name', 'system'),
+        'updatedBy': getattr(request, 'user_full_name', 'system')
     }
     data['_id'] = str(ObjectId())
     mongo.db.ents.insert_one(data)
     
-    log_history('primary_tag', data['_id'], 'CREATE', 'system', None, data, data)
+    log_history('primary_tag', data['_id'], 'CREATE', getattr(request, 'user_full_name', 'system'), None, data, data)
     
     return jsonify(serialize_doc(data)), 201
 
 
 @bp.route('/<id>', methods=['GET'])
+@jwt_required
 def get_primary_tag(id):
     """Get a single primary tag by ID"""
     tag = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'primary_tag', 'base.isDeleted': {'$ne': True}})
@@ -85,6 +90,7 @@ def get_primary_tag(id):
 
 
 @bp.route('/<id>', methods=['PUT'])
+@jwt_required
 def update_primary_tag(id):
     """Update an existing primary tag"""
     try:
@@ -100,7 +106,7 @@ def update_primary_tag(id):
         
     now = int(datetime.now().timestamp() * 1000)
     data['base.updatedAt'] = now
-    data['base.lut'] = now
+    data['base.updatedBy'] = getattr(request, 'user_full_name', 'system')
     
     try:
         mongo.db.ents.update_one({'_id': id}, {'$set': data})
@@ -109,12 +115,13 @@ def update_primary_tag(id):
         
     updated = mongo.db.ents.find_one({'_id': id})
     
-    log_history('primary_tag', id, 'UPDATE', 'system', old_doc, updated, data)
+    log_history('primary_tag', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, data)
              
     return jsonify(serialize_doc(updated))
 
 
 @bp.route('/<id>', methods=['DELETE'])
+@jwt_required
 def delete_primary_tag(id):
     """Soft delete a primary tag (sets isDeleted to true)"""
     try:
@@ -133,12 +140,18 @@ def delete_primary_tag(id):
             return jsonify({
                 "error": f"Cannot delete primary tag. {secondary_count} secondary tag(s) are using it. Delete them first."
             }), 400
-             
-        mongo.db.ents.update_one({'_id': id}, {'$set': {'base.isDeleted': True}})
+        
+        now = int(datetime.now().timestamp() * 1000)
+        mongo.db.ents.update_one({'_id': id}, {'$set': {
+            'base.isDeleted': True,
+            'base.updatedAt': now,
+            'base.updatedBy': getattr(request, 'user_full_name', 'system')
+        }})
         
         updated = mongo.db.ents.find_one({'_id': id})
-        log_history('primary_tag', id, 'DELETE', 'system', old_doc, updated, {'base': {'isDeleted': True}})
+        log_history('primary_tag', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, updated, {'base': {'isDeleted': True}})
         
     except Exception as e:
         return jsonify({"error": str(e)}), 400
     return jsonify({"message": "Primary tag deleted"}), 200
+

@@ -14,8 +14,9 @@ export interface Contact {
     isActive: boolean;
     createdAt: number;
     updatedAt: number;
-    lut: number;
     entityType: string;
+    createdBy?: string;
+    updatedBy?: string;
   };
 }
 

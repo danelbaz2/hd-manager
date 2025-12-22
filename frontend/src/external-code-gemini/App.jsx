@@ -112,7 +112,7 @@ const INITIAL_MISSIONS = [
     description: 'בדיקה מקיפה של שרתי ה-Production וה-Staging לוודא יציבות לאחר העדכון האחרון.',
     status: 'in_progress',
     responsibleUserIds: [1],
-    participantsIds: [4, 3],
+    participantIds: [4, 3],
     tagId: 'tag4',
     date: getRelativeDate(0),
     deadline: getRelativeDate(2),
@@ -126,7 +126,7 @@ const INITIAL_MISSIONS = [
     description: 'הרצת סקריפטים של מיגרציה לטבלאות המשתמשים החדשות.',
     status: 'open',
     responsibleUserIds: [2],
-    participantsIds: [1],
+    participantIds: [1],
     tagId: 'tag1',
     date: getRelativeDate(1),
     deadline: getRelativeDate(1),
@@ -140,7 +140,7 @@ const INITIAL_MISSIONS = [
     description: 'וידוא סנכרון תהליכי הרקע בין השרתים השונים.',
     status: 'closed',
     responsibleUserIds: [3],
-    participantsIds: [],
+    participantIds: [],
     tagId: 'tag4',
     date: getRelativeDate(-2),
     deadline: getRelativeDate(-2),
@@ -154,7 +154,7 @@ const INITIAL_MISSIONS = [
     description: 'ביצוע סריקה ידנית לאיתור נוזקות בשרת הקבצים.',
     status: 'open',
     responsibleUserIds: [4],
-    participantsIds: [1, 5],
+    participantIds: [1, 5],
     tagId: 'tag6',
     date: getRelativeDate(1),
     deadline: getRelativeDate(3),
@@ -168,7 +168,7 @@ const INITIAL_MISSIONS = [
     description: 'שיפור ביצועים במודול הליבה של המערכת.',
     status: 'in_progress',
     responsibleUserIds: [5],
-    participantsIds: [2],
+    participantIds: [2],
     tagId: 'tag1',
     date: getRelativeDate(0),
     deadline: getRelativeDate(4),
@@ -182,7 +182,7 @@ const INITIAL_MISSIONS = [
     description: 'כתיבת מסמכי אפיון ותיעוד טכני עבור ה-API החדש.',
     status: 'closed',
     responsibleUserIds: [6],
-    participantsIds: [8],
+    participantIds: [8],
     tagId: 'tag5',
     date: getRelativeDate(-5),
     deadline: getRelativeDate(-3),
@@ -350,7 +350,7 @@ const WeeklyCalendar = ({ currentDate, tasks, isDarkMode, onTaskClick }) => {
               >
                 {/* Status Bar */}
                 <div className={`absolute top-0 bottom-0 right-0 w-1.5 ${task.status === 'open' ? 'bg-emerald-500' :
-                    task.status === 'in_progress' ? 'bg-amber-500' : 'bg-slate-400'
+                  task.status === 'in_progress' ? 'bg-amber-500' : 'bg-slate-400'
                   }`}></div>
 
                 <div className="pr-3 flex items-center justify-between">
@@ -391,7 +391,7 @@ const CreateMissionModal = ({ isOpen, onClose, isDarkMode, users, onCreate }) =>
     title: '',
     description: '',
     responsibleUserIds: [],
-    participantsIds: [],
+    participantIds: [],
     tagId: '',
     status: 'open',
     priority: 'medium',
@@ -529,8 +529,8 @@ const CreateMissionModal = ({ isOpen, onClose, isDarkMode, users, onCreate }) =>
                       key={u.id}
                       onClick={() => toggleUserSelection('responsibleUserIds', u.id)}
                       className={`flex items-center gap-2 p-1.5 rounded-lg cursor-pointer transition-all border select-none ${isSelected
-                          ? 'bg-blue-500 text-white border-blue-600 shadow-sm'
-                          : isDarkMode ? 'bg-slate-800 border-slate-700 hover:bg-slate-700' : 'bg-white border-slate-200 hover:bg-slate-100'
+                        ? 'bg-blue-500 text-white border-blue-600 shadow-sm'
+                        : isDarkMode ? 'bg-slate-800 border-slate-700 hover:bg-slate-700' : 'bg-white border-slate-200 hover:bg-slate-100'
                         }`}
                     >
                       <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${u.iconColor} bg-white/90`}>

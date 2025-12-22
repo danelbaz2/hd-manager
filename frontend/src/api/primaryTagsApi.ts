@@ -7,14 +7,15 @@ export interface PrimaryTag {
     name: string;
     description: string | null;
     color: string;  // Darker color for primary tags
-    relatedContactsIds: string[] | null;
+    relatedContactIds: string[] | null;  // Fixed: removed extra 's'
     base?: {
         isDeleted: boolean;
         isActive: boolean;
         createdAt: number;
         updatedAt: number;
-        lut: number;
         entityType: string;
+        createdBy?: string;
+        updatedBy?: string;
     };
 }
 
@@ -23,7 +24,7 @@ export interface PrimaryTagFormPayload {
     name: string;
     description?: string;
     color: string;
-    relatedContactsIds?: string[];
+    relatedContactIds?: string[];  // Fixed: removed extra 's'
 }
 
 const PRIMARY_TAGS_ENDPOINT = `${API_BASE_URL}/primary-tags`;

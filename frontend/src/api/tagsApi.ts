@@ -6,15 +6,16 @@ export interface Tag {
   id: string;
   name: string;
   description: string | null;
-  relatedContactsIds: string[] | null;
+  relatedContactIds: string[] | null;  // Fixed: removed extra 's'
   color: string;
   base?: {
     isDeleted: boolean;
     isActive: boolean;
     createdAt: number;
     updatedAt: number;
-    lut: number;
     entityType: string;
+    createdBy?: string;
+    updatedBy?: string;
   };
 }
 
@@ -22,7 +23,7 @@ export interface Tag {
 export interface TagFormPayload {
   name: string;
   description?: string;
-  relatedContactsIds?: string[];
+  relatedContactIds?: string[];  // Fixed: removed extra 's'
   color: string;
 }
 

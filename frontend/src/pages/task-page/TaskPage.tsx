@@ -170,7 +170,7 @@ const TaskPage: React.FC = () => {
 
   // Handle task click
   const handleTaskClick = (task: Task) => {
-    console.log("Task clicked:", task);
+    console.log(task);
     // TODO: Open task detail modal
   };
 

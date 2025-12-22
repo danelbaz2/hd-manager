@@ -4,6 +4,7 @@ from datetime import datetime
 from models.tag_model import TagModel, TagUpdateModel
 from bson.objectid import ObjectId
 from utils.history import log_history
+from utils.jwt_utils import jwt_required
 
 bp = Blueprint('tags', __name__, url_prefix='/api/tags')
 
@@ -12,11 +13,13 @@ def serialize_doc(doc):
     return doc
 
 @bp.route('/', methods=['GET'])
+@jwt_required
 def get_tags():
     tags = list(mongo.db.ents.find({'base.entityType': 'tag', 'base.isDeleted': {'$ne': True}}))
     return jsonify([serialize_doc(t) for t in tags])
 
 @bp.route('/', methods=['POST'])
+@jwt_required
 def create_tag():
     try:
         data = TagModel(**request.json).model_dump(exclude_none=True)
@@ -51,7 +54,7 @@ def create_tag():
                 '$set': {
                     'base.isDeleted': False,
                     'base.updatedAt': now,
-                    'base.lut': now,
+                    'base.updatedAt': now,
                 }
             }
             
@@ -74,8 +77,9 @@ def create_tag():
         'isActive': True,
         'createdAt': now,
         'updatedAt': now,
-        'lut': now,
-        'entityType': 'tag'
+        'entityType': 'tag',
+        'createdBy': getattr(request, 'user_full_name', 'system'),
+        'updatedBy': getattr(request, 'user_full_name', 'system')
     }
     data['_id'] = str(ObjectId())
     mongo.db.ents.insert_one(data)
@@ -86,6 +90,7 @@ def create_tag():
 
 
 @bp.route('/<id>', methods=['PUT'])
+@jwt_required
 def update_tag(id):
     try:
         validated = TagUpdateModel(**request.json)
@@ -100,7 +105,7 @@ def update_tag(id):
         
     now = int(datetime.now().timestamp() * 1000)
     data['base.updatedAt'] = now
-    data['base.lut'] = now
+    data['base.updatedBy'] = getattr(request, 'user_full_name', 'system')
     
     try:
         mongo.db.ents.update_one({'_id': id}, {'$set': data})
@@ -109,22 +114,29 @@ def update_tag(id):
         
     updated = mongo.db.ents.find_one({'_id': id})
     
-    log_history('tag', id, 'UPDATE', 'system', old_doc, updated, data)
+    log_history('tag', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, data)
              
     return jsonify(serialize_doc(updated))
 
 @bp.route('/<id>', methods=['DELETE'])
+@jwt_required
 def delete_tag(id):
     try:
         old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'tag'})
         if not old_doc:
             return jsonify({"error": "Tag not found"}), 404
-             
-        mongo.db.ents.update_one({'_id': id}, {'$set': {'base.isDeleted': True}})
+        
+        now = int(datetime.now().timestamp() * 1000)
+        mongo.db.ents.update_one({'_id': id}, {'$set': {
+            'base.isDeleted': True,
+            'base.updatedAt': now,
+            'base.updatedBy': getattr(request, 'user_full_name', 'system')
+        }})
         
         updated = mongo.db.ents.find_one({'_id': id})
-        log_history('tag', id, 'DELETE', 'system', old_doc, updated, {'base': {'isDeleted': True}})
+        log_history('tag', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, updated, {'base': {'isDeleted': True}})
         
     except Exception as e:
         return jsonify({"error": str(e)}), 400
     return jsonify({"message": "Deleted"}), 200
+

@@ -8,7 +8,7 @@ class UserModel(BaseModel):
     id: Optional[str] = None
     fullName: str = Field(..., min_length=2)
     username: str = Field(..., min_length=2)
-    passwordHash: str
+    password: str  # Plain password from frontend - will be hashed in route
     role: str = Field(..., pattern="^(regular|admin)$")
     color: str = Field(..., pattern="^#[0-9a-fA-F]{6}$")
     profileImage: Optional[str] = None
@@ -21,7 +21,8 @@ class UserUpdateModel(BaseModel):
     
     fullName: Optional[str] = Field(None, min_length=2)
     username: Optional[str] = Field(None, min_length=2)
-    passwordHash: Optional[str] = None
+    password: Optional[str] = None  # Plain password from frontend - will be hashed in route
     role: Optional[str] = Field(None, pattern="^(regular|admin)$")
     color: Optional[str] = Field(None, pattern="^#[0-9a-fA-F]{6}$")
     profileImage: Optional[str] = None
+

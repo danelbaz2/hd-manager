@@ -23,7 +23,7 @@ export interface Task {
   date?: number;
   deadline?: number;
   responsibleUserIds?: string[];  // User IDs responsible for the task
-  participantsIds?: string[];      // Optional: Contact IDs participating
+  participantIds?: string[];      // Optional: Contact IDs participating
   secondaryTagIds?: string[];      // Secondary Tag IDs (new two-tier tag system)
   priority?: TaskPriority;
   status?: TaskStatus;
@@ -36,7 +36,7 @@ export interface TaskFormData {
   date?: number;
   deadline?: number;
   responsibleUserIds?: string[];
-  participantsIds?: string[];      // Optional: Contact IDs
+  participantIds?: string[];      // Optional: Contact IDs
   secondaryTagIds?: string[];      // Secondary Tag IDs (new two-tier tag system)
   priority?: TaskPriority;
   status?: TaskStatus;

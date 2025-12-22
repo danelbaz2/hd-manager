@@ -105,7 +105,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     }
 
     // Validate password - required
-    if (!formData.passwordHash.trim()) {
+    if (!formData.password.trim()) {
       showWarning("שדה חסר", "נא להזין סיסמה");
       return;
     }
@@ -275,9 +275,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="סיסמה"
-                value={formData.passwordHash}
+                value={formData.password}
                 onChange={(e) =>
-                  setFormData({ ...formData, passwordHash: e.target.value })
+                  setFormData({ ...formData, password: e.target.value })
                 }
                 className={`
               w-full px-4 py-2.5 pl-10

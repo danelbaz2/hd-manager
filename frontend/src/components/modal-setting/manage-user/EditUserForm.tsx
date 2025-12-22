@@ -129,8 +129,8 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
       payload.profileImage = formData.profileImage;
     }
     // Only include password if it's not empty (user wants to change it)
-    if (formData.passwordHash && formData.passwordHash.trim() !== "") {
-      payload.passwordHash = formData.passwordHash;
+    if (formData.password && formData.password.trim() !== "") {
+      payload.password = formData.password;
     }
 
     return payload;
@@ -308,9 +308,9 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="סיסמה חדשה"
-                value={formData.passwordHash}
+                value={formData.password}
                 onChange={(e) =>
-                  setFormData({ ...formData, passwordHash: e.target.value })
+                  setFormData({ ...formData, password: e.target.value })
                 }
                 disabled={isSaving}
                 className={`

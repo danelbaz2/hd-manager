@@ -3,6 +3,7 @@ from database import mongo
 from models.chat_message_model import ChatMessageModel
 from datetime import datetime
 from bson.objectid import ObjectId
+from utils.jwt_utils import jwt_required
 
 bp = Blueprint('chat_messages', __name__, url_prefix='/api/chat')
 
@@ -11,12 +12,14 @@ def serialize_doc(doc):
     return doc
 
 @bp.route('/', methods=['GET'])
+@jwt_required
 def get_messages():
     # Sort by createdAt ascending (chronological) per SRS note "continuous stream"
     messages = list(mongo.db.ents.find({'base.entityType': 'chat_message', 'base.isDeleted': {'$ne': True}}).sort('base.createdAt', 1)) 
     return jsonify([serialize_doc(m) for m in messages])
 
 @bp.route('/', methods=['POST'])
+@jwt_required
 def create_message():
     try:
         data = ChatMessageModel(**request.json).model_dump(exclude_none=True)
@@ -29,9 +32,11 @@ def create_message():
         'isActive': True,
         'createdAt': now,
         'updatedAt': now,
-        'lut': now,
-        'entityType': 'chat_message'
+        'entityType': 'chat_message',
+        'createdBy': getattr(request, 'user_full_name', 'system'),
+        'updatedBy': getattr(request, 'user_full_name', 'system')
     }
     data['_id'] = str(ObjectId())
     mongo.db.ents.insert_one(data)
     return jsonify(serialize_doc(data)), 201
+

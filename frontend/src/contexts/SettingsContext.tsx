@@ -14,7 +14,6 @@ const mapUserToUserData = (user: User): UserData => ({
     id: user.id,
     fullName: user.fullName,
     username: user.username,
-    passwordHash: "",
     role: user.role as "admin" | "regular",
     color: user.color,
     profileImage: user.profileImage,
