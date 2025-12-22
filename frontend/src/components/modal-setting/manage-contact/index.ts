@@ -5,4 +5,3 @@ export { default } from "./ManageContact";
 export { default as ContactsList } from "./ContactsList";
 export { default as AddContactForm } from "./AddContactForm";
 export { default as EditContactForm } from "./EditContactForm";
-export { default as ContactForm } from "./ContactForm";
