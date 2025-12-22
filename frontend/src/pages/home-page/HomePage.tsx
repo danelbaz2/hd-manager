@@ -1,177 +1,57 @@
 import React, { useState, useMemo } from "react";
-import { useNavigate } from "react-router-dom";
-import { useTheme, useSettings, useViewState, useAuth } from "../../contexts";
+import { useTheme, useSettings, useViewState } from "../../contexts";
 import HeaderHomePage from "./HeaderHomePage";
 import NewTaskModal from "../../components/modal-new-task";
-import { UserCardGrid, TaskListDaily, TaskListWeekly } from "./parts";
-import { type Task } from "../../api/tasksApi";
-import { type UserData } from "../../schemas/userTypes";
-
-// Get week start date (Sunday) for a given date
-const getWeekStart = (date: Date): Date => {
-  const d = new Date(date);
-  const day = d.getDay();
-  d.setDate(d.getDate() - day);
-  d.setHours(0, 0, 0, 0);
-  return d;
-};
-
-// Filter tasks by date range
-const filterTasksByDateRange = (
-  tasks: Task[],
-  selectedDate: number,
-  viewMode: "daily" | "weekly" | "monthly"
-): Task[] => {
-  const date = new Date(selectedDate);
-
-  if (viewMode === "daily") {
-    const start = new Date(date);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(date);
-    end.setHours(23, 59, 59, 999);
-
-    return tasks.filter((task) => {
-      if (!task.date) return false;
-      const taskDate = new Date(task.date);
-      return taskDate >= start && taskDate <= end;
-    });
-  }
-
-  if (viewMode === "weekly") {
-    const weekStart = getWeekStart(date);
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    weekEnd.setHours(23, 59, 59, 999);
-
-    return tasks.filter((task) => {
-      const taskStart = new Date(task.date || 0);
-      const taskEnd = task.deadline
-        ? new Date(task.deadline)
-        : new Date(taskStart);
-      taskStart.setHours(0, 0, 0, 0);
-      taskEnd.setHours(23, 59, 59, 999);
-      // Task overlaps with week if it starts before week ends AND ends after week starts
-      return taskStart <= weekEnd && taskEnd >= weekStart;
-    });
-  }
-
-  // Monthly - filter by month
-  const monthStart = new Date(date.getFullYear(), date.getMonth(), 1);
-  const monthEnd = new Date(date.getFullYear(), date.getMonth() + 1, 0);
-  monthEnd.setHours(23, 59, 59, 999);
-
-  return tasks.filter((task) => {
-    if (!task.date) return false;
-    const taskDate = new Date(task.date);
-    return taskDate >= monthStart && taskDate <= monthEnd;
-  });
-};
+import { GridView } from "./grid-view";
+import { ListView } from "./list-view";
+import { TagsView } from "./tags-view";
+import { filterTasksByDateRange } from "./shared";
 
 const HomePage: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { users, secondaryTags, tasks, refreshTasks } = useSettings();
   const { viewMode, setViewMode, displayMode, setDisplayMode, selectedDate } =
     useViewState();
-  const { user: authUser } = useAuth();
-  const navigate = useNavigate();
-
-  // Check if the authenticated user is an admin
-  const isAdmin = authUser?.role === "admin";
 
   // Modal state
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
 
-  // Filter tasks based on current view (memoized for performance)
+  // Search state for tags view
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter tasks based on current view (date range only)
   const filteredTasks = useMemo(() => {
     return filterTasksByDateRange(tasks, selectedDate, viewMode);
   }, [tasks, selectedDate, viewMode]);
 
-  const handleCreateTask = () => {
-    setIsNewTaskModalOpen(true);
-  };
-
-  const handleTaskCreated = () => {
-    refreshTasks(); // Refresh task list after creation
-  };
-
-  const handleSearch = (query: string, filterType: string) => {
-    console.log("Search:", query, "Filter:", filterType);
-    // TODO: Implement search functionality
-  };
-
-  // Handle user card click - navigate to tasks page with user in state
-  // Admin can click any user, regular users can only click themselves
-  const handleUserClick = (user: UserData) => {
-    // Check if click is allowed
-    const canClick = isAdmin || user.id === authUser?.id;
-
-    if (canClick) {
-      navigate("/tasks", {
-        state: { selectedUserId: user.id, userName: user.fullName },
-      });
-    }
-  };
-
-  // Helper to check if a user card should be clickable
-  const isUserClickable = (userId: string): boolean => {
-    return isAdmin || userId === authUser?.id;
-  };
-
-  // Handle task click (for weekly view)
-  const handleTaskClick = (task: Task) => {
-    console.log(task);
-    // TODO: Open task detail modal
-  };
+  // Handlers
+  const handleCreateTask = () => setIsNewTaskModalOpen(true);
+  const handleTaskCreated = () => refreshTasks();
+  const handleSearchChange = (query: string) => setSearchQuery(query);
 
   // Render content based on display mode
   const renderContent = () => {
-    if (displayMode === "grid") {
-      // Grid view - show user cards
-      return (
-        <UserCardGrid
-          users={users}
-          tasks={filteredTasks}
-          onUserClick={handleUserClick}
-          isUserClickable={isUserClickable}
-        />
-      );
-    }
+    switch (displayMode) {
+      case "grid":
+        return <GridView users={users} tasks={filteredTasks} />;
 
-    // List view - depends on view mode
-    if (viewMode === "daily") {
-      return (
-        <TaskListDaily
-          tasks={filteredTasks}
-          users={users}
-          tags={secondaryTags}
-        />
-      );
-    }
+      case "list":
+        return (
+          <ListView tasks={filteredTasks} users={users} tags={secondaryTags} />
+        );
 
-    if (viewMode === "weekly") {
-      const weekStart = getWeekStart(new Date(selectedDate));
-      return (
-        <TaskListWeekly
-          tasks={filteredTasks}
-          users={users}
-          weekStart={weekStart}
-          onTaskClick={handleTaskClick}
-        />
-      );
-    }
+      case "tags":
+        return (
+          <TagsView
+            tasks={filteredTasks}
+            users={users}
+            searchQuery={searchQuery}
+          />
+        );
 
-    // Monthly - not implemented, show placeholder
-    return (
-      <div
-        className={`
-          text-center py-16
-          ${isDarkMode ? "text-slate-400" : "text-slate-500"}
-        `}
-      >
-        <p className="text-lg">תצוגה חודשית תתווסף בקרוב</p>
-        <p className="text-sm mt-2">בחר תצוגה יומית או שבועית</p>
-      </div>
-    );
+      default:
+        return <GridView users={users} tasks={filteredTasks} />;
+    }
   };
 
   return (
@@ -184,24 +64,24 @@ const HomePage: React.FC = () => {
         initialDate={selectedDate}
       />
 
-      {/* Header with filter, toggle, and create button */}
+      {/* Header */}
       <HeaderHomePage
         onCreateTask={handleCreateTask}
-        onSearch={handleSearch}
         onViewModeChange={setViewMode}
         onDisplayModeChange={setDisplayMode}
+        onSearchChange={handleSearchChange}
         viewMode={viewMode}
         displayMode={displayMode}
       />
 
-      {/* Main Content Area */}
+      {/* Main Content */}
       <div
-        className={`
-          flex-1 overflow-y-auto
-          ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}
-          p-4 lg:p-6 xl:p-8
-          ${isDarkMode ? "bg-slate-900" : "bg-slate-50"}
-        `}
+        className={`flex-1 overflow-y-auto p-4 lg:p-6 xl:p-8
+          ${
+            isDarkMode
+              ? "bg-slate-900 dark-scrollbar"
+              : "bg-slate-50 light-scrollbar"
+          }`}
       >
         {renderContent()}
       </div>

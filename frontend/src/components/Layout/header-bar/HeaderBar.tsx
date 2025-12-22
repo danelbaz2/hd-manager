@@ -15,6 +15,21 @@ const HEBREW_DAYS_FULL = [
   "שבת",
 ];
 
+const HEBREW_MONTHS = [
+  "ינואר",
+  "פברואר",
+  "מרץ",
+  "אפריל",
+  "מאי",
+  "יוני",
+  "יולי",
+  "אוגוסט",
+  "ספטמבר",
+  "אוקטובר",
+  "נובמבר",
+  "דצמבר",
+];
+
 // Format date for daily view: "חמישי, 18.12"
 const formatDateHebrew = (date: Date): string => {
   const dayName = HEBREW_DAYS_FULL[date.getDay()];
@@ -38,6 +53,13 @@ const formatWeekRange = (date: Date): string => {
   return `${formatDay(end)} - ${formatDay(start)}`;
 };
 
+// Format month and year for monthly view: "דצמבר 2025"
+const formatMonthYear = (date: Date): string => {
+  const monthName = HEBREW_MONTHS[date.getMonth()];
+  const year = date.getFullYear();
+  return `${monthName} ${year}`;
+};
+
 interface HeaderBarProps {
   className?: string;
 }
@@ -55,11 +77,21 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
   // Convert timestamp to Date object for display
   const currentDate = new Date(selectedDate);
 
-  // Change date - for weekly mode, move by 7 days
+  // Change date based on view mode
   const changeDate = (direction: number) => {
     const newDate = new Date(selectedDate);
-    const daysToAdd = viewMode === "weekly" ? 7 : 1;
-    newDate.setDate(newDate.getDate() + direction * daysToAdd);
+
+    if (viewMode === "monthly") {
+      // Move by 1 month
+      newDate.setMonth(newDate.getMonth() + direction);
+    } else if (viewMode === "weekly") {
+      // Move by 7 days
+      newDate.setDate(newDate.getDate() + direction * 7);
+    } else {
+      // Move by 1 day (daily mode)
+      newDate.setDate(newDate.getDate() + direction);
+    }
+
     setSelectedDate(newDate.getTime());
   };
 
@@ -68,9 +100,12 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
     setSelectedDate(timestamp);
     setIsCalendarOpen(false);
   };
-  console.log(user);
+
   // Get display text based on view mode
   const getDateDisplayText = (): string => {
+    if (viewMode === "monthly") {
+      return formatMonthYear(currentDate);
+    }
     if (viewMode === "weekly") {
       return formatWeekRange(currentDate);
     }
@@ -174,7 +209,13 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
                   : "hover:bg-slate-100 text-slate-500"
               }
             `}
-            aria-label={viewMode === "weekly" ? "Next week" : "Next day"}
+            aria-label={
+              viewMode === "monthly"
+                ? "Next month"
+                : viewMode === "weekly"
+                ? "Next week"
+                : "Next day"
+            }
           >
             <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
           </button>
@@ -203,7 +244,11 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
               }
             `}
             aria-label={
-              viewMode === "weekly" ? "Previous week" : "Previous day"
+              viewMode === "monthly"
+                ? "Previous month"
+                : viewMode === "weekly"
+                ? "Previous week"
+                : "Previous day"
             }
           >
             <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />

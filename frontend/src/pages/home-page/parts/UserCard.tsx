@@ -47,11 +47,11 @@ const UserCard: React.FC<UserCardProps> = ({
                ? "bg-slate-800 border-slate-700 hover:border-slate-600"
                : "bg-white border-slate-200 hover:border-slate-300"
            }`
-            : `
+            : `cursor-default
            ${
              isDarkMode
-               ? "bg-slate-800/50 border-slate-700/50"
-               : "bg-slate-50 border-slate-200/50"
+               ? "bg-slate-800/50 border-slate-800/50"
+               : "bg-slate-100 border-slate-300"
            }`
         }
       `}

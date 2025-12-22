@@ -54,14 +54,22 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
   const isDataLoading = isLoadingData || isLoadingUsers || isLoadingTags;
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Helper: Format date to YYYY-MM-DD using local time
+  const formatDateLocal = (date: Date): string => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
   // Set initial date when modal opens
   useEffect(() => {
     if (isOpen) {
       if (initialDate) {
         const date = new Date(initialDate);
-        setStartDate(date.toISOString().split("T")[0]);
+        setStartDate(formatDateLocal(date));
       } else {
-        setStartDate(new Date().toISOString().split("T")[0]);
+        setStartDate(formatDateLocal(new Date()));
       }
     }
   }, [isOpen, initialDate]);
@@ -92,8 +100,19 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
         title: title.trim(),
         description: description.trim() || undefined,
         priority,
-        date: startDate ? new Date(startDate).getTime() : Date.now(),
-        deadline: deadline ? new Date(deadline).getTime() : undefined,
+        // Parse date string as local time (YYYY-MM-DD format)
+        date: startDate
+          ? (() => {
+              const [year, month, day] = startDate.split("-").map(Number);
+              return new Date(year, month - 1, day, 12, 0, 0).getTime();
+            })()
+          : Date.now(),
+        deadline: deadline
+          ? (() => {
+              const [year, month, day] = deadline.split("-").map(Number);
+              return new Date(year, month - 1, day, 12, 0, 0).getTime();
+            })()
+          : undefined,
         responsibleUserIds: selectedUserIds.length > 0 ? selectedUserIds : [],
         secondaryTagIds:
           selectedSecondaryTagIds.length > 0 ? selectedSecondaryTagIds : [],

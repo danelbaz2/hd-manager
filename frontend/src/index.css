@@ -189,7 +189,6 @@
 }
 
 @media (min-width: 1920px) {
-
   .dark-scrollbar::-webkit-scrollbar,
   .light-scrollbar::-webkit-scrollbar {
     width: 10px;
@@ -198,7 +197,6 @@
 }
 
 @media (min-width: 2560px) {
-
   .dark-scrollbar::-webkit-scrollbar,
   .light-scrollbar::-webkit-scrollbar {
     width: 12px;
@@ -257,4 +255,14 @@
 .light-scrollbar {
   scrollbar-width: thin;
   scrollbar-color: rgba(203, 213, 225, 0.8) rgba(241, 245, 249, 0.8);
+}
+
+/* Hidden scrollbar - scroll works but bar is invisible */
+.scrollbar-hide {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
 }

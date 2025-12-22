@@ -1,32 +1,18 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Plus,
-  Search,
-  Filter,
-  ChevronDown,
   Calendar,
   CalendarDays,
   CalendarRange,
   LayoutGrid,
   AlignJustify,
+  Tags,
+  Search,
 } from "lucide-react";
 import { useTheme, useAuth } from "../../contexts";
 
 type ViewMode = "daily" | "weekly" | "monthly";
-type DisplayMode = "grid" | "list";
-type FilterType = "free" | "title" | "status" | "tag";
-
-interface FilterOption {
-  id: FilterType;
-  label: string;
-}
-
-const FILTER_OPTIONS: FilterOption[] = [
-  { id: "free", label: "חיפוש חופשי" },
-  { id: "title", label: "כותרת משימה" },
-  { id: "status", label: "סטטוס" },
-  { id: "tag", label: "תגית" },
-];
+type DisplayMode = "grid" | "list" | "tags";
 
 const VIEW_MODES = [
   { id: "daily" as ViewMode, label: "יומי", icon: Calendar },
@@ -36,20 +22,18 @@ const VIEW_MODES = [
 
 interface HeaderHomePageProps {
   onCreateTask?: () => void;
-  onSearch?: (query: string, filterType: FilterType) => void;
   onViewModeChange?: (mode: ViewMode) => void;
   onDisplayModeChange?: (mode: DisplayMode) => void;
-  onDateChange?: (timestamp: number) => void;
+  onSearchChange?: (query: string) => void;
   viewMode?: ViewMode;
   displayMode?: DisplayMode;
-  selectedDate?: number;
 }
 
 const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
   onCreateTask,
-  onSearch,
   onViewModeChange,
   onDisplayModeChange,
+  onSearchChange,
   viewMode: externalViewMode,
   displayMode: externalDisplayMode,
 }) => {
@@ -66,11 +50,6 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
   const viewMode = externalViewMode ?? internalViewMode;
   const displayMode = externalDisplayMode ?? internalDisplayMode;
 
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState<FilterType>("free");
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const filterRef = useRef<HTMLDivElement>(null);
-
   // Handle view mode change
   const handleViewModeChange = (mode: ViewMode) => {
     setInternalViewMode(mode);
@@ -83,77 +62,46 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
     onDisplayModeChange?.(mode);
   };
 
-  // Handle search
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const query = e.target.value;
-    setSearchQuery(query);
-    onSearch?.(query, filterType);
-  };
-
-  // Handle filter selection
-  const handleFilterSelect = (filter: FilterType) => {
-    setFilterType(filter);
-    setIsFilterOpen(false);
-    onSearch?.(searchQuery, filter);
-  };
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        filterRef.current &&
-        !filterRef.current.contains(event.target as Node)
-      ) {
-        setIsFilterOpen(false);
-      }
-    };
-
-    if (isFilterOpen) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isFilterOpen]);
-
-  const currentFilter = FILTER_OPTIONS.find((f) => f.id === filterType);
-
   return (
     <div
       className={`
         flex items-center justify-between
         px-4 lg:px-6 xl:px-8
         py-3 lg:py-4
-        ${isDarkMode ? "bg-slate-900" : "bg-slate-50"}
+        border-b
+        ${
+          isDarkMode
+            ? "bg-slate-900 border-slate-800"
+            : "bg-slate-50 border-slate-200"
+        }
       `}
       dir="rtl"
     >
-      {/* Right Side - Display Toggle, Filter & Search */}
+      {/* Right Side - Display Toggle & Filter Panel */}
       <div className="flex items-center gap-3 lg:gap-4">
-        {/* Display Mode Toggle (Grid/List) - Moved here next to filter */}
+        {/* Display Mode Toggle (Grid/List) */}
         <div
           className={`
-            flex items-center p-1 rounded-lg border
+            flex items-center p-1 rounded-xl border
             ${
               isDarkMode
-                ? "bg-slate-700 border-slate-600"
-                : "bg-white border-slate-200"
+                ? "bg-slate-800 border-slate-700"
+                : "bg-white border-slate-200 shadow-sm"
             }
           `}
         >
           <button
             onClick={() => handleDisplayModeChange("list")}
             className={`
-              p-1.5 lg:p-2 rounded-md transition-all
+              p-1.5 lg:p-2 rounded-lg transition-all duration-200
               ${
                 displayMode === "list"
                   ? isDarkMode
-                    ? "bg-slate-600 text-white shadow-sm"
-                    : "bg-blue-50 text-blue-600"
+                    ? "bg-blue-600 text-white shadow-lg"
+                    : "bg-blue-500 text-white shadow-md"
                   : isDarkMode
-                  ? "text-slate-400 hover:text-slate-200"
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
               }
             `}
             title="תצוגת רשימה"
@@ -163,120 +111,65 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
           <button
             onClick={() => handleDisplayModeChange("grid")}
             className={`
-              p-1.5 lg:p-2 rounded-md transition-all
+              p-1.5 lg:p-2 rounded-lg transition-all duration-200
               ${
                 displayMode === "grid"
                   ? isDarkMode
-                    ? "bg-slate-600 text-white shadow-sm"
-                    : "bg-blue-50 text-blue-600"
+                    ? "bg-blue-600 text-white shadow-lg"
+                    : "bg-blue-500 text-white shadow-md"
                   : isDarkMode
-                  ? "text-slate-400 hover:text-slate-200"
-                  : "text-slate-500 hover:text-slate-700"
+                  ? "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
               }
             `}
             title="תצוגת כרטיסים"
           >
             <LayoutGrid className="w-4 h-4 lg:w-5 lg:h-5" />
           </button>
+          <button
+            onClick={() => handleDisplayModeChange("tags")}
+            className={`
+              p-1.5 lg:p-2 rounded-lg transition-all duration-200
+              ${
+                displayMode === "tags"
+                  ? isDarkMode
+                    ? "bg-blue-600 text-white shadow-lg"
+                    : "bg-blue-500 text-white shadow-md"
+                  : isDarkMode
+                  ? "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
+                  : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+              }
+            `}
+            title="תצוגת תגיות"
+          >
+            <Tags className="w-4 h-4 lg:w-5 lg:h-5" />
+          </button>
         </div>
 
-        {/* Filter Dropdown - Only show in list mode */}
-        {displayMode !== "grid" && (
-          <div className="relative" ref={filterRef}>
-            <button
-              onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className={`
-                flex items-center gap-2
-                px-3 lg:px-4 py-2 lg:py-2.5
-                rounded-lg border
-                text-sm lg:text-base font-medium
-                transition-colors
-                ${
-                  isDarkMode
-                    ? "bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600"
-                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-                }
-              `}
-            >
-              <Filter className="w-4 h-4 lg:w-5 lg:h-5" />
-              <span>{currentFilter?.label}</span>
-              <ChevronDown
-                className={`w-4 h-4 transition-transform ${
-                  isFilterOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-
-            {/* Dropdown Menu */}
-            {isFilterOpen && (
-              <div
-                className={`
-                  absolute top-full mt-2 right-0 z-20
-                  min-w-[160px] lg:min-w-[180px]
-                  py-2 rounded-lg border shadow-lg
-                  ${
-                    isDarkMode
-                      ? "bg-slate-800 border-slate-600"
-                      : "bg-white border-slate-200"
-                  }
-                `}
-              >
-                {FILTER_OPTIONS.map((option) => (
-                  <button
-                    key={option.id}
-                    onClick={() => handleFilterSelect(option.id)}
-                    className={`
-                      w-full text-right
-                      px-4 py-2 lg:py-2.5
-                      text-sm lg:text-base
-                      transition-colors
-                      ${
-                        filterType === option.id
-                          ? isDarkMode
-                            ? "bg-blue-900/30 text-blue-400"
-                            : "bg-blue-50 text-blue-600"
-                          : isDarkMode
-                          ? "text-slate-300 hover:bg-slate-700"
-                          : "text-slate-700 hover:bg-slate-50"
-                      }
-                    `}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Search Input - Only show in list mode */}
-        {displayMode !== "grid" && (
+        {/* Tag Search - Only show in tags mode */}
+        {displayMode === "tags" && (
           <div className="relative">
             <input
               type="text"
-              placeholder="חיפוש..."
-              value={searchQuery}
-              onChange={handleSearchChange}
+              placeholder="חיפוש לפי תגית..."
+              onChange={(e) => onSearchChange?.(e.target.value)}
               className={`
-                w-48 lg:w-64 xl:w-80
+                w-48 lg:w-64
                 pl-10 pr-4 py-2 lg:py-2.5
-                rounded-lg border
-                text-sm lg:text-base
-                transition-colors
+                rounded-xl border
+                text-sm
+                transition-all duration-200
                 ${
                   isDarkMode
-                    ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500"
-                    : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-500"
+                    ? "bg-slate-800 border-slate-700 text-white placeholder-slate-400 focus:border-blue-500"
+                    : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-500 shadow-sm"
                 }
                 focus:outline-none focus:ring-2 focus:ring-blue-500/20
               `}
             />
             <Search
-              className={`
-                absolute left-3 top-1/2 -translate-y-1/2
-                w-4 h-4 lg:w-5 lg:h-5
-                ${isDarkMode ? "text-slate-400" : "text-slate-400"}
-              `}
+              className={`absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4
+                ${isDarkMode ? "text-slate-400" : "text-slate-400"}`}
             />
           </div>
         )}
@@ -287,8 +180,12 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
         {/* View Mode Toggle (Daily/Weekly/Monthly) */}
         <div
           className={`
-            flex items-center p-1 rounded-lg
-            ${isDarkMode ? "bg-slate-700" : "bg-slate-100"}
+            flex items-center p-1 rounded-xl border
+            ${
+              isDarkMode
+                ? "bg-slate-800 border-slate-700"
+                : "bg-white border-slate-200 shadow-sm"
+            }
           `}
         >
           {VIEW_MODES.map((mode) => (
@@ -298,17 +195,17 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
               className={`
                 flex items-center gap-1.5 lg:gap-2
                 px-3 lg:px-4 py-1.5 lg:py-2
-                rounded-md
+                rounded-lg
                 text-xs lg:text-sm font-medium
                 transition-all duration-200
                 ${
                   viewMode === mode.id
                     ? isDarkMode
-                      ? "bg-slate-600 text-white shadow-sm"
-                      : "bg-white text-blue-600 shadow-sm"
+                      ? "bg-blue-600 text-white shadow-lg"
+                      : "bg-blue-500 text-white shadow-md"
                     : isDarkMode
-                    ? "text-slate-400 hover:text-slate-200"
-                    : "text-slate-500 hover:text-slate-700"
+                    ? "text-slate-400 hover:text-slate-200 hover:bg-slate-700"
+                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
                 }
               `}
             >
@@ -326,12 +223,14 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
               flex items-center gap-1.5 lg:gap-2
               px-4 lg:px-5 xl:px-6
               py-2 lg:py-2.5
-              rounded-lg
-              bg-blue-500 hover:bg-blue-600
+              rounded-xl
+              bg-gradient-to-r from-blue-500 to-blue-600
+              hover:from-blue-600 hover:to-blue-700
               text-white font-medium
               text-sm lg:text-base
-              transition-colors
-              shadow-sm hover:shadow-md
+              transition-all duration-200
+              shadow-lg hover:shadow-xl
+              hover:scale-[1.02]
             "
           >
             <Plus className="w-4 h-4 lg:w-5 lg:h-5" />
