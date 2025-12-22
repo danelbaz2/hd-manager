@@ -20,7 +20,7 @@ import {
     deleteSecondaryTag,
 } from "../../../api/secondaryTagsApi";
 import { ToastContainer, useToast } from "../../alert-feedback";
-import DelayedLoader from "../../delay-loader";
+import DelayedLoader from "../../loaders/DelayedLoader";
 import DeleteConfirmModal from "../../delete-confirm-modal";
 
 // Sub-components
