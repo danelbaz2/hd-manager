@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings, Moon, Sun, LogOut, User } from "lucide-react";
+import { Settings, Moon, Sun, LogOut, Import, FileOutput } from "lucide-react";
 import { useTheme, useAuth } from "../../../contexts";
 import ManageSetting from "../../modal-setting/ManageSetting";
 
@@ -53,46 +53,6 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
             }
           `}
         >
-          {/* User Info Header */}
-          <div
-            className={`
-              p-3 md:p-4 border-b
-              ${isDarkMode ? "border-slate-700" : "border-slate-100"}
-            `}
-          >
-            <div className="flex items-center gap-3">
-              <div
-                className={`
-                  w-10 h-10 rounded-full flex items-center justify-center
-                  ${isDarkMode ? "bg-slate-700" : "bg-slate-100"}
-                `}
-                style={
-                  user?.color ? { backgroundColor: `${user.color}20` } : {}
-                }
-              >
-                {user?.profileImage ? (
-                  <img
-                    src={user.profileImage}
-                    alt={user.fullName}
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                ) : (
-                  <User size={20} className="text-blue-500" />
-                )}
-              </div>
-              <div>
-                <p
-                  className={`
-                    font-bold text-sm
-                    ${isDarkMode ? "text-white" : "text-slate-800"}
-                  `}
-                >
-                  {user?.fullName || "משתמש"}
-                </p>
-              </div>
-            </div>
-          </div>
-
           {/* Menu Items */}
           <div className="py-2">
             {/* Dark Mode Toggle */}
@@ -134,6 +94,44 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
               >
                 <span>הגדרות</span>
                 <Settings size={18} className="text-slate-400" />
+              </button>
+            )}
+            {/* Settings - Only visible for admin users */}
+            {isAdmin && (
+              <button
+                onClick={handleOpenSettings}
+                className={`
+                  w-full flex items-center justify-between
+                  px-4 py-3
+                  text-sm transition-colors
+                  ${
+                    isDarkMode
+                      ? "hover:bg-slate-700 text-slate-200"
+                      : "hover:bg-slate-50 text-slate-700"
+                  }
+                `}
+              >
+                <span>יבוא דוחות</span>
+                <Import size={18} className="text-slate-400" />
+              </button>
+            )}
+            {/* Settings - Only visible for admin users */}
+            {isAdmin && (
+              <button
+                onClick={handleOpenSettings}
+                className={`
+                  w-full flex items-center justify-between
+                  px-4 py-3
+                  text-sm transition-colors
+                  ${
+                    isDarkMode
+                      ? "hover:bg-slate-700 text-slate-200"
+                      : "hover:bg-slate-50 text-slate-700"
+                  }
+                `}
+              >
+                <span>הפקת דוחות</span>
+                <FileOutput size={18} className="text-slate-400" />
               </button>
             )}
 
