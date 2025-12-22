@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
-import { useTheme, useSettings, useViewState } from "../../contexts";
+import { useTheme, useSettings, useViewState, useAuth } from "../../contexts";
 import HeaderHomePage from "./HeaderHomePage";
 import NewTaskModal from "../../components/modal-new-task";
 import { UserCardGrid, TaskListDaily, TaskListWeekly } from "./parts";
@@ -45,7 +45,9 @@ const filterTasksByDateRange = (
 
     return tasks.filter((task) => {
       const taskStart = new Date(task.date || 0);
-      const taskEnd = task.deadline ? new Date(task.deadline) : new Date(taskStart);
+      const taskEnd = task.deadline
+        ? new Date(task.deadline)
+        : new Date(taskStart);
       taskStart.setHours(0, 0, 0, 0);
       taskEnd.setHours(23, 59, 59, 999);
       // Task overlaps with week if it starts before week ends AND ends after week starts
@@ -68,8 +70,13 @@ const filterTasksByDateRange = (
 const HomePage: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { users, secondaryTags, tasks, refreshTasks } = useSettings();
-  const { viewMode, setViewMode, displayMode, setDisplayMode, selectedDate } = useViewState();
+  const { viewMode, setViewMode, displayMode, setDisplayMode, selectedDate } =
+    useViewState();
+  const { user: authUser } = useAuth();
   const navigate = useNavigate();
+
+  // Check if the authenticated user is an admin
+  const isAdmin = authUser?.role === "admin";
 
   // Modal state
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);
@@ -93,9 +100,21 @@ const HomePage: React.FC = () => {
   };
 
   // Handle user card click - navigate to tasks page with user in state
+  // Admin can click any user, regular users can only click themselves
   const handleUserClick = (user: UserData) => {
-    // Navigate to tasks page, passing userId via state (not URL)
-    navigate("/tasks", { state: { selectedUserId: user.id, userName: user.fullName } });
+    // Check if click is allowed
+    const canClick = isAdmin || user.id === authUser?.id;
+
+    if (canClick) {
+      navigate("/tasks", {
+        state: { selectedUserId: user.id, userName: user.fullName },
+      });
+    }
+  };
+
+  // Helper to check if a user card should be clickable
+  const isUserClickable = (userId: string): boolean => {
+    return isAdmin || userId === authUser?.id;
   };
 
   // Handle task click (for weekly view)
@@ -113,13 +132,20 @@ const HomePage: React.FC = () => {
           users={users}
           tasks={filteredTasks}
           onUserClick={handleUserClick}
+          isUserClickable={isUserClickable}
         />
       );
     }
 
     // List view - depends on view mode
     if (viewMode === "daily") {
-      return <TaskListDaily tasks={filteredTasks} users={users} tags={secondaryTags} />;
+      return (
+        <TaskListDaily
+          tasks={filteredTasks}
+          users={users}
+          tags={secondaryTags}
+        />
+      );
     }
 
     if (viewMode === "weekly") {

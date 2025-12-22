@@ -1,7 +1,12 @@
 import React, { useCallback, useState, useEffect, useMemo } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { ArrowRight, Calendar, CalendarDays, CalendarRange } from "lucide-react";
-import { useTheme, useSettings, useViewState } from "../../contexts";
+import {
+  ArrowRight,
+  Calendar,
+  CalendarDays,
+  CalendarRange,
+} from "lucide-react";
+import { useTheme, useSettings, useViewState, useAuth } from "../../contexts";
 import { KanbanBoard } from "./parts";
 import { updateTask, type Task, type TaskStatus } from "../../api/tasksApi";
 
@@ -56,7 +61,9 @@ const filterTasksByDateRange = (
 
     return tasks.filter((task) => {
       const taskStart = new Date(task.date || 0);
-      const taskEnd = task.deadline ? new Date(task.deadline) : new Date(taskStart);
+      const taskEnd = task.deadline
+        ? new Date(task.deadline)
+        : new Date(taskStart);
       taskStart.setHours(0, 0, 0, 0);
       taskEnd.setHours(23, 59, 59, 999);
       // Task overlaps with week if it starts before week ends AND ends after week starts
@@ -80,6 +87,7 @@ const TaskPage: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { tasks, users, refreshTasks } = useSettings();
   const { viewMode, setViewMode, selectedDate } = useViewState();
+  const { user: authUser } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -92,14 +100,21 @@ const TaskPage: React.FC = () => {
   }, [tasks]);
 
   // Get user info from location state (passed from home page)
+  // If no user selected, default to the authenticated user
   const state = location.state as LocationState | null;
-  const selectedUserId = state?.selectedUserId || "";
-  const userName = state?.userName || "";
+
+  // Determine selected user: from navigation state OR fallback to authenticated user
+  const selectedUserId = state?.selectedUserId || authUser?.id || "";
+  const userName = state?.userName || authUser?.fullName || "";
 
   // Filter tasks by selected date/week AND selected user
   const filteredTasks = useMemo(() => {
     // First filter by date range
-    const dateFilteredTasks = filterTasksByDateRange(optimisticTasks, selectedDate, viewMode);
+    const dateFilteredTasks = filterTasksByDateRange(
+      optimisticTasks,
+      selectedDate,
+      viewMode
+    );
     // Then filter by selected user
     return dateFilteredTasks.filter((task) =>
       task.responsibleUserIds?.includes(selectedUserId)
@@ -139,10 +154,10 @@ const TaskPage: React.FC = () => {
               ...(t.base || {
                 isDeleted: false,
                 createdAt: Date.now(),
-                entityType: 'task'
+                entityType: "task",
               }),
-              updatedAt: Date.now()
-            }
+              updatedAt: Date.now(),
+            },
           };
         })
       );
@@ -194,8 +209,6 @@ const TaskPage: React.FC = () => {
     );
   }
 
-
-
   return (
     <div className="flex flex-col h-full overflow-hidden" dir="rtl">
       {/* Header */}
@@ -205,10 +218,7 @@ const TaskPage: React.FC = () => {
           px-4 lg:px-6 xl:px-8
           py-3 lg:py-4
           shrink-0
-          ${isDarkMode
-            ? "bg-slate-900"
-            : "bg-slate-50"
-          }
+          ${isDarkMode ? "bg-slate-900" : "bg-slate-50"}
         `}
       >
         {/* Right side - Title with back button */}
@@ -218,9 +228,10 @@ const TaskPage: React.FC = () => {
             className={`
               p-2 rounded-full
               transition-colors
-              ${isDarkMode
-                ? "hover:bg-slate-700 text-slate-300"
-                : "hover:bg-slate-100 text-slate-600"
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-700 text-slate-300"
+                  : "hover:bg-slate-100 text-slate-600"
               }
             `}
             aria-label="חזרה לדף הבית"
@@ -256,11 +267,12 @@ const TaskPage: React.FC = () => {
                   rounded-md
                   text-xs lg:text-sm font-medium
                   transition-all duration-200
-                  ${viewMode === mode.id
-                    ? isDarkMode
-                      ? "bg-slate-600 text-white shadow-sm"
-                      : "bg-white text-blue-600 shadow-sm"
-                    : isDarkMode
+                  ${
+                    viewMode === mode.id
+                      ? isDarkMode
+                        ? "bg-slate-600 text-white shadow-sm"
+                        : "bg-white text-blue-600 shadow-sm"
+                      : isDarkMode
                       ? "text-slate-400 hover:text-slate-200"
                       : "text-slate-500 hover:text-slate-700"
                   }

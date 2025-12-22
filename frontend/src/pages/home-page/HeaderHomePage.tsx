@@ -180,102 +180,106 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
           </button>
         </div>
 
-        {/* Filter Dropdown */}
-        <div className="relative" ref={filterRef}>
-          <button
-            onClick={() => setIsFilterOpen(!isFilterOpen)}
-            className={`
-              flex items-center gap-2
-              px-3 lg:px-4 py-2 lg:py-2.5
-              rounded-lg border
-              text-sm lg:text-base font-medium
-              transition-colors
-              ${
-                isDarkMode
-                  ? "bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600"
-                  : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
-              }
-            `}
-          >
-            <Filter className="w-4 h-4 lg:w-5 lg:h-5" />
-            <span>{currentFilter?.label}</span>
-            <ChevronDown
-              className={`w-4 h-4 transition-transform ${
-                isFilterOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {/* Dropdown Menu */}
-          {isFilterOpen && (
-            <div
+        {/* Filter Dropdown - Only show in list mode */}
+        {displayMode !== "grid" && (
+          <div className="relative" ref={filterRef}>
+            <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
               className={`
-                absolute top-full mt-2 right-0 z-20
-                min-w-[160px] lg:min-w-[180px]
-                py-2 rounded-lg border shadow-lg
+                flex items-center gap-2
+                px-3 lg:px-4 py-2 lg:py-2.5
+                rounded-lg border
+                text-sm lg:text-base font-medium
+                transition-colors
                 ${
                   isDarkMode
-                    ? "bg-slate-800 border-slate-600"
-                    : "bg-white border-slate-200"
+                    ? "bg-slate-700 border-slate-600 text-slate-200 hover:bg-slate-600"
+                    : "bg-white border-slate-200 text-slate-700 hover:bg-slate-50"
                 }
               `}
             >
-              {FILTER_OPTIONS.map((option) => (
-                <button
-                  key={option.id}
-                  onClick={() => handleFilterSelect(option.id)}
-                  className={`
-                    w-full text-right
-                    px-4 py-2 lg:py-2.5
-                    text-sm lg:text-base
-                    transition-colors
-                    ${
-                      filterType === option.id
-                        ? isDarkMode
-                          ? "bg-blue-900/30 text-blue-400"
-                          : "bg-blue-50 text-blue-600"
-                        : isDarkMode
-                        ? "text-slate-300 hover:bg-slate-700"
-                        : "text-slate-700 hover:bg-slate-50"
-                    }
-                  `}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+              <Filter className="w-4 h-4 lg:w-5 lg:h-5" />
+              <span>{currentFilter?.label}</span>
+              <ChevronDown
+                className={`w-4 h-4 transition-transform ${
+                  isFilterOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
 
-        {/* Search Input */}
-        <div className="relative">
-          <input
-            type="text"
-            placeholder="חיפוש..."
-            value={searchQuery}
-            onChange={handleSearchChange}
-            className={`
-              w-48 lg:w-64 xl:w-80
-              pl-10 pr-4 py-2 lg:py-2.5
-              rounded-lg border
-              text-sm lg:text-base
-              transition-colors
-              ${
-                isDarkMode
-                  ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500"
-                  : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-500"
-              }
-              focus:outline-none focus:ring-2 focus:ring-blue-500/20
-            `}
-          />
-          <Search
-            className={`
-              absolute left-3 top-1/2 -translate-y-1/2
-              w-4 h-4 lg:w-5 lg:h-5
-              ${isDarkMode ? "text-slate-400" : "text-slate-400"}
-            `}
-          />
-        </div>
+            {/* Dropdown Menu */}
+            {isFilterOpen && (
+              <div
+                className={`
+                  absolute top-full mt-2 right-0 z-20
+                  min-w-[160px] lg:min-w-[180px]
+                  py-2 rounded-lg border shadow-lg
+                  ${
+                    isDarkMode
+                      ? "bg-slate-800 border-slate-600"
+                      : "bg-white border-slate-200"
+                  }
+                `}
+              >
+                {FILTER_OPTIONS.map((option) => (
+                  <button
+                    key={option.id}
+                    onClick={() => handleFilterSelect(option.id)}
+                    className={`
+                      w-full text-right
+                      px-4 py-2 lg:py-2.5
+                      text-sm lg:text-base
+                      transition-colors
+                      ${
+                        filterType === option.id
+                          ? isDarkMode
+                            ? "bg-blue-900/30 text-blue-400"
+                            : "bg-blue-50 text-blue-600"
+                          : isDarkMode
+                          ? "text-slate-300 hover:bg-slate-700"
+                          : "text-slate-700 hover:bg-slate-50"
+                      }
+                    `}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Search Input - Only show in list mode */}
+        {displayMode !== "grid" && (
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="חיפוש..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              className={`
+                w-48 lg:w-64 xl:w-80
+                pl-10 pr-4 py-2 lg:py-2.5
+                rounded-lg border
+                text-sm lg:text-base
+                transition-colors
+                ${
+                  isDarkMode
+                    ? "bg-slate-700 border-slate-600 text-white placeholder-slate-400 focus:border-blue-500"
+                    : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 focus:border-blue-500"
+                }
+                focus:outline-none focus:ring-2 focus:ring-blue-500/20
+              `}
+            />
+            <Search
+              className={`
+                absolute left-3 top-1/2 -translate-y-1/2
+                w-4 h-4 lg:w-5 lg:h-5
+                ${isDarkMode ? "text-slate-400" : "text-slate-400"}
+              `}
+            />
+          </div>
+        )}
       </div>
 
       {/* Left Side - View Mode Toggle & Create Button */}
