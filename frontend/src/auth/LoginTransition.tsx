@@ -24,7 +24,7 @@ const LoginTransition: React.FC<LoginTransitionProps> = ({
 
   // Use GlobalLoader for loading state
   if (state === "loading") {
-    return <GlobalLoader fullScreen />;
+    return <GlobalLoader text="מאמת נתונים..." subtext="אנא המתן..." fullScreen />;
   }
 
   // Success state - show welcome message with animation
