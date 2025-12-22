@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../contexts";
+import { useAuth, useSettings } from "../../contexts";
+import { GlobalLoader } from "../global-loader";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -9,30 +10,18 @@ interface ProtectedRouteProps {
 /**
  * ProtectedRoute component that redirects unauthenticated users to login page.
  * Wraps routes that require authentication.
+ * Shows a unified loader until BOTH auth AND data are fully loaded.
  */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { isLoading: isDataLoading } = useSettings();
   const location = useLocation();
 
-  // Show loading while checking auth state from sessionStorage
-  if (isLoading) {
+  // Show loading while checking auth state OR while initial data is being fetched
+  // This provides a unified loading experience - only ONE loader for everything
+  if (isAuthLoading || (isAuthenticated && isDataLoading)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-white to-slate-100 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
-        <div className="flex items-center gap-2">
-          <div
-            className="w-4 h-4 rounded-full animate-bounce bg-blue-500 dark:bg-blue-400"
-            style={{ animationDelay: "0ms", animationDuration: "600ms" }}
-          />
-          <div
-            className="w-4 h-4 rounded-full animate-bounce bg-blue-500 dark:bg-blue-400"
-            style={{ animationDelay: "150ms", animationDuration: "600ms" }}
-          />
-          <div
-            className="w-4 h-4 rounded-full animate-bounce bg-blue-500 dark:bg-blue-400"
-            style={{ animationDelay: "300ms", animationDuration: "600ms" }}
-          />
-        </div>
-      </div>
+      <GlobalLoader fullScreen />
     );
   }
 

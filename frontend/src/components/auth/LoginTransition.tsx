@@ -1,5 +1,6 @@
 import React from "react";
-import { Check, Loader2 } from "lucide-react";
+import { Check } from "lucide-react";
+import { GlobalLoader } from "../global-loader";
 
 export type LoginState = "idle" | "loading" | "success" | "error";
 
@@ -11,68 +12,54 @@ interface LoginTransitionProps {
 
 /**
  * LoginTransition - Displays animated states during login flow
- * Shows loading spinner, success checkmark, or error state
+ * Uses GlobalLoader for loading state, shows success animation for welcome
  */
 const LoginTransition: React.FC<LoginTransitionProps> = ({
   state,
   isDarkMode,
   userName,
 }) => {
+  // Don't render anything for idle or error states
   if (state === "idle" || state === "error") return null;
 
+  // Use GlobalLoader for loading state
+  if (state === "loading") {
+    return <GlobalLoader fullScreen />;
+  }
+
+  // Success state - show welcome message with animation
   return (
     <div
       className={`
         fixed inset-0 z-50
         flex items-center justify-center
         transition-opacity duration-300
-        ${
-          state === "loading" || state === "success"
-            ? "opacity-100"
-            : "opacity-0 pointer-events-none"
-        }
+        opacity-100
         ${isDarkMode ? "bg-slate-900/95" : "bg-white/95"}
         backdrop-blur-sm
       `}
     >
       <div className="flex flex-col items-center gap-6">
-        {/* Animated Circle */}
+        {/* Success Circle with Check */}
         <div
-          className={`
-            relative w-24 h-24
-            flex items-center justify-center
-            rounded-full
-            transition-all duration-500
-            ${
-              state === "success"
-                ? "bg-green-500 scale-100"
-                : "bg-blue-500 scale-90"
-            }
-          `}
+          className="relative w-24 h-24 flex items-center justify-center rounded-full bg-green-500 scale-100 transition-all duration-500"
         >
-          {state === "loading" && (
-            <Loader2 size={48} className="text-white animate-spin" />
-          )}
-          {state === "success" && (
-            <Check
-              size={48}
-              className="text-white animate-bounce-in"
-              strokeWidth={3}
-            />
-          )}
+          <Check
+            size={48}
+            className="text-white animate-bounce-in"
+            strokeWidth={3}
+          />
         </div>
 
-        {/* Status Text */}
+        {/* Welcome Text */}
         <div className="text-center">
           <p
             className={`
               text-xl font-bold mb-2
-              transition-all duration-300
               ${isDarkMode ? "text-white" : "text-slate-800"}
             `}
           >
-            {state === "loading" && "מתחבר למערכת..."}
-            {state === "success" && `ברוך הבא, ${userName || "משתמש"}!`}
+            ברוך הבא, {userName || "משתמש"}!
           </p>
           <p
             className={`
@@ -80,20 +67,17 @@ const LoginTransition: React.FC<LoginTransitionProps> = ({
               ${isDarkMode ? "text-slate-400" : "text-slate-500"}
             `}
           >
-            {state === "loading" && "אנא המתן..."}
-            {state === "success" && "מעביר אותך לדף הבית..."}
+            מעביר אותך לדף הבית...
           </p>
         </div>
 
-        {/* Progress Bar for Success */}
-        {state === "success" && (
-          <div className="w-48 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
-            <div
-              className="h-full bg-green-500 rounded-full animate-progress"
-              style={{ animation: "progress 1.5s ease-out forwards" }}
-            />
-          </div>
-        )}
+        {/* Progress Bar */}
+        <div className="w-48 h-1 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-green-500 rounded-full"
+            style={{ animation: "loginProgress 1.5s ease-out forwards" }}
+          />
+        </div>
       </div>
 
       {/* Custom Animations */}
@@ -105,7 +89,7 @@ const LoginTransition: React.FC<LoginTransitionProps> = ({
             100% { transform: scale(1); opacity: 1; }
           }
           
-          @keyframes progress {
+          @keyframes loginProgress {
             from { width: 0%; }
             to { width: 100%; }
           }
@@ -120,3 +104,4 @@ const LoginTransition: React.FC<LoginTransitionProps> = ({
 };
 
 export default LoginTransition;
+

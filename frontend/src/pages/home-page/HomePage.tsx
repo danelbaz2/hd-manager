@@ -5,7 +5,6 @@ import HeaderHomePage from "./HeaderHomePage";
 import NewTaskModal from "../../components/modal-new-task";
 import { UserCardGrid, TaskListDaily, TaskListWeekly } from "./parts";
 import { type Task } from "../../api/tasksApi";
-import DelayedLoader from "../../components/delay-loader";
 import { type UserData } from "../../schemas/userTypes";
 
 // Get week start date (Sunday) for a given date
@@ -68,7 +67,7 @@ const filterTasksByDateRange = (
 
 const HomePage: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { users, tags, tasks, isLoading, refreshTasks } = useSettings();
+  const { users, tags, tasks, refreshTasks } = useSettings();
   const { viewMode, setViewMode, displayMode, setDisplayMode, selectedDate } = useViewState();
   const navigate = useNavigate();
 
@@ -178,9 +177,7 @@ const HomePage: React.FC = () => {
           ${isDarkMode ? "bg-slate-900" : "bg-slate-50"}
         `}
       >
-        <DelayedLoader isLoading={isLoading} delay={300}>
-          {renderContent()}
-        </DelayedLoader>
+        {renderContent()}
       </div>
     </div>
   );
