@@ -2,13 +2,13 @@ import React from "react";
 import { useTheme } from "../../../contexts";
 import { type Task } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
-import { type TagData } from "../../../schemas/tagTypes";
+import { type SecondaryTagData } from "../../../schemas/tagTypes";
 import TaskListItem from "./TaskListItem";
 
 interface TaskListDailyProps {
     tasks: Task[];
     users: UserData[];
-    tags: TagData[];
+    tags: SecondaryTagData[];
 }
 
 const TaskListDaily: React.FC<TaskListDailyProps> = ({ tasks, users, tags }) => {

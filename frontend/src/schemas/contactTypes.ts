@@ -1,8 +1,8 @@
 // Contact types - imports shared tag types from schemas
-import { type TagData, type PrimaryTagData, getTextColor } from "./tagTypes";
+import { type PrimaryTagData, getTextColor } from "./tagTypes";
 
 // Re-export tag utilities for convenience
-export { type TagData, type PrimaryTagData, getTextColor };
+export { type PrimaryTagData, getTextColor };
 
 // Contact data interface (for display)
 export interface ContactData {

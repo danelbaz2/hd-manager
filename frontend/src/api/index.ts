@@ -23,17 +23,7 @@ export {
   type TaskQueryParams,
 } from "./tasksApi";
 
-// Tags API (Legacy - will be removed after migration)
-export {
-  getAllTags,
-  createTag,
-  updateTag,
-  deleteTag,
-  type Tag,
-  type TagFormPayload,
-} from "./tagsApi";
-
-// Primary Tags API (New two-tier tag system)
+// Primary Tags API (Two-tier tag system)
 export {
   getAllPrimaryTags,
   getPrimaryTag,

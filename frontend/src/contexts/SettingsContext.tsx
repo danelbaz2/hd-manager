@@ -1,12 +1,11 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
 import { getAllUsers, type User } from "../api/usersApi";
-import { getAllTags, type Tag } from "../api/tagsApi";
 import { getAllPrimaryTags, type PrimaryTag } from "../api/primaryTagsApi";
-import { getAllSecondaryTags, type SecondaryTag } from "../api/secondaryTagsApi";
+import { getAllSecondaryTags } from "../api/secondaryTagsApi";
 import { getAllContacts, type Contact } from "../api/contactsApi";
 import { getAllTasks, type Task } from "../api/tasksApi";
 import { type UserData } from "../schemas/userTypes";
-import { type TagData, type PrimaryTagData, type SecondaryTagData } from "../schemas/tagTypes";
+import { type PrimaryTagData, type SecondaryTagData, getLighterColor, TAG_COLORS } from "../schemas/tagTypes";
 import { type ContactData } from "../schemas/contactTypes";
 
 // Helper function to convert API User to UserData
@@ -19,27 +18,12 @@ const mapUserToUserData = (user: User): UserData => ({
     profileImage: user.profileImage,
 });
 
-// Helper function to convert API Tag to TagData (Legacy)
-const mapTagToTagData = (tag: Tag): TagData => ({
-    id: tag.id,
-    name: tag.name,
-    color: tag.color,
-    description: tag.description || undefined,
-});
 
 // Helper function to convert API PrimaryTag to PrimaryTagData
 const mapPrimaryTagToData = (tag: PrimaryTag): PrimaryTagData => ({
     id: tag.id,
     name: tag.name,
     color: tag.color,
-    description: tag.description || undefined,
-});
-
-// Helper function to convert API SecondaryTag to SecondaryTagData
-const mapSecondaryTagToData = (tag: SecondaryTag): SecondaryTagData => ({
-    id: tag.id,
-    name: tag.name,
-    primaryTagId: tag.primaryTagId,
     description: tag.description || undefined,
 });
 
@@ -56,9 +40,8 @@ const mapContactToContactData = (contact: Contact): ContactData => ({
 interface SettingsContextState {
     // Data
     users: UserData[];
-    tags: TagData[];  // Legacy - for backward compatibility
-    primaryTags: PrimaryTagData[];  // New two-tier system
-    secondaryTags: SecondaryTagData[];  // New two-tier system
+    primaryTags: PrimaryTagData[];  // Two-tier tag system
+    secondaryTags: SecondaryTagData[];  // Two-tier tag system
     contacts: ContactData[];
     tasks: Task[];
 
@@ -80,7 +63,6 @@ interface SettingsContextState {
 // Default context value
 const defaultContextValue: SettingsContextState = {
     users: [],
-    tags: [],
     primaryTags: [],
     secondaryTags: [],
     contacts: [],
@@ -108,7 +90,6 @@ interface SettingsProviderProps {
 // Provider Component
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) => {
     const [users, setUsers] = useState<UserData[]>([]);
-    const [tags, setTags] = useState<TagData[]>([]);  // Legacy
     const [primaryTags, setPrimaryTags] = useState<PrimaryTagData[]>([]);
     const [secondaryTags, setSecondaryTags] = useState<SecondaryTagData[]>([]);
     const [contacts, setContacts] = useState<ContactData[]>([]);
@@ -137,17 +118,10 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
         }
     }, []);
 
-    // Fetch tags (both legacy and new two-tier system)
+    // Fetch tags (two-tier system: primary + secondary)
     const refreshTags = useCallback(async () => {
         setIsLoadingTags(true);
         try {
-            // Fetch legacy tags (for backward compatibility)
-            const legacyResponse = await getAllTags();
-            if (legacyResponse.success && legacyResponse.data) {
-                setTags(legacyResponse.data.map(mapTagToTagData));
-            }
-
-            // Fetch new two-tier tags
             const [primaryResponse, secondaryResponse] = await Promise.all([
                 getAllPrimaryTags(),
                 getAllSecondaryTags(),
@@ -159,9 +133,21 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
                 console.error("Failed to fetch primary tags:", primaryResponse.error);
             }
 
-            if (secondaryResponse.success && secondaryResponse.data) {
-                setSecondaryTags(secondaryResponse.data.map(mapSecondaryTagToData));
-            } else {
+            if (secondaryResponse.success && secondaryResponse.data && primaryResponse.data) {
+                // Map secondary tags with computed colors from parent primary tag
+                const primaryTagsMap = new Map(primaryResponse.data.map(pt => [pt.id, pt]));
+                const mappedSecondaryTags = secondaryResponse.data.map((tag): SecondaryTagData => {
+                    const parentTag = primaryTagsMap.get(tag.primaryTagId);
+                    return {
+                        id: tag.id,
+                        name: tag.name,
+                        primaryTagId: tag.primaryTagId,
+                        color: parentTag ? getLighterColor(parentTag.color) : TAG_COLORS[0].bg,
+                        description: tag.description || undefined,
+                    };
+                });
+                setSecondaryTags(mappedSecondaryTags);
+            } else if (secondaryResponse.error) {
                 console.error("Failed to fetch secondary tags:", secondaryResponse.error);
             }
         } catch (error) {
@@ -224,7 +210,6 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
 
     const value: SettingsContextState = {
         users,
-        tags,
         primaryTags,
         secondaryTags,
         contacts,

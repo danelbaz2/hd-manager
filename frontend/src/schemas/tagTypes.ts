@@ -20,6 +20,7 @@ export interface SecondaryTagData {
   id: string;
   name: string;
   primaryTagId: string;  // Reference to parent Primary Tag
+  color?: string;  // Computed from parent primary tag for display (optional)
   description?: string;
 }
 
@@ -30,20 +31,7 @@ export interface SecondaryTagFormData {
   description?: string;
 }
 
-// ===== Legacy Tag Types (for backward compatibility during migration) =====
-export interface TagData {
-  id: string;
-  name: string;
-  color: string;
-  description?: string;
-}
 
-export interface TagFormData {
-  id?: string | null;
-  name: string;
-  color: string;
-  description?: string;
-}
 
 // ===== Tag Colors =====
 export interface TagColor {
@@ -178,10 +166,4 @@ export const DEFAULT_SECONDARY_TAG_FORM: SecondaryTagFormData = {
   description: "",
 };
 
-// Legacy default (for backward compatibility)
-export const DEFAULT_TAG_FORM: TagFormData = {
-  id: null,
-  name: "",
-  color: TAG_COLORS[0].bg,
-  description: "",
-};
+

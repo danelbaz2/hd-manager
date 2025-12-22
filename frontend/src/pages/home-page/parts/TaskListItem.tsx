@@ -3,12 +3,12 @@ import { User } from "lucide-react";
 import { useTheme } from "../../../contexts";
 import { type Task } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
-import { type TagData } from "../../../schemas/tagTypes";
+import { type SecondaryTagData } from "../../../schemas/tagTypes";
 
 interface TaskListItemProps {
     task: Task;
     users: UserData[];
-    tags: TagData[];
+    tags: SecondaryTagData[];
 }
 
 // Get status badge styling
@@ -117,8 +117,8 @@ const TaskListItem: React.FC<TaskListItemProps> = ({ task, users, tags }) => {
                                 key={tag.id}
                                 className="px-2 py-0.5 rounded text-xs font-medium"
                                 style={{
-                                    backgroundColor: tag.color + "30",
-                                    color: tag.color,
+                                    backgroundColor: (tag.color || "#94A3B8") + "30",
+                                    color: tag.color || "#94A3B8",
                                 }}
                             >
                                 {tag.name}

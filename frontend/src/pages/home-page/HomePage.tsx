@@ -67,7 +67,7 @@ const filterTasksByDateRange = (
 
 const HomePage: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { users, tags, tasks, refreshTasks } = useSettings();
+  const { users, secondaryTags, tasks, refreshTasks } = useSettings();
   const { viewMode, setViewMode, displayMode, setDisplayMode, selectedDate } = useViewState();
   const navigate = useNavigate();
 
@@ -119,7 +119,7 @@ const HomePage: React.FC = () => {
 
     // List view - depends on view mode
     if (viewMode === "daily") {
-      return <TaskListDaily tasks={filteredTasks} users={users} tags={tags} />;
+      return <TaskListDaily tasks={filteredTasks} users={users} tags={secondaryTags} />;
     }
 
     if (viewMode === "weekly") {
