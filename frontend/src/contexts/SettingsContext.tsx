@@ -1,261 +1,313 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  type ReactNode,
+} from "react";
 import { getAllUsers, type User } from "../api/usersApi";
 import { getAllTags, type Tag } from "../api/tagsApi";
 import { getAllPrimaryTags, type PrimaryTag } from "../api/primaryTagsApi";
-import { getAllSecondaryTags, type SecondaryTag } from "../api/secondaryTagsApi";
+import {
+  getAllSecondaryTags,
+  type SecondaryTag,
+} from "../api/secondaryTagsApi";
 import { getAllContacts, type Contact } from "../api/contactsApi";
 import { getAllTasks, type Task } from "../api/tasksApi";
 import { type UserData } from "../schemas/userTypes";
-import { type TagData, type PrimaryTagData, type SecondaryTagData } from "../schemas/tagTypes";
+import {
+  type TagData,
+  type PrimaryTagData,
+  type SecondaryTagData,
+} from "../schemas/tagTypes";
 import { type ContactData } from "../schemas/contactTypes";
+import { useAuth } from "./AuthContext";
 
 // Helper function to convert API User to UserData
 const mapUserToUserData = (user: User): UserData => ({
-    id: user.id,
-    fullName: user.fullName,
-    username: user.username,
-    passwordHash: "",
-    role: user.role as "admin" | "regular",
-    color: user.color,
-    profileImage: user.profileImage,
+  id: user.id,
+  fullName: user.fullName,
+  username: user.username,
+  passwordHash: "",
+  role: user.role as "admin" | "regular",
+  color: user.color,
+  profileImage: user.profileImage,
 });
 
 // Helper function to convert API Tag to TagData (Legacy)
 const mapTagToTagData = (tag: Tag): TagData => ({
-    id: tag.id,
-    name: tag.name,
-    color: tag.color,
-    description: tag.description || undefined,
+  id: tag.id,
+  name: tag.name,
+  color: tag.color,
+  description: tag.description || undefined,
 });
 
 // Helper function to convert API PrimaryTag to PrimaryTagData
 const mapPrimaryTagToData = (tag: PrimaryTag): PrimaryTagData => ({
-    id: tag.id,
-    name: tag.name,
-    color: tag.color,
-    description: tag.description || undefined,
+  id: tag.id,
+  name: tag.name,
+  color: tag.color,
+  description: tag.description || undefined,
 });
 
 // Helper function to convert API SecondaryTag to SecondaryTagData
 const mapSecondaryTagToData = (tag: SecondaryTag): SecondaryTagData => ({
-    id: tag.id,
-    name: tag.name,
-    primaryTagId: tag.primaryTagId,
-    description: tag.description || undefined,
+  id: tag.id,
+  name: tag.name,
+  primaryTagId: tag.primaryTagId,
+  description: tag.description || undefined,
 });
 
 // Helper function to convert API Contact to ContactData
 const mapContactToContactData = (contact: Contact): ContactData => ({
-    id: contact.id,
-    name: contact.fullName,
-    role: contact.position || "",
-    phone: contact.phoneNumber || "",
-    primaryTags: contact.primaryTagIds || [],
+  id: contact.id,
+  name: contact.fullName,
+  role: contact.position || "",
+  phone: contact.phoneNumber || "",
+  primaryTags: contact.primaryTagIds || [],
 });
 
 // Context State Interface
 interface SettingsContextState {
-    // Data
-    users: UserData[];
-    tags: TagData[];  // Legacy - for backward compatibility
-    primaryTags: PrimaryTagData[];  // New two-tier system
-    secondaryTags: SecondaryTagData[];  // New two-tier system
-    contacts: ContactData[];
-    tasks: Task[];
+  // Data
+  users: UserData[];
+  tags: TagData[]; // Legacy - for backward compatibility
+  primaryTags: PrimaryTagData[]; // New two-tier system
+  secondaryTags: SecondaryTagData[]; // New two-tier system
+  contacts: ContactData[];
+  tasks: Task[];
 
-    // Loading states
-    isLoading: boolean;
-    isLoadingUsers: boolean;
-    isLoadingTags: boolean;
-    isLoadingContacts: boolean;
-    isLoadingTasks: boolean;
+  // Loading states
+  isLoading: boolean;
+  isLoadingUsers: boolean;
+  isLoadingTags: boolean;
+  isLoadingContacts: boolean;
+  isLoadingTasks: boolean;
 
-    // Refresh functions
-    refreshUsers: () => Promise<void>;
-    refreshTags: () => Promise<void>;
-    refreshContacts: () => Promise<void>;
-    refreshTasks: () => Promise<void>;
-    refreshAll: () => Promise<void>;
+  // Refresh functions
+  refreshUsers: () => Promise<void>;
+  refreshTags: () => Promise<void>;
+  refreshContacts: () => Promise<void>;
+  refreshTasks: () => Promise<void>;
+  refreshAll: () => Promise<void>;
 }
 
 // Default context value
 const defaultContextValue: SettingsContextState = {
-    users: [],
-    tags: [],
-    primaryTags: [],
-    secondaryTags: [],
-    contacts: [],
-    tasks: [],
-    isLoading: true,
-    isLoadingUsers: false,
-    isLoadingTags: false,
-    isLoadingContacts: false,
-    isLoadingTasks: false,
-    refreshUsers: async () => { },
-    refreshTags: async () => { },
-    refreshContacts: async () => { },
-    refreshTasks: async () => { },
-    refreshAll: async () => { },
+  users: [],
+  tags: [],
+  primaryTags: [],
+  secondaryTags: [],
+  contacts: [],
+  tasks: [],
+  isLoading: true,
+  isLoadingUsers: false,
+  isLoadingTags: false,
+  isLoadingContacts: false,
+  isLoadingTasks: false,
+  refreshUsers: async () => {},
+  refreshTags: async () => {},
+  refreshContacts: async () => {},
+  refreshTasks: async () => {},
+  refreshAll: async () => {},
 };
 
 // Create Context
-const SettingsContext = createContext<SettingsContextState>(defaultContextValue);
+const SettingsContext =
+  createContext<SettingsContextState>(defaultContextValue);
 
 // Provider Props
 interface SettingsProviderProps {
-    children: ReactNode;
+  children: ReactNode;
 }
 
 // Provider Component
-export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) => {
-    const [users, setUsers] = useState<UserData[]>([]);
-    const [tags, setTags] = useState<TagData[]>([]);  // Legacy
-    const [primaryTags, setPrimaryTags] = useState<PrimaryTagData[]>([]);
-    const [secondaryTags, setSecondaryTags] = useState<SecondaryTagData[]>([]);
-    const [contacts, setContacts] = useState<ContactData[]>([]);
-    const [tasks, setTasks] = useState<Task[]>([]);
+export const SettingsProvider: React.FC<SettingsProviderProps> = ({
+  children,
+}) => {
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const [users, setUsers] = useState<UserData[]>([]);
+  const [tags, setTags] = useState<TagData[]>([]); // Legacy
+  const [primaryTags, setPrimaryTags] = useState<PrimaryTagData[]>([]);
+  const [secondaryTags, setSecondaryTags] = useState<SecondaryTagData[]>([]);
+  const [contacts, setContacts] = useState<ContactData[]>([]);
+  const [tasks, setTasks] = useState<Task[]>([]);
 
-    const [isLoading, setIsLoading] = useState(true);
-    const [isLoadingUsers, setIsLoadingUsers] = useState(false);
-    const [isLoadingTags, setIsLoadingTags] = useState(false);
-    const [isLoadingContacts, setIsLoadingContacts] = useState(false);
-    const [isLoadingTasks, setIsLoadingTasks] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingUsers, setIsLoadingUsers] = useState(false);
+  const [isLoadingTags, setIsLoadingTags] = useState(false);
+  const [isLoadingContacts, setIsLoadingContacts] = useState(false);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(false);
 
-    // Fetch users
-    const refreshUsers = useCallback(async () => {
-        setIsLoadingUsers(true);
-        try {
-            const response = await getAllUsers();
-            if (response.success && response.data) {
-                setUsers(response.data.map(mapUserToUserData));
-            } else {
-                console.error("Failed to fetch users:", response.error);
-            }
-        } catch (error) {
-            console.error("Error fetching users:", error);
-        } finally {
-            setIsLoadingUsers(false);
-        }
-    }, []);
+  // Fetch users
+  const refreshUsers = useCallback(async () => {
+    setIsLoadingUsers(true);
+    try {
+      const response = await getAllUsers();
+      if (response.success && response.data) {
+        setUsers(response.data.map(mapUserToUserData));
+      } else {
+        console.error("Failed to fetch users:", response.error);
+      }
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    } finally {
+      setIsLoadingUsers(false);
+    }
+  }, []);
 
-    // Fetch tags (both legacy and new two-tier system)
-    const refreshTags = useCallback(async () => {
-        setIsLoadingTags(true);
-        try {
-            // Fetch legacy tags (for backward compatibility)
-            const legacyResponse = await getAllTags();
-            if (legacyResponse.success && legacyResponse.data) {
-                setTags(legacyResponse.data.map(mapTagToTagData));
-            }
+  // Fetch tags (both legacy and new two-tier system)
+  const refreshTags = useCallback(async () => {
+    setIsLoadingTags(true);
+    try {
+      // Fetch legacy tags (for backward compatibility)
+      const legacyResponse = await getAllTags();
+      if (legacyResponse.success && legacyResponse.data) {
+        setTags(legacyResponse.data.map(mapTagToTagData));
+      }
 
-            // Fetch new two-tier tags
-            const [primaryResponse, secondaryResponse] = await Promise.all([
-                getAllPrimaryTags(),
-                getAllSecondaryTags(),
-            ]);
+      // Fetch new two-tier tags
+      const [primaryResponse, secondaryResponse] = await Promise.all([
+        getAllPrimaryTags(),
+        getAllSecondaryTags(),
+      ]);
 
-            if (primaryResponse.success && primaryResponse.data) {
-                setPrimaryTags(primaryResponse.data.map(mapPrimaryTagToData));
-            } else {
-                console.error("Failed to fetch primary tags:", primaryResponse.error);
-            }
+      if (primaryResponse.success && primaryResponse.data) {
+        setPrimaryTags(primaryResponse.data.map(mapPrimaryTagToData));
+      } else {
+        console.error("Failed to fetch primary tags:", primaryResponse.error);
+      }
 
-            if (secondaryResponse.success && secondaryResponse.data) {
-                setSecondaryTags(secondaryResponse.data.map(mapSecondaryTagToData));
-            } else {
-                console.error("Failed to fetch secondary tags:", secondaryResponse.error);
-            }
-        } catch (error) {
-            console.error("Error fetching tags:", error);
-        } finally {
-            setIsLoadingTags(false);
-        }
-    }, []);
+      if (secondaryResponse.success && secondaryResponse.data) {
+        setSecondaryTags(secondaryResponse.data.map(mapSecondaryTagToData));
+      } else {
+        console.error(
+          "Failed to fetch secondary tags:",
+          secondaryResponse.error
+        );
+      }
+    } catch (error) {
+      console.error("Error fetching tags:", error);
+    } finally {
+      setIsLoadingTags(false);
+    }
+  }, []);
 
-    // Fetch contacts
-    const refreshContacts = useCallback(async () => {
-        setIsLoadingContacts(true);
-        try {
-            const response = await getAllContacts();
-            if (response.success && response.data) {
-                setContacts(response.data.map(mapContactToContactData));
-            } else {
-                console.error("Failed to fetch contacts:", response.error);
-            }
-        } catch (error) {
-            console.error("Error fetching contacts:", error);
-        } finally {
-            setIsLoadingContacts(false);
-        }
-    }, []);
+  // Fetch contacts
+  const refreshContacts = useCallback(async () => {
+    setIsLoadingContacts(true);
+    try {
+      const response = await getAllContacts();
+      if (response.success && response.data) {
+        setContacts(response.data.map(mapContactToContactData));
+      } else {
+        console.error("Failed to fetch contacts:", response.error);
+      }
+    } catch (error) {
+      console.error("Error fetching contacts:", error);
+    } finally {
+      setIsLoadingContacts(false);
+    }
+  }, []);
 
-    // Fetch tasks - gets all tasks without date filtering
-    const refreshTasks = useCallback(async () => {
-        setIsLoadingTasks(true);
-        try {
-            const response = await getAllTasks();
-            if (response.success && response.data) {
-                setTasks(response.data);
-            } else {
-                console.error("Failed to fetch tasks:", response.error);
-            }
-        } catch (error) {
-            console.error("Error fetching tasks:", error);
-        } finally {
-            setIsLoadingTasks(false);
-        }
-    }, []);
+  // Fetch tasks - gets all tasks without date filtering
+  const refreshTasks = useCallback(async () => {
+    setIsLoadingTasks(true);
+    try {
+      const response = await getAllTasks();
+      if (response.success && response.data) {
+        setTasks(response.data);
+      } else {
+        console.error("Failed to fetch tasks:", response.error);
+      }
+    } catch (error) {
+      console.error("Error fetching tasks:", error);
+    } finally {
+      setIsLoadingTasks(false);
+    }
+  }, []);
 
-    // Fetch all data
-    const refreshAll = useCallback(async () => {
-        setIsLoading(true);
-        await Promise.all([
-            refreshUsers(),
-            refreshTags(),
-            refreshContacts(),
-            refreshTasks(),
-        ]);
-        setIsLoading(false);
-    }, [refreshUsers, refreshTags, refreshContacts, refreshTasks]);
+  // Fetch all data
+  const refreshAll = useCallback(async () => {
+    setIsLoading(true);
+    await Promise.all([
+      refreshUsers(),
+      refreshTags(),
+      refreshContacts(),
+      refreshTasks(),
+    ]);
+    setIsLoading(false);
+  }, [refreshUsers, refreshTags, refreshContacts, refreshTasks]);
 
-    // Initial fetch on mount
-    useEffect(() => {
-        refreshAll();
-    }, [refreshAll]);
+  // Clear all data (used on logout)
+  const clearAllData = useCallback(() => {
+    setUsers([]);
+    setTags([]);
+    setPrimaryTags([]);
+    setSecondaryTags([]);
+    setContacts([]);
+    setTasks([]);
+    setIsLoading(false);
+  }, []);
 
-    const value: SettingsContextState = {
-        users,
-        tags,
-        primaryTags,
-        secondaryTags,
-        contacts,
-        tasks,
-        isLoading,
-        isLoadingUsers,
-        isLoadingTags,
-        isLoadingContacts,
-        isLoadingTasks,
-        refreshUsers,
-        refreshTags,
-        refreshContacts,
-        refreshTasks,
-        refreshAll,
-    };
+  // Fetch data only when authenticated, clear data on logout
+  useEffect(() => {
+    // Don't do anything while auth is still checking
+    if (isAuthLoading) {
+      return;
+    }
 
-    return (
-        <SettingsContext.Provider value={value}>
-            {children}
-        </SettingsContext.Provider>
-    );
+    if (isAuthenticated) {
+      // User is authenticated, fetch all data
+      refreshAll();
+    } else {
+      // Extra safeguard: check if there's still a token in sessionStorage
+      // This prevents clearing data during race conditions (quick refreshes)
+      const hasStoredToken = sessionStorage.getItem("auth_token");
+      if (!hasStoredToken) {
+        // User is not authenticated and no stored token, clear all data
+        clearAllData();
+      }
+      // If there's a stored token but isAuthenticated is false,
+      // it means auth is still being validated or there was a transient error.
+      // Don't clear the data - let the user retry.
+    }
+  }, [isAuthenticated, isAuthLoading, refreshAll, clearAllData]);
+
+  const value: SettingsContextState = {
+    users,
+    tags,
+    primaryTags,
+    secondaryTags,
+    contacts,
+    tasks,
+    isLoading,
+    isLoadingUsers,
+    isLoadingTags,
+    isLoadingContacts,
+    isLoadingTasks,
+    refreshUsers,
+    refreshTags,
+    refreshContacts,
+    refreshTasks,
+    refreshAll,
+  };
+
+  return (
+    <SettingsContext.Provider value={value}>
+      {children}
+    </SettingsContext.Provider>
+  );
 };
 
 // Custom Hook to use Settings Context
 export const useSettings = (): SettingsContextState => {
-    const context = useContext(SettingsContext);
-    if (!context) {
-        throw new Error("useSettings must be used within a SettingsProvider");
-    }
-    return context;
+  const context = useContext(SettingsContext);
+  if (!context) {
+    throw new Error("useSettings must be used within a SettingsProvider");
+  }
+  return context;
 };
 
 export default SettingsContext;

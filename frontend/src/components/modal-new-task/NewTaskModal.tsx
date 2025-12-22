@@ -4,7 +4,7 @@ import { useTheme, useSettings } from "../../contexts";
 import { type TaskPriority, type TaskFormData } from "../../schemas/taskTypes";
 import { createTask } from "../../api/tasksApi";
 import { ToastContainer, useToast } from "../alert-feedback";
-import DelayedLoader from "../delay-loader";
+import DelayedLoader from "../loaders/DelayedLoader";
 
 // Import modular components
 import {
@@ -21,8 +21,6 @@ interface NewTaskModalProps {
   initialDate?: number;
 }
 
-
-
 const NewTaskModal: React.FC<NewTaskModalProps> = ({
   isOpen,
   onClose,
@@ -30,7 +28,14 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
   initialDate,
 }) => {
   const { isDarkMode } = useTheme();
-  const { users, primaryTags, secondaryTags, isLoading: isLoadingData, isLoadingUsers, isLoadingTags } = useSettings();
+  const {
+    users,
+    primaryTags,
+    secondaryTags,
+    isLoading: isLoadingData,
+    isLoadingUsers,
+    isLoadingTags,
+  } = useSettings();
   const { alerts, showSuccess, showError, showWarning, dismissAlert } =
     useToast();
 
@@ -38,7 +43,9 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
-  const [selectedSecondaryTagIds, setSelectedSecondaryTagIds] = useState<string[]>([]);
+  const [selectedSecondaryTagIds, setSelectedSecondaryTagIds] = useState<
+    string[]
+  >([]);
   const [startDate, setStartDate] = useState<string>("");
   const [deadline, setDeadline] = useState<string>("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -88,7 +95,8 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
         date: startDate ? new Date(startDate).getTime() : Date.now(),
         deadline: deadline ? new Date(deadline).getTime() : undefined,
         responsibleUserIds: selectedUserIds.length > 0 ? selectedUserIds : [],
-        secondaryTagIds: selectedSecondaryTagIds.length > 0 ? selectedSecondaryTagIds : [],
+        secondaryTagIds:
+          selectedSecondaryTagIds.length > 0 ? selectedSecondaryTagIds : [],
       };
 
       // Log task object
@@ -140,9 +148,10 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
           max-w-2xl lg:max-w-3xl
           rounded-3xl border shadow-2xl
           flex flex-col
-          ${isDarkMode
-            ? "bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 border-slate-700"
-            : "bg-gradient-to-br from-white via-white to-slate-50 border-slate-200"
+          ${
+            isDarkMode
+              ? "bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 border-slate-700"
+              : "bg-gradient-to-br from-white via-white to-slate-50 border-slate-200"
           }
         `}
         dir="rtl"
@@ -170,9 +179,10 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
             onClick={onClose}
             className={`
               p-2.5 rounded-xl transition-all duration-200
-              ${isDarkMode
-                ? "hover:bg-slate-700/50 text-slate-400 hover:text-slate-200"
-                : "hover:bg-slate-100 text-slate-500 hover:text-slate-700"
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-700/50 text-slate-400 hover:text-slate-200"
+                  : "hover:bg-slate-100 text-slate-500 hover:text-slate-700"
               }
             `}
           >
@@ -211,10 +221,11 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
                     rounded-xl border-2
                     text-sm lg:text-base font-medium
                     transition-all duration-200
-                    ${isDarkMode
+                    ${
+                      isDarkMode
                         ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
                         : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
-                      }
+                    }
                     focus:outline-none focus:ring-2 focus:ring-blue-500/20
                   `}
                   />
@@ -244,10 +255,11 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
                   rounded-xl border-2 resize-none
                   text-sm lg:text-base
                   transition-all duration-200
-                  ${isDarkMode
+                  ${
+                    isDarkMode
                       ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
                       : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
-                    }
+                  }
                   focus:outline-none focus:ring-2 focus:ring-blue-500/20
                 `}
                 />
@@ -298,9 +310,10 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
             flex items-center justify-end gap-10
             px-6 lg:px-8 py-4 lg:py-5
             border-t
-            ${isDarkMode
-              ? "border-slate-700/50 bg-slate-800/50"
-              : "border-slate-200/50 bg-slate-50/50"
+            ${
+              isDarkMode
+                ? "border-slate-700/50 bg-slate-800/50"
+                : "border-slate-200/50 bg-slate-50/50"
             }
           `}
         >
@@ -310,9 +323,10 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
               font-medium
               text-sm lg:text-base
               transition-colors
-              ${isDarkMode
-                ? "text-slate-400 hover:text-slate-200"
-                : "text-slate-500 hover:text-slate-700"
+              ${
+                isDarkMode
+                  ? "text-slate-400 hover:text-slate-200"
+                  : "text-slate-500 hover:text-slate-700"
               }
             `}
           >
@@ -329,9 +343,10 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
               text-sm lg:text-base
               transition-all duration-200
               shadow-lg
-              ${isSubmitting
-                ? "bg-blue-400 cursor-not-allowed shadow-blue-400/25"
-                : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-blue-500/30 hover:shadow-blue-500/40"
+              ${
+                isSubmitting
+                  ? "bg-blue-400 cursor-not-allowed shadow-blue-400/25"
+                  : "bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-blue-500/30 hover:shadow-blue-500/40"
               }
             `}
           >

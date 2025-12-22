@@ -1,3 +1,3 @@
-// Auth components barrel export
+// Auth barrel export
 export { default as ProtectedRoute } from "./ProtectedRoute";
 export { default as LoginTransition, type LoginState } from "./LoginTransition";
