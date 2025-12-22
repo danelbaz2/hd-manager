@@ -1,12 +1,19 @@
-// New two-tier tag management (Primary + Secondary)
+// Two-tier tag management (Primary + Secondary)
 export { default as ManageTagsTwoTier } from "./ManageTagsTwoTier";
 export { default } from "./ManageTagsTwoTier";
 
-// Legacy single-tier tag management (for backward compatibility)
-export { default as ManageTags } from "./ManageTags";
+// Sub-components (modular architecture)
+export { default as TagCard } from "./TagCard";
+export { default as ModeToggle } from "./ModeToggle";
+export { default as PrimaryTagForm } from "./PrimaryTagForm";
+export { default as SecondaryTagForm } from "./SecondaryTagForm";
+export { default as PrimaryTagsList } from "./PrimaryTagsList";
+export { default as SecondaryTagsList } from "./SecondaryTagsList";
 
-// Export individual components
-export { default as TagsList } from "./TagsList";
-export { default as AddTagForm } from "./AddTagForm";
-export { default as EditTagForm } from "./EditTagForm";
-export { default as TagForm } from "./TagForm";
+// Re-export types
+export type { TagMode } from "./ModeToggle";
+export type { TagCardProps } from "./TagCard";
+export type { PrimaryTagFormProps } from "./PrimaryTagForm";
+export type { SecondaryTagFormProps } from "./SecondaryTagForm";
+export type { PrimaryTagsListProps } from "./PrimaryTagsList";
+export type { SecondaryTagsListProps } from "./SecondaryTagsList";
