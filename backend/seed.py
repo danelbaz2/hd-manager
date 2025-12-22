@@ -526,22 +526,185 @@ def seed(clean_only=False, bulk_tasks=False):
             print(f"  - {len(tasks_data)} tasks")
         print(f"  - {len(chat_data)} chat messages")
 
+def seed_init():
+    """Initialize database with essential data only: users, tags, and contacts. No tasks or chat."""
+    with app.app_context():
+        # Clear existing data
+        clear_database()
+        
+        # 1. Users - Same as regular seed
+        print("Seeding Users...")
+        print("  Loading profile images as base64...")
+        
+        users_data = [
+            { "fullName": 'עדן טירם', "username": "eden", "passwordHash": "123456", "role": 'admin', "color": '#93C5FD', "profileImage": load_profile_image_base64("eden"), "base": create_base("user")},
+            { "fullName": 'מאור נובחוב', "username": "maor", "passwordHash": "123456", "role": 'regular', "color": '#FDBA74', "profileImage": load_profile_image_base64("maor"), "base": create_base("user")},
+            { "fullName": 'עילי אדמוני', "username": "ilay", "passwordHash": "123456", "role": 'admin', "color": '#86EFAC', "profileImage": load_profile_image_base64("ilay"), "base": create_base("user")},
+            { "fullName": 'דן אלבז', "username": "dan", "passwordHash": "123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("dan"), "base": create_base("user")},
+            { "fullName": 'אוראל חסידיאן', "username": "orel", "passwordHash": "123456", "role": 'regular', "color": '#C4B5FD', "profileImage": load_profile_image_base64("orel"), "base": create_base("user")},
+            { "fullName": 'אליה דנאל', "username": "eliya", "passwordHash": "123456", "role": 'regular', "color": '#FDA4AF', "profileImage": load_profile_image_base64("eliya"), "base": create_base("user")},
+            { "fullName": 'אורי רוגוזיק', "username": "ori", "passwordHash": "123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("ori"), "base": create_base("user")},
+            { "fullName": 'עדי פליישמן', "username": "adi", "passwordHash": "123456", "role": 'regular', "color": '#F9A8D4', "profileImage": load_profile_image_base64("adi"), "base": create_base("user")},
+            { "fullName": 'גל פרץ', "username": "gal", "passwordHash": "123456", "role": 'regular', "color": '#93C5FD', "profileImage": load_profile_image_base64("gal"), "base": create_base("user")},
+        ]
+        
+        user_ids = []
+        for u in users_data:
+            u['_id'] = str(ObjectId())
+            u['passwordHash'] = hash_password(u['passwordHash'])
+            mongo.db.users.insert_one(u)
+            uid = u['_id']
+            user_ids.append(uid)
+            log_history('user', uid, 'CREATE', 'system', None, u, u)
+        
+        print(f"  - {len(users_data)} users seeded")
+
+        # 2. Primary Tags - The 8 main categories
+        print("Seeding Primary Tags...")
+        primary_tags_data = [
+            { "name": 'DB', "description": "מסדי נתונים", "color": '#3B82F6', "base": create_base("primary_tag", -10)},       # Blue
+            { "name": 'TD', "description": "תיעוד טכני", "color": '#8B5CF6', "base": create_base("primary_tag", -10)},       # Violet
+            { "name": 'APP', "description": "אפליקציה", "color": '#06B6D4', "base": create_base("primary_tag", -10)},        # Cyan
+            { "name": 'GO', "description": "Go Live / העלאה לייצור", "color": '#22C55E', "base": create_base("primary_tag", -10)},  # Green
+            { "name": 'CORE', "description": "ליבת המערכת", "color": '#F97316', "base": create_base("primary_tag", -10)},    # Orange
+            { "name": 'DVC', "description": "התקנים ומכשירים", "color": '#EC4899', "base": create_base("primary_tag", -10)}, # Pink
+            { "name": 'COMP', "description": "תאימות ואינטגרציה", "color": '#EAB308', "base": create_base("primary_tag", -10)},  # Yellow
+            { "name": 'OCP', "description": "תפעול ובקרה", "color": '#14B8A6', "base": create_base("primary_tag", -10)},     # Teal
+        ]
+
+        primary_tag_ids = []
+        for t in primary_tags_data:
+            t['_id'] = str(ObjectId())
+            mongo.db.ents.insert_one(t)
+            tid = t['_id']
+            primary_tag_ids.append(tid)
+            log_history('primary_tag', tid, 'CREATE', 'system', None, t, t)
+        
+        print(f"  - {len(primary_tags_data)} primary tags seeded")
+        
+        # Primary tag indexes: 0=DB, 1=TD, 2=APP, 3=GO, 4=CORE, 5=DVC, 6=COMP, 7=OCP
+
+        # 3. Secondary Tags - 2 per primary tag
+        print("Seeding Secondary Tags...")
+        secondary_tags_data = [
+            # DB (Database) secondary tags
+            { "name": 'גיבוי', "primaryTagId": primary_tag_ids[0], "description": "גיבוי מסד נתונים", "base": create_base("secondary_tag", -10)},
+            { "name": 'שאילתות', "primaryTagId": primary_tag_ids[0], "description": "אופטימיזציית שאילתות", "base": create_base("secondary_tag", -10)},
+            
+            # TD (Technical Documentation) secondary tags
+            { "name": 'API', "primaryTagId": primary_tag_ids[1], "description": "תיעוד API", "base": create_base("secondary_tag", -10)},
+            { "name": 'מדריך', "primaryTagId": primary_tag_ids[1], "description": "מדריך למשתמש", "base": create_base("secondary_tag", -10)},
+            
+            # APP (Application) secondary tags
+            { "name": 'פרונטאנד', "primaryTagId": primary_tag_ids[2], "description": "צד לקוח", "base": create_base("secondary_tag", -10)},
+            { "name": 'בקאנד', "primaryTagId": primary_tag_ids[2], "description": "צד שרת", "base": create_base("secondary_tag", -10)},
+            
+            # GO (Go Live) secondary tags
+            { "name": 'דיפלוי', "primaryTagId": primary_tag_ids[3], "description": "העלאה לייצור", "base": create_base("secondary_tag", -10)},
+            { "name": 'רולבק', "primaryTagId": primary_tag_ids[3], "description": "חזרה לגרסה קודמת", "base": create_base("secondary_tag", -10)},
+            
+            # CORE (Core System) secondary tags
+            { "name": 'אבטחה', "primaryTagId": primary_tag_ids[4], "description": "אבטחת מידע", "base": create_base("secondary_tag", -10)},
+            { "name": 'ביצועים', "primaryTagId": primary_tag_ids[4], "description": "אופטימיזציית ביצועים", "base": create_base("secondary_tag", -10)},
+            
+            # DVC (Devices) secondary tags
+            { "name": 'מובייל', "primaryTagId": primary_tag_ids[5], "description": "מכשירים ניידים", "base": create_base("secondary_tag", -10)},
+            { "name": 'IoT', "primaryTagId": primary_tag_ids[5], "description": "התקנים חכמים", "base": create_base("secondary_tag", -10)},
+            
+            # COMP (Compatibility) secondary tags
+            { "name": 'API חיצוני', "primaryTagId": primary_tag_ids[6], "description": "אינטגרציה חיצונית", "base": create_base("secondary_tag", -10)},
+            { "name": 'מיגרציה', "primaryTagId": primary_tag_ids[6], "description": "העברת נתונים", "base": create_base("secondary_tag", -10)},
+            
+            # OCP (Operations) secondary tags
+            { "name": 'ניטור', "primaryTagId": primary_tag_ids[7], "description": "ניטור מערכת", "base": create_base("secondary_tag", -10)},
+            { "name": 'התראות', "primaryTagId": primary_tag_ids[7], "description": "מערכת התראות", "base": create_base("secondary_tag", -10)},
+        ]
+        
+        secondary_tag_ids = []
+        for t in secondary_tags_data:
+            t['_id'] = str(ObjectId())
+            mongo.db.ents.insert_one(t)
+            tid = t['_id']
+            secondary_tag_ids.append(tid)
+            log_history('secondary_tag', tid, 'CREATE', 'system', None, t, t)
+        
+        print(f"  - {len(secondary_tags_data)} secondary tags seeded")
+        
+        # Secondary tag indexes:
+        # 0=גיבוי (DB), 1=שאילתות (DB)
+        # 2=API (TD), 3=מדריך (TD)
+        # 4=פרונטאנד (APP), 5=בקאנד (APP)
+        # 6=דיפלוי (GO), 7=רולבק (GO)
+        # 8=אבטחה (CORE), 9=ביצועים (CORE)
+        # 10=מובייל (DVC), 11=IoT (DVC)
+        # 12=API חיצוני (COMP), 13=מיגרציה (COMP)
+        # 14=ניטור (OCP), 15=התראות (OCP)
+
+        # 4. Contacts - 10 contacts linked to Primary Tags
+        print("Seeding Contacts...")
+        contacts_data = [
+            # DB related contacts
+            { "fullName": 'יוסי כהן', "position": 'DBA', "department": "IT", "phoneNumber": '050-1234567', "primaryTagIds": [primary_tag_ids[0]], "base": create_base("contact", -30)},
+            { "fullName": 'מיכל לוי', "position": 'מנהלת מסדי נתונים', "department": "IT", "phoneNumber": '052-2345678', "primaryTagIds": [primary_tag_ids[0], primary_tag_ids[4]], "base": create_base("contact", -30)},  # DB + CORE
+            
+            # APP related contacts
+            { "fullName": 'דוד ישראלי', "position": 'מפתח בכיר', "department": "פיתוח", "phoneNumber": '053-3456789', "primaryTagIds": [primary_tag_ids[2]], "base": create_base("contact", -30)},
+            { "fullName": 'רחל אברהם', "position": 'ארכיטקטית', "department": "פיתוח", "phoneNumber": '054-4567890', "primaryTagIds": [primary_tag_ids[2], primary_tag_ids[4]], "base": create_base("contact", -30)},  # APP + CORE
+            
+            # GO & OCP related contacts
+            { "fullName": 'אבי שמעון', "position": 'DevOps', "department": "תפעול", "phoneNumber": '055-5678901', "primaryTagIds": [primary_tag_ids[3], primary_tag_ids[7]], "base": create_base("contact", -30)},  # GO + OCP
+            { "fullName": 'נועה פרידמן', "position": 'מנהלת תפעול', "department": "תפעול", "phoneNumber": '056-6789012', "primaryTagIds": [primary_tag_ids[7]], "base": create_base("contact", -30)},  # OCP
+            
+            # DVC related contacts
+            { "fullName": 'עומר גולן', "position": 'מהנדס IoT', "department": "R&D", "phoneNumber": '057-7890123', "primaryTagIds": [primary_tag_ids[5]], "base": create_base("contact", -30)},  # DVC
+            { "fullName": 'שירה נחמן', "position": 'מפתחת מובייל', "department": "פיתוח", "phoneNumber": '058-8901234', "primaryTagIds": [primary_tag_ids[5], primary_tag_ids[2]], "base": create_base("contact", -30)},  # DVC + APP
+            
+            # TD & COMP related contacts
+            { "fullName": 'אלון ברק', "position": 'כותב טכני', "department": "תיעוד", "phoneNumber": '059-9012345', "primaryTagIds": [primary_tag_ids[1]], "base": create_base("contact", -30)},  # TD
+            { "fullName": 'תמר רוזן', "position": 'מנהלת אינטגרציות', "department": "פיתוח", "phoneNumber": '050-0123456', "primaryTagIds": [primary_tag_ids[6], primary_tag_ids[1]], "base": create_base("contact", -30)},  # COMP + TD
+        ]
+        
+        contact_ids = []
+        for c in contacts_data:
+            c['_id'] = str(ObjectId())
+            mongo.db.contacts.insert_one(c)
+            cid = c['_id']
+            contact_ids.append(cid)
+            log_history('contact', cid, 'CREATE', 'system', None, c, c)
+
+        print(f"  - {len(contacts_data)} contacts seeded")
+
+        # Summary
+        print("")
+        print("✅ Init mode completed successfully!")
+        print(f"  - {len(users_data)} users")
+        print(f"  - {len(primary_tags_data)} primary tags (DB, TD, APP, GO, CORE, DVC, COMP, OCP)")
+        print(f"  - {len(secondary_tags_data)} secondary tags")
+        print(f"  - {len(contacts_data)} contacts (with tag connections)")
+        print("  - 0 tasks")
+        print("  - 0 chat messages")
+
+
 def print_usage():
     print("Usage: python seed.py [options]")
     print("")
     print("Options:")
+    print("  --init     Initialize with users, tags, and contacts only (no tasks/chat)")
     print("  --clean    Clear all data and add only users (no sample data)")
     print("  --bulk     Seed with 100 tasks for performance testing")
     print("  --help     Show this help message")
     print("")
     print("Examples:")
     print("  python seed.py           # Clear and seed with sample data (15 tasks)")
+    print("  python seed.py --init    # Initialize with users, tags, and contacts only")
     print("  python seed.py --clean   # Clear all data and add only users")
     print("  python seed.py --bulk    # Clear and seed with 100 tasks for performance testing")
 
 if __name__ == '__main__':
     if '--help' in sys.argv or '-h' in sys.argv:
         print_usage()
+    elif '--init' in sys.argv:
+        seed_init()
     elif '--clean' in sys.argv:
         seed(clean_only=True, bulk_tasks=False)
     elif '--bulk' in sys.argv:
