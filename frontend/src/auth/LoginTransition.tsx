@@ -1,6 +1,6 @@
 import React from "react";
 import { Check } from "lucide-react";
-import { GlobalLoader } from "../global-loader";
+import { GlobalLoader } from "../components/loaders";
 
 export type LoginState = "idle" | "loading" | "success" | "error";
 
@@ -41,9 +41,7 @@ const LoginTransition: React.FC<LoginTransitionProps> = ({
     >
       <div className="flex flex-col items-center gap-6">
         {/* Success Circle with Check */}
-        <div
-          className="relative w-24 h-24 flex items-center justify-center rounded-full bg-green-500 scale-100 transition-all duration-500"
-        >
+        <div className="relative w-24 h-24 flex items-center justify-center rounded-full bg-green-500 scale-100 transition-all duration-500">
           <Check
             size={48}
             className="text-white animate-bounce-in"
@@ -104,4 +102,3 @@ const LoginTransition: React.FC<LoginTransitionProps> = ({
 };
 
 export default LoginTransition;
-

@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Layout from "./components/Layout/Layout";
-import { ProtectedRoute } from "./components/auth";
+import { ProtectedRoute } from "./auth";
 import HomePage from "./pages/home-page/HomePage";
 import TaskPage from "./pages/task-page/TaskPage";
 import ChatPage from "./pages/chat-page/ChatPage";

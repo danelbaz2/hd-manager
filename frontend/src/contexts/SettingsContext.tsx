@@ -1,4 +1,11 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from "react";
+import React, {
+    createContext,
+    useContext,
+    useState,
+    useEffect,
+    useCallback,
+    type ReactNode,
+} from "react";
 import { getAllUsers, type User } from "../api/usersApi";
 import { getAllPrimaryTags, type PrimaryTag } from "../api/primaryTagsApi";
 import { getAllSecondaryTags } from "../api/secondaryTagsApi";
@@ -7,6 +14,7 @@ import { getAllTasks, type Task } from "../api/tasksApi";
 import { type UserData } from "../schemas/userTypes";
 import { type PrimaryTagData, type SecondaryTagData, getLighterColor, TAG_COLORS } from "../schemas/tagTypes";
 import { type ContactData } from "../schemas/contactTypes";
+import { useAuth } from "./AuthContext";
 
 // Helper function to convert API User to UserData
 const mapUserToUserData = (user: User): UserData => ({
@@ -17,7 +25,6 @@ const mapUserToUserData = (user: User): UserData => ({
     color: user.color,
     profileImage: user.profileImage,
 });
-
 
 // Helper function to convert API PrimaryTag to PrimaryTagData
 const mapPrimaryTagToData = (tag: PrimaryTag): PrimaryTagData => ({
@@ -80,7 +87,8 @@ const defaultContextValue: SettingsContextState = {
 };
 
 // Create Context
-const SettingsContext = createContext<SettingsContextState>(defaultContextValue);
+const SettingsContext =
+    createContext<SettingsContextState>(defaultContextValue);
 
 // Provider Props
 interface SettingsProviderProps {
@@ -89,6 +97,7 @@ interface SettingsProviderProps {
 
 // Provider Component
 export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) => {
+    const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
     const [users, setUsers] = useState<UserData[]>([]);
     const [primaryTags, setPrimaryTags] = useState<PrimaryTagData[]>([]);
     const [secondaryTags, setSecondaryTags] = useState<SecondaryTagData[]>([]);
@@ -203,10 +212,39 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
         setIsLoading(false);
     }, [refreshUsers, refreshTags, refreshContacts, refreshTasks]);
 
-    // Initial fetch on mount
+    // Clear all data (used on logout)
+    const clearAllData = useCallback(() => {
+        setUsers([]);
+        setPrimaryTags([]);
+        setSecondaryTags([]);
+        setContacts([]);
+        setTasks([]);
+        setIsLoading(false);
+    }, []);
+
+    // Fetch data only when authenticated, clear data on logout
     useEffect(() => {
-        refreshAll();
-    }, [refreshAll]);
+        // Don't do anything while auth is still checking
+        if (isAuthLoading) {
+            return;
+        }
+
+        if (isAuthenticated) {
+            // User is authenticated, fetch all data
+            refreshAll();
+        } else {
+            // Extra safeguard: check if there's still a token in sessionStorage
+            // This prevents clearing data during race conditions (quick refreshes)
+            const hasStoredToken = sessionStorage.getItem("auth_token");
+            if (!hasStoredToken) {
+                // User is not authenticated and no stored token, clear all data
+                clearAllData();
+            }
+            // If there's a stored token but isAuthenticated is false,
+            // it means auth is still being validated or there was a transient error.
+            // Don't clear the data - let the user retry.
+        }
+    }, [isAuthenticated, isAuthLoading, refreshAll, clearAllData]);
 
     const value: SettingsContextState = {
         users,
