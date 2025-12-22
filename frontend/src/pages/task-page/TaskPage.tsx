@@ -9,6 +9,7 @@ import {
 import { useTheme, useSettings, useViewState, useAuth } from "../../contexts";
 import { KanbanBoard } from "./parts";
 import { updateTask, type Task, type TaskStatus } from "../../api/tasksApi";
+import { useTaskModal } from "../../components/modal-task";
 
 interface LocationState {
   selectedUserId?: string;
@@ -85,9 +86,10 @@ const filterTasksByDateRange = (
 
 const TaskPage: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { tasks, users, refreshTasks } = useSettings();
+  const { tasks, users, refreshTasks, refreshTaskHistory } = useSettings();
   const { viewMode, setViewMode, selectedDate } = useViewState();
   const { user: authUser } = useAuth();
+  const { openTaskModal, setOnTaskUpdated } = useTaskModal();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -170,6 +172,7 @@ const TaskPage: React.FC = () => {
         setTimeout(() => {
           if (response.success) {
             refreshTasks();
+            refreshTaskHistory();
           } else {
             console.error("Failed to update task status:", response.error);
             refreshTasks(); // Revert to server state
@@ -180,14 +183,14 @@ const TaskPage: React.FC = () => {
         refreshTasks(); // Revert to server state
       }
     },
-    [optimisticTasks, refreshTasks]
+    [optimisticTasks, refreshTasks, refreshTaskHistory]
   );
 
-  // Handle task click
-  const handleTaskClick = (task: Task) => {
-    console.log(task);
-    // TODO: Open task detail modal
-  };
+  // Handle task click - open task modal
+  const handleTaskClick = useCallback((task: Task) => {
+    setOnTaskUpdated(() => () => { refreshTasks(); refreshTaskHistory(); });
+    openTaskModal(task);
+  }, [openTaskModal, setOnTaskUpdated, refreshTasks, refreshTaskHistory]);
 
   // If no user is selected, redirect to home
   if (!selectedUserId) {
@@ -228,10 +231,9 @@ const TaskPage: React.FC = () => {
             className={`
               p-2 rounded-full
               transition-colors
-              ${
-                isDarkMode
-                  ? "hover:bg-slate-700 text-slate-300"
-                  : "hover:bg-slate-100 text-slate-600"
+              ${isDarkMode
+                ? "hover:bg-slate-700 text-slate-300"
+                : "hover:bg-slate-100 text-slate-600"
               }
             `}
             aria-label="חזרה לדף הבית"
@@ -267,12 +269,11 @@ const TaskPage: React.FC = () => {
                   rounded-md
                   text-xs lg:text-sm font-medium
                   transition-all duration-200
-                  ${
-                    viewMode === mode.id
-                      ? isDarkMode
-                        ? "bg-slate-600 text-white shadow-sm"
-                        : "bg-white text-blue-600 shadow-sm"
-                      : isDarkMode
+                  ${viewMode === mode.id
+                    ? isDarkMode
+                      ? "bg-slate-600 text-white shadow-sm"
+                      : "bg-white text-blue-600 shadow-sm"
+                    : isDarkMode
                       ? "text-slate-400 hover:text-slate-200"
                       : "text-slate-500 hover:text-slate-700"
                   }

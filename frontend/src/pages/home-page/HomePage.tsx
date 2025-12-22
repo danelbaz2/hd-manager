@@ -69,7 +69,7 @@ const filterTasksByDateRange = (
 
 const HomePage: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { users, secondaryTags, tasks, refreshTasks } = useSettings();
+  const { users, secondaryTags, tasks, refreshTasks, refreshTaskHistory } = useSettings();
   const { viewMode, setViewMode, displayMode, setDisplayMode, selectedDate } =
     useViewState();
   const { user: authUser } = useAuth();
@@ -92,6 +92,7 @@ const HomePage: React.FC = () => {
 
   const handleTaskCreated = () => {
     refreshTasks(); // Refresh task list after creation
+    refreshTaskHistory(); // Refresh history after creation
   };
 
   const handleSearch = (query: string, filterType: string) => {

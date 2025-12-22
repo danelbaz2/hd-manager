@@ -120,3 +120,53 @@ export const deleteTask = async (taskId: string): Promise<ApiResponse<null>> => 
 
   return response;
 };
+
+// ============== Task History ==============
+
+/**
+ * Action types for task history
+ */
+export type TaskHistoryAction = "CREATE" | "UPDATE" | "IN_PROGRESS" | "CLOSE" | "DELETE" | "NOTE" | "ASSIGN";
+
+/**
+ * Task history entry from ents_archive
+ */
+export interface TaskHistoryEntry {
+  id: string;
+  taskId: string;
+  action: TaskHistoryAction;
+  timestamp: number;
+  updatedBy: string;
+  changes: Record<string, unknown>;
+  oldValues?: Record<string, unknown>;
+  note?: string;
+}
+
+/**
+ * Get ALL tasks history (for global fetch at login)
+ */
+export const getAllTasksHistory = async (): Promise<ApiResponse<TaskHistoryEntry[]>> => {
+  return apiRequest<TaskHistoryEntry[]>(`${API_ENDPOINTS.tasks}/history`);
+};
+
+/**
+ * Get the history of a specific task
+ */
+export const getTaskHistory = async (
+  taskId: string
+): Promise<ApiResponse<TaskHistoryEntry[]>> => {
+  return apiRequest<TaskHistoryEntry[]>(`${API_ENDPOINTS.tasks}/${taskId}/history`);
+};
+
+/**
+ * Add a note to a task's history
+ */
+export const addTaskNote = async (
+  taskId: string,
+  note: string
+): Promise<ApiResponse<TaskHistoryEntry>> => {
+  return apiRequest<TaskHistoryEntry>(`${API_ENDPOINTS.tasks}/${taskId}/notes`, {
+    method: "POST",
+    body: JSON.stringify({ note }),
+  });
+};

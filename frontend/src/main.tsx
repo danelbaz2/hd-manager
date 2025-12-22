@@ -8,6 +8,7 @@ import {
   ViewStateProvider,
   AuthProvider,
 } from "./contexts";
+import { TaskModalProvider, TaskModal } from "./components/modal-task";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -15,7 +16,10 @@ createRoot(document.getElementById("root")!).render(
       <ThemeProvider>
         <SettingsProvider>
           <ViewStateProvider>
-            <App />
+            <TaskModalProvider>
+              <App />
+              <TaskModal />
+            </TaskModalProvider>
           </ViewStateProvider>
         </SettingsProvider>
       </ThemeProvider>

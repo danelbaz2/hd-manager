@@ -18,9 +18,14 @@ export {
   createTask,
   updateTask,
   deleteTask,
+  getAllTasksHistory,
+  getTaskHistory,
+  addTaskNote,
   type Task,
   type TaskFormData,
   type TaskQueryParams,
+  type TaskHistoryEntry,
+  type TaskHistoryAction,
 } from "./tasksApi";
 
 // Primary Tags API (Two-tier tag system)

@@ -10,7 +10,7 @@ import { getAllUsers, type User } from "../api/usersApi";
 import { getAllPrimaryTags, type PrimaryTag } from "../api/primaryTagsApi";
 import { getAllSecondaryTags } from "../api/secondaryTagsApi";
 import { getAllContacts, type Contact } from "../api/contactsApi";
-import { getAllTasks, type Task } from "../api/tasksApi";
+import { getAllTasks, getAllTasksHistory, type Task, type TaskHistoryEntry } from "../api/tasksApi";
 import { type UserData } from "../schemas/userTypes";
 import { type PrimaryTagData, type SecondaryTagData, getLighterColor, TAG_COLORS } from "../schemas/tagTypes";
 import { type ContactData } from "../schemas/contactTypes";
@@ -51,6 +51,7 @@ interface SettingsContextState {
     secondaryTags: SecondaryTagData[];  // Two-tier tag system
     contacts: ContactData[];
     tasks: Task[];
+    taskHistory: TaskHistoryEntry[];  // All task history
 
     // Loading states
     isLoading: boolean;
@@ -58,13 +59,19 @@ interface SettingsContextState {
     isLoadingTags: boolean;
     isLoadingContacts: boolean;
     isLoadingTasks: boolean;
+    isLoadingHistory: boolean;
 
     // Refresh functions
     refreshUsers: () => Promise<void>;
     refreshTags: () => Promise<void>;
     refreshContacts: () => Promise<void>;
     refreshTasks: () => Promise<void>;
+    refreshTaskHistory: () => Promise<void>;
     refreshAll: () => Promise<void>;
+
+    // History helpers
+    addHistoryEntry: (entry: TaskHistoryEntry) => void;
+    getHistoryForTask: (taskId: string) => TaskHistoryEntry[];
 }
 
 // Default context value
@@ -74,16 +81,21 @@ const defaultContextValue: SettingsContextState = {
     secondaryTags: [],
     contacts: [],
     tasks: [],
+    taskHistory: [],
     isLoading: true,
     isLoadingUsers: false,
     isLoadingTags: false,
     isLoadingContacts: false,
     isLoadingTasks: false,
+    isLoadingHistory: false,
     refreshUsers: async () => { },
     refreshTags: async () => { },
     refreshContacts: async () => { },
     refreshTasks: async () => { },
+    refreshTaskHistory: async () => { },
     refreshAll: async () => { },
+    addHistoryEntry: () => { },
+    getHistoryForTask: () => [],
 };
 
 // Create Context
@@ -103,12 +115,14 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
     const [secondaryTags, setSecondaryTags] = useState<SecondaryTagData[]>([]);
     const [contacts, setContacts] = useState<ContactData[]>([]);
     const [tasks, setTasks] = useState<Task[]>([]);
+    const [taskHistory, setTaskHistory] = useState<TaskHistoryEntry[]>([]);
 
     const [isLoading, setIsLoading] = useState(true);
     const [isLoadingUsers, setIsLoadingUsers] = useState(false);
     const [isLoadingTags, setIsLoadingTags] = useState(false);
     const [isLoadingContacts, setIsLoadingContacts] = useState(false);
     const [isLoadingTasks, setIsLoadingTasks] = useState(false);
+    const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
     // Fetch users
     const refreshUsers = useCallback(async () => {
@@ -200,6 +214,33 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
         }
     }, []);
 
+    // Fetch all task history - for global access
+    const refreshTaskHistory = useCallback(async () => {
+        setIsLoadingHistory(true);
+        try {
+            const response = await getAllTasksHistory();
+            if (response.success && response.data) {
+                setTaskHistory(response.data);
+            } else {
+                console.error("Failed to fetch task history:", response.error);
+            }
+        } catch (error) {
+            console.error("Error fetching task history:", error);
+        } finally {
+            setIsLoadingHistory(false);
+        }
+    }, []);
+
+    // Add a single history entry (after adding a note)
+    const addHistoryEntry = useCallback((entry: TaskHistoryEntry) => {
+        setTaskHistory((prev) => [...prev, entry]);
+    }, []);
+
+    // Get history entries for a specific task
+    const getHistoryForTask = useCallback((taskId: string): TaskHistoryEntry[] => {
+        return taskHistory.filter((entry) => entry.taskId === taskId);
+    }, [taskHistory]);
+
     // Fetch all data
     const refreshAll = useCallback(async () => {
         setIsLoading(true);
@@ -208,9 +249,10 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
             refreshTags(),
             refreshContacts(),
             refreshTasks(),
+            refreshTaskHistory(),
         ]);
         setIsLoading(false);
-    }, [refreshUsers, refreshTags, refreshContacts, refreshTasks]);
+    }, [refreshUsers, refreshTags, refreshContacts, refreshTasks, refreshTaskHistory]);
 
     // Clear all data (used on logout)
     const clearAllData = useCallback(() => {
@@ -219,6 +261,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
         setSecondaryTags([]);
         setContacts([]);
         setTasks([]);
+        setTaskHistory([]);
         setIsLoading(false);
     }, []);
 
@@ -252,16 +295,21 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({ children }) 
         secondaryTags,
         contacts,
         tasks,
+        taskHistory,
         isLoading,
         isLoadingUsers,
         isLoadingTags,
         isLoadingContacts,
         isLoadingTasks,
+        isLoadingHistory,
         refreshUsers,
         refreshTags,
         refreshContacts,
         refreshTasks,
+        refreshTaskHistory,
         refreshAll,
+        addHistoryEntry,
+        getHistoryForTask,
     };
 
     return (

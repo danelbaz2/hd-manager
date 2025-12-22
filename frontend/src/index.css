@@ -258,3 +258,16 @@
   scrollbar-width: thin;
   scrollbar-color: rgba(203, 213, 225, 0.8) rgba(241, 245, 249, 0.8);
 }
+
+/* Hidden scrollbar - scroll but invisible */
+.hidden-scrollbar {
+  scrollbar-width: none;
+  /* Firefox */
+  -ms-overflow-style: none;
+  /* IE/Edge */
+}
+
+.hidden-scrollbar::-webkit-scrollbar {
+  display: none;
+  /* Chrome/Safari/Opera */
+}
