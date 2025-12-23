@@ -1,5 +1,5 @@
 /**
- * ChatInput - Chat-like input for adding notes with send animation
+ * ChatInput - Chat-like input for adding notes with send animation.
  */
 import React, { useState, useRef, useEffect } from "react";
 import { Send, Loader2 } from "lucide-react";
