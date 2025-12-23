@@ -61,7 +61,7 @@ export const useTaskForm = ({
   onSuccess,
   onClose,
 }: UseTaskFormOptions): UseTaskFormReturn => {
-  const { alerts, showSuccess, showError, showWarning, dismissAlert } = useToast();
+  const { alerts, showSuccess, showError, showWarning, dismissAlert, clearAllAlerts } = useToast();
 
   // Form state
   const [title, setTitle] = useState("");
@@ -73,9 +73,12 @@ export const useTaskForm = ({
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Reset form and set default dates when modal opens
+  // Reset form and set default dates when modal opens/closes
   useEffect(() => {
     if (isOpen) {
+      // Clear any existing alerts when modal opens
+      clearAllAlerts();
+
       // Reset all fields
       setTitle("");
       setDescription("");
@@ -88,12 +91,53 @@ export const useTaskForm = ({
       const startDateStr = formatDateLocal(startDateObj);
       setStartDate(startDateStr);
 
-      // Set default deadline to startDate + 1 day
-      const deadlineDateObj = new Date(startDateObj);
-      deadlineDateObj.setDate(deadlineDateObj.getDate() + 1);
-      setDeadline(formatDateLocal(deadlineDateObj));
+      // Set default deadline to same as start date
+      setDeadline(startDateStr);
+    } else {
+      // Clear alerts when modal closes
+      clearAllAlerts();
     }
-  }, [isOpen, initialDate]);
+  }, [isOpen, initialDate, clearAllAlerts]);
+
+  // Validate and set deadline - ensure it's not before start date
+  const handleSetDeadline = (newDeadline: string) => {
+    if (!newDeadline) {
+      setDeadline("");
+      return;
+    }
+
+    // If start date is set, validate deadline is not before it
+    if (startDate) {
+      const startTimestamp = parseDateToTimestamp(startDate);
+      const deadlineTimestamp = parseDateToTimestamp(newDeadline);
+
+      if (deadlineTimestamp < startTimestamp) {
+        showWarning(
+          "תאריך לא תקין",
+          "לא ניתן לבחור תאריך יעד לפני תאריך ההתחלה"
+        );
+        return; // Don't update the deadline
+      }
+    }
+
+    setDeadline(newDeadline);
+  };
+
+  // Handle start date change - update deadline if it becomes invalid
+  const handleSetStartDate = (newStartDate: string) => {
+    setStartDate(newStartDate);
+
+    // If deadline exists and is now before the new start date, update deadline to match
+    if (deadline && newStartDate) {
+      const startTimestamp = parseDateToTimestamp(newStartDate);
+      const deadlineTimestamp = parseDateToTimestamp(deadline);
+
+      if (deadlineTimestamp < startTimestamp) {
+        // Update deadline to match the new start date
+        setDeadline(newStartDate);
+      }
+    }
+  };
 
   // Handle submit
   const handleSubmit = async () => {
@@ -107,8 +151,8 @@ export const useTaskForm = ({
     try {
       // Calculate deadline: use selected deadline, or default to startDate + 1 day
       const startTimestamp = startDate ? parseDateToTimestamp(startDate) : Date.now();
-      const deadlineTimestamp = deadline 
-        ? parseDateToTimestamp(deadline) 
+      const deadlineTimestamp = deadline
+        ? parseDateToTimestamp(deadline)
         : startTimestamp + 24 * 60 * 60 * 1000; // Add 1 day in milliseconds
 
       const taskData: TaskFormData = {
@@ -151,9 +195,9 @@ export const useTaskForm = ({
     selectedSecondaryTagIds,
     setSelectedSecondaryTagIds,
     startDate,
-    setStartDate,
+    setStartDate: handleSetStartDate,
     deadline,
-    setDeadline,
+    setDeadline: handleSetDeadline,
     selectedUserIds,
     setSelectedUserIds,
     isSubmitting,
