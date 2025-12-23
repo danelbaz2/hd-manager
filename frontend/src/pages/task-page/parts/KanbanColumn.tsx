@@ -3,7 +3,7 @@ import { CheckCircle2, Clock, AlertCircle, type LucideIcon } from "lucide-react"
 import { useTheme } from "../../../contexts";
 import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
-import KanbanTaskCard from "./KanbanTaskCard";
+import KanbanTaskCard, { type DropConfirmRequest } from "./KanbanTaskCard";
 
 interface KanbanColumnProps {
     title: string;
@@ -15,6 +15,7 @@ interface KanbanColumnProps {
     onDrop: (taskId: string, targetStatus: TaskStatus) => void;
     onTaskStatusChange?: (taskId: string, newStatus: TaskStatus) => void;
     onTaskClick?: (task: Task) => void;
+    onDropConfirmRequest?: (request: DropConfirmRequest) => void;
 }
 
 const KanbanColumn: React.FC<KanbanColumnProps> = ({
@@ -26,6 +27,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
     colorClass,
     onTaskStatusChange,
     onTaskClick,
+    onDropConfirmRequest,
 }) => {
     const { isDarkMode } = useTheme();
     const [isDropTarget, setIsDropTarget] = useState(false);
@@ -163,6 +165,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                         onClick={onTaskClick}
                         columnStatus={status}
                         onTaskStatusChange={onTaskStatusChange}
+                        onDropConfirmRequest={onDropConfirmRequest}
                     />
                 ))}
             </div>

@@ -1,8 +1,11 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useCallback } from "react";
+import { MoveLeft } from "lucide-react";
 import { useTheme } from "../../../contexts";
 import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
 import KanbanColumn, { KANBAN_COLUMNS } from "./KanbanColumn";
+import { type DropConfirmRequest } from "./KanbanTaskCard";
+import { ConfirmModal } from "../../../components/confirm-modal";
 
 interface KanbanBoardProps {
     tasks: Task[];
@@ -12,6 +15,12 @@ interface KanbanBoardProps {
     onTaskClick?: (task: Task) => void;
 }
 
+// Helper to get status label in Hebrew
+const getStatusLabel = (status: string): string => {
+    const column = KANBAN_COLUMNS.find(c => c.status === status);
+    return column?.title || status;
+};
+
 const KanbanBoard: React.FC<KanbanBoardProps> = ({
     tasks,
     users,
@@ -19,6 +28,9 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     onTaskClick,
 }) => {
     const { isDarkMode } = useTheme();
+
+    // Confirmation modal state
+    const [confirmRequest, setConfirmRequest] = useState<DropConfirmRequest | null>(null);
 
     // Group tasks by status (tasks are already filtered by user and date)
     const tasksByStatus = useMemo(() => {
@@ -41,7 +53,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
             if (grouped[status]) {
                 grouped[status].push(task);
             } else {
-                // If status doesn't match, put in pending
                 grouped.pending.push(task);
             }
         });
@@ -57,32 +68,88 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         }
     };
 
+    // Handle drop confirmation request from KanbanTaskCard
+    const handleDropConfirmRequest = useCallback((request: DropConfirmRequest) => {
+        setConfirmRequest(request);
+    }, []);
+
+    // Handle confirmation
+    const handleConfirm = useCallback(() => {
+        if (confirmRequest) {
+            confirmRequest.onConfirm();
+            setConfirmRequest(null);
+        }
+    }, [confirmRequest]);
+
+    // Handle cancellation
+    const handleCancel = useCallback(() => {
+        if (confirmRequest) {
+            confirmRequest.onCancel();
+            setConfirmRequest(null);
+        }
+    }, [confirmRequest]);
+
     return (
-        <div
-            className={`
-        h-full w-full overflow-x-auto overflow-y-hidden
-        ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}
-        ${isDarkMode ? "bg-slate-900" : "bg-slate-50"}
-    `}
-            dir="rtl"
-        >
-            <div className="flex h-full gap-4 lg:gap-6 p-4 lg:p-6">
-                {KANBAN_COLUMNS.map((column) => (
-                    <KanbanColumn
-                        key={column.status}
-                        title={column.title}
-                        status={column.status}
-                        tasks={tasksByStatus[column.status]}
-                        users={users}
-                        icon={column.icon}
-                        colorClass={column.colorClass}
-                        onDrop={handleDrop}
-                        onTaskStatusChange={onTaskStatusChange}
-                        onTaskClick={onTaskClick}
-                    />
-                ))}
+        <>
+            <div
+                className={`
+                    h-full w-full overflow-x-auto overflow-y-hidden
+                    ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}
+                    ${isDarkMode ? "bg-slate-900" : "bg-slate-50"}
+                `}
+                dir="rtl"
+            >
+                {/* Kanban Columns */}
+                <div className="flex h-full gap-4 lg:gap-6 p-4 lg:p-6">
+                    {KANBAN_COLUMNS.map((column) => (
+                        <KanbanColumn
+                            key={column.status}
+                            title={column.title}
+                            status={column.status}
+                            tasks={tasksByStatus[column.status]}
+                            users={users}
+                            icon={column.icon}
+                            colorClass={column.colorClass}
+                            onDrop={handleDrop}
+                            onTaskStatusChange={onTaskStatusChange}
+                            onTaskClick={onTaskClick}
+                            onDropConfirmRequest={handleDropConfirmRequest}
+                        />
+                    ))}
+                </div>
             </div>
-        </div>
+
+            {/* Status Change Confirmation Modal */}
+            <ConfirmModal
+                isOpen={!!confirmRequest}
+                title="שינוי סטטוס משימה"
+                text={
+                    confirmRequest ? (
+                        <div className="space-y-2">
+                            <p>
+                                האם להעביר את המשימה{" "}
+                                <strong>"{confirmRequest.taskTitle}"</strong>?
+                            </p>
+                            {/* RTL: displays as [toStatus] ← [fromStatus] */}
+                            <div className="flex items-center justify-center gap-2 text-sm" dir="rtl">
+                                <span className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-700">
+                                    {getStatusLabel(confirmRequest.fromStatus)}
+                                </span>
+                                <MoveLeft size={16} className="text-blue-500" />
+                                <span className="px-2 py-1 rounded bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-medium">
+                                    {getStatusLabel(confirmRequest.toStatus)}
+                                </span>
+                            </div>
+                        </div>
+                    ) : null
+                }
+                onConfirm={handleConfirm}
+                onCancel={handleCancel}
+                isDarkMode={isDarkMode}
+                variant="info"
+                headerIcon={MoveLeft}
+            />
+        </>
     );
 };
 

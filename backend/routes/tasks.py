@@ -214,8 +214,9 @@ def get_task_history(task_id):
                 'updatedBy': change_data.get('base', {}).get('updatedBy') or 
                             new_data.get('base', {}).get('updatedBy') or
                             new_data.get('base', {}).get('createdBy') or 'מערכת',
-                'changes': {k: v for k, v in change_data.items() if k not in ['id', '_id', 'base', 'action', 'timestamp', 'note']},
-                'note': change_data.get('note')
+                'changes': {k: v for k, v in change_data.items() if k not in ['id', '_id', 'base', 'action', 'timestamp', 'note', 'file']},
+                'note': change_data.get('note'),
+                'file': change_data.get('file')  # Include file metadata if present
             }
             
             # For CREATE actions, include responsibleUserIds from new_data if present
@@ -298,7 +299,8 @@ def get_all_tasks_history():
                             new_data.get('base', {}).get('createdBy') or 'מערכת',
                 'changes': changes,
                 'oldValues': old_values,
-                'note': change_data.get('note')
+                'note': change_data.get('note'),
+                'file': change_data.get('file')  # Include file metadata if present
             }
             
             history.append(history_item)

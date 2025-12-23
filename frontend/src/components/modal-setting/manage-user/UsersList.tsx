@@ -3,7 +3,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import { useSettings } from "../../../contexts/SettingsContext";
 import { type UserData } from "../../../schemas/userTypes";
 import DelayedLoader from "../../loaders/DelayedLoader";
-import DeleteConfirmModal from "../../delete-confirm-modal";
+import { ConfirmModal } from "../../confirm-modal";
 import { UserCard } from "./components";
 
 interface UsersListProps {
@@ -44,7 +44,7 @@ const UsersList: React.FC<UsersListProps> = ({
   return (
     <>
       {/* Delete Confirmation Modal */}
-      <DeleteConfirmModal
+      <ConfirmModal
         isOpen={deleteTarget !== null}
         title="מחיקת משתמש"
         text={
@@ -56,24 +56,24 @@ const UsersList: React.FC<UsersListProps> = ({
         isDarkMode={isDarkMode}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
+        variant="danger"
+        showIrreversibleWarning
       />
 
       <DelayedLoader isLoading={isLoadingUsers} delay={300}>
         {users.length === 0 ? (
           <div className="flex-1 flex items-center justify-center py-12">
             <p
-              className={`text-center ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`text-center ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               אין משתמשים להצגה
             </p>
           </div>
         ) : (
           <div
-            className={`flex-1 overflow-y-auto space-y-3 ${
-              isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-            }`}
+            className={`flex-1 overflow-y-auto space-y-3 ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+              }`}
           >
             {users.map((user) => (
               <UserCard
