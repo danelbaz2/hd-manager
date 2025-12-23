@@ -4,6 +4,7 @@ import { useTheme } from "../../../contexts";
 import { type Task } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
 import { type SecondaryTagData } from "../../../schemas/tagTypes";
+import { Tooltip } from "../../../components/tags-tooltip";
 
 interface TagTaskCardProps {
   task: Task;
@@ -68,16 +69,17 @@ const TagTaskCard: React.FC<TagTaskCardProps> = ({
         <div className="flex items-center gap-2 mb-1">
           {/* Secondary Tags */}
           {taskTags.slice(0, 2).map((tag) => (
-            <span
-              key={tag.id}
-              className="px-2 py-0.5 rounded text-xs font-medium"
-              style={{
-                backgroundColor: primaryColor + "20",
-                color: primaryColor,
-              }}
-            >
-              {tag.name}
-            </span>
+            <Tooltip key={tag.id} content={tag.description} position="top">
+              <span
+                className="px-2 py-0.5 rounded text-xs font-medium cursor-default"
+                style={{
+                  backgroundColor: primaryColor + "20",
+                  color: primaryColor,
+                }}
+              >
+                {tag.name}
+              </span>
+            </Tooltip>
           ))}
         </div>
 
