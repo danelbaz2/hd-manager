@@ -12,6 +12,7 @@ interface TagsViewProps {
   tasks: Task[];
   users: UserData[];
   searchQuery?: string;
+  onTaskClick?: (task: Task) => void;
 }
 
 /**
@@ -50,8 +51,8 @@ const TagsView: React.FC<TagsViewProps> = ({
   tasks,
   users,
   searchQuery = "",
+  onTaskClick,
 }) => {
-  const { isDarkMode } = useTheme();
   const { primaryTags, secondaryTags } = useSettings();
 
   // Filter tags by search query (matches tag names)
@@ -100,6 +101,7 @@ const TagsView: React.FC<TagsViewProps> = ({
               secondaryTags={group.secondaryTags}
               tasks={group.tasks}
               users={users}
+              onTaskClick={onTaskClick}
             />
           ))}
         </div>

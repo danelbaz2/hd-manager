@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { useTheme } from "../../contexts/ThemeContext";
+import React, { useState, useEffect, useCallback } from "react";
+import { useTheme, useSettings } from "../../contexts";
 import HeaderArchivePage from "./HeaderArchivePage";
 import ListTaskArchive from "./ListTaskArchive";
 import {
@@ -7,34 +7,32 @@ import {
   defaultFilters,
 } from "../../schemas/archiveTypes";
 import { getAllTasks, type Task } from "../../api/tasksApi";
-import { getAllUsers } from "../../api/usersApi";
-import { getAllSecondaryTags } from "../../api/secondaryTagsApi";
-import { type UserData } from "../../schemas/userTypes";
-import { type SecondaryTagData } from "../../schemas/tagTypes";
 import { Loader2 } from "lucide-react";
+import { useTaskModal } from "../../components/modal-task";
 
 const ArchivePage: React.FC = () => {
   const { isDarkMode } = useTheme();
+  // Use useSettings to get users and tags with computed colors (same as home page)
+  const { users, secondaryTags } = useSettings();
   const [filters, setFilters] = useState<ArchiveFilters>(defaultFilters);
   const [tasks, setTasks] = useState<Task[]>([]);
-  const [users, setUsers] = useState<UserData[]>([]);
-  const [tags, setTags] = useState<SecondaryTagData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const { openTaskModal } = useTaskModal();
+
+  const handleTaskClick = useCallback(
+    (task: Task) => {
+      openTaskModal(task, { enableFileHandle: false });
+    },
+    [openTaskModal]
+  );
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setIsLoading(true);
-        const [tasksRes, usersRes, tagsRes] = await Promise.all([
-          getAllTasks(),
-          getAllUsers(),
-          getAllSecondaryTags(),
-        ]);
+        // Only fetch tasks - users and tags come from useSettings context
+        const tasksRes = await getAllTasks();
         if (tasksRes.success && tasksRes.data) setTasks(tasksRes.data);
-        if (usersRes.success && usersRes.data)
-          setUsers(usersRes.data as UserData[]);
-        if (tagsRes.success && tagsRes.data)
-          setTags(tagsRes.data as SecondaryTagData[]);
       } catch (error) {
         console.error("Error fetching archive data:", error);
       } finally {
@@ -76,8 +74,9 @@ const ArchivePage: React.FC = () => {
         <ListTaskArchive
           tasks={tasks}
           users={users}
-          tags={tags}
+          tags={secondaryTags}
           filters={filters}
+          onTaskClick={handleTaskClick}
         />
       </div>
     </div>

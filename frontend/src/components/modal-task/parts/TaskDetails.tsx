@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { FileText, Calendar, Clock, Users } from "lucide-react";
+import { Tooltip } from "../../tags-tooltip";
 import {
   PRIORITY_COLORS,
   PRIORITY_OPTIONS,
@@ -8,15 +9,18 @@ import {
   type TaskPriority,
 } from "../../../schemas/taskTypes";
 import type { Task } from "../../../api/tasksApi";
-import type { User } from "../../../schemas/userTypes";
-import type { Tag } from "../../../schemas/tagTypes";
+import type { UserData } from "../../../schemas/userTypes";
+import type {
+  PrimaryTagData,
+  SecondaryTagData,
+} from "../../../schemas/tagTypes";
 
 interface TaskDetailsProps {
   task: Task;
   isDarkMode: boolean;
-  primaryTags: Tag[];
-  secondaryTags: Tag[];
-  users: User[];
+  primaryTags: PrimaryTagData[];
+  secondaryTags: SecondaryTagData[];
+  users: UserData[];
 }
 
 export const TaskDetails: React.FC<TaskDetailsProps> = ({
@@ -68,16 +72,21 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
           {taskTags.map(
             (tag, idx) =>
               tag && (
-                <span
+                <Tooltip
                   key={idx}
-                  className="px-3 py-1 rounded-full text-xs font-medium"
-                  style={{
-                    backgroundColor: `${tag.color}20`,
-                    color: tag.color,
-                  }}
+                  content={tag.description || tag.name}
+                  position="bottom"
                 >
-                  {tag.name}
-                </span>
+                  <span
+                    className="px-3 py-1 rounded-full text-xs font-medium cursor-default"
+                    style={{
+                      backgroundColor: `${tag.color}20`,
+                      color: tag.color,
+                    }}
+                  >
+                    {tag.name}
+                  </span>
+                </Tooltip>
               )
           )}
         </div>

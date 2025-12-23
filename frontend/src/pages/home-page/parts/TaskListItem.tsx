@@ -15,13 +15,19 @@ interface TaskListItemProps {
   task: Task;
   users: UserData[];
   tags: SecondaryTagData[];
+  onTaskClick?: (task: Task) => void;
 }
 
 /**
  * TaskListItem - Individual task row in the daily/list view
  * Refactored to use shared utility functions from taskItemUtils.ts
  */
-const TaskListItem: React.FC<TaskListItemProps> = ({ task, users, tags }) => {
+const TaskListItem: React.FC<TaskListItemProps> = ({
+  task,
+  users,
+  tags,
+  onTaskClick,
+}) => {
   const { isDarkMode } = useTheme();
   const statusStyle = getStatusStyle(task.status);
 
@@ -48,6 +54,7 @@ const TaskListItem: React.FC<TaskListItemProps> = ({ task, users, tags }) => {
         }
       `}
       dir="rtl"
+      onClick={() => onTaskClick?.(task)}
     >
       {/* Color Border - Gradient for multiple users */}
       <div

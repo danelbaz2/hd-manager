@@ -14,6 +14,7 @@ interface TagAccordionProps {
   secondaryTags: SecondaryTagData[];
   tasks: Task[];
   users: UserData[];
+  onTaskClick?: (task: Task) => void;
 }
 
 const TagAccordion: React.FC<TagAccordionProps> = ({
@@ -21,6 +22,7 @@ const TagAccordion: React.FC<TagAccordionProps> = ({
   secondaryTags,
   tasks,
   users,
+  onTaskClick,
 }) => {
   const { isDarkMode } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
@@ -82,6 +84,7 @@ const TagAccordion: React.FC<TagAccordionProps> = ({
                 users={users}
                 secondaryTags={secondaryTags}
                 primaryColor={primaryTag.color}
+                onTaskClick={onTaskClick}
               />
             ))}
           </div>

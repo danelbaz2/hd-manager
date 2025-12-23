@@ -11,6 +11,7 @@ interface TagTaskCardProps {
   users: UserData[];
   secondaryTags: SecondaryTagData[];
   primaryColor: string;
+  onTaskClick?: (task: Task) => void;
 }
 
 // Get status styling
@@ -39,6 +40,7 @@ const TagTaskCard: React.FC<TagTaskCardProps> = ({
   users,
   secondaryTags,
   primaryColor,
+  onTaskClick,
 }) => {
   const { isDarkMode } = useTheme();
   const statusStyle = getStatusStyle(task.status);
@@ -63,6 +65,7 @@ const TagTaskCard: React.FC<TagTaskCardProps> = ({
             : "bg-white border-slate-200 hover:border-slate-300"
         }`}
       style={{ borderRightWidth: "4px", borderRightColor: primaryColor }}
+      onClick={() => onTaskClick?.(task)}
     >
       {/* Task Content */}
       <div className="flex-1 min-w-0">

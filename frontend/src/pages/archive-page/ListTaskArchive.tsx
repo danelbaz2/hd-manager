@@ -13,11 +13,18 @@ interface Props {
   users: UserData[];
   tags: SecondaryTagData[];
   filters: ArchiveFilters;
+  onTaskClick?: (task: Task) => void;
 }
 
 const ROW_HEIGHT = 80; // Approximate height of each row in pixels
 
-const ListTaskArchive: React.FC<Props> = ({ tasks, users, tags, filters }) => {
+const ListTaskArchive: React.FC<Props> = ({
+  tasks,
+  users,
+  tags,
+  filters,
+  onTaskClick,
+}) => {
   const { isDarkMode } = useTheme();
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -53,16 +60,18 @@ const ListTaskArchive: React.FC<Props> = ({ tasks, users, tags, filters }) => {
   if (filtered.length === 0) {
     return (
       <div
-        className={`p-12 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center transition-all ${isDarkMode
-          ? "border-slate-700 bg-slate-800/30"
-          : "border-slate-200 bg-white"
-          }`}
+        className={`p-12 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center transition-all ${
+          isDarkMode
+            ? "border-slate-700 bg-slate-800/30"
+            : "border-slate-200 bg-white"
+        }`}
       >
         <div
-          className={`w-16 h-16 mb-4 rounded-2xl flex items-center justify-center ${isDarkMode
-            ? "bg-slate-800 text-slate-500"
-            : "bg-slate-100 text-slate-400"
-            }`}
+          className={`w-16 h-16 mb-4 rounded-2xl flex items-center justify-center ${
+            isDarkMode
+              ? "bg-slate-800 text-slate-500"
+              : "bg-slate-100 text-slate-400"
+          }`}
         >
           <Archive className="w-8 h-8" />
         </div>
@@ -76,10 +85,11 @@ const ListTaskArchive: React.FC<Props> = ({ tasks, users, tags, filters }) => {
     <div className="transition-all duration-300">
       {/* Header */}
       <div
-        className={`flex items-center gap-4 px-4 lg:px-5 py-3 rounded-t-xl border-b text-xs font-semibold uppercase tracking-wide ${isDarkMode
-          ? "bg-slate-800/80 border-slate-700 text-slate-400"
-          : "bg-slate-50 border-slate-200 text-slate-500"
-          }`}
+        className={`flex items-center gap-4 px-4 lg:px-5 py-3 rounded-t-xl border-b text-xs font-semibold uppercase tracking-wide ${
+          isDarkMode
+            ? "bg-slate-800/80 border-slate-700 text-slate-400"
+            : "bg-slate-50 border-slate-200 text-slate-500"
+        }`}
         dir="rtl"
       >
         <div className="w-1" />
@@ -93,10 +103,11 @@ const ListTaskArchive: React.FC<Props> = ({ tasks, users, tags, filters }) => {
       {/* Virtualized List Container */}
       <div
         ref={parentRef}
-        className={`rounded-b-xl overflow-auto max-h-[calc(100vh-220px)] border border-t-0 ${isDarkMode
-          ? "border-slate-700 dark-scrollbar"
-          : "border-slate-200 light-scrollbar"
-          }`}
+        className={`rounded-b-xl overflow-auto max-h-[calc(100vh-220px)] border border-t-0 ${
+          isDarkMode
+            ? "border-slate-700 dark-scrollbar"
+            : "border-slate-200 light-scrollbar"
+        }`}
       >
         {/* Inner container with total height for scroll */}
         <div
@@ -125,6 +136,7 @@ const ListTaskArchive: React.FC<Props> = ({ tasks, users, tags, filters }) => {
                   task={task}
                   users={users}
                   tags={tags}
+                  onTaskClick={onTaskClick}
                 />
               </div>
             );
@@ -134,8 +146,9 @@ const ListTaskArchive: React.FC<Props> = ({ tasks, users, tags, filters }) => {
 
       {/* Footer with count */}
       <div
-        className={`mt-3 text-sm text-center ${isDarkMode ? "text-slate-500" : "text-slate-400"
-          }`}
+        className={`mt-3 text-sm text-center ${
+          isDarkMode ? "text-slate-500" : "text-slate-400"
+        }`}
       >
         מציג {filtered.length} מתוך {tasks.length} משימות
       </div>

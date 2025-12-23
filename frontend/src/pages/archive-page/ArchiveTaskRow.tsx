@@ -14,9 +14,15 @@ interface Props {
   task: Task;
   users: UserData[];
   tags: SecondaryTagData[];
+  onTaskClick?: (task: Task) => void;
 }
 
-const ArchiveTaskRow: React.FC<Props> = ({ task, users, tags }) => {
+const ArchiveTaskRow: React.FC<Props> = ({
+  task,
+  users,
+  tags,
+  onTaskClick,
+}) => {
   const { isDarkMode } = useTheme();
   const status = getStatusStyle(task.status);
   const assigned = users.filter((u) => task.responsibleUserIds?.includes(u.id));
@@ -28,11 +34,13 @@ const ArchiveTaskRow: React.FC<Props> = ({ task, users, tags }) => {
   return (
     <div
       className={`flex items-center gap-4 p-4 lg:p-5 border-b transition-all duration-200 hover:shadow-lg cursor-pointer group
-      ${isDarkMode
+      ${
+        isDarkMode
           ? "bg-slate-800/50 border-slate-700/50 hover:bg-slate-800"
           : "bg-white border-slate-100 hover:bg-slate-50"
-        }`}
+      }`}
       dir="rtl"
+      onClick={() => onTaskClick?.(task)}
     >
       <div
         className="w-1 h-14 rounded-full shrink-0 group-hover:h-16 transition-all"
@@ -43,8 +51,9 @@ const ArchiveTaskRow: React.FC<Props> = ({ task, users, tags }) => {
       </div>
       <div className="flex-1 min-w-0">
         <h3
-          className={`font-semibold text-sm lg:text-base truncate ${isDarkMode ? "text-white" : "text-slate-800"
-            }`}
+          className={`font-semibold text-sm lg:text-base truncate ${
+            isDarkMode ? "text-white" : "text-slate-800"
+          }`}
         >
           {task.title || "ללא כותרת"}
         </h3>
@@ -55,7 +64,7 @@ const ArchiveTaskRow: React.FC<Props> = ({ task, users, tags }) => {
                 <span
                   className="px-2 py-0.5 rounded text-xs font-medium"
                   style={{
-                    backgroundColor: (tag.color || "#94A3B8") + "25",
+                    backgroundColor: (tag.color || "#94A3B8") + "40",
                     color: tag.color || "#94A3B8",
                   }}
                 >
@@ -65,8 +74,9 @@ const ArchiveTaskRow: React.FC<Props> = ({ task, users, tags }) => {
             ))}
             {taskTags.length > 3 && (
               <span
-                className={`text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                  }`}
+                className={`text-xs ${
+                  isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
               >
                 +{taskTags.length - 3}
               </span>
@@ -84,8 +94,9 @@ const ArchiveTaskRow: React.FC<Props> = ({ task, users, tags }) => {
       <div className="w-24 lg:w-28 shrink-0 flex items-center gap-1.5">
         <Calendar className="w-4 h-4 text-slate-400" />
         <span
-          className={`text-xs lg:text-sm ${isDarkMode ? "text-slate-300" : "text-slate-600"
-            }`}
+          className={`text-xs lg:text-sm ${
+            isDarkMode ? "text-slate-300" : "text-slate-600"
+          }`}
         >
           {fmtDate(task.date)}
         </span>
@@ -114,15 +125,17 @@ const ArchiveTaskRow: React.FC<Props> = ({ task, users, tags }) => {
             </div>
             <div className="hidden lg:block min-w-0">
               <p
-                className={`text-sm font-medium truncate ${isDarkMode ? "text-slate-200" : "text-slate-700"
-                  }`}
+                className={`text-sm font-medium truncate ${
+                  isDarkMode ? "text-slate-200" : "text-slate-700"
+                }`}
               >
                 {assigned[0].fullName}
               </p>
               {assigned.length > 1 && (
                 <p
-                  className={`text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                    }`}
+                  className={`text-xs ${
+                    isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
                 >
                   +{assigned.length - 1} נוספים
                 </p>
@@ -131,8 +144,9 @@ const ArchiveTaskRow: React.FC<Props> = ({ task, users, tags }) => {
           </>
         ) : (
           <span
-            className={`text-xs ${isDarkMode ? "text-slate-500" : "text-slate-400"
-              }`}
+            className={`text-xs ${
+              isDarkMode ? "text-slate-500" : "text-slate-400"
+            }`}
           >
             לא משויך
           </span>

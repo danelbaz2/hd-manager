@@ -9,6 +9,7 @@ interface DailyListProps {
   tasks: Task[];
   users: UserData[];
   tags: SecondaryTagData[];
+  onTaskClick?: (task: Task) => void;
 }
 
 // Status priority order: pending (1), in_progress (2), completed (3), cancelled (4)
@@ -27,7 +28,12 @@ const getStatusPriority = (status?: string): number => {
   }
 };
 
-const DailyList: React.FC<DailyListProps> = ({ tasks, users, tags }) => {
+const DailyList: React.FC<DailyListProps> = ({
+  tasks,
+  users,
+  tags,
+  onTaskClick,
+}) => {
   const { isDarkMode } = useTheme();
 
   // Sort tasks by status priority
@@ -71,7 +77,13 @@ const DailyList: React.FC<DailyListProps> = ({ tasks, users, tags }) => {
 
       {/* Task Items - Sorted by status priority */}
       {sortedTasks.map((task) => (
-        <TaskListItem key={task.id} task={task} users={users} tags={tags} />
+        <TaskListItem
+          key={task.id}
+          task={task}
+          users={users}
+          tags={tags}
+          onTaskClick={onTaskClick}
+        />
       ))}
     </div>
   );
