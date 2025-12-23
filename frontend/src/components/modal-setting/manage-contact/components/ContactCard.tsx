@@ -5,6 +5,7 @@ import {
   getTextColor,
 } from "../../../../schemas/contactTypes";
 import { type PrimaryTagData } from "../../../../schemas/tagTypes";
+import { Tooltip } from "../../../tags-tooltip";
 
 interface ContactCardProps {
   contact: ContactData;
@@ -125,16 +126,21 @@ const ContactCard: React.FC<ContactCardProps> = ({
                 const tag = getTagById(tagId);
                 if (!tag) return null;
                 return (
-                  <span
+                  <Tooltip
                     key={tag.id}
-                    className="px-2 py-0.5 rounded text-xs font-medium"
-                    style={{
-                      backgroundColor: tag.color,
-                      color: getTextColor(tag.color),
-                    }}
+                    content={tag.description}
+                    position="top"
                   >
-                    {tag.name}
-                  </span>
+                    <span
+                      className="px-2 py-0.5 rounded text-xs font-medium cursor-default"
+                      style={{
+                        backgroundColor: tag.color,
+                        color: getTextColor(tag.color),
+                      }}
+                    >
+                      {tag.name}
+                    </span>
+                  </Tooltip>
                 );
               })}
             </div>

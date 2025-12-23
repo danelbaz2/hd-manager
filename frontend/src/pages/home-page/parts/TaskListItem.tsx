@@ -9,6 +9,7 @@ import {
   getGradientStyle,
   getDaysRemaining,
 } from "./taskItemUtils";
+import { Tooltip } from "../../../components/tags-tooltip";
 
 interface TaskListItemProps {
   task: Task;
@@ -73,16 +74,17 @@ const TaskListItem: React.FC<TaskListItemProps> = ({ task, users, tags }) => {
         {taskTags.length > 0 && (
           <div className="flex items-center gap-2 mt-1">
             {taskTags.slice(0, 2).map((tag) => (
-              <span
-                key={tag.id}
-                className="px-2 py-0.5 rounded text-xs font-medium"
-                style={{
-                  backgroundColor: (tag.color || "#94A3B8") + "30",
-                  color: tag.color || "#94A3B8",
-                }}
-              >
-                {tag.name}
-              </span>
+              <Tooltip key={tag.id} content={tag.description} position="top">
+                <span
+                  className="px-2 py-0.5 rounded text-xs font-medium cursor-default"
+                  style={{
+                    backgroundColor: (tag.color || "#94A3B8") + "30",
+                    color: tag.color || "#94A3B8",
+                  }}
+                >
+                  {tag.name}
+                </span>
+              </Tooltip>
             ))}
             {taskTags.length > 2 && (
               <span

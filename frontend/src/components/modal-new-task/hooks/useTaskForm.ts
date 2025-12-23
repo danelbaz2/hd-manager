@@ -73,28 +73,27 @@ export const useTaskForm = ({
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Set initial date when modal opens
+  // Reset form and set default dates when modal opens
   useEffect(() => {
     if (isOpen) {
-      if (initialDate) {
-        setStartDate(formatDateLocal(new Date(initialDate)));
-      } else {
-        setStartDate(formatDateLocal(new Date()));
-      }
-    }
-  }, [isOpen, initialDate]);
-
-  // Reset form when modal opens
-  useEffect(() => {
-    if (isOpen) {
+      // Reset all fields
       setTitle("");
       setDescription("");
       setPriority("medium");
       setSelectedSecondaryTagIds([]);
-      setDeadline("");
       setSelectedUserIds([]);
+
+      // Set default start date (today or initialDate)
+      const startDateObj = initialDate ? new Date(initialDate) : new Date();
+      const startDateStr = formatDateLocal(startDateObj);
+      setStartDate(startDateStr);
+
+      // Set default deadline to startDate + 1 day
+      const deadlineDateObj = new Date(startDateObj);
+      deadlineDateObj.setDate(deadlineDateObj.getDate() + 1);
+      setDeadline(formatDateLocal(deadlineDateObj));
     }
-  }, [isOpen]);
+  }, [isOpen, initialDate]);
 
   // Handle submit
   const handleSubmit = async () => {
@@ -106,12 +105,18 @@ export const useTaskForm = ({
     setIsSubmitting(true);
 
     try {
+      // Calculate deadline: use selected deadline, or default to startDate + 1 day
+      const startTimestamp = startDate ? parseDateToTimestamp(startDate) : Date.now();
+      const deadlineTimestamp = deadline 
+        ? parseDateToTimestamp(deadline) 
+        : startTimestamp + 24 * 60 * 60 * 1000; // Add 1 day in milliseconds
+
       const taskData: TaskFormData = {
         title: title.trim(),
         description: description.trim() || undefined,
         priority,
-        date: startDate ? parseDateToTimestamp(startDate) : Date.now(),
-        deadline: deadline ? parseDateToTimestamp(deadline) : undefined,
+        date: startTimestamp,
+        deadline: deadlineTimestamp,
         responsibleUserIds: selectedUserIds.length > 0 ? selectedUserIds : [],
         secondaryTagIds: selectedSecondaryTagIds.length > 0 ? selectedSecondaryTagIds : [],
       };
