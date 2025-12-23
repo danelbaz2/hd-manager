@@ -257,7 +257,7 @@ def get_all_tasks_history():
         
         # Fields that represent data changes (not metadata)
         DATA_FIELDS = ['title', 'description', 'priority', 'status', 'date', 'deadline', 
-                       'responsibleUserIds', 'secondaryTagIds']
+                       'responsibleUserIds', 'primaryTagIds', 'secondaryTagIds']
         
         # Transform entries for frontend
         history = []
