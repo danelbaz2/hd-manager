@@ -3,7 +3,7 @@ import { useTheme } from "../../../contexts/ThemeContext";
 import { type ContactData } from "../../../schemas/contactTypes";
 import { type PrimaryTagData } from "../../../schemas/tagTypes";
 import DelayedLoader from "../../loaders/DelayedLoader";
-import DeleteConfirmModal from "../../delete-confirm-modal";
+import { ConfirmModal } from "../../confirm-modal";
 import { ContactCard } from "./components";
 
 interface ContactsListProps {
@@ -50,7 +50,7 @@ const ContactsList: React.FC<ContactsListProps> = ({
   return (
     <>
       {/* Delete Confirmation Modal */}
-      <DeleteConfirmModal
+      <ConfirmModal
         isOpen={deleteTarget !== null}
         title="מחיקת איש קשר"
         text={
@@ -62,24 +62,24 @@ const ContactsList: React.FC<ContactsListProps> = ({
         isDarkMode={isDarkMode}
         onConfirm={handleConfirmDelete}
         onCancel={handleCancelDelete}
+        variant="danger"
+        showIrreversibleWarning
       />
 
       <DelayedLoader isLoading={isLoading} delay={300}>
         {contacts.length === 0 ? (
           <div className="flex-1 flex items-center justify-center py-12">
             <p
-              className={`text-center ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`text-center ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               אין אנשי קשר להצגה
             </p>
           </div>
         ) : (
           <div
-            className={`flex-1 overflow-y-auto space-y-3 ${
-              isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-            }`}
+            className={`flex-1 overflow-y-auto space-y-3 ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+              }`}
           >
             {contacts.map((contact) => (
               <ContactCard

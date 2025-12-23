@@ -5,11 +5,13 @@ import {
   Calendar,
   CalendarDays,
   CalendarRange,
+  HelpCircle,
 } from "lucide-react";
 import { useTheme, useSettings, useViewState, useAuth } from "../../contexts";
 import { KanbanBoard } from "./parts";
 import { updateTask, type Task, type TaskStatus } from "../../api/tasksApi";
 import { useTaskModal } from "../../components/modal-task";
+import { KanbanOnboardingDemo, shouldShowOnboarding, resetOnboarding } from "../../components/demos/kanban-onboarding";
 
 interface LocationState {
   selectedUserId?: string;
@@ -96,10 +98,31 @@ const TaskPage: React.FC = () => {
   // Optimistic UI state
   const [optimisticTasks, setOptimisticTasks] = useState(tasks);
 
+  // Onboarding demo state
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  // Check if onboarding should be shown on mount
+  useEffect(() => {
+    if (shouldShowOnboarding()) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
   // Sync with global state
   useEffect(() => {
     setOptimisticTasks(tasks);
   }, [tasks]);
+
+  // Handle showing the onboarding demo
+  const handleShowHelp = () => {
+    resetOnboarding();
+    setShowOnboarding(true);
+  };
+
+  // Handle dismissing the onboarding demo
+  const handleDismissOnboarding = () => {
+    setShowOnboarding(false);
+  };
 
   // Get user info from location state (passed from home page)
   // If no user selected, default to the authenticated user
@@ -248,6 +271,22 @@ const TaskPage: React.FC = () => {
           >
             המשימות של {userName}
           </h1>
+          {/* Help Button */}
+          <button
+            onClick={handleShowHelp}
+            className={`
+              p-2 rounded-full
+              transition-all duration-200
+              ${isDarkMode
+                ? "hover:bg-slate-700 text-slate-400 hover:text-blue-400"
+                : "hover:bg-slate-100 text-slate-400 hover:text-blue-500"
+              }
+            `}
+            title="איך עובד הלוח?"
+            aria-label="הצג הדרכה"
+          >
+            <HelpCircle />
+          </button>
         </div>
 
         {/* Left side - View Mode Toggle (Same as HomePage) */}
@@ -286,6 +325,11 @@ const TaskPage: React.FC = () => {
           </div>
         </div>
       </header>
+
+      {/* Onboarding Demo Overlay */}
+      {showOnboarding && (
+        <KanbanOnboardingDemo onDismiss={handleDismissOnboarding} />
+      )}
 
       {/* Kanban Board */}
       <div className="flex-1 overflow-hidden">

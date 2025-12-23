@@ -21,7 +21,7 @@ import {
 } from "../../../api/secondaryTagsApi";
 import { ToastContainer, useToast } from "../../alert-feedback";
 import DelayedLoader from "../../loaders/DelayedLoader";
-import DeleteConfirmModal from "../../delete-confirm-modal";
+import { ConfirmModal } from "../../confirm-modal";
 
 // Sub-components
 import ModeToggle, { type TagMode } from "./ModeToggle";
@@ -231,7 +231,7 @@ const ManageTagsTwoTier: React.FC = () => {
             <ToastContainer alerts={alerts} onDismiss={dismissAlert} isDarkMode={isDarkMode} />
 
             {/* Delete Confirmation Modal */}
-            <DeleteConfirmModal
+            <ConfirmModal
                 isOpen={deleteTarget !== null}
                 title={deleteTarget?.type === "primary" ? "מחיקת קטגוריה" : "מחיקת תגית"}
                 text={
@@ -243,6 +243,8 @@ const ManageTagsTwoTier: React.FC = () => {
                 isDarkMode={isDarkMode}
                 onConfirm={deleteTarget?.type === "primary" ? handleDeletePrimary : handleDeleteSecondary}
                 onCancel={() => setDeleteTarget(null)}
+                variant="danger"
+                showIrreversibleWarning
             />
 
             {/* Header */}

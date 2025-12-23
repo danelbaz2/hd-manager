@@ -6,12 +6,22 @@ import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
 import { getLighterColor, getTextColor } from "../../../schemas/tagTypes";
 
+export interface DropConfirmRequest {
+    taskId: string;
+    taskTitle: string;
+    fromStatus: string;
+    toStatus: TaskStatus;
+    onConfirm: () => void;
+    onCancel: () => void;
+}
+
 interface KanbanTaskCardProps {
     task: Task;
     users: UserData[];
     onClick?: (task: Task) => void;
     columnStatus: string;
     onTaskStatusChange?: (taskId: string, newStatus: TaskStatus) => void;
+    onDropConfirmRequest?: (request: DropConfirmRequest) => void;
 }
 
 // Minimum distance to consider it a drag (in pixels)
@@ -36,6 +46,7 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
     onClick,
     columnStatus,
     onTaskStatusChange,
+    onDropConfirmRequest,
 }) => {
     const { isDarkMode } = useTheme();
     const { primaryTags, secondaryTags } = useSettings();
@@ -44,6 +55,7 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
     const [isDragging, setIsDragging] = useState(false);
     const [isAnimating, setIsAnimating] = useState(false);
     const [isCollapsing, setIsCollapsing] = useState(false);
+    const [isPendingConfirmation, setIsPendingConfirmation] = useState(false);
     const [dragPosition, setDragPosition] = useState({ x: 0, y: 0 });
     const [animationTarget, setAnimationTarget] = useState({ x: 0, y: 0 });
     const cardRef = useRef<HTMLDivElement>(null);
@@ -159,72 +171,99 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
             const isNewColumn = targetStatus !== null && targetStatus !== columnStatus;
             dropTargetRef.current = targetStatus ? { status: targetStatus, isNewColumn } : null;
 
-            // Calculate animation target
-            let targetX: number;
-            let targetY: number;
+            // Helper: complete the animation sequence
+            const proceedWithAnimation = (shouldApplyChange: boolean) => {
+                // Calculate animation target
+                let targetX: number;
+                let targetY: number;
 
-            if (isNewColumn && targetColumn && onTaskStatusChange) {
-                // Dropping in new column - animate to the bottom of the list
-                const listContainer = targetColumn.querySelector('div.overflow-y-auto') || targetColumn.lastElementChild;
+                if (shouldApplyChange && isNewColumn && targetColumn) {
+                    // Dropping in new column - animate to the bottom of the list
+                    const listContainer = targetColumn.querySelector('div.overflow-y-auto') || targetColumn.lastElementChild;
 
-                if (listContainer) {
-                    const containerRect = listContainer.getBoundingClientRect();
-                    const taskCards = listContainer.querySelectorAll('.kanban-card');
+                    if (listContainer) {
+                        const containerRect = listContainer.getBoundingClientRect();
+                        const taskCards = listContainer.querySelectorAll('.kanban-card');
 
-                    if (taskCards.length > 0) {
-                        // Aim for below the last task
-                        const lastCard = taskCards[taskCards.length - 1];
-                        const lastCardRect = lastCard.getBoundingClientRect();
-                        targetY = lastCardRect.bottom + 8;
+                        if (taskCards.length > 0) {
+                            const lastCard = taskCards[taskCards.length - 1];
+                            const lastCardRect = lastCard.getBoundingClientRect();
+                            targetY = lastCardRect.bottom + 8;
+                        } else {
+                            targetY = containerRect.top + 8;
+                        }
+
+                        targetY = Math.min(targetY, Math.min(containerRect.bottom - 50, window.innerHeight - 100));
+                        targetX = containerRect.left + (containerRect.width / 2) - (cardRef.current?.offsetWidth || 280) / 2;
                     } else {
-                        // Empty column - aim for top
-                        targetY = containerRect.top + 8;
+                        const colRect = targetColumn.getBoundingClientRect();
+                        targetX = colRect.left + (colRect.width / 2) - (cardRef.current?.offsetWidth || 280) / 2;
+                        targetY = colRect.top + 80;
                     }
 
-                    // Clamp to visible area
-                    targetY = Math.min(targetY, Math.min(containerRect.bottom - 50, window.innerHeight - 100));
-                    targetX = containerRect.left + (containerRect.width / 2) - (cardRef.current?.offsetWidth || 280) / 2;
+                    // Start collapsing the original card (causes siblings to slide up)
+                    setIsCollapsing(true);
                 } else {
-                    const colRect = targetColumn.getBoundingClientRect();
-                    targetX = colRect.left + (colRect.width / 2) - (cardRef.current?.offsetWidth || 280) / 2;
-                    targetY = colRect.top + 80;
+                    // Return to original position (cancelled or same column)
+                    if (originalRectRef.current) {
+                        targetX = originalRectRef.current.left;
+                        targetY = originalRectRef.current.top;
+                    } else {
+                        targetX = e.clientX - offsetRef.current.x;
+                        targetY = e.clientY - offsetRef.current.y;
+                    }
                 }
 
-                // Start collapsing the original card (causes siblings to slide up)
-                setIsCollapsing(true);
-            } else {
-                // Return to original position
-                if (originalRectRef.current) {
-                    targetX = originalRectRef.current.left;
-                    targetY = originalRectRef.current.top;
-                } else {
-                    targetX = e.clientX - offsetRef.current.x;
-                    targetY = e.clientY - offsetRef.current.y;
-                }
-            }
+                // Start animation
+                setAnimationTarget({ x: targetX, y: targetY });
+                setIsAnimating(true);
+                setIsDragging(false);
+                setIsPendingConfirmation(false);
 
-            // Start animation
-            setAnimationTarget({ x: targetX, y: targetY });
-            setIsAnimating(true);
-            setIsDragging(false);
-
-            // Wait for animation to complete
-            setTimeout(() => {
-                const dropInfo = dropTargetRef.current;
-
-                if (dropInfo?.isNewColumn && dropInfo.status && onTaskStatusChange) {
-                    // Update state - card will appear in new column (but still invisible due to isAnimating)
-                    onTaskStatusChange(task.id, dropInfo.status as TaskStatus);
-                }
-
-                // Small delay before showing the new card - allows React to settle
+                // Wait for animation to complete
                 setTimeout(() => {
-                    setIsAnimating(false);
-                    setIsCollapsing(false);
-                    hasDraggedRef.current = false;
-                    dropTargetRef.current = null;
-                }, 50);
-            }, ANIMATION_DURATION);
+                    const dropInfo = dropTargetRef.current;
+
+                    if (shouldApplyChange && dropInfo?.isNewColumn && dropInfo.status && onTaskStatusChange) {
+                        onTaskStatusChange(task.id, dropInfo.status as TaskStatus);
+                    }
+
+                    // Small delay before showing the new card - allows React to settle
+                    setTimeout(() => {
+                        setIsAnimating(false);
+                        setIsCollapsing(false);
+                        hasDraggedRef.current = false;
+                        dropTargetRef.current = null;
+                    }, 50);
+                }, ANIMATION_DURATION);
+            };
+
+            // If dropping to a new column, request confirmation
+            if (isNewColumn && targetStatus && onDropConfirmRequest) {
+                // Freeze the card in place - stop dragging but keep floating overlay visible
+                setIsDragging(false);
+                setIsPendingConfirmation(true);
+
+                // Request confirmation from parent
+                onDropConfirmRequest({
+                    taskId: task.id,
+                    taskTitle: task.title || "משימה",
+                    fromStatus: columnStatus,
+                    toStatus: targetStatus as TaskStatus,
+                    onConfirm: () => {
+                        proceedWithAnimation(true);
+                    },
+                    onCancel: () => {
+                        proceedWithAnimation(false);
+                    },
+                });
+            } else if (isNewColumn && targetStatus && !onDropConfirmRequest) {
+                // No confirmation required - proceed directly
+                proceedWithAnimation(true);
+            } else {
+                // Same column or no valid target - return to original position
+                proceedWithAnimation(false);
+            }
         };
 
         window.addEventListener("mousemove", handleMouseMove);
@@ -234,7 +273,7 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
             window.removeEventListener("mousemove", handleMouseMove);
             window.removeEventListener("mouseup", handleMouseUp);
         };
-    }, [task, columnStatus, onClick, onTaskStatusChange]);
+    }, [task, columnStatus, onClick, onTaskStatusChange, onDropConfirmRequest]);
 
     // Calculate overlay position
     const overlayPosition = isAnimating
@@ -351,18 +390,23 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
             {/* Original card in place */}
             {renderCardContent(false)}
 
-            {/* Floating overlay during drag/animation */}
-            {(isDragging || isAnimating) && ReactDOM.createPortal(
+            {/* Floating overlay during drag/animation/pending confirmation */}
+            {(isDragging || isAnimating || isPendingConfirmation) && ReactDOM.createPortal(
                 <div
-                    className="fixed pointer-events-none z-[9999]"
+                    className={`
+                        fixed pointer-events-none
+                        ${isPendingConfirmation ? "z-[50]" : "z-[9999]"}
+                    `}
                     dir="rtl"
                     style={{
                         left: overlayPosition.x,
                         top: overlayPosition.y,
                         width: cardRef.current?.offsetWidth || 280,
                         transition: isAnimating
-                            ? `left ${ANIMATION_DURATION}ms ease-out, top ${ANIMATION_DURATION}ms ease-out`
-                            : "none",
+                            ? `left ${ANIMATION_DURATION}ms ease-out, top ${ANIMATION_DURATION}ms ease-out, opacity 200ms ease-out`
+                            : "opacity 200ms ease-out",
+                        opacity: isPendingConfirmation ? 0.5 : 1,
+                        filter: isPendingConfirmation ? "saturate(0.7)" : "none",
                     }}
                 >
                     {renderCardContent(true)}
