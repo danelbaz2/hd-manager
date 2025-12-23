@@ -12,8 +12,10 @@ import TagDropdownContent from "./TagDropdownContent";
 interface TwoTierTagsSelectProps {
     primaryTags: PrimaryTagData[];
     secondaryTags: SecondaryTagData[];
+    selectedPrimaryTagIds?: string[];  // Optional: for loading existing primary tags
     selectedSecondaryTagIds: string[];
     onChange: (secondaryTagIds: string[]) => void;
+    onChangePrimary?: (primaryTagIds: string[]) => void;  // Optional: for saving primary tags
     isLoading?: boolean;
 }
 
@@ -24,18 +26,20 @@ interface TwoTierTagsSelectProps {
  * 1. User selects Primary Tags (categories like DB, APP, NETWORK)
  * 2. If no secondary tags are chosen, the primary tag is displayed
  * 3. When secondary tags are selected, they replace the primary tag display
- * 4. Only Secondary Tag IDs are stored on the task
+ * 4. Both Primary and Secondary Tag IDs can be stored on the task
  */
 const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
     primaryTags,
     secondaryTags,
+    selectedPrimaryTagIds = [],
     selectedSecondaryTagIds,
     onChange,
+    onChangePrimary,
     isLoading = false,
 }) => {
     const { isDarkMode } = useTheme();
     const [isOpen, setIsOpen] = useState(false);
-    const [selectedPrimaryIds, setSelectedPrimaryIds] = useState<string[]>([]);
+    const [selectedPrimaryIds, setSelectedPrimaryIds] = useState<string[]>(selectedPrimaryTagIds);
     const ref = useRef<HTMLDivElement>(null);
 
     // Get selected secondary tags
@@ -73,6 +77,13 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
             });
         }
     }, [activePrimaryIds]);
+
+    // Propagate primary tag selection changes to parent
+    useEffect(() => {
+        if (onChangePrimary) {
+            onChangePrimary(selectedPrimaryIds);
+        }
+    }, [selectedPrimaryIds, onChangePrimary]);
 
     // Filter secondary tags by selected primary tags
     const filteredSecondaryTags = useMemo(() => {

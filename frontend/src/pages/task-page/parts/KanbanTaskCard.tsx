@@ -4,8 +4,9 @@ import { User, Clock } from "lucide-react";
 import { useTheme, useSettings } from "../../../contexts";
 import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
-import { getLighterColor, getTextColor } from "../../../schemas/tagTypes";
-import { Tooltip } from "../../../components/tags-tooltip";
+import { getLighterColor, getTextColor, TAG_COLORS } from "../../../schemas/tagTypes";
+
+
 export interface DropConfirmRequest {
   taskId: string;
   taskTitle: string;
@@ -76,20 +77,63 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
       ? users.find((u) => u.id === task.responsibleUserIds![0])
       : null;
 
-  // Get secondary tags for this task with their primary tag info
-  const taskSecondaryTags = (task.secondaryTagIds || [])
-    .map((tagId) => {
-      const secondaryTag = secondaryTags.find((st) => st.id === tagId);
-      if (!secondaryTag) return null;
-      const primaryTag = primaryTags.find(
-        (pt) => pt.id === secondaryTag.primaryTagId
-      );
-      return {
-        ...secondaryTag,
-        primaryColor: primaryTag?.color || "#1E40AF",
-      };
-    })
-    .filter((tag): tag is NonNullable<typeof tag> => tag !== null);
+  // Process Tags: Combine Primary & Secondary
+  const displayedTags = React.useMemo(() => {
+    const sTagIds = task.secondaryTagIds || [];
+    const pTagIds = task.primaryTagIds || [];
+
+    // 1. Map secondary tags and find their parent primary IDs
+    const secondaryList = sTagIds
+      .map((tagId) => {
+        const secondaryTag = secondaryTags.find((st) => st.id === tagId);
+        if (!secondaryTag) return null;
+        const primaryTag = primaryTags.find(
+          (pt) => pt.id === secondaryTag.primaryTagId
+        );
+        return {
+          id: secondaryTag.id,
+          name: secondaryTag.name,
+          color: primaryTag ? getLighterColor(primaryTag.color) : TAG_COLORS[0].bg,
+          primaryId: secondaryTag.primaryTagId,
+        };
+      })
+      .filter((tag): tag is NonNullable<typeof tag> => tag !== null);
+
+    // 2. Identify which primary tags correspond to selected secondary tags
+    const primaryIdsWithSecondary = new Set(
+      secondaryList.map((t) => t.primaryId)
+    );
+
+    // 3. Find standalone primary tags (those selected but having no secondary tags)
+    const primaryList = pTagIds
+      .filter((pId) => !primaryIdsWithSecondary.has(pId))
+      .map((pId) => {
+        const primaryTag = primaryTags.find((pt) => pt.id === pId);
+        if (!primaryTag) return null;
+        // Primary tags use their own color (darker), but maybe for the card we want the lighter version?
+        // TaskDetails uses distinct colors. Let's stick to the color defined, maybe lighten it if it's too dark for the badge background?
+        // Actually TaskDetails uses: backgroundColor: `${tag.color}20`, color: tag.color
+        // But KanbanCard uses solid background badges.
+        // Let's use getLighterColor for consistency with how secondary tags look on the card,
+        // or use the original color if we want them to pop.
+        // Given the code uses `backgroundColor: lightColor`, let's try to maintain consistency.
+        return {
+          id: primaryTag.id,
+          name: primaryTag.name,
+          color: getLighterColor(primaryTag.color), // Use lighter version for card badge background
+          primaryId: primaryTag.id,
+        };
+      })
+      .filter((tag): tag is NonNullable<typeof tag> => tag !== null);
+
+    return [...primaryList, ...secondaryList];
+  }, [task.secondaryTagIds, task.primaryTagIds, secondaryTags, primaryTags]);
+
+  // ... existing handlers
+
+  // ... inside renderCardContent
+
+
 
   // Mouse down - prepare for potential drag
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -302,20 +346,19 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
   const overlayPosition = isAnimating
     ? animationTarget
     : {
-        x: dragPosition.x - offsetRef.current.x,
-        y: dragPosition.y - offsetRef.current.y,
-      };
+      x: dragPosition.x - offsetRef.current.x,
+      y: dragPosition.y - offsetRef.current.y,
+    };
 
   // Card styles based on state
   const getCardClasses = (isOverlay: boolean) => {
     const baseClasses = `
             p-4 rounded-xl border select-none kanban-card
             ${isOverlay ? "" : "mb-3"}
-            ${
-              isDarkMode
-                ? "bg-slate-800 border-slate-700"
-                : "bg-white border-slate-100"
-            }
+            ${isDarkMode
+        ? "bg-slate-800 border-slate-700"
+        : "bg-white border-slate-100"
+      }
         `;
 
     if (isOverlay) {
@@ -347,22 +390,21 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
         isOverlay
           ? { boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.35)" }
           : isCollapsing
-          ? {
+            ? {
               height: 0,
               padding: 0,
               margin: 0,
               opacity: 0,
               transition: `all ${ANIMATION_DURATION}ms ease-out`,
             }
-          : undefined
+            : undefined
       }
     >
       {/* Task Title */}
       <div className="flex justify-between items-start mb-2">
         <h4
-          className={`font-bold text-sm leading-tight ${
-            isDarkMode ? "text-white" : "text-slate-800"
-          }`}
+          className={`font-bold text-sm leading-tight ${isDarkMode ? "text-white" : "text-slate-800"
+            }`}
         >
           {task.title || "ללא כותרת"}
         </h4>
@@ -371,41 +413,38 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
       {/* Task Description */}
       {task.description && (
         <p
-          className={`text-xs mb-3 line-clamp-2 ${
-            isDarkMode ? "text-slate-400" : "text-slate-500"
-          }`}
+          className={`text-xs mb-3 line-clamp-2 ${isDarkMode ? "text-slate-400" : "text-slate-500"
+            }`}
         >
           {task.description}
         </p>
       )}
 
-      {/* Secondary Tags */}
-      {taskSecondaryTags.length > 0 && (
+      {/* Tags */}
+      {displayedTags.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-3">
-          {taskSecondaryTags.slice(0, 3).map((tag) => {
-            const lightColor = getLighterColor(tag.primaryColor);
+          {displayedTags.slice(0, 3).map((tag) => {
             return (
               <span
                 key={tag.id}
                 className="px-2 py-0.5 rounded-md text-[10px] font-semibold"
                 style={{
-                  backgroundColor: lightColor,
-                  color: getTextColor(lightColor),
+                  backgroundColor: tag.color,
+                  color: getTextColor(tag.color),
                 }}
               >
                 {tag.name}
               </span>
             );
           })}
-          {taskSecondaryTags.length > 3 && (
+          {displayedTags.length > 3 && (
             <span
-              className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${
-                isDarkMode
-                  ? "bg-slate-700 text-slate-300"
-                  : "bg-slate-100 text-slate-500"
-              }`}
+              className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${isDarkMode
+                ? "bg-slate-700 text-slate-300"
+                : "bg-slate-100 text-slate-500"
+                }`}
             >
-              +{taskSecondaryTags.length - 3}
+              +{displayedTags.length - 3}
             </span>
           )}
         </div>
@@ -415,9 +454,8 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
       <div className="flex items-center justify-between mt-auto">
         {task.deadline && (
           <div
-            className={`flex items-center gap-1 text-xs ${
-              isDarkMode ? "text-slate-400" : "text-slate-400"
-            }`}
+            className={`flex items-center gap-1 text-xs ${isDarkMode ? "text-slate-400" : "text-slate-400"
+              }`}
           >
             <Clock size={12} />
             <span>{formatDate(task.deadline)}</span>

@@ -10,9 +10,11 @@ import {
 } from "../../../schemas/taskTypes";
 import type { Task } from "../../../api/tasksApi";
 import type { UserData } from "../../../schemas/userTypes";
-import type {
-  PrimaryTagData,
-  SecondaryTagData,
+import {
+  type PrimaryTagData,
+  type SecondaryTagData,
+  getLighterColor,
+  TAG_COLORS,
 } from "../../../schemas/tagTypes";
 
 interface TaskDetailsProps {
@@ -35,11 +37,13 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
     "pending") as keyof typeof STATUS_COLORS;
   const statusOption = STATUS_OPTIONS.find((s) => s.id === currentStatus);
 
-  // process tags
+  // process tags - matching TwoTierTagsSelect logic
   const taskTags = useMemo(() => {
-    const tagIds = task.secondaryTagIds || [];
-    if (tagIds.length === 0) return [];
-    return tagIds
+    const sTagIds = task.secondaryTagIds || [];
+    const pTagIds = task.primaryTagIds || [];
+
+    // 1. Map secondary tags and find their parent primary IDs
+    const displayedSecondaryTags = sTagIds
       .map((tagId) => {
         const secondaryTag = secondaryTags.find((st) => st.id === tagId);
         if (!secondaryTag) return null;
@@ -47,24 +51,50 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
           (pt) => pt.id === secondaryTag.primaryTagId
         );
         return {
+          id: secondaryTag.id,
           name: secondaryTag.name,
-          color: primaryTag?.color || "#3B82F6",
+          color: primaryTag ? getLighterColor(primaryTag.color) : TAG_COLORS[0].bg, // Use lighter color for secondary
           description: secondaryTag.description || null,
+          primaryId: secondaryTag.primaryTagId,
+          isPrimary: false,
         };
       })
-      .filter(Boolean);
-  }, [task.secondaryTagIds, secondaryTags, primaryTags]);
+      .filter((t): t is NonNullable<typeof t> => t !== null);
+
+    // 2. Identify which primary tags correspond to selected secondary tags
+    const primaryIdsWithSecondary = new Set(
+      displayedSecondaryTags.map((t) => t.primaryId)
+    );
+
+    // 3. Find standalone primary tags (those selected but having no secondary tags)
+    const displayedPrimaryTags = pTagIds
+      .filter((pId) => !primaryIdsWithSecondary.has(pId))
+      .map((pId) => {
+        const primaryTag = primaryTags.find((pt) => pt.id === pId);
+        if (!primaryTag) return null;
+        return {
+          id: primaryTag.id,
+          name: primaryTag.name,
+          color: primaryTag.color,
+          description: primaryTag.description || null,
+          primaryId: primaryTag.id,
+          isPrimary: true,
+        };
+      })
+      .filter((t): t is NonNullable<typeof t> => t !== null);
+
+    return [...displayedPrimaryTags, ...displayedSecondaryTags];
+  }, [task.secondaryTagIds, task.primaryTagIds, secondaryTags, primaryTags]);
 
   return (
     <div className="space-y-5">
       {/* Task ID & Tags */}
       <div className="flex items-center justify-between">
         <span
-          className={`text-xs font-mono px-2 py-1 rounded ${
-            isDarkMode
-              ? "bg-slate-700 text-slate-400"
-              : "bg-slate-100 text-slate-500"
-          }`}
+          className={`text-xs font-mono px-2 py-1 rounded ${isDarkMode
+            ? "bg-slate-700 text-slate-400"
+            : "bg-slate-100 text-slate-500"
+            }`}
         >
           MS-{task.id ? task.id.slice(-3).toUpperCase() : "???"}
         </span>
@@ -94,9 +124,8 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
 
       {/* Title */}
       <h2
-        className={`text-2xl font-bold ${
-          isDarkMode ? "text-white" : "text-slate-800"
-        }`}
+        className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-slate-800"
+          }`}
       >
         {task.title}
       </h2>
@@ -128,28 +157,24 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       {/* Description */}
       {task.description && (
         <div
-          className={`p-4 rounded-xl ${
-            isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
-          }`}
+          className={`p-4 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+            }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <FileText
-              className={`w-4 h-4 ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`w-4 h-4 ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             />
             <span
-              className={`text-sm font-medium ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`text-sm font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               תיאור
             </span>
           </div>
           <p
-            className={`text-sm leading-relaxed ${
-              isDarkMode ? "text-slate-300" : "text-slate-600"
-            }`}
+            className={`text-sm leading-relaxed ${isDarkMode ? "text-slate-300" : "text-slate-600"
+              }`}
           >
             {task.description}
           </p>
@@ -160,28 +185,24 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       <div className="grid grid-cols-2 gap-4">
         {task.date && (
           <div
-            className={`p-3 rounded-xl ${
-              isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
-            }`}
+            className={`p-3 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+              }`}
           >
             <div className="flex items-center gap-2 mb-1">
               <Calendar
-                className={`w-4 h-4 ${
-                  isDarkMode ? "text-blue-400" : "text-blue-500"
-                }`}
+                className={`w-4 h-4 ${isDarkMode ? "text-blue-400" : "text-blue-500"
+                  }`}
               />
               <span
-                className={`text-xs font-medium ${
-                  isDarkMode ? "text-slate-400" : "text-slate-500"
-                }`}
+                className={`text-xs font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
               >
                 תאריך התחלה
               </span>
             </div>
             <p
-              className={`text-sm font-semibold ${
-                isDarkMode ? "text-white" : "text-slate-800"
-              }`}
+              className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-slate-800"
+                }`}
             >
               {new Date(task.date).toLocaleDateString("he-IL")}
             </p>
@@ -189,28 +210,24 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
         )}
         {task.deadline && (
           <div
-            className={`p-3 rounded-xl ${
-              isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
-            }`}
+            className={`p-3 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+              }`}
           >
             <div className="flex items-center gap-2 mb-1">
               <Clock
-                className={`w-4 h-4 ${
-                  isDarkMode ? "text-amber-400" : "text-amber-500"
-                }`}
+                className={`w-4 h-4 ${isDarkMode ? "text-amber-400" : "text-amber-500"
+                  }`}
               />
               <span
-                className={`text-xs font-medium ${
-                  isDarkMode ? "text-slate-400" : "text-slate-500"
-                }`}
+                className={`text-xs font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
               >
                 תאריך יעד
               </span>
             </div>
             <p
-              className={`text-sm font-semibold ${
-                isDarkMode ? "text-white" : "text-slate-800"
-              }`}
+              className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-slate-800"
+                }`}
             >
               {new Date(task.deadline).toLocaleDateString("he-IL")}
             </p>
@@ -221,20 +238,17 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       {/* Responsible Users */}
       {task.responsibleUserIds && task.responsibleUserIds.length > 0 && (
         <div
-          className={`p-4 rounded-xl ${
-            isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
-          }`}
+          className={`p-4 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+            }`}
         >
           <div className="flex items-center gap-2 mb-3">
             <Users
-              className={`w-4 h-4 ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`w-4 h-4 ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             />
             <span
-              className={`text-sm font-medium ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`text-sm font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               אחראים
             </span>
@@ -246,9 +260,8 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
               return (
                 <div
                   key={userId}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl ${
-                    isDarkMode ? "bg-slate-600/50" : "bg-white shadow-sm"
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl ${isDarkMode ? "bg-slate-600/50" : "bg-white shadow-sm"
+                    }`}
                 >
                   {user.profileImage ? (
                     <img
@@ -267,9 +280,8 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                     </div>
                   )}
                   <span
-                    className={`text-sm font-medium ${
-                      isDarkMode ? "text-white" : "text-slate-700"
-                    }`}
+                    className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-slate-700"
+                      }`}
                   >
                     {user.fullName}
                   </span>

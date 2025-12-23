@@ -6,8 +6,8 @@ import {
   DatePicker,
 } from "../../modal-new-task/components";
 import type { TaskPriority } from "../../../schemas/taskTypes";
-import type { User } from "../../../schemas/userTypes";
-import type { Tag } from "../../../schemas/tagTypes";
+import type { UserData } from "../../../schemas/userTypes";
+import type { PrimaryTagData, SecondaryTagData } from "../../../schemas/tagTypes";
 
 interface TaskFormProps {
   title: string;
@@ -24,9 +24,11 @@ interface TaskFormProps {
   setSelectedUserIds: (value: string[]) => void;
   selectedSecondaryTagIds: string[];
   setSelectedSecondaryTagIds: (value: string[]) => void;
-  primaryTags: Tag[];
-  secondaryTags: Tag[];
-  users: User[];
+  selectedPrimaryTagIds: string[];
+  setSelectedPrimaryTagIds: (value: string[]) => void;
+  primaryTags: PrimaryTagData[];
+  secondaryTags: SecondaryTagData[];
+  users: UserData[];
   isDarkMode: boolean;
 }
 
@@ -45,6 +47,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   setSelectedUserIds,
   selectedSecondaryTagIds,
   setSelectedSecondaryTagIds,
+  selectedPrimaryTagIds,
+  setSelectedPrimaryTagIds,
   primaryTags,
   secondaryTags,
   users,
@@ -56,9 +60,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="md:col-span-2">
           <label
-            className={`block text-sm lg:text-base font-medium mb-2 ${
-              isDarkMode ? "text-slate-300" : "text-slate-700"
-            }`}
+            className={`block text-sm lg:text-base font-medium mb-2 ${isDarkMode ? "text-slate-300" : "text-slate-700"
+              }`}
           >
             כותרת המשימה
           </label>
@@ -69,10 +72,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             onChange={(e) => setTitle(e.target.value)}
             className={`
               w-full px-4 py-3 rounded-xl border-2 text-sm lg:text-base font-medium transition-all
-              ${
-                isDarkMode
-                  ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
-                  : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
+              ${isDarkMode
+                ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
+                : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
               }
               focus:outline-none focus:ring-2 focus:ring-blue-500/20
             `}
@@ -84,9 +86,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       {/* Description */}
       <div>
         <label
-          className={`block text-sm lg:text-base font-medium mb-2 ${
-            isDarkMode ? "text-slate-300" : "text-slate-700"
-          }`}
+          className={`block text-sm lg:text-base font-medium mb-2 ${isDarkMode ? "text-slate-300" : "text-slate-700"
+            }`}
         >
           תיאור
         </label>
@@ -97,10 +98,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           rows={2}
           className={`
             w-full px-4 py-3 rounded-xl border-2 resize-none text-sm lg:text-base transition-all
-            ${
-              isDarkMode
-                ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
-                : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
+            ${isDarkMode
+              ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
+              : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
             }
             focus:outline-none focus:ring-2 focus:ring-blue-500/20
           `}
@@ -114,6 +114,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           secondaryTags={secondaryTags}
           selectedSecondaryTagIds={selectedSecondaryTagIds}
           onChange={setSelectedSecondaryTagIds}
+          selectedPrimaryTagIds={selectedPrimaryTagIds}
+          onChangePrimary={setSelectedPrimaryTagIds}
           isLoading={false}
         />
         <DatePicker

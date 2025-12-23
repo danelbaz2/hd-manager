@@ -4,23 +4,32 @@ import {
   STATUS_OPTIONS,
   type TaskPriority,
 } from "../../../schemas/taskTypes";
-import type { User } from "../../../schemas/userTypes";
-import type { Tag } from "../../../schemas/tagTypes";
+import type { UserData } from "../../../schemas/userTypes";
+import type { PrimaryTagData, SecondaryTagData } from "../../../schemas/tagTypes";
 import type { ActionConfigItem } from "./historyConfig";
 
 // Helpers
-export const getUserNames = (userIds: string[], users: User[]): string[] => {
+export const getUserNames = (userIds: string[], users: UserData[]): string[] => {
   return userIds
     .map((id) => users.find((u) => u.id === id)?.fullName)
     .filter((name): name is string => !!name);
 };
 
-export const getTagNames = (
+export const getSecondaryTagNames = (
   tagIds: string[],
-  secondaryTags: Tag[]
+  secondaryTags: SecondaryTagData[]
 ): string[] => {
   return tagIds
     .map((id) => secondaryTags.find((t) => t.id === id)?.name)
+    .filter((name): name is string => !!name);
+};
+
+export const getPrimaryTagNames = (
+  tagIds: string[],
+  primaryTags: PrimaryTagData[]
+): string[] => {
+  return tagIds
+    .map((id) => primaryTags.find((t) => t.id === id)?.name)
     .filter((name): name is string => !!name);
 };
 
@@ -42,6 +51,8 @@ export const getFieldLabel = (field: string): string => {
       return "אחראים";
     case "secondaryTagIds":
       return "תגיות";
+    case "primaryTagIds":
+      return "קטגוריות";
     default:
       return field;
   }
@@ -50,8 +61,9 @@ export const getFieldLabel = (field: string): string => {
 export const formatValue = (
   field: string,
   value: any,
-  users: User[],
-  secondaryTags: Tag[]
+  users: UserData[],
+  secondaryTags: SecondaryTagData[],
+  primaryTags: PrimaryTagData[]
 ): string => {
   if (value === null || value === undefined) return "ריק";
 
@@ -67,8 +79,12 @@ export const formatValue = (
       const names = getUserNames(value as string[], users);
       return names.length > 0 ? names.join(", ") : "אין אחראים";
     case "secondaryTagIds":
-      const tags = getTagNames(value as string[], secondaryTags);
-      return tags.length > 0 ? tags.join(", ") : "אין תגיות";
+      const sTags = getSecondaryTagNames(value as string[], secondaryTags);
+      return sTags.length > 0 ? sTags.join(", ") : "אין תגיות";
+    case "primaryTagIds":
+      if (!value || value.length === 0) return "אין קטגוריות";
+      const pTags = getPrimaryTagNames(value as string[], primaryTags);
+      return pTags.length > 0 ? pTags.join(", ") : "אין קטגוריות";
     case "title":
     case "description":
       return value.toString();
@@ -80,8 +96,9 @@ export const formatValue = (
 export const getActionDescription = (
   entry: any,
   config: ActionConfigItem,
-  users: User[],
-  secondaryTags: Tag[],
+  users: UserData[],
+  secondaryTags: SecondaryTagData[],
+  primaryTags: PrimaryTagData[],
   isDarkMode: boolean
 ): React.ReactNode => {
   const changes = entry.changes || {};
@@ -115,6 +132,7 @@ export const getActionDescription = (
       "deadline",
       "responsibleUserIds",
       "secondaryTagIds",
+      "primaryTagIds",
     ].includes(k)
   );
 
@@ -126,13 +144,15 @@ export const getActionDescription = (
             field,
             changes[field],
             users,
-            secondaryTags
+            secondaryTags,
+            primaryTags
           );
           const oldValue = formatValue(
             field,
             oldValues[field],
             users,
-            secondaryTags
+            secondaryTags,
+            primaryTags
           );
           const label = getFieldLabel(field);
 

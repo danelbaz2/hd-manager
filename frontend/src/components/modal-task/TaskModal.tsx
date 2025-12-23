@@ -25,8 +25,8 @@ const TaskModal: React.FC = () => {
         refreshTasks,
         refreshTaskHistory,
     } = useSettings();
-    const { isOpen, task, closeTaskModal, onTaskUpdated } = useTaskModal();
-    const { alerts, showSuccess, showError, showWarning, dismissAlert } =
+    const { isOpen, task, closeTaskModal, onTaskUpdated, updateCurrentTask } = useTaskModal();
+    const { alerts, showSuccess, showError, showWarning, dismissAlert, clearAllAlerts } =
         useToast();
 
     const [activeTab, setActiveTab] = useState<"details" | "history">("details");
@@ -40,16 +40,23 @@ const TaskModal: React.FC = () => {
     const [selectedSecondaryTagIds, setSelectedSecondaryTagIds] = useState<
         string[]
     >([]);
+    const [selectedPrimaryTagIds, setSelectedPrimaryTagIds] = useState<
+        string[]
+    >([]);
     const [startDate, setStartDate] = useState("");
     const [deadline, setDeadline] = useState("");
     const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 
-    // Reset tab to details when modal closes (prevents visual swap on reopen)
+    // Reset tab to details and clear alerts when modal closes
     useEffect(() => {
         if (!isOpen) {
             setActiveTab("details");
+            clearAllAlerts();
+        } else {
+            // Clear alerts when modal opens
+            clearAllAlerts();
         }
-    }, [isOpen]);
+    }, [isOpen, clearAllAlerts]);
 
     // Initialize/Reset form
     useEffect(() => {
@@ -59,6 +66,7 @@ const TaskModal: React.FC = () => {
             setDescription(task.description || "");
             setPriority((task.priority as TaskPriority) || "medium");
             setSelectedSecondaryTagIds(task.secondaryTagIds || []);
+            setSelectedPrimaryTagIds(task.primaryTagIds || []);
             setSelectedUserIds(task.responsibleUserIds || []);
             setStartDate(
                 task.date ? new Date(task.date).toISOString().split("T")[0] : ""
@@ -75,6 +83,7 @@ const TaskModal: React.FC = () => {
         setDescription(task.description || "");
         setPriority((task.priority as TaskPriority) || "medium");
         setSelectedSecondaryTagIds(task.secondaryTagIds || []);
+        setSelectedPrimaryTagIds(task.primaryTagIds || []);
         setSelectedUserIds(task.responsibleUserIds || []);
         setStartDate(
             task.date ? new Date(task.date).toISOString().split("T")[0] : ""
@@ -84,6 +93,52 @@ const TaskModal: React.FC = () => {
         );
         setIsEditMode(false);
     }, [task]);
+
+    // Parse date string to timestamp at noon local time
+    const parseDateToTimestamp = (dateStr: string): number => {
+        const [year, month, day] = dateStr.split("-").map(Number);
+        return new Date(year, month - 1, day, 12, 0, 0).getTime();
+    };
+
+    // Validate and set deadline - ensure it's not before start date
+    const handleSetDeadline = useCallback((newDeadline: string) => {
+        if (!newDeadline) {
+            setDeadline("");
+            return;
+        }
+
+        // If start date is set, validate deadline is not before it
+        if (startDate) {
+            const startTimestamp = parseDateToTimestamp(startDate);
+            const deadlineTimestamp = parseDateToTimestamp(newDeadline);
+
+            if (deadlineTimestamp < startTimestamp) {
+                showWarning(
+                    "תאריך לא תקין",
+                    "לא ניתן לבחור תאריך יעד לפני תאריך ההתחלה"
+                );
+                return; // Don't update the deadline
+            }
+        }
+
+        setDeadline(newDeadline);
+    }, [startDate, showWarning]);
+
+    // Handle start date change - update deadline if it becomes invalid
+    const handleSetStartDate = useCallback((newStartDate: string) => {
+        setStartDate(newStartDate);
+
+        // If deadline exists and is now before the new start date, update deadline to match
+        if (deadline && newStartDate) {
+            const startTimestamp = parseDateToTimestamp(newStartDate);
+            const deadlineTimestamp = parseDateToTimestamp(deadline);
+
+            if (deadlineTimestamp < startTimestamp) {
+                // Update deadline to match the new start date
+                setDeadline(newStartDate);
+            }
+        }
+    }, [deadline]);
 
     const handleSave = useCallback(async () => {
         if (!task) return;
@@ -116,6 +171,7 @@ const TaskModal: React.FC = () => {
             startDate !== originalStartDate ||
             deadline !== originalDeadline ||
             !arraysEqual(selectedUserIds, task.responsibleUserIds || []) ||
+            !arraysEqual(selectedPrimaryTagIds, task.primaryTagIds || []) ||
             !arraysEqual(selectedSecondaryTagIds, task.secondaryTagIds || []);
 
         if (!hasChanges) {
@@ -131,6 +187,7 @@ const TaskModal: React.FC = () => {
                 description: description.trim() || undefined,
                 priority,
                 responsibleUserIds: selectedUserIds,
+                primaryTagIds: selectedPrimaryTagIds,
                 secondaryTagIds: selectedSecondaryTagIds,
             };
 
@@ -147,6 +204,10 @@ const TaskModal: React.FC = () => {
             const response = await updateTask(task.id, taskData);
             if (response.success) {
                 showSuccess("עודכן בהצלחה", "המשימה עודכנה");
+                // Update local task in context so View mode shows new data
+                if (response.data) {
+                    updateCurrentTask(response.data);
+                }
                 setIsEditMode(false);
                 refreshTasks();
                 refreshTaskHistory();
@@ -168,6 +229,7 @@ const TaskModal: React.FC = () => {
         deadline,
         selectedUserIds,
         selectedSecondaryTagIds,
+        selectedPrimaryTagIds,
     ]); // Simplified deps
 
     const handleAddNote = useCallback(
@@ -199,10 +261,11 @@ const TaskModal: React.FC = () => {
                 config,
                 users,
                 secondaryTags,
+                primaryTags,
                 isDarkMode
             );
         },
-        [users, secondaryTags, isDarkMode]
+        [users, secondaryTags, primaryTags, isDarkMode]
     );
 
     if (!isOpen || !task) return null;
@@ -247,13 +310,15 @@ const TaskModal: React.FC = () => {
                             priority={priority}
                             setPriority={setPriority}
                             startDate={startDate}
-                            setStartDate={setStartDate}
+                            setStartDate={handleSetStartDate}
                             deadline={deadline}
-                            setDeadline={setDeadline}
+                            setDeadline={handleSetDeadline}
                             selectedUserIds={selectedUserIds}
                             setSelectedUserIds={setSelectedUserIds}
                             selectedSecondaryTagIds={selectedSecondaryTagIds}
                             setSelectedSecondaryTagIds={setSelectedSecondaryTagIds}
+                            selectedPrimaryTagIds={selectedPrimaryTagIds}
+                            setSelectedPrimaryTagIds={setSelectedPrimaryTagIds}
                             primaryTags={primaryTags}
                             secondaryTags={secondaryTags}
                             users={users}

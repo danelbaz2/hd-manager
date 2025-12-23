@@ -20,6 +20,8 @@ interface UseTaskFormReturn {
   setPriority: (value: TaskPriority) => void;
   selectedSecondaryTagIds: string[];
   setSelectedSecondaryTagIds: (value: string[]) => void;
+  selectedPrimaryTagIds: string[];
+  setSelectedPrimaryTagIds: (value: string[]) => void;
   startDate: string;
   setStartDate: (value: string) => void;
   deadline: string;
@@ -62,12 +64,12 @@ export const useTaskForm = ({
   onClose,
 }: UseTaskFormOptions): UseTaskFormReturn => {
   const { alerts, showSuccess, showError, showWarning, dismissAlert, clearAllAlerts } = useToast();
-
   // Form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
   const [selectedSecondaryTagIds, setSelectedSecondaryTagIds] = useState<string[]>([]);
+  const [selectedPrimaryTagIds, setSelectedPrimaryTagIds] = useState<string[]>([]);
   const [startDate, setStartDate] = useState<string>("");
   const [deadline, setDeadline] = useState<string>("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
@@ -84,6 +86,7 @@ export const useTaskForm = ({
       setDescription("");
       setPriority("medium");
       setSelectedSecondaryTagIds([]);
+      setSelectedPrimaryTagIds([]);
       setSelectedUserIds([]);
 
       // Set default start date (today or initialDate)
@@ -162,6 +165,7 @@ export const useTaskForm = ({
         date: startTimestamp,
         deadline: deadlineTimestamp,
         responsibleUserIds: selectedUserIds.length > 0 ? selectedUserIds : [],
+        primaryTagIds: selectedPrimaryTagIds.length > 0 ? selectedPrimaryTagIds : [],
         secondaryTagIds: selectedSecondaryTagIds.length > 0 ? selectedSecondaryTagIds : [],
       };
 
@@ -194,6 +198,8 @@ export const useTaskForm = ({
     setPriority,
     selectedSecondaryTagIds,
     setSelectedSecondaryTagIds,
+    selectedPrimaryTagIds,
+    setSelectedPrimaryTagIds,
     startDate,
     setStartDate: handleSetStartDate,
     deadline,

@@ -9,6 +9,7 @@ interface TaskModalContextType {
     closeTaskModal: () => void;
     onTaskUpdated?: () => void;
     setOnTaskUpdated: (callback: (() => void) | undefined) => void;
+    updateCurrentTask: (task: Task) => void;
 }
 
 const TaskModalContext = createContext<TaskModalContextType | undefined>(undefined);
@@ -40,6 +41,10 @@ export const TaskModalProvider: React.FC<TaskModalProviderProps> = ({ children }
         setOnTaskUpdatedCallback(() => callback);
     }, []);
 
+    const updateCurrentTask = useCallback((updatedTask: Task) => {
+        setTask(updatedTask);
+    }, []);
+
     return (
         <TaskModalContext.Provider
             value={{
@@ -50,6 +55,7 @@ export const TaskModalProvider: React.FC<TaskModalProviderProps> = ({ children }
                 closeTaskModal,
                 onTaskUpdated,
                 setOnTaskUpdated,
+                updateCurrentTask,
             }}
         >
             {children}
