@@ -73,18 +73,6 @@ const ArchivePage: React.FC = () => {
       </div>
 
       <div className="flex-1 p-4 w-full overflow-auto">
-        <style>{`
-          @keyframes fadeSlideIn {
-            from {
-              opacity: 0;
-              transform: translateY(10px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-        `}</style>
         <ListTaskArchive
           tasks={tasks}
           users={users}
