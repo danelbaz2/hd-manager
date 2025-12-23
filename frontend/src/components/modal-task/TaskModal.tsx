@@ -44,10 +44,16 @@ const TaskModal: React.FC = () => {
     const [deadline, setDeadline] = useState("");
     const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
 
+    // Reset tab to details when modal closes (prevents visual swap on reopen)
+    useEffect(() => {
+        if (!isOpen) {
+            setActiveTab("details");
+        }
+    }, [isOpen]);
+
     // Initialize/Reset form
     useEffect(() => {
         if (isOpen && task) {
-            setActiveTab("details");
             setIsEditMode(false);
             setTitle(task.title || "");
             setDescription(task.description || "");
@@ -85,17 +91,59 @@ const TaskModal: React.FC = () => {
             showWarning("שדה חסר", "יש להזין כותרת למשימה");
             return;
         }
+
+        // Helper to convert timestamp to date string (same format as form state)
+        const timestampToDateStr = (ts: number | undefined) =>
+            ts ? new Date(ts).toISOString().split("T")[0] : "";
+
+        // Get original values for comparison
+        const originalStartDate = timestampToDateStr(task.date);
+        const originalDeadline = timestampToDateStr(task.deadline);
+
+        // Helper to compare arrays (order-insensitive)
+        const arraysEqual = (a: string[], b: string[]) => {
+            if (a.length !== b.length) return false;
+            const sortedA = [...a].sort();
+            const sortedB = [...b].sort();
+            return sortedA.every((val, i) => val === sortedB[i]);
+        };
+
+        // Check if anything has changed
+        const hasChanges =
+            title.trim() !== (task.title || "") ||
+            (description.trim() || "") !== (task.description || "") ||
+            priority !== (task.priority || "medium") ||
+            startDate !== originalStartDate ||
+            deadline !== originalDeadline ||
+            !arraysEqual(selectedUserIds, task.responsibleUserIds || []) ||
+            !arraysEqual(selectedSecondaryTagIds, task.secondaryTagIds || []);
+
+        if (!hasChanges) {
+            showWarning("אין שינויים", "לא בוצעו שינויים במשימה");
+            setIsEditMode(false);
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const taskData: Partial<TaskFormData> = {
                 title: title.trim(),
                 description: description.trim() || undefined,
                 priority,
-                date: startDate ? new Date(startDate).getTime() : undefined,
-                deadline: deadline ? new Date(deadline).getTime() : undefined,
                 responsibleUserIds: selectedUserIds,
                 secondaryTagIds: selectedSecondaryTagIds,
             };
+
+            // Only add date if it changed
+            if (startDate !== originalStartDate) {
+                taskData.date = startDate ? new Date(startDate).getTime() : undefined;
+            }
+
+            // Only add deadline if it changed
+            if (deadline !== originalDeadline) {
+                taskData.deadline = deadline ? new Date(deadline).getTime() : undefined;
+            }
+
             const response = await updateTask(task.id, taskData);
             if (response.success) {
                 showSuccess("עודכן בהצלחה", "המשימה עודכנה");
