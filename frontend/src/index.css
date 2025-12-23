@@ -284,3 +284,39 @@
   display: none;
   /* Chrome, Safari, Opera */
 }
+
+/* =====================================================
+   ANIMATIONS
+   ===================================================== */
+
+/* Slide in animation for new history entries */
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.4s ease-out;
+}
+
+/* Fade up animation */
+@keyframes fadeUp {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeUp {
+  animation: fadeUp 0.3s ease-out;
+}

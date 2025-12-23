@@ -5,158 +5,182 @@ import { AlertTriangle, X, Check, Trash2 } from "lucide-react";
 export type ConfirmModalVariant = "danger" | "warning" | "info";
 
 interface ConfirmModalProps {
-    isOpen: boolean;
-    title: string;
-    text: React.ReactNode;
-    onConfirm: () => void;
-    onCancel: () => void;
-    isDarkMode: boolean;
-    variant?: ConfirmModalVariant;
-    confirmText?: string;
-    cancelText?: string;
-    confirmIcon?: LucideIcon;
-    headerIcon?: LucideIcon;
-    showIrreversibleWarning?: boolean;
+  isOpen: boolean;
+  title: string;
+  text: React.ReactNode;
+  onConfirm: () => void;
+  onCancel: () => void;
+  isDarkMode: boolean;
+  variant?: ConfirmModalVariant;
+  confirmText?: string;
+  cancelText?: string;
+  confirmIcon?: LucideIcon;
+  headerIcon?: LucideIcon;
+  showIrreversibleWarning?: boolean;
 }
 
-const VARIANT_CONFIG: Record<ConfirmModalVariant, {
-    iconBg: string;
-    iconColor: string;
+const VARIANT_CONFIG: Record<
+  ConfirmModalVariant,
+  {
+    iconBgLight: string;
+    iconBgDark: string;
+    iconColorLight: string;
+    iconColorDark: string;
     confirmBg: string;
     confirmHover: string;
     defaultIcon: LucideIcon;
     defaultConfirmIcon: LucideIcon;
     defaultConfirmText: string;
-}> = {
-    danger: {
-        iconBg: "bg-red-100",
-        iconColor: "text-red-600",
-        confirmBg: "bg-red-500",
-        confirmHover: "hover:bg-red-600",
-        defaultIcon: AlertTriangle,
-        defaultConfirmIcon: Trash2,
-        defaultConfirmText: "מחק",
-    },
-    warning: {
-        iconBg: "bg-amber-100",
-        iconColor: "text-amber-600",
-        confirmBg: "bg-amber-500",
-        confirmHover: "hover:bg-amber-600",
-        defaultIcon: AlertTriangle,
-        defaultConfirmIcon: Check,
-        defaultConfirmText: "אישור",
-    },
-    info: {
-        iconBg: "bg-blue-100",
-        iconColor: "text-blue-600",
-        confirmBg: "bg-blue-500",
-        confirmHover: "hover:bg-blue-600",
-        defaultIcon: AlertTriangle,
-        defaultConfirmIcon: Check,
-        defaultConfirmText: "אישור",
-    },
+  }
+> = {
+  danger: {
+    iconBgLight: "bg-red-100",
+    iconBgDark: "bg-red-500/20",
+    iconColorLight: "text-red-600",
+    iconColorDark: "text-red-400",
+    confirmBg: "bg-red-500",
+    confirmHover: "hover:bg-red-600",
+    defaultIcon: AlertTriangle,
+    defaultConfirmIcon: Trash2,
+    defaultConfirmText: "מחק",
+  },
+  warning: {
+    iconBgLight: "bg-amber-100",
+    iconBgDark: "bg-amber-500/20",
+    iconColorLight: "text-amber-600",
+    iconColorDark: "text-amber-400",
+    confirmBg: "bg-amber-500",
+    confirmHover: "hover:bg-amber-600",
+    defaultIcon: AlertTriangle,
+    defaultConfirmIcon: Check,
+    defaultConfirmText: "אישור",
+  },
+  info: {
+    iconBgLight: "bg-blue-100",
+    iconBgDark: "bg-blue-500/20",
+    iconColorLight: "text-blue-600",
+    iconColorDark: "text-blue-400",
+    confirmBg: "bg-blue-500",
+    confirmHover: "hover:bg-blue-600",
+    defaultIcon: AlertTriangle,
+    defaultConfirmIcon: Check,
+    defaultConfirmText: "אישור",
+  },
 };
 
 const ConfirmModal: React.FC<ConfirmModalProps> = ({
-    isOpen,
-    title,
-    text,
-    onConfirm,
-    onCancel,
-    isDarkMode,
-    variant = "warning",
-    confirmText,
-    cancelText = "ביטול",
-    confirmIcon,
-    headerIcon,
-    showIrreversibleWarning = false,
+  isOpen,
+  title,
+  text,
+  onConfirm,
+  onCancel,
+  isDarkMode,
+  variant = "warning",
+  confirmText,
+  cancelText = "ביטול",
+  confirmIcon,
+  headerIcon,
+  showIrreversibleWarning = false,
 }) => {
-    if (!isOpen) return null;
+  if (!isOpen) return null;
 
-    const config = VARIANT_CONFIG[variant];
-    const HeaderIcon = headerIcon || config.defaultIcon;
-    const ConfirmIcon = confirmIcon || config.defaultConfirmIcon;
-    const finalConfirmText = confirmText || config.defaultConfirmText;
+  const config = VARIANT_CONFIG[variant];
+  const HeaderIcon = headerIcon || config.defaultIcon;
+  const ConfirmIcon = confirmIcon || config.defaultConfirmIcon;
+  const finalConfirmText = confirmText || config.defaultConfirmText;
 
-    return (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center">
-            {/* Backdrop */}
-            <div
-                className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-                onClick={onCancel}
-            />
+  return (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center">
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+        onClick={onCancel}
+      />
 
-            {/* Modal */}
-            <div
-                className={`
+      {/* Modal */}
+      <div
+        className={`
                     relative z-10 w-full max-w-md mx-4 p-6 rounded-xl border shadow-2xl
-                    ${isDarkMode
+                    ${
+                      isDarkMode
                         ? "bg-slate-800 border-slate-600"
                         : "bg-white border-slate-200"
                     }
                 `}
-                dir="rtl"
+        dir="rtl"
+      >
+        {/* Header */}
+        <div className="flex items-center justify-center gap-3 mb-4">
+          <div
+            className={`p-3 rounded-full ${
+              isDarkMode ? config.iconBgDark : config.iconBgLight
+            }`}
+          >
+            <HeaderIcon
+              size={24}
+              className={
+                isDarkMode ? config.iconColorDark : config.iconColorLight
+              }
+            />
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="text-center mb-6">
+          <h3
+            className={`text-lg font-bold mb-2 ${
+              isDarkMode ? "text-white" : "text-slate-800"
+            }`}
+          >
+            {title}
+          </h3>
+          <div
+            className={`${isDarkMode ? "text-slate-300" : "text-slate-600"}`}
+          >
+            {text}
+          </div>
+          {showIrreversibleWarning && (
+            <p
+              className={`text-sm mt-2 ${
+                isDarkMode ? "text-slate-400" : "text-slate-500"
+              }`}
             >
-                {/* Header */}
-                <div className="flex items-center justify-center gap-3 mb-4">
-                    <div className={`p-3 rounded-full ${config.iconBg}`}>
-                        <HeaderIcon size={24} className={config.iconColor} />
-                    </div>
-                </div>
+              פעולה זו אינה ניתנת לביטול
+            </p>
+          )}
+        </div>
 
-                {/* Content */}
-                <div className="text-center mb-6">
-                    <h3
-                        className={`text-lg font-bold mb-2 ${isDarkMode ? "text-white" : "text-slate-800"
-                            }`}
-                    >
-                        {title}
-                    </h3>
-                    <div
-                        className={`${isDarkMode ? "text-slate-300" : "text-slate-600"}`}
-                    >
-                        {text}
-                    </div>
-                    {showIrreversibleWarning && (
-                        <p
-                            className={`text-sm mt-2 ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                                }`}
-                        >
-                            פעולה זו אינה ניתנת לביטול
-                        </p>
-                    )}
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-3 justify-center">
-                    <button
-                        onClick={onConfirm}
-                        className={`
+        {/* Actions */}
+        <div className="flex gap-3 justify-center">
+          <button
+            onClick={onConfirm}
+            className={`
                             px-6 py-2.5 rounded-lg text-white font-medium 
                             transition-colors flex items-center gap-2
                             ${config.confirmBg} ${config.confirmHover}
                         `}
-                    >
-                        <ConfirmIcon size={18} />
-                        {finalConfirmText}
-                    </button>
-                    <button
-                        onClick={onCancel}
-                        className={`
+          >
+            <ConfirmIcon size={18} />
+            {finalConfirmText}
+          </button>
+          <button
+            onClick={onCancel}
+            className={`
                             px-6 py-2.5 rounded-lg font-medium transition-colors flex items-center gap-2
-                            ${isDarkMode
+                            ${
+                              isDarkMode
                                 ? "bg-slate-600 hover:bg-slate-500 text-white"
                                 : "bg-slate-200 hover:bg-slate-300 text-slate-700"
                             }
                         `}
-                    >
-                        <X size={18} />
-                        {cancelText}
-                    </button>
-                </div>
-            </div>
+          >
+            <X size={18} />
+            {cancelText}
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 };
 
 export default ConfirmModal;
