@@ -289,20 +289,42 @@
    ANIMATIONS
    ===================================================== */
 
-/* Slide in animation for new history entries */
+/* Slide in animation for new history entries - slides up with fade */
 @keyframes slideIn {
   0% {
     opacity: 0;
-    transform: translateX(20px);
+    transform: translateY(16px);
   }
+
   100% {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateY(0);
   }
 }
 
 .animate-slideIn {
-  animation: slideIn 0.4s ease-out;
+  animation: slideIn 0.3s ease-out;
+}
+
+/* Bounce in animation for success checkmark */
+@keyframes bounceIn {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+
+  50% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-bounceIn {
+  animation: bounceIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 /* Fade up animation */
@@ -311,6 +333,7 @@
     opacity: 0;
     transform: translateY(10px);
   }
+
   100% {
     opacity: 1;
     transform: translateY(0);

@@ -17,7 +17,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const [text, setText] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   // Auto-resize textarea
@@ -38,8 +37,6 @@ const ChatInput: React.FC<ChatInputProps> = ({
     try {
       await onSend(text.trim());
       setText("");
-      setShowSuccess(true);
-      setTimeout(() => setShowSuccess(false), 500);
     } finally {
       setIsSubmitting(false);
     }
@@ -55,12 +52,12 @@ const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <div
       className={`
-        flex items-end gap-2 p-3 rounded-2xl border-2 transition-all
-        ${
-          isDarkMode
-            ? "bg-slate-700/50 border-slate-600 focus-within:border-blue-500"
-            : "bg-white border-slate-200 focus-within:border-blue-500"
+        flex items-center gap-2 px-3 py-2 rounded-xl border transition-all duration-200
+        ${isDarkMode
+          ? "bg-slate-700/60 border-slate-600"
+          : "bg-white border-slate-200"
         }
+        focus-within:border-blue-500
         focus-within:ring-2 focus-within:ring-blue-500/20
       `}
     >
@@ -73,15 +70,14 @@ const ChatInput: React.FC<ChatInputProps> = ({
         placeholder={placeholder}
         rows={1}
         className={`
-          flex-1 resize-none text-sm leading-relaxed
+          flex-1 resize-none text-sm leading-normal
           bg-transparent border-none outline-none
-          ${
-            isDarkMode
-              ? "text-white placeholder-slate-400"
-              : "text-slate-800 placeholder-slate-400"
+          ${isDarkMode
+            ? "text-white placeholder-slate-400"
+            : "text-slate-800 placeholder-slate-400"
           }
         `}
-        style={{ minHeight: "24px", maxHeight: "120px" }}
+        style={{ minHeight: "22px", maxHeight: "80px" }}
       />
 
       {/* Send Button */}
@@ -89,35 +85,18 @@ const ChatInput: React.FC<ChatInputProps> = ({
         onClick={handleSend}
         disabled={!text.trim() || isSubmitting}
         className={`
-          shrink-0 w-9 h-9 rounded-xl flex items-center justify-center
-          transition-all duration-200 transform
-          ${
-            !text.trim() || isSubmitting
-              ? isDarkMode
-                ? "bg-slate-600 text-slate-400 cursor-not-allowed"
-                : "bg-slate-100 text-slate-400 cursor-not-allowed"
-              : showSuccess
-              ? "bg-green-500 text-white scale-110"
-              : "bg-blue-500 text-white hover:bg-blue-600 hover:scale-105 active:scale-95"
+          shrink-0 w-8 h-8 rounded-lg flex items-center justify-center
+          transition-all duration-200
+          ${!text.trim() || isSubmitting
+            ? isDarkMode
+              ? "bg-slate-600/50 text-slate-500 cursor-not-allowed"
+              : "bg-slate-100 text-slate-400 cursor-not-allowed"
+            : "bg-blue-500 text-white hover:bg-blue-600 active:scale-95"
           }
         `}
       >
         {isSubmitting ? (
           <Loader2 className="w-4 h-4 animate-spin" />
-        ) : showSuccess ? (
-          <svg
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={3}
-              d="M5 13l4 4L19 7"
-            />
-          </svg>
         ) : (
           <Send className="w-4 h-4" />
         )}

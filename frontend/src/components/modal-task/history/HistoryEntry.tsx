@@ -51,12 +51,14 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({
         {/* Icon */}
         <div
           className={`
-            relative z-10 w-7 h-7 rounded-full flex items-center justify-center
-            ${isNew ? "animate-pulse" : ""}
+            relative w-7 h-7 rounded-full flex items-center justify-center
+            transition-all duration-300
+            ${isNew ? "z-50 scale-110 shadow-md" : "z-10"}
           `}
           style={{
             backgroundColor: config.bgColor,
             border: `2px solid ${config.color}`,
+            boxShadow: isNew ? `0 4px 12px ${config.color}40` : undefined,
           }}
         >
           <Icon className="w-3.5 h-3.5" style={{ color: config.color }} />
@@ -64,9 +66,8 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({
         {/* Connecting line to next icon */}
         {!isLast && (
           <div
-            className={`w-0.5 flex-1 min-h-[40px] ${
-              isDarkMode ? "bg-slate-600" : "bg-slate-300"
-            }`}
+            className={`w-0.5 flex-1 min-h-[40px] ${isDarkMode ? "bg-slate-600" : "bg-slate-300"
+              }`}
           />
         )}
       </div>
@@ -74,24 +75,23 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({
       {/* Content */}
       <div className="flex-1 min-w-0 pb-4">
         {/* User and time */}
-        <div className="flex items-center justify-between mb-1.5">
+        <div className="flex items-center gap-3 mb-1.5">
           <span
             className="text-sm font-medium px-2 py-0.5 rounded-md"
             style={{
               backgroundColor: user?.color
                 ? `${user.color}30`
                 : isDarkMode
-                ? "#475569"
-                : "#E2E8F0",
+                  ? "#475569"
+                  : "#E2E8F0",
               color: isDarkMode ? "#F8FAFC" : "#1E293B",
             }}
           >
             {entry.updatedBy}
           </span>
           <span
-            className={`text-xs ${
-              isDarkMode ? "text-slate-500" : "text-slate-400"
-            }`}
+            className={`text-xs ${isDarkMode ? "text-slate-500" : "text-slate-400"
+              }`}
           >
             {formatDateTime(entry.timestamp)}
           </span>
@@ -100,19 +100,21 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({
         {/* Action description */}
         <div
           className={`
-            p-3 rounded-xl text-sm
-            ${
-              isDarkMode
-                ? "bg-slate-700/50 text-slate-300"
-                : "bg-slate-100 text-slate-700"
+            inline-block w-fit max-w-full p-3 rounded-xl text-sm transition-all duration-300
+            ${isDarkMode
+              ? "bg-slate-700/50 text-slate-300"
+              : "bg-slate-100 text-slate-700"
             }
-            ${isNew ? "ring-2 ring-purple-500/30" : ""}
+            ${isNew
+              ? "ring-2 ring-blue-500/40 shadow-lg " + (isDarkMode ? "shadow-blue-500/10" : "shadow-blue-500/20")
+              : ""
+            }
           `}
         >
           {getActionDescription(entry, config)}
         </div>
       </div>
-    </div>
+    </div >
   );
 };
 

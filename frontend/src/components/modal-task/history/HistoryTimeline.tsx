@@ -31,55 +31,74 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [newEntryId, setNewEntryId] = useState<string | null>(null);
+  const prevLengthRef = useRef(history.length);
+  const waitingForNewEntry = useRef(false);
+  const isInitialMount = useRef(true);
 
   // Get user by name
   const getUserByName = (name: string): UserData | undefined => {
     return users.find((u) => u.fullName === name);
   };
 
-  // Scroll to bottom on new entry
+  // Initial scroll to bottom (instant, no animation)
   useEffect(() => {
-    if (scrollRef.current) {
+    if (scrollRef.current && isInitialMount.current) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      isInitialMount.current = false;
     }
-  }, [history.length]);
+  }, []);
 
-  // Handle note submission with animation
-  const handleAddNote = async (text: string) => {
-    await onAddNote(text);
-    // Set the latest entry as new for animation
-    if (history.length > 0) {
-      const latestId = history[history.length - 1]?.id;
-      if (latestId) {
-        setNewEntryId(latestId);
+  // Handle history changes - smooth scroll only on new entries
+  useEffect(() => {
+    // If we're waiting for a new entry and history grew, animate the NEW entry
+    if (waitingForNewEntry.current && history.length > prevLengthRef.current) {
+      const newEntry = history[history.length - 1];
+      if (newEntry?.id) {
+        setNewEntryId(newEntry.id);
         setTimeout(() => setNewEntryId(null), 1000);
       }
+      waitingForNewEntry.current = false;
+
+      // Smooth scroll only for new entries
+      if (scrollRef.current) {
+        scrollRef.current.scrollTo({
+          top: scrollRef.current.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
     }
+
+    prevLengthRef.current = history.length;
+  }, [history]);
+
+  // Handle note submission
+  const handleAddNote = async (text: string) => {
+    waitingForNewEntry.current = true;
+    await onAddNote(text);
   };
 
   if (isLoading) {
     return (
       <div className="flex justify-center items-center py-12">
         <Loader2
-          className={`w-6 h-6 animate-spin ${
-            isDarkMode ? "text-blue-400" : "text-blue-500"
-          }`}
+          className={`w-6 h-6 animate-spin ${isDarkMode ? "text-blue-400" : "text-blue-500"
+            }`}
         />
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full min-h-0">
+    <div className="flex flex-col h-full min-h-0 overflow-visible">
       {/* Timeline with scroll */}
       <div
         ref={scrollRef}
-        className="relative flex-1 overflow-y-auto pl-2 hidden-scrollbar min-h-0"
+        className="relative z-20 flex-1 overflow-y-auto overflow-x-visible pl-2 pr-1 hidden-scrollbar min-h-0"
         style={{ direction: "ltr" }}
       >
-        <div style={{ direction: "rtl" }}>
+        <div style={{ direction: "rtl" }} className="pr-2">
           {/* History entries */}
-          <div className="space-y-0 pb-2">
+          <div className="space-y-0 pb-6">
             {history.map((entry, index) => (
               <HistoryEntry
                 key={entry.id || index}
@@ -94,9 +113,8 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
 
             {history.length === 0 && (
               <p
-                className={`text-center text-sm py-8 ${
-                  isDarkMode ? "text-slate-500" : "text-slate-400"
-                }`}
+                className={`text-center text-sm py-8 ${isDarkMode ? "text-slate-500" : "text-slate-400"
+                  }`}
               >
                 אין היסטוריה עדיין
               </p>
@@ -107,7 +125,7 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
 
       {/* Chat Input - Always visible */}
       <div
-        className="pt-3 mt-auto border-t border-dashed"
+        className="relative z-10 pt-3 mt-auto border-t border-dashed"
         style={{ borderColor: isDarkMode ? "#475569" : "#CBD5E1" }}
       >
         <ChatInput
