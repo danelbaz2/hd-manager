@@ -33,17 +33,17 @@ const ArchiveTaskRow: React.FC<Props> = ({
 
   return (
     <div
-      className={`flex items-center gap-4 p-4 lg:p-5 border-b transition-all duration-200 hover:shadow-lg cursor-pointer group
+      className={`flex items-center gap-4 p-4 lg:p-5 border-b cursor-pointer transition-colors duration-150
       ${
         isDarkMode
-          ? "bg-slate-800/50 border-slate-700/50 hover:bg-slate-800"
-          : "bg-white border-slate-100 hover:bg-slate-50"
+          ? "bg-slate-800/50 border-slate-700/50 hover:bg-slate-800/70"
+          : "bg-white border-slate-100 hover:bg-slate-50/80"
       }`}
       dir="rtl"
       onClick={() => onTaskClick?.(task)}
     >
       <div
-        className="w-1 h-14 rounded-full shrink-0 group-hover:h-16 transition-all"
+        className="w-1 h-14 rounded-full shrink-0"
         style={getGradientStyle(colors)}
       />
       <div className="shrink-0 w-16 lg:w-20 text-xs font-mono text-center text-slate-400">

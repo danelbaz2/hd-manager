@@ -42,7 +42,12 @@ const ListTaskArchive: React.FC<Props> = ({
         return false;
       if (filters.startDate && t.date && t.date < filters.startDate)
         return false;
-      if (filters.endDate && t.date && t.date >= filters.endDate) return false;
+      // For end date, include tasks on the selected date by comparing with end of day
+      if (filters.endDate && t.date) {
+        const endOfDay = new Date(filters.endDate);
+        endOfDay.setHours(23, 59, 59, 999);
+        if (t.date > endOfDay.getTime()) return false;
+      }
       return true;
     });
     // Sort by date, newest first
@@ -103,16 +108,22 @@ const ListTaskArchive: React.FC<Props> = ({
       {/* Virtualized List Container */}
       <div
         ref={parentRef}
-        className={`rounded-b-xl overflow-auto max-h-[calc(100vh-220px)] border border-t-0 ${
+        className={`rounded-b-xl overflow-y-auto max-h-[calc(100vh-300px)] border border-t-0 ${
           isDarkMode
             ? "border-slate-700 dark-scrollbar"
             : "border-slate-200 light-scrollbar"
         }`}
+        style={{
+          overflowY:
+            virtualizer.getTotalSize() > window.innerHeight - 300
+              ? "auto"
+              : "hidden",
+        }}
       >
         {/* Inner container with total height for scroll */}
         <div
           style={{
-            height: `${virtualizer.getTotalSize()}px`,
+            height: `${virtualizer.getTotalSize() + 10}px`,
             width: "100%",
             position: "relative",
           }}
