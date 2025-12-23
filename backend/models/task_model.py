@@ -21,7 +21,7 @@ class TaskModel(BaseModel):
     participantIds: Optional[List[Union[int, str]]] = []  # Optional: Contact IDs participating
     secondaryTagIds: List[Union[int, str]] = []  # Secondary Tag IDs (new two-tier tag system)
     date: int
-    deadline: Optional[int] = None
+    deadline: int
     base: Optional[BaseEntityMeta] = None
 
 # Update Model - all fields optional but validated when provided
