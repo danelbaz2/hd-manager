@@ -100,7 +100,8 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({
         {/* Action description */}
         <div
           className={`
-            inline-block w-fit max-w-full p-3 rounded-xl text-sm transition-all duration-300
+            w-fit max-w-full p-3 rounded-xl text-sm transition-all duration-300
+            whitespace-pre-wrap break-words
             ${isDarkMode
               ? "bg-slate-700/50 text-slate-300"
               : "bg-slate-100 text-slate-700"

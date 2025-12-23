@@ -223,9 +223,8 @@ def seed(clean_only=False, bulk_tasks=False):
                 )[0]
                 task_date = get_relative_date(date_range + random.randint(-3, 3))
                 
-                # 30% of tasks have deadlines
-                has_deadline = random.random() < 0.3
-                deadline = get_relative_date(date_range + random.randint(1, 7)) if has_deadline else None
+                # All bulk tasks have deadlines (1-7 days after task date)
+                deadline = get_relative_date(date_range + random.randint(1, 7))
                 
                 task = {
                     "_id": str(ObjectId()),
@@ -255,16 +254,21 @@ def seed(clean_only=False, bulk_tasks=False):
                 # Insert in batches
                 if len(bulk_tasks_data) >= batch_size:
                     mongo.db.ents.insert_many(bulk_tasks_data)
+                    # Log history for each task in the batch
+                    for t in bulk_tasks_data:
+                        log_history('task', t['_id'], 'CREATE', 'system', None, t, t)
                     print(f"  - Inserted {len(bulk_tasks_data)} tasks (total: {i+1})")
                     bulk_tasks_data = []
             
             # Insert remaining tasks
             if bulk_tasks_data:
                 mongo.db.ents.insert_many(bulk_tasks_data)
+                # Log history for remaining tasks
+                for t in bulk_tasks_data:
+                    log_history('task', t['_id'], 'CREATE', 'system', None, t, t)
                 print(f"  - Inserted final {len(bulk_tasks_data)} tasks")
             
             print(f"✅ Successfully created 100 tasks for performance testing!")
-            print("⚠️  Note: History logging skipped for bulk tasks to improve performance")
             
         else:
             # NORMAL MODE: Seed with realistic sample tasks
