@@ -1,6 +1,13 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Home, List, MessageCircle, Layers, LogOut } from "lucide-react";
+import {
+  Home,
+  List,
+  MessageCircle,
+  Layers,
+  LogOut,
+  Archive,
+} from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
 
 interface MenuBarProps {
@@ -10,6 +17,7 @@ interface MenuBarProps {
 const MENU_ITEMS = [
   { id: "/", label: "בית", icon: Home },
   { id: "/tasks", label: "משימות", icon: List },
+  { id: "/archive", label: "ארכיון", icon: Archive },
   { id: "/chat", label: "צ'אט", icon: MessageCircle },
 ];
 
@@ -65,11 +73,12 @@ const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
               px-3 lg:px-4 xl:px-6
               py-2.5 lg:py-3
               rounded-xl transition-all duration-200 group
-              ${isActive(item.id)
-                ? isDarkMode
-                  ? "bg-blue-900/30 text-blue-400"
-                  : "bg-blue-50 text-blue-600"
-                : isDarkMode
+              ${
+                isActive(item.id)
+                  ? isDarkMode
+                    ? "bg-blue-900/30 text-blue-400"
+                    : "bg-blue-50 text-blue-600"
+                  : isDarkMode
                   ? "text-slate-400 hover:bg-slate-700/50"
                   : "text-slate-600 hover:bg-slate-100"
               }
@@ -79,8 +88,9 @@ const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
               {item.label}
             </span>
             <item.icon
-              className={`w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 ${isActive(item.id) ? "" : "group-hover:text-blue-500"
-                }`}
+              className={`w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 ${
+                isActive(item.id) ? "" : "group-hover:text-blue-500"
+              }`}
               strokeWidth={2}
             />
           </Link>
@@ -98,9 +108,10 @@ const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
             px-3 lg:px-4 xl:px-6
             py-2.5 lg:py-3
             rounded-xl w-full transition-all
-            ${isDarkMode
-              ? "text-red-400 hover:bg-red-900/20"
-              : "text-red-500 hover:bg-red-50"
+            ${
+              isDarkMode
+                ? "text-red-400 hover:bg-red-900/20"
+                : "text-red-500 hover:bg-red-50"
             }
           `}
         >
