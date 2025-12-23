@@ -212,7 +212,7 @@ const TaskPage: React.FC = () => {
   // Handle task click - open task modal
   const handleTaskClick = useCallback((task: Task) => {
     setOnTaskUpdated(() => () => { refreshTasks(); refreshTaskHistory(); });
-    openTaskModal(task);
+    openTaskModal(task, { enableFileHandle: false });
   }, [openTaskModal, setOnTaskUpdated, refreshTasks, refreshTaskHistory]);
 
   // If no user is selected, redirect to home

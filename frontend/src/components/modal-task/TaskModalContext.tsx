@@ -4,7 +4,8 @@ import type { Task } from "../../api/tasksApi";
 interface TaskModalContextType {
     isOpen: boolean;
     task: Task | null;
-    openTaskModal: (task: Task) => void;
+    enableFileHandle: boolean;
+    openTaskModal: (task: Task, options?: { enableFileHandle?: boolean }) => void;
     closeTaskModal: () => void;
     onTaskUpdated?: () => void;
     setOnTaskUpdated: (callback: (() => void) | undefined) => void;
@@ -19,10 +20,12 @@ interface TaskModalProviderProps {
 export const TaskModalProvider: React.FC<TaskModalProviderProps> = ({ children }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [task, setTask] = useState<Task | null>(null);
+    const [enableFileHandle, setEnableFileHandle] = useState(true);
     const [onTaskUpdated, setOnTaskUpdatedCallback] = useState<(() => void) | undefined>(undefined);
 
-    const openTaskModal = useCallback((taskToOpen: Task) => {
+    const openTaskModal = useCallback((taskToOpen: Task, options?: { enableFileHandle?: boolean }) => {
         setTask(taskToOpen);
+        setEnableFileHandle(options?.enableFileHandle ?? true); // Default to true
         setIsOpen(true);
     }, []);
 
@@ -42,6 +45,7 @@ export const TaskModalProvider: React.FC<TaskModalProviderProps> = ({ children }
             value={{
                 isOpen,
                 task,
+                enableFileHandle,
                 openTaskModal,
                 closeTaskModal,
                 onTaskUpdated,

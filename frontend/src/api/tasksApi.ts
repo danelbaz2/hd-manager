@@ -131,6 +131,14 @@ export type TaskHistoryAction = "CREATE" | "UPDATE" | "IN_PROGRESS" | "CLOSE" | 
 /**
  * Task history entry from ents_archive
  */
+export interface FileMetadata {
+  originalName: string;
+  storedName: string;
+  size: number;
+  type: string;
+  url: string;
+}
+
 export interface TaskHistoryEntry {
   id: string;
   taskId: string;
@@ -140,6 +148,7 @@ export interface TaskHistoryEntry {
   changes: Record<string, unknown>;
   oldValues?: Record<string, unknown>;
   note?: string;
+  file?: FileMetadata;
 }
 
 /**
@@ -169,4 +178,40 @@ export const addTaskNote = async (
     method: "POST",
     body: JSON.stringify({ note }),
   });
+};
+
+/**
+ * Upload a file attachment with optional note
+ */
+export const uploadTaskFile = async (
+  taskId: string,
+  file: File,
+  note?: string
+): Promise<ApiResponse<TaskHistoryEntry>> => {
+  const formData = new FormData();
+  formData.append("file", file);
+  if (note) {
+    formData.append("note", note);
+  }
+
+  // Get auth token
+  const token = sessionStorage.getItem("auth_token");
+
+  try {
+    const response = await fetch(`${API_ENDPOINTS.uploads}/task/${taskId}`, {
+      method: "POST",
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+      body: formData,
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      return { success: true, data };
+    } else {
+      return { success: false, error: data.error || "Upload failed" };
+    }
+  } catch (error) {
+    return { success: false, error: "Network error during upload" };
+  }
 };

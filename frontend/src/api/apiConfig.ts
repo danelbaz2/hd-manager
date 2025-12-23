@@ -11,6 +11,7 @@ export const API_ENDPOINTS = {
   contacts: `${API_BASE_URL}/contacts`,
   historyEntries: `${API_BASE_URL}/history-entries`,
   chatMessages: `${API_BASE_URL}/chat-messages`,
+  uploads: `${API_BASE_URL}/uploads`,
 } as const;
 
 // Generic API Response interface
