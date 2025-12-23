@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { motion, LayoutGroup } from "framer-motion";
 import { CheckCircle2, Clock, AlertCircle, type LucideIcon } from "lucide-react";
 import { useTheme } from "../../../contexts";
 import { type Task, type TaskStatus } from "../../../api/tasksApi";
@@ -156,18 +157,31 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                     </div>
                 )}
 
-                {/* Task cards */}
-                {tasks.map((task) => (
-                    <KanbanTaskCard
-                        key={task.id}
-                        task={task}
-                        users={users}
-                        onClick={onTaskClick}
-                        columnStatus={status}
-                        onTaskStatusChange={onTaskStatusChange}
-                        onDropConfirmRequest={onDropConfirmRequest}
-                    />
-                ))}
+                {/* Task cards with layout animation for reordering */}
+                <LayoutGroup id={`column-${status}`}>
+                    {tasks.map((task) => (
+                        <motion.div
+                            key={task.id}
+                            layout
+                            transition={{
+                                layout: {
+                                    type: "tween",
+                                    ease: [0.25, 0.1, 0.25, 1], // Smooth cubic bezier
+                                    duration: 0.4
+                                }
+                            }}
+                        >
+                            <KanbanTaskCard
+                                task={task}
+                                users={users}
+                                onClick={onTaskClick}
+                                columnStatus={status}
+                                onTaskStatusChange={onTaskStatusChange}
+                                onDropConfirmRequest={onDropConfirmRequest}
+                            />
+                        </motion.div>
+                    ))}
+                </LayoutGroup>
             </div>
         </div>
     );

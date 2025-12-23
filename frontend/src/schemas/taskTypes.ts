@@ -38,7 +38,7 @@ export const PRIORITY_OPTIONS: { id: TaskPriority; label: string }[] = [
 // Status options with Hebrew labels
 export const STATUS_OPTIONS: { id: TaskStatus; label: string }[] = [
   { id: "pending", label: "פתוח" },
-  { id: "in_progress", label: "בביצוע" },
+  { id: "in_progress", label: "בטיפול" },
   { id: "completed", label: "סגור" },
   { id: "cancelled", label: "בוטל" },
 ];
@@ -50,12 +50,12 @@ export const PRIORITY_COLORS: Record<TaskPriority, { bg: string; text: string }>
   high: { bg: "#FDA4AF", text: "#9F1239" }, // Rose
 };
 
-// Status colors for visual representation
+// Status colors for visual representation (matches Kanban column colors)
 export const STATUS_COLORS: Record<TaskStatus, { bg: string; text: string }> = {
-  pending: { bg: "#E2E8F0", text: "#475569" }, // Slate
-  in_progress: { bg: "#93C5FD", text: "#1E40AF" }, // Blue
-  completed: { bg: "#86EFAC", text: "#166534" }, // Green
-  cancelled: { bg: "#FDA4AF", text: "#9F1239" }, // Rose
+  pending: { bg: "#D1FAE5", text: "#059669" }, // Emerald (green)
+  in_progress: { bg: "#FEF3C7", text: "#D97706" }, // Amber (orange)
+  completed: { bg: "#E2E8F0", text: "#64748B" }, // Slate (gray)
+  cancelled: { bg: "#FEE2E2", text: "#DC2626" }, // Red
 };
 
 // Default form data for creating new tasks

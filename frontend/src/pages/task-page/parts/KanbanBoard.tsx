@@ -42,20 +42,48 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       cancelled: [],
     };
 
-    // Sort tasks by updatedAt Ascending (oldest first -> newest last)
-    const sortedTasks = [...tasks].sort((a, b) => {
-      const timeA = a.base?.updatedAt || a.base?.createdAt || 0;
-      const timeB = b.base?.updatedAt || b.base?.createdAt || 0;
-      return timeA - timeB;
-    });
-
-    sortedTasks.forEach((task) => {
+    // Group tasks by status first
+    tasks.forEach((task) => {
       const status = (task.status as TaskStatus) || "pending";
       if (grouped[status]) {
         grouped[status].push(task);
       } else {
         grouped.pending.push(task);
       }
+    });
+
+    // Priority order: high (1), medium (2), low (3)
+    const priorityOrder: Record<string, number> = {
+      high: 1,
+      medium: 2,
+      low: 3,
+    };
+
+    // Sort pending and in_progress by priority (high → medium → low)
+    grouped.pending.sort((a, b) => {
+      const priorityA = priorityOrder[a.priority || "medium"] || 2;
+      const priorityB = priorityOrder[b.priority || "medium"] || 2;
+      return priorityA - priorityB;
+    });
+
+    grouped.in_progress.sort((a, b) => {
+      const priorityA = priorityOrder[a.priority || "medium"] || 2;
+      const priorityB = priorityOrder[b.priority || "medium"] || 2;
+      return priorityA - priorityB;
+    });
+
+    // Sort completed by updatedAt ascending (oldest first, newest at bottom)
+    grouped.completed.sort((a, b) => {
+      const timeA = a.base?.updatedAt || a.base?.createdAt || 0;
+      const timeB = b.base?.updatedAt || b.base?.createdAt || 0;
+      return timeA - timeB;
+    });
+
+    // Sort cancelled by updatedAt ascending as well
+    grouped.cancelled.sort((a, b) => {
+      const timeA = a.base?.updatedAt || a.base?.createdAt || 0;
+      const timeB = b.base?.updatedAt || b.base?.createdAt || 0;
+      return timeA - timeB;
     });
 
     return grouped;
@@ -146,33 +174,29 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
               </p>
               {/* Status change visualization */}
               <div
-                className={`flex items-center justify-center gap-3 py-3 px-4 rounded-xl ${
-                  isDarkMode ? "bg-slate-700/50" : "bg-slate-100/80"
-                }`}
+                className={`flex items-center justify-center gap-3 py-3 px-4 rounded-xl ${isDarkMode ? "bg-slate-700/50" : "bg-slate-100/80"
+                  }`}
                 dir="rtl"
               >
                 <span
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${
-                    isDarkMode
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${isDarkMode
                       ? "bg-slate-600 text-slate-200"
                       : "bg-white text-slate-700 border border-slate-200"
-                  }`}
+                    }`}
                 >
                   {getStatusLabel(confirmRequest.fromStatus)}
                 </span>
                 <div
-                  className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                    isDarkMode ? "bg-blue-500/20" : "bg-blue-100"
-                  }`}
+                  className={`flex items-center justify-center w-8 h-8 rounded-full ${isDarkMode ? "bg-blue-500/20" : "bg-blue-100"
+                    }`}
                 >
                   <MoveLeft size={16} className="text-blue-500" />
                 </div>
                 <span
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${
-                    isDarkMode
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${isDarkMode
                       ? "bg-blue-500/30 text-blue-300"
                       : "bg-blue-500 text-white"
-                  }`}
+                    }`}
                 >
                   {getStatusLabel(confirmRequest.toStatus)}
                 </span>
