@@ -1,8 +1,9 @@
 import React from "react";
 import { type UserData } from "../../../../schemas/userTypes";
 import { type Task } from "../../../../api/tasksApi";
-import PersonalUserCard from "./PersonalUserCard";
+import UserCard from "../UserCard";
 import TaskBrief from "./TaskBrief";
+import MotivationalBanner from "./MotivationalBanner";
 import { Statistics } from "../admin-view";
 
 interface UserViewProps {
@@ -41,8 +42,21 @@ const UserView: React.FC<UserViewProps> = ({
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      {/* Personal User Card */}
-      <PersonalUserCard user={user} taskCounts={stats} onClick={onUserClick} />
+      {/* Top Row: UserCard + MotivationalBanner - Centered */}
+      <div className="flex justify-center gap-4" dir="rtl">
+        {/* User Card */}
+        <div className="w-1/3">
+          <UserCard
+            user={user}
+            taskCounts={stats}
+            onUserClick={() => onUserClick?.()}
+          />
+        </div>
+        {/* Motivational Banner - Same width as UserCard */}
+        <div className="w-1/3">
+          <MotivationalBanner userName={user.fullName} userId={user.id} />
+        </div>
+      </div>
 
       {/* Task Brief */}
       <div className="flex-1 overflow-auto">

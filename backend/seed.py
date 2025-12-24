@@ -208,7 +208,7 @@ def seed(clean_only=False, bulk_tasks=False):
             bulk_tasks_data = []
             batch_size = 1000  # Insert in batches for better performance
             
-            for i in range(10000):
+            for i in range(1000):
                 # Randomize task properties for realistic data
                 num_responsible = random.choice([1, 1, 2])  # 1 or 2 users
                 responsible_users = random.sample(user_ids, num_responsible)
