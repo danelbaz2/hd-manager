@@ -67,7 +67,7 @@ def seed(clean_only=False, bulk_tasks=False):
             { "fullName": 'עדן טירם', "username": "eden", "passwordHash": "123456", "role": 'admin', "color": '#93C5FD', "profileImage": load_profile_image_base64("eden"), "base": create_base("user")},
             { "fullName": 'מאור נובחוב', "username": "maor", "passwordHash": "123456", "role": 'regular', "color": '#FDBA74', "profileImage": load_profile_image_base64("maor"), "base": create_base("user")},
             { "fullName": 'עילי אדמוני', "username": "ilay", "passwordHash": "123456", "role": 'admin', "color": '#86EFAC', "profileImage": load_profile_image_base64("ilay"), "base": create_base("user")},
-            { "fullName": 'דן אלבז', "username": "dan", "passwordHash": "123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("dan"), "base": create_base("user")},
+            { "fullName": 'דן אלבז', "username": "dan", "passwordHash": "123456", "role": 'admin', "color": '#FCD34D', "profileImage": load_profile_image_base64("dan"), "base": create_base("user")},
             { "fullName": 'אוראל חסידיאן', "username": "orel", "passwordHash": "123456", "role": 'regular', "color": '#C4B5FD', "profileImage": load_profile_image_base64("orel"), "base": create_base("user")},
             { "fullName": 'אליה דנאל', "username": "eliya", "passwordHash": "123456", "role": 'regular', "color": '#FDA4AF', "profileImage": load_profile_image_base64("eliya"), "base": create_base("user")},
             { "fullName": 'אורי רוגוזיק', "username": "ori", "passwordHash": "123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("ori"), "base": create_base("user")},
@@ -185,14 +185,15 @@ def seed(clean_only=False, bulk_tasks=False):
         priorities = ['low', 'medium', 'high']
         
         if bulk_tasks:
-            # PERFORMANCE TEST MODE: Generate 100 tasks
-            print("🔥 BULK MODE: Generating 100 tasks for performance testing...")
+            # REALISTIC TEST MODE: Generate 20 tasks with history over 7 days
+            print("🔥 BULK MODE: Generating 20 tasks with realistic history...")
             
             task_titles = [
                 "בדיקת שרתים", "פיתוח פיצ'ר חדש", "תיקון באג", "סקירת קוד",
                 "עדכון תיעוד", "פגישת צוות", "בדיקות אוטומטיות", "אינטגרציה",
                 "אופטימיזציה", "עיצוב UI", "ניהול פרויקט", "תמיכה טכנית",
-                "פיתוח API", "הגדרת סביבה", "העלאה לייצור", "גיבוי נתונים"
+                "פיתוח API", "הגדרת סביבה", "העלאה לייצור", "גיבוי נתונים",
+                "שדרוג מערכת", "בדיקת אבטחה", "תיקון ביצועים", "עיצוב UX"
             ]
             
             task_descriptions = [
@@ -200,75 +201,191 @@ def seed(clean_only=False, bulk_tasks=False):
                 "פיתוח קומפוננטה חדשה",
                 "פתרון בעיה קריטית",
                 "עבודה שוטפת",
-                "משימה דחופה",
-                "משימה ארוכה",
-                "משימה קצרה"
+                "משימה דחופה"
             ]
             
-            bulk_tasks_data = []
-            batch_size = 1000  # Insert in batches for better performance
+            notes_examples = [
+                "התחלתי לעבוד על זה",
+                "צריך לבדוק עם הצוות",
+                "ממתין לאישור",
+                "בודק את הפתרון",
+                "מתקדם יפה",
+                "נתקלתי בבעיה קטנה",
+                "הבעיה נפתרה",
+                "מעדכן את הקוד",
+                "בדיקות עברו בהצלחה",
+                "מחכה לסקירת קוד"
+            ]
             
-            for i in range(10000):
-                # Randomize task properties for realistic data
-                num_responsible = random.choice([1, 1, 2])  # 1 or 2 users
-                responsible_users = random.sample(user_ids, num_responsible)
+            created_tasks = []
+            
+            for i in range(20):
+                # Date spread over 7 days (0 = today, 1-6 = future days)
+                day_offset = i % 7  # Spread tasks across the week
+                task_date = get_relative_date(day_offset)
+                deadline = get_relative_date(day_offset + random.randint(1, 3))
                 
-                num_tags = random.choice([0, 1, 1, 2])  # 0, 1, or 2 secondary tags
-                task_tags = random.sample(secondary_tag_ids, num_tags) if num_tags > 0 else []
+                # Random initial assignment
+                initial_user_idx = random.randint(0, len(user_ids) - 1)
+                initial_user = user_ids[initial_user_idx]
+                initial_user_name = users_data[initial_user_idx]['fullName']
                 
-                # Date spread: 80% this week, 15% last week, 5% next week
-                date_range = random.choices(
-                    [0, -7, 7],  # This week, last week, next week
-                    weights=[80, 15, 5]
-                )[0]
-                task_date = get_relative_date(date_range + random.randint(-3, 3))
-                
-                # All bulk tasks have deadlines (1-7 days after task date)
-                deadline = get_relative_date(date_range + random.randint(1, 7))
+                # Creation timestamp (1-4 hours before now)
+                hours_ago = random.randint(1, 4)
+                created_at = get_timestamp_ms() - (hours_ago * 3600 * 1000)
                 
                 task = {
                     "_id": str(ObjectId()),
-                    "title": f"{random.choice(task_titles)} #{i+1}",
+                    "title": f"{task_titles[i]}",
                     "description": random.choice(task_descriptions),
-                    "status": random.choices(statuses, weights=[50, 30, 15, 5])[0],  # Most pending
-                    "priority": random.choices(priorities, weights=[30, 50, 20])[0],  # Most medium
-                    "responsibleUserIds": responsible_users,
+                    "status": "pending",  # Start as pending
+                    "priority": random.choices(priorities, weights=[30, 50, 20])[0],
+                    "responsibleUserIds": [initial_user],
                     "participantIds": [],
-                    "secondaryTagIds": task_tags,  # New two-tier tag system
+                    "secondaryTagIds": random.sample(secondary_tag_ids, random.randint(0, 2)),
                     "date": task_date,
                     "deadline": deadline,
                     "base": {
                         "isDeleted": False,
                         "isActive": True,
-                        "createdAt": get_relative_date(-random.randint(1, 30)),
-                        "updatedAt": get_relative_date(-random.randint(0, 5)),
-
+                        "createdAt": created_at,
+                        "updatedAt": created_at,
                         "entityType": "task",
-                        "createdBy": "System Admin",
-                        "updatedBy": "System Admin"
+                        "createdBy": initial_user_name,
+                        "updatedBy": initial_user_name
                     }
                 }
                 
-                bulk_tasks_data.append(task)
+                # Insert task
+                mongo.db.ents.insert_one(task)
+                log_history('task', task['_id'], 'CREATE', initial_user_name, None, task, task)
+                created_tasks.append(task)
                 
-                # Insert in batches
-                if len(bulk_tasks_data) >= batch_size:
-                    mongo.db.ents.insert_many(bulk_tasks_data)
-                    # Log history for each task in the batch
-                    for t in bulk_tasks_data:
-                        log_history('task', t['_id'], 'CREATE', 'system', None, t, t)
-                    print(f"  - Inserted {len(bulk_tasks_data)} tasks (total: {i+1})")
-                    bulk_tasks_data = []
+            print(f"  ✅ Created 20 tasks")
             
-            # Insert remaining tasks
-            if bulk_tasks_data:
-                mongo.db.ents.insert_many(bulk_tasks_data)
-                # Log history for remaining tasks
-                for t in bulk_tasks_data:
-                    log_history('task', t['_id'], 'CREATE', 'system', None, t, t)
-                print(f"  - Inserted final {len(bulk_tasks_data)} tasks")
+            # Now add realistic history entries to some tasks
+            print("  📝 Adding realistic history entries...")
             
-            print(f"✅ Successfully created 100 tasks for performance testing!")
+            history_count = 0
+            
+            for idx, task in enumerate(created_tasks):
+                task_id = task['_id']
+                current_status = "pending"
+                current_users = task['responsibleUserIds']
+                current_task = task.copy()
+                
+                # Determine how many history entries this task should have (0-5)
+                num_entries = random.choices([0, 1, 2, 3, 4, 5], weights=[20, 25, 20, 15, 12, 8])[0]
+                
+                for entry_idx in range(num_entries):
+                    # Pick a random user for this action
+                    actor_idx = random.randint(0, len(user_ids) - 1)
+                    actor_name = users_data[actor_idx]['fullName']
+                    
+                    # Timestamp: spread across the last few hours
+                    minutes_ago = (num_entries - entry_idx) * random.randint(10, 45)
+                    entry_timestamp = get_timestamp_ms() - (minutes_ago * 60 * 1000)
+                    
+                    # Choose action type
+                    action_type = random.choices(
+                        ['note', 'status_change', 'assignment'],
+                        weights=[40, 35, 25]
+                    )[0]
+                    
+                    if action_type == 'note':
+                        # Add a note
+                        note_text = random.choice(notes_examples)
+                        entry = {
+                            '_id': str(ObjectId()),
+                            'o': None,
+                            'c': {
+                                'action': 'NOTE',
+                                'timestamp': entry_timestamp,
+                                'note': note_text,
+                                'base': {
+                                    'updatedBy': actor_name
+                                }
+                            },
+                            'n': {
+                                'id': task_id,
+                                '_id': task_id,
+                                'note': note_text,
+                                'base': {
+                                    'entityType': 'task',
+                                    'updatedBy': actor_name
+                                }
+                            }
+                        }
+                        mongo.db.ents_archive.insert_one(entry)
+                        history_count += 1
+                        
+                    elif action_type == 'status_change':
+                        # Progress status: pending -> in_progress -> completed
+                        old_task = current_task.copy()
+                        
+                        if current_status == 'pending':
+                            new_status = 'in_progress'
+                        elif current_status == 'in_progress':
+                            new_status = random.choice(['in_progress', 'completed'])  # May stay or complete
+                        else:
+                            continue  # Already completed, skip
+                        
+                        if new_status != current_status:
+                            # Update task in DB
+                            mongo.db.ents.update_one(
+                                {'_id': task_id},
+                                {'$set': {'status': new_status, 'base.updatedAt': entry_timestamp, 'base.updatedBy': actor_name}}
+                            )
+                            
+                            # Create history entry
+                            new_task = old_task.copy()
+                            new_task['status'] = new_status
+                            new_task['base']['updatedAt'] = entry_timestamp
+                            new_task['base']['updatedBy'] = actor_name
+                            
+                            changes = {
+                                'status': new_status,
+                                'base': {'updatedAt': entry_timestamp, 'updatedBy': actor_name}
+                            }
+                            
+                            log_history('task', task_id, 'UPDATE', actor_name, old_task, new_task, changes)
+                            current_status = new_status
+                            current_task = new_task
+                            history_count += 1
+                            
+                    elif action_type == 'assignment':
+                        # Change assignment
+                        new_user_idx = random.randint(0, len(user_ids) - 1)
+                        new_user = user_ids[new_user_idx]
+                        
+                        if new_user not in current_users:
+                            old_task = current_task.copy()
+                            new_users = [new_user]  # Replace with new user
+                            
+                            # Update task in DB
+                            mongo.db.ents.update_one(
+                                {'_id': task_id},
+                                {'$set': {'responsibleUserIds': new_users, 'base.updatedAt': entry_timestamp, 'base.updatedBy': actor_name}}
+                            )
+                            
+                            # Create history entry
+                            new_task = old_task.copy()
+                            new_task['responsibleUserIds'] = new_users
+                            new_task['base']['updatedAt'] = entry_timestamp
+                            new_task['base']['updatedBy'] = actor_name
+                            
+                            changes = {
+                                'responsibleUserIds': new_users,
+                                'base': {'updatedAt': entry_timestamp, 'updatedBy': actor_name}
+                            }
+                            
+                            log_history('task', task_id, 'UPDATE', actor_name, old_task, new_task, changes)
+                            current_users = new_users
+                            current_task = new_task
+                            history_count += 1
+                
+            print(f"  ✅ Added {history_count} history entries")
+            print(f"✅ Successfully created realistic test data!")
             
         else:
             # NORMAL MODE: Seed with realistic sample tasks
@@ -525,7 +642,7 @@ def seed(clean_only=False, bulk_tasks=False):
         print(f"  - {len(secondary_tags_data)} secondary tags")
         print(f"  - {len(contacts_data)} contacts")
         if bulk_tasks:
-            print(f"  - 100 tasks (bulk mode)")
+            print(f"  - 20 tasks with history (bulk mode)")
         else:
             print(f"  - {len(tasks_data)} tasks")
         print(f"  - {len(chat_data)} chat messages")
