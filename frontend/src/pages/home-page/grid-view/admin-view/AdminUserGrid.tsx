@@ -2,7 +2,7 @@ import React from "react";
 import { useTheme } from "../../../../contexts";
 import { type UserData } from "../../../../schemas/userTypes";
 import { type Task } from "../../../../api/tasksApi";
-import UserCard from "../UserCard";
+import AdminUserCard from "./AdminUserCard";
 
 interface AdminUserGridProps {
   users: UserData[];
@@ -51,19 +51,18 @@ const AdminUserGrid: React.FC<AdminUserGridProps> = ({
         </div>
       ) : (
         <div
-          className={`h-full p-1 overflow-y-auto ${
+          className={`h-full p-2 overflow-hidden ${
             isDarkMode ? "dark-scrollbar" : "light-scrollbar"
           }`}
         >
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2 md:gap-3">
+          <div className="grid grid-cols-3 gap-2 h-full content-start">
             {users.map((user) => (
-              <UserCard
+              <AdminUserCard
                 key={user.id}
                 user={user}
                 taskCounts={getTaskCountsForUser(user.id, tasks)}
                 onUserClick={onUserClick}
                 isClickable={isUserClickable ? isUserClickable(user.id) : true}
-                size="normal"
               />
             ))}
           </div>
