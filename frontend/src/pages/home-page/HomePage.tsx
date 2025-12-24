@@ -50,7 +50,9 @@ const HomePage: React.FC = () => {
   const renderContent = () => {
     switch (displayMode) {
       case "grid":
-        return <GridView users={users} tasks={filteredTasks} />;
+        return (
+          <GridView users={users} tasks={filteredTasks} viewMode={viewMode} />
+        );
 
       case "list":
         return (
@@ -68,7 +70,9 @@ const HomePage: React.FC = () => {
         );
 
       default:
-        return <GridView users={users} tasks={filteredTasks} />;
+        return (
+          <GridView users={users} tasks={filteredTasks} viewMode={viewMode} />
+        );
     }
   };
 
