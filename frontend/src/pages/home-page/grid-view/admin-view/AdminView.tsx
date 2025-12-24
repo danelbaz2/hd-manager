@@ -2,7 +2,7 @@ import React from "react";
 import { type UserData } from "../../../../schemas/userTypes";
 import { type Task } from "../../../../api/tasksApi";
 import AdminUserGrid from "./AdminUserGrid";
-import Statistics from "./Statistics";
+import Statistics from "../Statistics";
 
 interface AdminViewProps {
   users: UserData[];
@@ -43,8 +43,8 @@ const AdminView: React.FC<AdminViewProps> = ({
 
   return (
     <div className="flex flex-col gap-4 h-full">
-      {/* User Cards Grid */}
-      <div className="flex-1 overflow-auto">
+      {/* User Cards Grid - flex-1 with min-h-0 for proper flex overflow */}
+      <div className="flex-1 min-h-0">
         <AdminUserGrid
           users={users}
           tasks={tasks}

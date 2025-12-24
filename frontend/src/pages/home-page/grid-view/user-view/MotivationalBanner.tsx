@@ -19,7 +19,7 @@ const emojis = [
   "🏆",
   "✨",
   "🌈",
-  "�",
+  "🦁",
   "⚡",
   "👑",
   "🎊",
@@ -29,7 +29,7 @@ const emojis = [
   "🦋",
   "🐬",
   "🦄",
-  "�",
+  "🐉",
   "🦅",
   "🐝",
   "🌻",
@@ -38,7 +38,7 @@ const emojis = [
   "🌴",
   "🎸",
   "🎹",
-  "�",
+  "🎺",
   "🎭",
   "🎪",
   "🎠",
@@ -48,7 +48,7 @@ const emojis = [
   "🌍",
   "🌙",
   "☀️",
-  "�",
+  "🌤️",
   "❄️",
   "🔮",
   "💝",
@@ -59,7 +59,7 @@ const emojis = [
   "💚",
   "💙",
   "💜",
-  "�",
+  "🖤",
   "🤍",
   "🤎",
   "❤️",
@@ -70,16 +70,16 @@ const emojis = [
   "🎀",
   "🎈",
   "🎆",
-  "�",
+  "🎇",
   "🧨",
   "🪄",
   "🔭",
   "🎤",
   "🎧",
   "🎵",
-  "�",
+  "🏂",
   "🏄",
-  "�",
+  "🚴",
   "⛷️",
   "🏊",
   "🧗",
@@ -107,8 +107,23 @@ const emojis = [
   "🍊",
   "🥝",
   "🥥",
-  "�",
+  "🥧",
 ];
+
+// Get greeting based on time of day
+const getTimeGreeting = (): string => {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) {
+    return "בוקר טוב";
+  }
+  if (hour >= 12 && hour < 17) {
+    return "צהריים טובים";
+  }
+  if (hour >= 17 && hour < 21) {
+    return "ערב טוב";
+  }
+  return "לילה טוב";
+};
 
 // Generate consistent random index based on string + date
 const getDailyIndex = (seed: string, arrayLength: number): number => {
@@ -121,63 +136,67 @@ const getDailyIndex = (seed: string, arrayLength: number): number => {
   return Math.abs(hash) % arrayLength;
 };
 
-// Get greeting based on time of day
-const getTimeGreeting = (): string => {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return "בוקר טוב";
-  if (hour >= 12 && hour < 17) return "צהריים טובים";
-  if (hour >= 17 && hour < 21) return "ערב טוב";
-  return "לילה טוב";
-};
-
 const MotivationalBanner: React.FC<MotivationalBannerProps> = ({
   userName,
   userId = "",
 }) => {
   const { isDarkMode } = useTheme();
+  const greeting = getTimeGreeting();
 
   // Get daily random emoji for this user
   const dailyEmoji = useMemo(() => {
     return emojis[getDailyIndex(userId, emojis.length)];
   }, [userId]);
 
-  const greeting = getTimeGreeting();
-
   return (
-    <div
-      className={`h-full flex flex-col items-center justify-center rounded-xl border transition-all ${
-        isDarkMode
-          ? "bg-slate-800 border-slate-700"
-          : "bg-white border-slate-200"
-      }`}
-      dir="rtl"
-    >
-      {/* Time-based Greeting */}
-      <p
-        className={`text-lg font-bold mb-8 ${
-          isDarkMode ? "text-white" : "text-slate-800"
-        }`}
-      >
-        {greeting}
-        {userName ? `, ${userName}` : ""}!
-      </p>
-
-      {/* Daily Emoji Section */}
-      <div className="flex items-center gap-6">
-        <p
-          className={`text-sm font-medium ${
-            isDarkMode ? "text-slate-400" : "text-slate-500"
+    <div className="py-4 px-6" dir="rtl">
+      {/* Main Content */}
+      <div className="flex flex-col gap-2">
+        {/* Greeting with wave emoji */}
+        <h1
+          className={`text-2xl font-semibold ${
+            isDarkMode ? "text-white" : "text-slate-800"
           }`}
         >
-          האימוג׳י היומי שלך הוא:
-        </p>
-        <div
-          className="text-4xl animate-bounce"
-          style={{ animationDuration: "2s" }}
-        >
-          {dailyEmoji}
+          {greeting}
+          {userName ? `, ${userName}` : ""}{" "}
+          <span className="inline-block animate-wave">👋</span>
+        </h1>
+
+        {/* Daily Emoji Section */}
+        <div className="flex items-center gap-2">
+          <span
+            className={`text-sm ${
+              isDarkMode ? "text-slate-400" : "text-slate-500"
+            }`}
+          >
+            האימוג׳י היומי שלך הוא:
+          </span>
+          <span className="text-2xl animate-bounce-subtle">{dailyEmoji}</span>
         </div>
       </div>
+
+      {/* Animations */}
+      <style>{`
+        @keyframes wave {
+          0%, 100% { transform: rotate(0deg); }
+          25% { transform: rotate(20deg); }
+          50% { transform: rotate(-10deg); }
+          75% { transform: rotate(20deg); }
+        }
+        .animate-wave {
+          display: inline-block;
+          animation: wave 1.5s ease-in-out infinite;
+          transform-origin: 70% 70%;
+        }
+        @keyframes bounce-subtle {
+          0%, 100% { transform: translateY(0); }
+          50% { transform: translateY(-4px); }
+        }
+        .animate-bounce-subtle {
+          animation: bounce-subtle 2s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };

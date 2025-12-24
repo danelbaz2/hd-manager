@@ -4,10 +4,10 @@ import { type Task } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
 import { type SecondaryTagData } from "../../../schemas/tagTypes";
 import DailyList from "./DailyList";
-import { TaskListWeekly } from "../parts";
+import WeeklyList from "./WeeklyList";
 import MonthlyCalendar from "./MonthlyCalendar";
 import { getWeekStart } from "../shared";
-import { useTaskModal } from "../../../components/modal-task";
+import { useTaskModal } from "../../../components/modal/modal-task";
 
 interface ListViewProps {
   tasks: Task[];
@@ -18,7 +18,7 @@ interface ListViewProps {
 /**
  * ListView - Shows task list or calendar based on view mode
  * - Daily: Task list
- * - Weekly: Original calendar week view (from parts)
+ * - Weekly: Week calendar view
  * - Monthly: Month calendar view
  */
 const ListView: React.FC<ListViewProps> = ({ tasks, users, tags }) => {
@@ -48,7 +48,7 @@ const ListView: React.FC<ListViewProps> = ({ tasks, users, tags }) => {
   if (viewMode === "weekly") {
     const weekStart = getWeekStart(new Date(selectedDate));
     return (
-      <TaskListWeekly
+      <WeeklyList
         tasks={tasks}
         users={users}
         weekStart={weekStart}

@@ -219,7 +219,7 @@ def seed(clean_only=False, bulk_tasks=False):
             
             created_tasks = []
             
-            for i in range(20):
+            for i in range(100):
                 # Date spread over 7 days (0 = today, 1-6 = future days)
                 day_offset = i % 7  # Spread tasks across the week
                 task_date = get_relative_date(day_offset)
@@ -236,7 +236,7 @@ def seed(clean_only=False, bulk_tasks=False):
                 
                 task = {
                     "_id": str(ObjectId()),
-                    "title": f"{task_titles[i]}",
+                    "title": f"{task_titles[i % len(task_titles)]} #{i + 1}",
                     "description": random.choice(task_descriptions),
                     "status": "pending",  # Start as pending
                     "priority": random.choices(priorities, weights=[30, 50, 20])[0],

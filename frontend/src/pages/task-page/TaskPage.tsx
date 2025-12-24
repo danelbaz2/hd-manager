@@ -10,8 +10,12 @@ import {
 import { useTheme, useSettings, useViewState, useAuth } from "../../contexts";
 import { KanbanBoard } from "./parts";
 import { updateTask, type Task, type TaskStatus } from "../../api/tasksApi";
-import { useTaskModal } from "../../components/modal-task";
-import { KanbanOnboardingDemo, shouldShowOnboarding, resetOnboarding } from "../../components/demos/kanban-onboarding";
+import { useTaskModal } from "../../components/modal/modal-task";
+import {
+  KanbanOnboardingDemo,
+  shouldShowOnboarding,
+  resetOnboarding,
+} from "../../components/demos/kanban-onboarding";
 
 interface LocationState {
   selectedUserId?: string;
@@ -210,10 +214,16 @@ const TaskPage: React.FC = () => {
   );
 
   // Handle task click - open task modal
-  const handleTaskClick = useCallback((task: Task) => {
-    setOnTaskUpdated(() => () => { refreshTasks(); refreshTaskHistory(); });
-    openTaskModal(task, { enableFileHandle: false });
-  }, [openTaskModal, setOnTaskUpdated, refreshTasks, refreshTaskHistory]);
+  const handleTaskClick = useCallback(
+    (task: Task) => {
+      setOnTaskUpdated(() => () => {
+        refreshTasks();
+        refreshTaskHistory();
+      });
+      openTaskModal(task, { enableFileHandle: false });
+    },
+    [openTaskModal, setOnTaskUpdated, refreshTasks, refreshTaskHistory]
+  );
 
   // If no user is selected, redirect to home
   if (!selectedUserId) {
@@ -254,9 +264,10 @@ const TaskPage: React.FC = () => {
             className={`
               p-2 rounded-full
               transition-colors
-              ${isDarkMode
-                ? "hover:bg-slate-700 text-slate-300"
-                : "hover:bg-slate-100 text-slate-600"
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-700 text-slate-300"
+                  : "hover:bg-slate-100 text-slate-600"
               }
             `}
             aria-label="חזרה לדף הבית"
@@ -277,9 +288,10 @@ const TaskPage: React.FC = () => {
             className={`
               p-2 rounded-full
               transition-all duration-200
-              ${isDarkMode
-                ? "hover:bg-slate-700 text-slate-400 hover:text-blue-400"
-                : "hover:bg-slate-100 text-slate-400 hover:text-blue-500"
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-700 text-slate-400 hover:text-blue-400"
+                  : "hover:bg-slate-100 text-slate-400 hover:text-blue-500"
               }
             `}
             title="איך עובד הלוח?"
@@ -308,11 +320,12 @@ const TaskPage: React.FC = () => {
                   rounded-md
                   text-xs lg:text-sm font-medium
                   transition-all duration-200
-                  ${viewMode === mode.id
-                    ? isDarkMode
-                      ? "bg-slate-600 text-white shadow-sm"
-                      : "bg-white text-blue-600 shadow-sm"
-                    : isDarkMode
+                  ${
+                    viewMode === mode.id
+                      ? isDarkMode
+                        ? "bg-slate-600 text-white shadow-sm"
+                        : "bg-white text-blue-600 shadow-sm"
+                      : isDarkMode
                       ? "text-slate-400 hover:text-slate-200"
                       : "text-slate-500 hover:text-slate-700"
                   }

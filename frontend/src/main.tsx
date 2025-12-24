@@ -8,7 +8,7 @@ import {
   ViewStateProvider,
   AuthProvider,
 } from "./contexts";
-import { TaskModalProvider, TaskModal } from "./components/modal-task";
+import { TaskModalProvider, TaskModal } from "./components/modal/modal-task";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

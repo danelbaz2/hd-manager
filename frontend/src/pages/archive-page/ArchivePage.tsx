@@ -8,7 +8,7 @@ import {
 } from "../../schemas/archiveTypes";
 import { getAllTasks, type Task } from "../../api/tasksApi";
 import { Loader2 } from "lucide-react";
-import { useTaskModal } from "../../components/modal-task";
+import { useTaskModal } from "../../components/modal/modal-task";
 
 const ArchivePage: React.FC = () => {
   const { isDarkMode } = useTheme();

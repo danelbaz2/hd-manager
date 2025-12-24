@@ -21,8 +21,8 @@ const VIEW_MODE_OPTIONS = [
 ];
 
 const DISPLAY_MODE_OPTIONS = [
-  { id: "list" as DisplayMode, icon: AlignJustify, title: "תצוגת רשימה" },
   { id: "grid" as DisplayMode, icon: LayoutGrid, title: "תצוגת כרטיסים" },
+  { id: "list" as DisplayMode, icon: AlignJustify, title: "תצוגת רשימה" },
   { id: "tags" as DisplayMode, icon: Tags, title: "תצוגת תגיות" },
 ];
 

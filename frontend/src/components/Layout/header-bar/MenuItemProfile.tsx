@@ -1,9 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings, Moon, Sun, LogOut, Import, FileOutput } from "lucide-react";
+import { Settings, Moon, Sun, LogOut, FileOutput } from "lucide-react";
 import { useTheme, useAuth } from "../../../contexts";
-import ManageSetting from "../../modal-setting/ManageSetting";
-import { ExportModal } from "../../modal-export-excel";
+import ManageSetting from "../../modal/modal-setting/ManageSetting";
+import { ExportModal } from "../../modal/modal-export-excel";
 
 interface MenuItemProfileProps {
   isOpen: boolean;

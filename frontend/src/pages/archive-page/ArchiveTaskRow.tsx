@@ -4,10 +4,7 @@ import { useTheme } from "../../contexts";
 import { type Task } from "../../api/tasksApi";
 import { type UserData } from "../../schemas/userTypes";
 import { type SecondaryTagData } from "../../schemas/tagTypes";
-import {
-  getStatusStyle,
-  getGradientStyle,
-} from "../home-page/parts/taskItemUtils";
+import { getStatusStyle, getGradientStyle } from "../home-page/shared";
 import { Tooltip } from "../../components/tags-tooltip";
 
 interface Props {

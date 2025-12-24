@@ -10,3 +10,9 @@ export {
   filterTasksByTags,
   type ViewMode,
 } from "./dateUtils";
+
+export {
+  getStatusStyle,
+  getGradientStyle,
+  getPriorityStyle,
+} from "./taskItemUtils";

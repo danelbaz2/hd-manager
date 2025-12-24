@@ -18,7 +18,6 @@ const MENU_ITEMS = [
   { id: "/", label: "בית", icon: Home },
   { id: "/tasks", label: "משימות", icon: List },
   { id: "/archive", label: "ארכיון", icon: Archive },
-  { id: "/chat", label: "צ'אט", icon: MessageCircle },
 ];
 
 const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
@@ -67,6 +66,11 @@ const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
           <Link
             key={item.id}
             to={item.id}
+            state={
+              item.id === "/"
+                ? { displayMode: "grid", viewMode: "daily" }
+                : undefined
+            }
             className={`
               w-full flex items-center justify-end
               gap-3 lg:gap-4

@@ -1,14 +1,15 @@
 import React from "react";
 import { type UserData } from "../../../../schemas/userTypes";
 import { type Task } from "../../../../api/tasksApi";
-import UserCard from "../UserCard";
+import UserCardLine from "./UserCardLine";
 import TaskBrief from "./TaskBrief";
 import MotivationalBanner from "./MotivationalBanner";
-import { Statistics } from "../admin-view";
+import Statistics from "../Statistics";
 
 interface UserViewProps {
   user: UserData;
-  tasks: Task[];
+  tasks: Task[]; // User's personal tasks
+  allTasks: Task[]; // All team tasks for statistics
   viewMode: "daily" | "weekly" | "monthly";
   onUserClick?: () => void;
 }
@@ -21,55 +22,77 @@ const getTaskCountsForUser = (tasks: Task[]) => ({
   ).length,
 });
 
+// Calculate total stats from all tasks
+const calculateTotalStats = (tasks: Task[]) => ({
+  open: tasks.filter((t) => t.status === "pending").length,
+  inProgress: tasks.filter((t) => t.status === "in_progress").length,
+  closed: tasks.filter(
+    (t) => t.status === "completed" || t.status === "cancelled"
+  ).length,
+});
+
 const getStatTitle = (viewMode: string) => {
   switch (viewMode) {
     case "weekly":
-      return "הסטטיסטיקה שלי - שבועי";
+      return "סטטיסטיקה שבועית";
     case "monthly":
-      return "הסטטיסטיקה שלי - חודשי";
+      return "סטטיסטיקה חודשית";
     default:
-      return "הסטטיסטיקה שלי - יומי";
+      return "סטטיסטיקה יומית";
   }
 };
 
 const UserView: React.FC<UserViewProps> = ({
   user,
   tasks,
+  allTasks,
   viewMode,
   onUserClick,
 }) => {
-  const stats = getTaskCountsForUser(tasks);
+  const personalStats = getTaskCountsForUser(tasks);
+  const teamStats = calculateTotalStats(allTasks);
 
   return (
-    <div className="flex flex-col gap-4 h-full">
-      {/* Top Row: UserCard + MotivationalBanner - Centered */}
-      <div className="flex justify-center gap-4" dir="rtl">
-        {/* User Card */}
-        <div className="w-1/3">
-          <UserCard
-            user={user}
-            taskCounts={stats}
-            onUserClick={() => onUserClick?.()}
-          />
-        </div>
-        {/* Motivational Banner - Same width as UserCard */}
-        <div className="w-1/3">
-          <MotivationalBanner userName={user.fullName} userId={user.id} />
+    <div className="flex flex-col h-full">
+      {/* Header Section - 20% height: Banner + UserCard in a row */}
+      <div
+        className="h-[20%] min-h-[100px] flex items-center shrink-0"
+        dir="rtl"
+      >
+        <div className="flex items-center w-full gap-4">
+          {/* Motivational Banner */}
+          <div className="shrink-0">
+            <MotivationalBanner userName={user.fullName} userId={user.id} />
+          </div>
+
+          {/* Divider */}
+          <div className="w-px h-16 bg-slate-200 dark:bg-slate-700 shrink-0" />
+
+          {/* User Card - Line Style */}
+          <div className="flex-1">
+            <UserCardLine
+              user={user}
+              taskCounts={personalStats}
+              onUserClick={() => onUserClick?.()}
+            />
+          </div>
         </div>
       </div>
 
-      {/* Task Brief */}
+      {/* Task Brief - Takes remaining space */}
       <div className="flex-1 overflow-auto">
         <TaskBrief tasks={tasks} />
       </div>
 
-      {/* Personal Statistics */}
-      <Statistics
-        open={stats.open}
-        inProgress={stats.inProgress}
-        closed={stats.closed}
-        title={getStatTitle(viewMode)}
-      />
+      {/* Team Statistics */}
+      <div className="shrink-0">
+        <Statistics
+          open={teamStats.open}
+          inProgress={teamStats.inProgress}
+          closed={teamStats.closed}
+          title={getStatTitle(viewMode)}
+        />
+      </div>
     </div>
   );
 };

@@ -1,5 +1,4 @@
 import React from "react";
-import { Users } from "lucide-react";
 import { useTheme } from "../../../../contexts";
 import { type UserData } from "../../../../schemas/userTypes";
 import { type Task } from "../../../../api/tasksApi";
@@ -35,46 +34,39 @@ const AdminUserGrid: React.FC<AdminUserGridProps> = ({
   const { isDarkMode } = useTheme();
 
   return (
-    <div
-      className={`rounded-2xl border p-4 ${
-        isDarkMode
-          ? "bg-slate-800 border-slate-700"
-          : "bg-white border-slate-200"
-      }`}
-      dir="rtl"
-    >
-      {/* Header */}
-      <div className="flex items-center gap-2 mb-4">
-        <Users className="w-5 h-5 text-blue-500" />
-        <h3
-          className={`font-bold text-sm ${
-            isDarkMode ? "text-white" : "text-slate-800"
-          }`}
-        >
-          צוות ({users.length}X3)
-        </h3>
-      </div>
-
-      {/* User Cards Grid - 3 columns */}
+    <div className="h-full" dir="rtl">
       {users.length === 0 ? (
         <div
-          className={`text-center py-8 ${
-            isDarkMode ? "text-slate-400" : "text-slate-500"
+          className={`h-full flex items-center justify-center rounded-2xl border ${
+            isDarkMode ? "border-slate-700" : "border-slate-200"
           }`}
         >
-          <p className="text-sm">אין משתמשים להצגה</p>
+          <p
+            className={`text-sm ${
+              isDarkMode ? "text-slate-400" : "text-slate-500"
+            }`}
+          >
+            אין משתמשים להצגה
+          </p>
         </div>
       ) : (
-        <div className="grid grid-cols-3 gap-3">
-          {users.map((user) => (
-            <UserCard
-              key={user.id}
-              user={user}
-              taskCounts={getTaskCountsForUser(user.id, tasks)}
-              onUserClick={onUserClick}
-              isClickable={isUserClickable ? isUserClickable(user.id) : true}
-            />
-          ))}
+        <div
+          className={`h-full p-1 overflow-y-auto ${
+            isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+          }`}
+        >
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 gap-2 md:gap-3">
+            {users.map((user) => (
+              <UserCard
+                key={user.id}
+                user={user}
+                taskCounts={getTaskCountsForUser(user.id, tasks)}
+                onUserClick={onUserClick}
+                isClickable={isUserClickable ? isUserClickable(user.id) : true}
+                size="normal"
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>

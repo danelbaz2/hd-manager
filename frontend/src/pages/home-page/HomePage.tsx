@@ -1,21 +1,37 @@
-import React, { useState, useMemo, useCallback } from "react";
+import React, { useState, useMemo, useCallback, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { useTheme, useSettings, useViewState } from "../../contexts";
 import HeaderHomePage from "./HeaderHomePage";
-import NewTaskModal from "../../components/modal-new-task";
+import NewTaskModal from "../../components/modal/modal-new-task";
 import { GridView } from "./grid-view";
 import { ListView } from "./list-view";
 import { TagsView } from "./tags-view";
 import { filterTasksByDateRange } from "./shared";
-import { useTaskModal } from "../../components/modal-task";
+import { useTaskModal } from "../../components/modal/modal-task";
 import { type Task } from "../../api/tasksApi";
 
 const HomePage: React.FC = () => {
   const { isDarkMode } = useTheme();
+  const location = useLocation();
   const { users, secondaryTags, tasks, refreshTasks, refreshTaskHistory } =
     useSettings();
   const { viewMode, setViewMode, displayMode, setDisplayMode, selectedDate } =
     useViewState();
   const { openTaskModal } = useTaskModal();
+
+  // Handle navigation state from menu
+  useEffect(() => {
+    const state = location.state as {
+      displayMode?: string;
+      viewMode?: string;
+    } | null;
+    if (state?.displayMode === "grid") {
+      setDisplayMode("grid");
+    }
+    if (state?.viewMode === "daily") {
+      setViewMode("daily");
+    }
+  }, [location.state, setDisplayMode, setViewMode]);
 
   // Modal state
   const [isNewTaskModalOpen, setIsNewTaskModalOpen] = useState(false);

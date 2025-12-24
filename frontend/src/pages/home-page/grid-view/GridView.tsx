@@ -58,6 +58,7 @@ const GridView: React.FC<GridViewProps> = ({
           <UserView
             user={currentUser}
             tasks={userTasks}
+            allTasks={tasks}
             viewMode={viewMode}
             onUserClick={() => handleUserClick(currentUser)}
           />
