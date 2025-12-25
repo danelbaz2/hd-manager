@@ -122,38 +122,11 @@ const HOME_TOUR: PageTourConfig = {
     adminOnly: false,
 };
 
-// Kanban Page Tour
+// Kanban Page Tour - DISABLED (to be continued in future)
 const KANBAN_TOUR: PageTourConfig = {
     pageId: "kanban",
     storageKey: `${TOUR_STORAGE_PREFIX}kanban`,
-    steps: [
-        {
-            targetSelector: "[data-tour='kanban-columns']",
-            title: "לוח המשימות (Kanban)",
-            description: "כאן רואים את זרימת העבודה. ניתן לגרור משימות בין העמודות כדי לעדכן סטטוס",
-            position: "bottom",
-        },
-        {
-            targetSelector: "[data-tour='kanban-card']",
-            title: "כרטיס משימה",
-            description: "לחיצה על המשימה תפתח את החלון המלא עם כל הפרטים. קדימה, לחצו על משימה עכשיו!",
-            position: "right",
-            allowInteraction: true,
-        },
-        {
-            targetSelector: "[data-tour='history-tab']",
-            title: "היסטוריית משימה",
-            description: "בלשונית זו אפשר לראות את כל השינויים והפעולות שבוצעו במשימה לאורך הזמן",
-            position: "bottom",
-            waitForTarget: true,
-        },
-        {
-            targetSelector: "[data-tour='view-modes']",
-            title: "סינון זמן",
-            description: "גם כאן ניתן לסנן את הלוח לפי יום, שבוע או חודש",
-            position: "left",
-        },
-    ],
+    steps: [], // Empty steps = tour disabled
     adminOnly: false,
 };
 

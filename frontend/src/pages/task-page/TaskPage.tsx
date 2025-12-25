@@ -11,7 +11,6 @@ import { KanbanBoard } from "./parts";
 import { updateTask, type Task, type TaskStatus } from "../../api/tasksApi";
 import { useTaskModal } from "../../components/modal/modal-task";
 import { useTour } from "../../components/demos/tour-provider";
-import { PageHelpButton } from "../../components/demos/page-help-button";
 import { DEMO_TASKS, DEMO_USERS } from "../../components/demos/shared/tourData";
 import type { UserData } from "../../schemas/userTypes";
 
@@ -373,9 +372,6 @@ const TaskPage: React.FC = () => {
           onTaskClick={handleTaskClick}
         />
       </div>
-
-      {/* Floating Help Button */}
-      <PageHelpButton pageId="kanban" />
     </div>
   );
 };

@@ -34,8 +34,19 @@ const TourOverlay: React.FC = () => {
 
     const [targetRects, setTargetRects] = useState<TargetRect[]>([]);
     const [placementRect, setPlacementRect] = useState<TargetRect | null>(null);
+    const [isAnimating, setIsAnimating] = useState(false);
     const currentStep = getCurrentStep();
     const totalSteps = getTotalSteps();
+
+    // Trigger entrance animation when tour starts
+    useEffect(() => {
+        if (state.isActive && state.currentStepIndex === 0) {
+            setIsAnimating(false);
+            // Small delay then trigger animation
+            const timer = setTimeout(() => setIsAnimating(true), 50);
+            return () => clearTimeout(timer);
+        }
+    }, [state.isActive, state.currentStepIndex]);
 
     // Find and measure target elements
     const updateTargetRects = useCallback(() => {
@@ -305,15 +316,19 @@ const TourOverlay: React.FC = () => {
 
             {/* Tooltip / Welcome Modal */}
             {currentStep.position === "center" ? (
-                /* Special Welcome Modal - Beautiful and prominent */
+                /* Special Welcome Modal - Beautiful and prominent with entrance animation */
                 <div
                     style={{
                         position: "fixed",
                         top: "50%",
                         left: "50%",
-                        transform: "translate(-50%, -50%)",
+                        transform: isAnimating
+                            ? "translate(-50%, -50%) scale(1)"
+                            : "translate(-50%, -50%) scale(0.8)",
                         width: 450,
                         zIndex: 10002,
+                        opacity: isAnimating ? 1 : 0,
+                        transition: "all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
                     }}
                     className={`
                         rounded-3xl shadow-2xl overflow-hidden
@@ -321,17 +336,49 @@ const TourOverlay: React.FC = () => {
                     `}
                     dir="rtl"
                 >
-                    {/* Gradient Header */}
+                    {/* Floating Sparkles Background */}
+                    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                        {[...Array(12)].map((_, i) => (
+                            <div
+                                key={i}
+                                className="absolute w-2 h-2 rounded-full opacity-60"
+                                style={{
+                                    background: `linear-gradient(135deg, ${['#60a5fa', '#a78bfa', '#f472b6', '#fbbf24'][i % 4]} 0%, transparent 100%)`,
+                                    left: `${10 + (i * 7)}%`,
+                                    top: `${15 + (i % 3) * 25}%`,
+                                    animation: `float ${3 + (i % 3)}s ease-in-out infinite`,
+                                    animationDelay: `${i * 0.2}s`,
+                                }}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Gradient Header with shimmer */}
                     <div
-                        className="p-6 text-center"
+                        className="p-6 text-center relative overflow-hidden"
                         style={{
                             background: isDarkMode
                                 ? "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #ec4899 100%)"
                                 : "linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%)",
                         }}
                     >
-                        {/* Welcome Icon */}
-                        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm mb-4">
+                        {/* Shimmer effect */}
+                        <div
+                            className="absolute inset-0 opacity-30"
+                            style={{
+                                background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.4) 50%, transparent 100%)",
+                                animation: isAnimating ? "shimmer 2s ease-in-out infinite" : "none",
+                            }}
+                        />
+
+                        {/* Welcome Icon with bounce */}
+                        <div
+                            className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm mb-4 relative"
+                            style={{
+                                transform: isAnimating ? "scale(1) rotate(0deg)" : "scale(0) rotate(-180deg)",
+                                transition: "all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s",
+                            }}
+                        >
                             <svg
                                 className="w-8 h-8 text-white"
                                 fill="none"
@@ -346,50 +393,76 @@ const TourOverlay: React.FC = () => {
                                 />
                             </svg>
                         </div>
-                        <h2 className="text-2xl font-bold text-white mb-2">
+                        <h2
+                            className="text-2xl font-bold text-white mb-2"
+                            style={{
+                                opacity: isAnimating ? 1 : 0,
+                                transform: isAnimating ? "translateY(0)" : "translateY(20px)",
+                                transition: "all 0.5s ease-out 0.3s",
+                            }}
+                        >
                             {currentStep.title}
                         </h2>
-                        <p className="text-white/90 text-sm">
+                        <p
+                            className="text-white/90 text-sm"
+                            style={{
+                                opacity: isAnimating ? 1 : 0,
+                                transform: isAnimating ? "translateY(0)" : "translateY(20px)",
+                                transition: "all 0.5s ease-out 0.4s",
+                            }}
+                        >
                             סיור אינטראקטיבי במערכת
                         </p>
                     </div>
 
                     {/* Content */}
                     <div className="p-6">
-                        <p className={`text-base mb-6 text-center leading-relaxed ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>
+                        <p
+                            className={`text-base mb-6 text-center leading-relaxed ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}
+                            style={{
+                                opacity: isAnimating ? 1 : 0,
+                                transform: isAnimating ? "translateY(0)" : "translateY(15px)",
+                                transition: "all 0.5s ease-out 0.5s",
+                            }}
+                        >
                             {currentStep.description}
                         </p>
 
-                        {/* Features Preview */}
+                        {/* Features Preview with staggered animation */}
                         <div className={`grid grid-cols-3 gap-3 mb-6 ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
-                            <div className="flex flex-col items-center gap-1 text-center">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDarkMode ? "bg-slate-700" : "bg-slate-100"}`}>
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                                    </svg>
+                            {[
+                                { icon: "M4 6h16M4 10h16M4 14h16M4 18h16", label: "תצוגות" },
+                                { icon: "M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z", label: "תאריכים" },
+                                { icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z", label: "צוות" },
+                            ].map((item, idx) => (
+                                <div
+                                    key={idx}
+                                    className="flex flex-col items-center gap-1 text-center"
+                                    style={{
+                                        opacity: isAnimating ? 1 : 0,
+                                        transform: isAnimating ? "translateY(0) scale(1)" : "translateY(20px) scale(0.8)",
+                                        transition: `all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) ${0.6 + idx * 0.1}s`,
+                                    }}
+                                >
+                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDarkMode ? "bg-slate-700" : "bg-slate-100"}`}>
+                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={item.icon} />
+                                        </svg>
+                                    </div>
+                                    <span className="text-xs">{item.label}</span>
                                 </div>
-                                <span className="text-xs">תצוגות</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-1 text-center">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDarkMode ? "bg-slate-700" : "bg-slate-100"}`}>
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <span className="text-xs">תאריכים</span>
-                            </div>
-                            <div className="flex flex-col items-center gap-1 text-center">
-                                <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${isDarkMode ? "bg-slate-700" : "bg-slate-100"}`}>
-                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                </div>
-                                <span className="text-xs">צוות</span>
-                            </div>
+                            ))}
                         </div>
 
-                        {/* Buttons */}
-                        <div className="flex items-center justify-between">
+                        {/* Buttons with delayed animation */}
+                        <div
+                            className="flex items-center justify-between"
+                            style={{
+                                opacity: isAnimating ? 1 : 0,
+                                transform: isAnimating ? "translateY(0)" : "translateY(15px)",
+                                transition: "all 0.5s ease-out 0.9s",
+                            }}
+                        >
                             <button
                                 onClick={skipTour}
                                 className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors
@@ -400,7 +473,7 @@ const TourOverlay: React.FC = () => {
                             </button>
                             <button
                                 onClick={nextStep}
-                                className="px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:scale-105"
+                                className="px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:scale-105 active:scale-95"
                                 style={{
                                     background: "linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)",
                                     boxShadow: "0 4px 15px rgba(59, 130, 246, 0.4)",
@@ -410,6 +483,18 @@ const TourOverlay: React.FC = () => {
                             </button>
                         </div>
                     </div>
+
+                    {/* CSS Keyframes for animations */}
+                    <style>{`
+                        @keyframes float {
+                            0%, 100% { transform: translateY(0) rotate(0deg); }
+                            50% { transform: translateY(-10px) rotate(180deg); }
+                        }
+                        @keyframes shimmer {
+                            0% { transform: translateX(-100%); }
+                            100% { transform: translateX(100%); }
+                        }
+                    `}</style>
                 </div>
             ) : (
                 /* Regular Tooltip for other steps */

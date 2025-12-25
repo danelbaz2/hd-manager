@@ -47,9 +47,9 @@ const PageHelpButton: React.FC<PageHelpButtonProps> = ({ pageId }) => {
         >
             <HelpCircle className="w-6 h-6 text-white drop-shadow-sm" />
 
-            {/* Tooltip */}
+            {/* Tooltip - appears on the right side */}
             <span className={`
-                absolute right-full mr-3 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap
+                absolute left-full ml-3 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap
                 opacity-0 group-hover:opacity-100 pointer-events-none
                 transition-opacity duration-200
                 ${isDarkMode
