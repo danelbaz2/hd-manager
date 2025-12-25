@@ -28,10 +28,9 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
         onClick={closeTaskModal}
         className={`
           p-2.5 rounded-xl transition-all
-          ${
-            isDarkMode
-              ? "hover:bg-slate-700 text-slate-300 hover:text-white"
-              : "hover:bg-slate-100 text-slate-500 hover:text-slate-700"
+          ${isDarkMode
+            ? "hover:bg-slate-700 text-slate-300 hover:text-white"
+            : "hover:bg-slate-100 text-slate-500 hover:text-slate-700"
           }
         `}
       >
@@ -41,18 +40,16 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
       {/* Tabs - Center (only when not editing) */}
       {!isEditMode && (
         <div
-          className={`flex items-center gap-1 p-1 rounded-xl ${
-            isDarkMode ? "bg-slate-700/50" : "bg-slate-100"
-          }`}
+          className={`flex items-center gap-1 p-1 rounded-xl ${isDarkMode ? "bg-slate-700/50" : "bg-slate-100"
+            }`}
         >
           <button
             onClick={() => setActiveTab("details")}
             className={`
               px-4 py-1.5 rounded-lg text-sm font-medium transition-all
-              ${
-                activeTab === "details"
-                  ? "bg-blue-500 text-white shadow-sm"
-                  : isDarkMode
+              ${activeTab === "details"
+                ? "bg-blue-500 text-white shadow-sm"
+                : isDarkMode
                   ? "text-slate-400 hover:text-white"
                   : "text-slate-500 hover:text-slate-800"
               }
@@ -61,13 +58,13 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
             פרטי משימה
           </button>
           <button
+            data-tour="history-tab"
             onClick={() => setActiveTab("history")}
             className={`
               px-4 py-1.5 rounded-lg text-sm font-medium transition-all
-              ${
-                activeTab === "history"
-                  ? "bg-blue-500 text-white shadow-sm"
-                  : isDarkMode
+              ${activeTab === "history"
+                ? "bg-blue-500 text-white shadow-sm"
+                : isDarkMode
                   ? "text-slate-400 hover:text-white"
                   : "text-slate-500 hover:text-slate-800"
               }
@@ -81,9 +78,8 @@ export const TaskHeader: React.FC<TaskHeaderProps> = ({
       {/* Edit mode title */}
       {isEditMode && (
         <h2
-          className={`text-xl font-bold ${
-            isDarkMode ? "text-white" : "text-slate-800"
-          }`}
+          className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-800"
+            }`}
         >
           עריכת משימה
         </h2>

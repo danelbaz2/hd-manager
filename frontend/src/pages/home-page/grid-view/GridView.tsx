@@ -11,12 +11,14 @@ interface GridViewProps {
   users: UserData[];
   tasks: Task[];
   viewMode?: "daily" | "weekly" | "monthly";
+  taskHistory?: any[];
 }
 
 const GridView: React.FC<GridViewProps> = ({
   users,
   tasks,
   viewMode = "daily",
+  taskHistory,
 }) => {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
@@ -66,8 +68,12 @@ const GridView: React.FC<GridViewProps> = ({
       </div>
 
       {/* Left Side - Activity Feed (35%) */}
-      <div className="w-[35%] h-full">
-        <ActivityFeedBox />
+      <div className="w-[35%] h-full" data-tour="activity-feed">
+        <ActivityFeedBox
+          tasksOverride={tasks}
+          usersOverride={users}
+          historyOverride={taskHistory}
+        />
       </div>
     </div>
   );

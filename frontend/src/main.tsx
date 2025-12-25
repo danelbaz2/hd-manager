@@ -9,6 +9,8 @@ import {
   AuthProvider,
 } from "./contexts";
 import { TaskModalProvider, TaskModal } from "./components/modal/modal-task";
+import { TourProvider } from "./components/demos/tour-provider";
+import { TourOverlay } from "./components/demos/tour-overlay";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -17,8 +19,12 @@ createRoot(document.getElementById("root")!).render(
         <SettingsProvider>
           <ViewStateProvider>
             <TaskModalProvider>
-              <App />
-              <TaskModal />
+              <TourProvider>
+                <App />
+                <TaskModal />
+                {/* Guided Tour Overlay */}
+                <TourOverlay />
+              </TourProvider>
             </TaskModalProvider>
           </ViewStateProvider>
         </SettingsProvider>

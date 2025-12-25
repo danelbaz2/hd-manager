@@ -137,7 +137,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         dir="rtl"
       >
         {/* Kanban Columns */}
-        <div className="flex h-full gap-4 lg:gap-6 p-4 lg:p-6">
+        <div data-tour="kanban-columns" className="flex h-full gap-4 lg:gap-6 p-4 lg:p-6">
           {KANBAN_COLUMNS.map((column) => (
             <KanbanColumn
               key={column.status}
@@ -174,33 +174,29 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
               </p>
               {/* Status change visualization */}
               <div
-                className={`flex items-center justify-center gap-3 py-3 px-4 rounded-xl ${
-                  isDarkMode ? "bg-slate-700/50" : "bg-slate-100/80"
-                }`}
+                className={`flex items-center justify-center gap-3 py-3 px-4 rounded-xl ${isDarkMode ? "bg-slate-700/50" : "bg-slate-100/80"
+                  }`}
                 dir="rtl"
               >
                 <span
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${
-                    isDarkMode
-                      ? "bg-slate-600 text-slate-200"
-                      : "bg-white text-slate-700 border border-slate-200"
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${isDarkMode
+                    ? "bg-slate-600 text-slate-200"
+                    : "bg-white text-slate-700 border border-slate-200"
+                    }`}
                 >
                   {getStatusLabel(confirmRequest.fromStatus)}
                 </span>
                 <div
-                  className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                    isDarkMode ? "bg-blue-500/20" : "bg-blue-100"
-                  }`}
+                  className={`flex items-center justify-center w-8 h-8 rounded-full ${isDarkMode ? "bg-blue-500/20" : "bg-blue-100"
+                    }`}
                 >
                   <MoveLeft size={16} className="text-blue-500" />
                 </div>
                 <span
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${
-                    isDarkMode
-                      ? "bg-blue-500/30 text-blue-300"
-                      : "bg-blue-500 text-white"
-                  }`}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${isDarkMode
+                    ? "bg-blue-500/30 text-blue-300"
+                    : "bg-blue-500 text-white"
+                    }`}
                 >
                   {getStatusLabel(confirmRequest.toStatus)}
                 </span>

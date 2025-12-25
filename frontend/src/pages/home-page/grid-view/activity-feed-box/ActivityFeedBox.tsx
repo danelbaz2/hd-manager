@@ -5,12 +5,49 @@ import { useTaskModal } from "../../../../components/modal/modal-task";
 import { ActivityMessage } from "./ActivityMessage";
 import { filterActivitiesByDate, sortActivitiesByTime } from "./activityUtils";
 
+import { type Task } from "../../../../api/tasksApi";
+import { type UserData } from "../../../../schemas/userTypes";
+
 type TabType = "tasks" | "team";
 
-const ActivityFeedBox: React.FC = () => {
+interface ActivityFeedBoxProps {
+  tasksOverride?: Task[];
+  usersOverride?: UserData[];
+  historyOverride?: any[]; // Using any to avoid complex import cycles for now
+}
+
+import { useTour } from "../../../../components/demos/tour-provider";
+import { DEMO_TASKS, DEMO_HISTORY, DEMO_TEAM_UPDATES } from "../../../../components/demos/shared/tourData";
+
+// ... existing imports
+
+const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
+  tasksOverride,
+  usersOverride,
+  historyOverride
+}) => {
   const { isDarkMode } = useTheme();
-  const { taskHistory, tasks, users, primaryTags, secondaryTags } = useSettings();
+  const { taskHistory: globalHistory, tasks: globalTasks, users: globalUsers, primaryTags, secondaryTags } = useSettings();
   const { selectedDate } = useViewState();
+  const { state: tourState } = useTour();
+
+  const isTourActive = tourState.isActive && tourState.currentPageId === "home";
+
+  // Use overrides if provided (for demo/tour), otherwise use global state. 
+  // If tour is active, merge dummy data to ensure feed is not empty.
+  const tasks = useMemo(() => {
+    if (tasksOverride) return tasksOverride;
+    if (isTourActive) return [...globalTasks, ...DEMO_TASKS];
+    return globalTasks;
+  }, [tasksOverride, globalTasks, isTourActive]);
+
+  const users = usersOverride || globalUsers;
+
+  const taskHistory = useMemo(() => {
+    if (historyOverride) return historyOverride;
+    if (isTourActive) return [...globalHistory, ...DEMO_HISTORY];
+    return globalHistory;
+  }, [historyOverride, globalHistory, isTourActive]);
 
   const [activeTab, setActiveTab] = useState<TabType>("tasks");
   const { openTaskModal } = useTaskModal();
@@ -45,6 +82,7 @@ const ActivityFeedBox: React.FC = () => {
 
   return (
     <div
+      data-tour="activity-feed"
       className={`h-full flex flex-col rounded-2xl border overflow-hidden ${isDarkMode
         ? "bg-slate-800 border-slate-700"
         : "bg-white border-slate-200"
@@ -74,6 +112,7 @@ const ActivityFeedBox: React.FC = () => {
         <div className="flex" dir="rtl">
           <button
             onClick={() => setActiveTab("tasks")}
+            data-tour="tasks-updates-tab"
             className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium transition-all ${activeTab === "tasks"
               ? isDarkMode
                 ? "bg-slate-700 text-blue-400 border-b-2 border-blue-400"
@@ -102,6 +141,7 @@ const ActivityFeedBox: React.FC = () => {
           </button>
           <button
             onClick={() => setActiveTab("team")}
+            data-tour="team-updates-tab"
             className={`flex-1 flex items-center justify-center gap-2 px-3 py-2.5 text-sm font-medium transition-all ${activeTab === "team"
               ? isDarkMode
                 ? "bg-slate-700 text-purple-400 border-b-2 border-purple-400"
@@ -154,40 +194,80 @@ const ActivityFeedBox: React.FC = () => {
             </div>
           )
         ) : (
-          // Team Updates - Coming Soon
-          <div className="flex flex-col items-center justify-center h-full py-12">
-            <div
-              className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${isDarkMode ? "bg-purple-500/20" : "bg-purple-100"
-                }`}
-            >
-              <Megaphone
-                className={`w-8 h-8 ${isDarkMode ? "text-purple-400" : "text-purple-500"
-                  }`}
-              />
+          // Team Updates
+          (isTourActive) ? (
+            <div className="space-y-3">
+              {/* @ts-ignore */}
+              {DEMO_TEAM_UPDATES.map((update: any) => (
+                <div
+                  key={update.id}
+                  className={`p-3 rounded-xl border ${isDarkMode
+                    ? "bg-slate-800/50 border-slate-700"
+                    : "bg-white border-slate-100 shadow-sm"
+                    }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${update.type === 'announcement' ? 'bg-blue-100 text-blue-600' :
+                      update.type === 'celebration' ? 'bg-yellow-100 text-yellow-600' :
+                        'bg-purple-100 text-purple-600'
+                      }`}>
+                      {update.type === 'announcement' && <Megaphone className="w-4 h-4" />}
+                      {update.type === 'celebration' && <span className="text-sm">🎉</span>}
+                      {update.type === 'update' && <MessageSquare className="w-4 h-4" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className={`text-sm font-semibold ${isDarkMode ? "text-slate-200" : "text-slate-800"}`}>
+                          {update.author}
+                        </span>
+                        <span className={`text-xs ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>
+                          {new Date(update.timestamp).toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                      </div>
+                      <p className={`text-sm leading-relaxed ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>
+                        {update.message}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
-            <h4
-              className={`font-semibold text-lg mb-2 ${isDarkMode ? "text-white" : "text-slate-800"
-                }`}
-            >
-              עדכוני צוות
-            </h4>
-            <p
-              className={`text-sm text-center ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                }`}
-            >
-              בקרוב תוכלו לפרסם עדכונים
-              <br />
-              והודעות לכל הצוות
-            </p>
-            <span
-              className={`mt-4 px-3 py-1 text-xs rounded-full ${isDarkMode
-                ? "bg-purple-500/20 text-purple-300"
-                : "bg-purple-100 text-purple-600"
-                }`}
-            >
-              בפיתוח 🚀
-            </span>
-          </div>
+          ) : (
+            // Coming Soon Placeholder (Non-tour mode)
+            <div className="flex flex-col items-center justify-center h-full py-12">
+              <div
+                className={`w-16 h-16 rounded-full flex items-center justify-center mb-4 ${isDarkMode ? "bg-purple-500/20" : "bg-purple-100"
+                  }`}
+              >
+                <Megaphone
+                  className={`w-8 h-8 ${isDarkMode ? "text-purple-400" : "text-purple-500"
+                    }`}
+                />
+              </div>
+              <h4
+                className={`font-semibold text-lg mb-2 ${isDarkMode ? "text-white" : "text-slate-800"
+                  }`}
+              >
+                עדכוני צוות
+              </h4>
+              <p
+                className={`text-sm text-center ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
+              >
+                בקרוב תוכלו לפרסם עדכונים
+                <br />
+                והודעות לכל הצוות
+              </p>
+              <span
+                className={`mt-4 px-3 py-1 text-xs rounded-full ${isDarkMode
+                  ? "bg-purple-500/20 text-purple-300"
+                  : "bg-purple-100 text-purple-600"
+                  }`}
+              >
+                בפיתוח 🚀
+              </span>
+            </div>
+          )
         )}
       </div>
     </div>

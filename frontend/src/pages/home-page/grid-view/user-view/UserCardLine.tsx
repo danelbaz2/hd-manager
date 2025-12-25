@@ -1,7 +1,8 @@
 import React from "react";
 import { User, Circle, Clock, CheckCircle2 } from "lucide-react";
-import { useTheme } from "../../../../contexts";
+import { useTheme, useAuth } from "../../../../contexts";
 import { type UserData } from "../../../../schemas/userTypes";
+import { useTour } from "../../../../components/demos/tour-provider";
 
 interface TaskCounts {
   open: number;
@@ -27,9 +28,16 @@ const UserCardLine: React.FC<UserCardLineProps> = ({
   isClickable = true,
 }) => {
   const { isDarkMode } = useTheme();
+  const { user: authUser } = useAuth();
+  const { state: tourState, completeTour } = useTour();
+  const isCurrentUser = (authUser as any)?.id === user.id; // Type cast if necessary, or just authUser?.id
 
   const handleClick = () => {
     if (isClickable) {
+      // If tour is active on home page and user clicks their card, complete the tour
+      if (tourState.isActive && tourState.currentPageId === "home" && isCurrentUser) {
+        completeTour();
+      }
       onUserClick?.(user);
     }
   };
@@ -38,6 +46,7 @@ const UserCardLine: React.FC<UserCardLineProps> = ({
     <button
       onClick={handleClick}
       disabled={!isClickable}
+      data-tour={isCurrentUser ? "my-user-card" : undefined}
       className={`
         w-full py-4 px-6 transition-all duration-300 ease-out group rounded-xl
         ${isClickable ? "cursor-pointer" : "cursor-default"}

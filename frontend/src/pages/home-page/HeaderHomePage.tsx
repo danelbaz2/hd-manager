@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Plus,
   Calendar,
@@ -69,27 +69,47 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
     onDisplayModeChange?.(mode);
   };
 
+  // Listen for tour events to change display/view modes
+  useEffect(() => {
+    const handleSetDisplayMode = (e: CustomEvent<DisplayMode>) => {
+      handleDisplayModeChange(e.detail);
+    };
+    const handleSetViewMode = (e: CustomEvent<ViewMode>) => {
+      handleViewModeChange(e.detail);
+    };
+
+    window.addEventListener('tour:set-display-mode', handleSetDisplayMode as EventListener);
+    window.addEventListener('tour:set-view-mode', handleSetViewMode as EventListener);
+
+    return () => {
+      window.removeEventListener('tour:set-display-mode', handleSetDisplayMode as EventListener);
+      window.removeEventListener('tour:set-view-mode', handleSetViewMode as EventListener);
+    };
+  }, []);
+
   return (
     <div
+      data-tour="header-bar"
       className={`
         flex items-center justify-between
         px-4 lg:px-6 xl:px-8 py-3 lg:py-4 
-        ${
-          isDarkMode
-            ? "bg-slate-900 border-slate-800"
-            : "bg-slate-50 border-slate-200"
+        ${isDarkMode
+          ? "bg-slate-900 border-slate-800"
+          : "bg-slate-50 border-slate-200"
         }
       `}
       dir="rtl"
     >
       {/* Right Side - Display Toggle & Search */}
       <div className="flex items-center gap-3 lg:gap-4">
-        <IconButtonToggle
-          options={DISPLAY_MODE_OPTIONS}
-          selected={displayMode}
-          isDarkMode={isDarkMode}
-          onChange={handleDisplayModeChange}
-        />
+        <div data-tour="display-modes">
+          <IconButtonToggle
+            options={DISPLAY_MODE_OPTIONS}
+            selected={displayMode}
+            isDarkMode={isDarkMode}
+            onChange={handleDisplayModeChange}
+          />
+        </div>
 
         {displayMode === "tags" && onSearchChange && (
           <SearchInput
@@ -102,16 +122,19 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
 
       {/* Left Side - View Mode Toggle & Create Button */}
       <div className="flex items-center gap-3 lg:gap-4">
-        <IconToggleButton
-          options={VIEW_MODE_OPTIONS}
-          selected={viewMode}
-          isDarkMode={isDarkMode}
-          onChange={handleViewModeChange}
-        />
+        <div data-tour="view-modes">
+          <IconToggleButton
+            options={VIEW_MODE_OPTIONS}
+            selected={viewMode}
+            isDarkMode={isDarkMode}
+            onChange={handleViewModeChange}
+          />
+        </div>
 
         {isAdmin && (
           <button
             onClick={onCreateTask}
+            data-tour="create-task"
             className="
               flex items-center gap-1.5 lg:gap-2
               px-4 lg:px-5 xl:px-6 py-2 lg:py-2.5

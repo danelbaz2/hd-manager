@@ -385,6 +385,7 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
     <div
       ref={isOverlay ? undefined : cardRef}
       onMouseDown={isOverlay ? undefined : handleMouseDown}
+      data-tour="kanban-card"
       className={getCardClasses(isOverlay)}
       style={
         isOverlay

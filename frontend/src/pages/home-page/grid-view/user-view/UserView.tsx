@@ -66,7 +66,7 @@ const UserView: React.FC<UserViewProps> = ({
           <div className="w-px h-16 bg-slate-200 dark:bg-slate-700 shrink-0" />
 
           {/* User Card - Line Style */}
-          <div className="flex-1">
+          <div className="flex-1" data-tour="my-user-card">
             <UserCardLine
               user={user}
               taskCounts={personalStats}

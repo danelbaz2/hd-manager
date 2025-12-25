@@ -13,6 +13,8 @@ interface TagsViewProps {
   users: UserData[];
   searchQuery?: string;
   onTaskClick?: (task: Task) => void;
+  primaryTags?: PrimaryTagData[];
+  secondaryTags?: SecondaryTagData[];
 }
 
 /**
@@ -47,13 +49,18 @@ const filterTagsBySearch = (
  * TagsView - Shows tasks grouped by tags in accordion style
  * Search filters by tag names (primary or secondary)
  */
-const TagsView: React.FC<TagsViewProps> = ({
+export const TagsView: React.FC<TagsViewProps> = ({
   tasks,
   users,
   searchQuery = "",
   onTaskClick,
+  primaryTags: propsPrimaryTags,
+  secondaryTags: propsSecondaryTags,
 }) => {
-  const { primaryTags, secondaryTags } = useSettings();
+  const { primaryTags: globalPrimaryTags, secondaryTags: globalSecondaryTags } = useSettings();
+
+  const primaryTags = propsPrimaryTags || globalPrimaryTags;
+  const secondaryTags = propsSecondaryTags || globalSecondaryTags;
 
   // Filter tags by search query (matches tag names)
   const filteredPrimaryTags = filterTagsBySearch(

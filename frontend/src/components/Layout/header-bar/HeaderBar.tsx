@@ -193,14 +193,14 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
           className="absolute left-1/2 transform -translate-x-1/2"
         >
           <div
+            data-tour="date-selector"
             className={`
               flex items-center
               rounded-full shadow-sm border
               px-1 md:px-2 py-1
-              ${
-                isDarkMode
-                  ? "bg-slate-700 border-slate-600"
-                  : "bg-white border-slate-200"
+              ${isDarkMode
+                ? "bg-slate-700 border-slate-600"
+                : "bg-white border-slate-200"
               }
             `}
           >
@@ -209,18 +209,17 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
               className={`
                 p-1.5 md:p-2
                 rounded-full transition-colors
-                ${
-                  isDarkMode
-                    ? "hover:bg-slate-600 text-slate-300"
-                    : "hover:bg-slate-100 text-slate-500"
+                ${isDarkMode
+                  ? "hover:bg-slate-600 text-slate-300"
+                  : "hover:bg-slate-100 text-slate-500"
                 }
               `}
               aria-label={
                 viewMode === "monthly"
                   ? "Next month"
                   : viewMode === "weekly"
-                  ? "Next week"
-                  : "Next day"
+                    ? "Next week"
+                    : "Next day"
               }
             >
               <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
@@ -243,18 +242,17 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
               className={`
                 p-1.5 md:p-1
                 rounded-full transition-colors
-                ${
-                  isDarkMode
-                    ? "hover:bg-slate-600 text-slate-300"
-                    : "hover:bg-slate-100 text-slate-500"
+                ${isDarkMode
+                  ? "hover:bg-slate-600 text-slate-300"
+                  : "hover:bg-slate-100 text-slate-500"
                 }
               `}
               aria-label={
                 viewMode === "monthly"
                   ? "Previous month"
                   : viewMode === "weekly"
-                  ? "Previous week"
-                  : "Previous day"
+                    ? "Previous week"
+                    : "Previous day"
               }
             >
               <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
