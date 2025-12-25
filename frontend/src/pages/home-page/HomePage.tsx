@@ -115,10 +115,9 @@ const HomePage: React.FC = () => {
       {/* Main Content */}
       <div
         className={`flex-1 overflow-y-auto p-4 lg:p-6 xl:p-8
-          ${
-            isDarkMode
-              ? "bg-slate-900 dark-scrollbar"
-              : "bg-slate-50 light-scrollbar"
+          ${isDarkMode
+            ? "bg-slate-900 dark-scrollbar"
+            : "bg-slate-50 light-scrollbar"
           }`}
       >
         {renderContent()}
