@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useTheme, useViewState, useAuth } from "../../../contexts";
 import defaultProfile from "../../../assets/default-profile.jpg";
@@ -68,6 +69,10 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
   const { isDarkMode } = useTheme();
   const { viewMode, selectedDate, setSelectedDate } = useViewState();
   const { user } = useAuth();
+  const location = useLocation();
+
+  // Check if we're on the archive route
+  const isArchiveRoute = location.pathname.includes("/archive");
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
@@ -181,91 +186,93 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
         />
       </div>
 
-      {/* Center - Date Picker */}
-      <div
-        ref={calendarRef}
-        className="absolute left-1/2 transform -translate-x-1/2"
-      >
+      {/* Center - Date Picker (hidden on archive route) */}
+      {!isArchiveRoute && (
         <div
-          className={`
-            flex items-center
-            rounded-full shadow-sm border
-            px-1 md:px-2 py-1
-            ${
-              isDarkMode
-                ? "bg-slate-700 border-slate-600"
-                : "bg-white border-slate-200"
-            }
-          `}
+          ref={calendarRef}
+          className="absolute left-1/2 transform -translate-x-1/2"
         >
-          <button
-            onClick={() => changeDate(1)}
-            className={`
-              p-1.5 md:p-2
-              rounded-full transition-colors
-              ${
-                isDarkMode
-                  ? "hover:bg-slate-600 text-slate-300"
-                  : "hover:bg-slate-100 text-slate-500"
-              }
-            `}
-            aria-label={
-              viewMode === "monthly"
-                ? "Next month"
-                : viewMode === "weekly"
-                ? "Next week"
-                : "Next day"
-            }
-          >
-            <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
-          </button>
           <div
-            onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-            className="px-3 md:px-4 min-w-[100px] md:min-w-[140px] text-center cursor-pointer select-none"
-          >
-            <span
-              className={`
-                font-bold text-sm md:text-sm lg:text-base
-                ${isDarkMode ? "text-slate-200" : "text-slate-700"}
-              `}
-            >
-              {getDateDisplayText()}
-            </span>
-          </div>
-          <button
-            onClick={() => changeDate(-1)}
             className={`
-              p-1.5 md:p-1
-              rounded-full transition-colors
+              flex items-center
+              rounded-full shadow-sm border
+              px-1 md:px-2 py-1
               ${
                 isDarkMode
-                  ? "hover:bg-slate-600 text-slate-300"
-                  : "hover:bg-slate-100 text-slate-500"
+                  ? "bg-slate-700 border-slate-600"
+                  : "bg-white border-slate-200"
               }
             `}
-            aria-label={
-              viewMode === "monthly"
-                ? "Previous month"
-                : viewMode === "weekly"
-                ? "Previous week"
-                : "Previous day"
-            }
           >
-            <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
-          </button>
-        </div>
-
-        {/* Calendar Popup */}
-        {isCalendarOpen && (
-          <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 z-50">
-            <Calendar
-              selectedDate={selectedDate}
-              onDateSelect={handleDateSelect}
-              onClose={() => setIsCalendarOpen(false)}
-            />
+            <button
+              onClick={() => changeDate(1)}
+              className={`
+                p-1.5 md:p-2
+                rounded-full transition-colors
+                ${
+                  isDarkMode
+                    ? "hover:bg-slate-600 text-slate-300"
+                    : "hover:bg-slate-100 text-slate-500"
+                }
+              `}
+              aria-label={
+                viewMode === "monthly"
+                  ? "Next month"
+                  : viewMode === "weekly"
+                  ? "Next week"
+                  : "Next day"
+              }
+            >
+              <ChevronLeft className="w-4 h-4 md:w-5 md:h-5" />
+            </button>
+            <div
+              onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+              className="px-3 md:px-4 min-w-[100px] md:min-w-[140px] text-center cursor-pointer select-none"
+            >
+              <span
+                className={`
+                  font-bold text-sm md:text-sm lg:text-base
+                  ${isDarkMode ? "text-slate-200" : "text-slate-700"}
+                `}
+              >
+                {getDateDisplayText()}
+              </span>
+            </div>
+            <button
+              onClick={() => changeDate(-1)}
+              className={`
+                p-1.5 md:p-1
+                rounded-full transition-colors
+                ${
+                  isDarkMode
+                    ? "hover:bg-slate-600 text-slate-300"
+                    : "hover:bg-slate-100 text-slate-500"
+                }
+              `}
+              aria-label={
+                viewMode === "monthly"
+                  ? "Previous month"
+                  : viewMode === "weekly"
+                  ? "Previous week"
+                  : "Previous day"
+              }
+            >
+              <ChevronRight className="w-4 h-4 md:w-5 md:h-5" />
+            </button>
           </div>
-        )}
-      </div>
+
+          {/* Calendar Popup */}
+          {isCalendarOpen && (
+            <div className="absolute top-full mt-2 left-1/2 transform -translate-x-1/2 z-50">
+              <Calendar
+                selectedDate={selectedDate}
+                onDateSelect={handleDateSelect}
+                onClose={() => setIsCalendarOpen(false)}
+              />
+            </div>
+          )}
+        </div>
+      )}
     </header>
   );
 };

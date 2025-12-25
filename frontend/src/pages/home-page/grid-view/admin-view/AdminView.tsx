@@ -3,6 +3,8 @@ import { type UserData } from "../../../../schemas/userTypes";
 import { type Task } from "../../../../api/tasksApi";
 import AdminUserGrid from "./AdminUserGrid";
 import Statistics from "../Statistics";
+import MotivationalBanner from "../MotivationalBanner";
+import { useAuth } from "../../../../contexts";
 
 interface AdminViewProps {
   users: UserData[];
@@ -24,11 +26,11 @@ const calculateTotalStats = (tasks: Task[]) => ({
 const getStatTitle = (viewMode: string) => {
   switch (viewMode) {
     case "weekly":
-      return "סטטיסטיקה שבועית";
+      return "סטטיסטיקה צוותית שבועית";
     case "monthly":
-      return "סטטיסטיקה חודשית";
+      return "סטטיסטיקה צוותית חודשית";
     default:
-      return "סטטיסטיקה יומית";
+      return "סטטיסטיקה צוותית יומית";
   }
 };
 
@@ -39,12 +41,18 @@ const AdminView: React.FC<AdminViewProps> = ({
   onUserClick,
   isUserClickable,
 }) => {
+  const { user } = useAuth();
   const stats = calculateTotalStats(tasks);
 
   return (
-    <div className="flex flex-col gap-4 h-full">
-      {/* User Cards Grid - flex-1 with min-h-0 for proper flex overflow */}
-      <div className="flex-1 min-h-0">
+    <div className="flex flex-col h-full">
+      {/* Header Section - MotivationalBanner headline */}
+      <div className="">
+        <MotivationalBanner userName={user?.fullName} userId={user?.id} />
+      </div>
+
+      {/* User Cards Grid - takes remaining space */}
+      <div className="flex-1 min-h-5">
         <AdminUserGrid
           users={users}
           tasks={tasks}
@@ -54,12 +62,14 @@ const AdminView: React.FC<AdminViewProps> = ({
       </div>
 
       {/* Statistics */}
-      <Statistics
-        open={stats.open}
-        inProgress={stats.inProgress}
-        closed={stats.closed}
-        title={getStatTitle(viewMode)}
-      />
+      <div className="shrink-0 mt-4">
+        <Statistics
+          open={stats.open}
+          inProgress={stats.inProgress}
+          closed={stats.closed}
+          title={getStatTitle(viewMode)}
+        />
+      </div>
     </div>
   );
 };

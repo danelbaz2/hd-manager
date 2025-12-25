@@ -30,18 +30,12 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
     }
   };
 
-  // Get role display text
-  const getRoleText = (role?: string) => {
-    if (role === "admin") return "מנהל מערכת";
-    return "משתמש";
-  };
-
   return (
     <button
       onClick={handleClick}
       disabled={!isClickable}
       className={`
-        w-full rounded-xl overflow-hidden
+        w-full h-38 w-64 rounded-xl overflow-hidden flex flex-col
         transition-all duration-300 ease-out group
         ${
           isClickable
@@ -59,7 +53,7 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
       `}
     >
       {/* Top Section - Avatar, Name, Role */}
-      <div className="pt-3 pb-2 px-2 flex flex-col items-center gap-1">
+      <div className="flex-1 pt-4 pb-2 px-4 flex flex-col items-center justify-center gap-1">
         {/* Avatar */}
         <div
           className={`w-10 h-10 rounded-full flex items-center justify-center
@@ -91,15 +85,6 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
         >
           {user.fullName}
         </h3>
-
-        {/* Role */}
-        <p
-          className={`text-[10px] font-medium ${
-            isDarkMode ? "text-slate-400" : "text-slate-500"
-          }`}
-        >
-          {getRoleText(user.role)}
-        </p>
       </div>
 
       {/* Bottom Section - Task Counts Bar */}
@@ -108,9 +93,7 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
         <div
           className={`flex flex-col items-center py-1.5 transition-colors duration-200
             ${
-              isDarkMode
-                ? "bg-emerald-500/15 hover:bg-emerald-500/25"
-                : "bg-emerald-50 hover:bg-emerald-100"
+              isDarkMode ? " hover:bg-emerald-500/25" : "hover:bg-emerald-100"
             }`}
         >
           <span
@@ -132,11 +115,7 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
         {/* In Progress (בטיפול) - Yellow/Amber */}
         <div
           className={`flex flex-col items-center py-1.5 transition-colors duration-200
-            ${
-              isDarkMode
-                ? "bg-amber-500/15 hover:bg-amber-500/25"
-                : "bg-amber-50 hover:bg-amber-100"
-            }`}
+            ${isDarkMode ? " hover:bg-amber-500/25" : " hover:bg-amber-100"}`}
         >
           <span
             className={`text-sm font-bold ${
@@ -157,11 +136,7 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
         {/* Closed (סגור) - Gray */}
         <div
           className={`flex flex-col items-center py-1.5 transition-colors duration-200
-            ${
-              isDarkMode
-                ? "bg-slate-600/30 hover:bg-slate-600/50"
-                : "bg-slate-100 hover:bg-slate-200"
-            }`}
+            ${isDarkMode ? "hover:bg-slate-600/50" : " hover:bg-slate-200"}`}
         >
           <span
             className={`text-sm font-bold ${
