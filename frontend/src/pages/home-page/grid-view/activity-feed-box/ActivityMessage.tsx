@@ -1,44 +1,21 @@
 import React from "react";
-import {
-  Plus,
-  Pencil,
-  Clock,
-  CheckCircle2,
-  Trash2,
-  MessageSquare,
-  UserPlus,
-  ArrowLeft,
-} from "lucide-react";
-import type { TaskHistoryEntry, TaskHistoryAction } from "../../../../api/tasksApi";
+import { ArrowLeft } from "lucide-react";
+import type { TaskHistoryEntry } from "../../../../api/tasksApi";
 import type { UserData } from "../../../../schemas/userTypes";
+import type { PrimaryTagData, SecondaryTagData } from "../../../../schemas/tagTypes";
 import { formatTime } from "./activityUtils";
+import { getIconConfig } from "../../../../components/modal/modal-task/history/historyConfig";
 
 interface ActivityMessageProps {
   entry: TaskHistoryEntry;
   taskTitle?: string;
   isDarkMode: boolean;
   users: UserData[];
+  primaryTags?: PrimaryTagData[];
+  secondaryTags?: SecondaryTagData[];
+  isTaskDeleted?: boolean;  // True if the task no longer exists
   onClick?: () => void;
 }
-
-// Action config
-const ACTION_CONFIG: Record<
-  TaskHistoryAction,
-  {
-    icon: React.ElementType;
-    color: string;
-    bgColor: string;
-    label: string;
-  }
-> = {
-  CREATE: { icon: Plus, color: "#22C55E", bgColor: "#22C55E20", label: "יצירה" },
-  UPDATE: { icon: Pencil, color: "#3B82F6", bgColor: "#3B82F620", label: "עדכון" },
-  IN_PROGRESS: { icon: Clock, color: "#F59E0B", bgColor: "#F59E0B20", label: "בטיפול" },
-  CLOSE: { icon: CheckCircle2, color: "#10B981", bgColor: "#10B98120", label: "נסגר" },
-  DELETE: { icon: Trash2, color: "#EF4444", bgColor: "#EF444420", label: "נמחק" },
-  NOTE: { icon: MessageSquare, color: "#8B5CF6", bgColor: "#8B5CF620", label: "הערה" },
-  ASSIGN: { icon: UserPlus, color: "#06B6D4", bgColor: "#06B6D420", label: "שיוך" },
-};
 
 // Status and priority labels
 const STATUS_LABELS: Record<string, string> = {
@@ -62,13 +39,30 @@ const FIELD_LABELS: Record<string, string> = {
   date: "תאריך",
   deadline: "תאריך יעד",
   responsibleUserIds: "אחראים",
+  primaryTagIds: "קטגוריות",
+  secondaryTagIds: "תגיות",
+};
+
+// Helper to get tag names
+const getPrimaryTagNames = (tagIds: string[], tags: PrimaryTagData[]): string[] => {
+  return tagIds
+    .map((id) => tags.find((t) => t.id === id)?.name)
+    .filter((name): name is string => !!name);
+};
+
+const getSecondaryTagNames = (tagIds: string[], tags: SecondaryTagData[]): string[] => {
+  return tagIds
+    .map((id) => tags.find((t) => t.id === id)?.name)
+    .filter((name): name is string => !!name);
 };
 
 // Format value for display
 const formatValue = (
   field: string,
   value: unknown,
-  users: UserData[]
+  users: UserData[],
+  primaryTags: PrimaryTagData[] = [],
+  secondaryTags: SecondaryTagData[] = []
 ): string => {
   if (value === null || value === undefined) return "ריק";
 
@@ -80,12 +74,23 @@ const formatValue = (
     case "date":
     case "deadline":
       return value ? new Date(value as number).toLocaleDateString("he-IL") : "לא נקבע";
-    case "responsibleUserIds":
+    case "responsibleUserIds": {
       const ids = value as string[];
       const names = ids
         .map((id) => users.find((u) => u.id === id)?.fullName)
         .filter((n): n is string => !!n);
       return names.length > 0 ? names.join(", ") : "אין אחראים";
+    }
+    case "primaryTagIds": {
+      const tagIds = value as string[];
+      const names = getPrimaryTagNames(tagIds, primaryTags);
+      return names.length > 0 ? names.join(", ") : "אין קטגוריות";
+    }
+    case "secondaryTagIds": {
+      const tagIds = value as string[];
+      const names = getSecondaryTagNames(tagIds, secondaryTags);
+      return names.length > 0 ? names.join(", ") : "אין תגיות";
+    }
     default:
       return String(value);
   }
@@ -96,11 +101,19 @@ export const ActivityMessage: React.FC<ActivityMessageProps> = ({
   taskTitle,
   isDarkMode,
   users,
+  primaryTags = [],
+  secondaryTags = [],
+  isTaskDeleted = false,
   onClick,
 }) => {
-  const config = ACTION_CONFIG[entry.action] || ACTION_CONFIG.UPDATE;
+  // Use dynamic icon config based on changed fields
+  const config = getIconConfig(entry);
   const Icon = config.icon;
-  const title = taskTitle || "משימה";
+
+  // For DELETE actions, use the title from oldValues if available
+  const title = entry.action === "DELETE" && entry.oldValues?.title
+    ? (entry.oldValues.title as string)
+    : (taskTitle || "משימה");
 
   // Find user by fullName
   const user = users.find((u) => u.fullName === entry.updatedBy);
@@ -109,7 +122,7 @@ export const ActivityMessage: React.FC<ActivityMessageProps> = ({
   // Get changed fields (excluding base metadata)
   const changedFields = entry.changes
     ? Object.keys(entry.changes).filter((k) =>
-      ["title", "description", "priority", "status", "date", "deadline", "responsibleUserIds"].includes(k)
+      ["title", "description", "priority", "status", "date", "deadline", "responsibleUserIds", "primaryTagIds", "secondaryTagIds"].includes(k)
     )
     : [];
 
@@ -129,6 +142,15 @@ export const ActivityMessage: React.FC<ActivityMessageProps> = ({
       return (
         <p className={`text-sm ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>
           יצר את המשימה "<span className="font-medium">{title}</span>"
+        </p>
+      );
+    }
+
+    // DELETE action - show the deleted task title
+    if (entry.action === "DELETE") {
+      return (
+        <p className={`text-sm ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>
+          מחק את המשימה "<span className="font-medium text-red-500">{title}</span>"
         </p>
       );
     }
@@ -155,13 +177,13 @@ export const ActivityMessage: React.FC<ActivityMessageProps> = ({
                 {oldValue !== undefined && (
                   <>
                     <span className="opacity-60 line-through">
-                      {formatValue(field, oldValue, users)}
+                      {formatValue(field, oldValue, users, primaryTags, secondaryTags)}
                     </span>
                     <ArrowLeft className="w-3 h-3 opacity-50" />
                   </>
                 )}
                 <span className={isDarkMode ? "text-blue-300" : "text-blue-600"}>
-                  {formatValue(field, newValue, users)}
+                  {formatValue(field, newValue, users, primaryTags, secondaryTags)}
                 </span>
               </div>
             );
@@ -178,12 +200,16 @@ export const ActivityMessage: React.FC<ActivityMessageProps> = ({
     );
   };
 
+  // Apply gray filter for deleted tasks (except the DELETE action itself)
+  const shouldShowGrayFilter = isTaskDeleted && entry.action !== "DELETE";
+
   return (
     <div
       className={`flex items-start gap-3 cursor-pointer transition-all rounded-xl p-2.5 ${isDarkMode
-          ? "hover:bg-slate-700/50 active:bg-slate-700"
-          : "hover:bg-slate-100 active:bg-slate-200"
+        ? "hover:bg-slate-700/50 active:bg-slate-700"
+        : "hover:bg-slate-100 active:bg-slate-200"
         }`}
+      style={shouldShowGrayFilter ? { filter: "grayscale(40%)", opacity: 0.7 } : undefined}
       dir="rtl"
       onClick={onClick}
     >
@@ -233,7 +259,7 @@ export const ActivityMessage: React.FC<ActivityMessageProps> = ({
             {config.label}
           </span>
           <span
-            className={`text-xs mr-auto ${isDarkMode ? "text-slate-500" : "text-slate-400"
+            className={`text-xs font-bold mr-auto ${isDarkMode ? "text-slate-400" : "text-slate-500"
               }`}
           >
             {formatTime(entry.timestamp)}

@@ -136,7 +136,14 @@ def delete_task(id):
         
         updated = mongo.db.ents.find_one({'_id': id})
         
-        log_history('task', id, 'DELETE', request.user_full_name, old_doc, updated, {'base': {'isDeleted': True}})
+        # Log deletion - title will be retrieved from old_doc (o field) in frontend via oldValues
+        log_history('task', id, 'DELETE', request.user_full_name, old_doc, updated, {
+            'base': {
+                'isDeleted': True,
+                'updatedAt': now,
+                'updatedBy': request.user_full_name
+            }
+        })
         
     except Exception as e:
         return jsonify({"error": str(e)}), 400
@@ -288,6 +295,11 @@ def get_all_tasks_history():
                 for field in DATA_FIELDS:
                     if field in new_data and new_data[field]:
                         changes[field] = new_data[field]
+            
+            # For DELETE, include title in oldValues so frontend can display it
+            if action_type == 'DELETE' and old_data:
+                if 'title' in old_data:
+                    old_values['title'] = old_data['title']
             
             history_item = {
                 'id': str(entry.get('_id', '')),

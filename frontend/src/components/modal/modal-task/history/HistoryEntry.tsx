@@ -4,7 +4,7 @@
 import React from "react";
 import type { TaskHistoryEntry } from "../../../../api/tasksApi";
 import type { UserData } from "../../../../schemas/userTypes";
-import { ACTION_CONFIG, type ActionConfigItem } from "./historyConfig";
+import { getIconConfig, type ActionConfigItem } from "./historyConfig";
 
 interface HistoryEntryProps {
   entry: TaskHistoryEntry;
@@ -36,7 +36,8 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({
   getActionDescription,
   isNew = false,
 }) => {
-  const config = ACTION_CONFIG[entry.action] || ACTION_CONFIG.UPDATE;
+  // Use dynamic icon config based on changed fields
+  const config = getIconConfig(entry);
   const Icon = config.icon;
 
   return (

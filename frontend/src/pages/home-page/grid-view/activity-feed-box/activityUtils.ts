@@ -100,10 +100,10 @@ export const filterActivitiesByDate = (
 };
 
 /**
- * Sort activities by timestamp (oldest first - earliest at top)
+ * Sort activities by timestamp (newest first - latest at top)
  */
 export const sortActivitiesByTime = (
     activities: TaskHistoryEntry[]
 ): TaskHistoryEntry[] => {
-    return [...activities].sort((a, b) => a.timestamp - b.timestamp);
+    return [...activities].sort((a, b) => b.timestamp - a.timestamp);
 };
