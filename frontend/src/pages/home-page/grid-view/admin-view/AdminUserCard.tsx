@@ -35,7 +35,7 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
       onClick={handleClick}
       disabled={!isClickable}
       className={`
-        w-full rounded-xl overflow-hidden
+        w-full h-38 w-64 rounded-xl overflow-hidden flex flex-col
         transition-all duration-300 ease-out group
         ${
           isClickable
@@ -53,7 +53,7 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
       `}
     >
       {/* Top Section - Avatar, Name, Role */}
-      <div className="pt-3 pb-2 px-2 flex flex-col items-center gap-1">
+      <div className="flex-1 pt-4 pb-2 px-4 flex flex-col items-center justify-center gap-1">
         {/* Avatar */}
         <div
           className={`w-10 h-10 rounded-full flex items-center justify-center

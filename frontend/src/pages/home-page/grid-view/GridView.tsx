@@ -43,7 +43,7 @@ const GridView: React.FC<GridViewProps> = ({
     : [];
 
   return (
-    <div className="flex gap-4 h-full p-4" dir="rtl">
+    <div className="flex gap-4  h-full " dir="rtl">
       {/* Right Side - Main Content (65%) */}
       <div className="w-[65%] h-full overflow-hidden">
         {isAdmin ? (

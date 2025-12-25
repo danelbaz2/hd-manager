@@ -51,11 +51,12 @@ const AdminUserGrid: React.FC<AdminUserGridProps> = ({
         </div>
       ) : (
         <div
-          className={`h-full p-2 overflow-hidden ${
+          dir="ltr"
+          className={`h-full p-1 overflow-y-auto ${
             isDarkMode ? "dark-scrollbar" : "light-scrollbar"
           }`}
         >
-          <div className="grid grid-cols-3 gap-2 h-full content-start">
+          <div dir="rtl" className="grid grid-cols-3 gap-2 content-start">
             {users.map((user) => (
               <AdminUserCard
                 key={user.id}

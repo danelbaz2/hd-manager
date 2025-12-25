@@ -3,7 +3,7 @@ import { type UserData } from "../../../../schemas/userTypes";
 import { type Task } from "../../../../api/tasksApi";
 import UserCardLine from "./UserCardLine";
 import TaskBrief from "./TaskBrief";
-import MotivationalBanner from "./MotivationalBanner";
+import MotivationalBanner from "../MotivationalBanner";
 import Statistics from "../Statistics";
 
 interface UserViewProps {
@@ -34,11 +34,11 @@ const calculateTotalStats = (tasks: Task[]) => ({
 const getStatTitle = (viewMode: string) => {
   switch (viewMode) {
     case "weekly":
-      return "סטטיסטיקה שבועית";
+      return "סטטיסטיקה צוותית שבועית";
     case "monthly":
-      return "סטטיסטיקה חודשית";
+      return "סטטיסטיקה צוותית חודשית";
     default:
-      return "סטטיסטיקה יומית";
+      return "סטטיסטיקה צוותית יומית";
   }
 };
 
@@ -55,10 +55,7 @@ const UserView: React.FC<UserViewProps> = ({
   return (
     <div className="flex flex-col h-full">
       {/* Header Section - 20% height: Banner + UserCard in a row */}
-      <div
-        className="h-[20%] min-h-[100px] flex items-center shrink-0"
-        dir="rtl"
-      >
+      <div className="min-h-[100px] flex items-center shrink-0" dir="rtl">
         <div className="flex items-center w-full gap-4">
           {/* Motivational Banner */}
           <div className="shrink-0">
@@ -85,7 +82,7 @@ const UserView: React.FC<UserViewProps> = ({
       </div>
 
       {/* Team Statistics */}
-      <div className="shrink-0">
+      <div className="shrink-0 mt-4">
         <Statistics
           open={teamStats.open}
           inProgress={teamStats.inProgress}

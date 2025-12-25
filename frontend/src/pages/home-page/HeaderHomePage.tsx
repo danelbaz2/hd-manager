@@ -73,7 +73,7 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
     <div
       className={`
         flex items-center justify-between
-        px-4 lg:px-6 xl:px-8 py-3 lg:py-4 border-b
+        px-4 lg:px-6 xl:px-8 py-3 lg:py-4 
         ${
           isDarkMode
             ? "bg-slate-900 border-slate-800"
