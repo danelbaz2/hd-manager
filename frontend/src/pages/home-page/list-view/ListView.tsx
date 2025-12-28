@@ -13,6 +13,7 @@ interface ListViewProps {
   tasks: Task[];
   users: UserData[];
   tags: SecondaryTagData[];
+  searchQuery?: string;
 }
 
 /**
@@ -21,7 +22,12 @@ interface ListViewProps {
  * - Weekly: Week calendar view
  * - Monthly: Month calendar view
  */
-const ListView: React.FC<ListViewProps> = ({ tasks, users, tags }) => {
+const ListView: React.FC<ListViewProps> = ({
+  tasks,
+  users,
+  tags,
+  searchQuery = "",
+}) => {
   const { viewMode, selectedDate } = useViewState();
   const { openTaskModal } = useTaskModal();
 
@@ -33,11 +39,55 @@ const ListView: React.FC<ListViewProps> = ({ tasks, users, tags }) => {
     [openTaskModal]
   );
 
+  // Filter tasks based on search query
+  const filteredTasks = React.useMemo(() => {
+    if (!searchQuery.trim()) return tasks;
+
+    const query = searchQuery.toLowerCase();
+
+    return tasks.filter((task) => {
+      // 1. Search in title and description
+      if (
+        task.title?.toLowerCase().includes(query) ||
+        task.description?.toLowerCase().includes(query)
+      ) {
+        return true;
+      }
+
+      // 2. Search in responsible users
+      if (task.responsibleUserIds && task.responsibleUserIds.length > 0) {
+        const rIds = task.responsibleUserIds;
+        const taskUsers = users.filter((u) => rIds.includes(u.id));
+        if (
+          taskUsers.some(
+            (u) =>
+              u.fullName.toLowerCase().includes(query) ||
+              u.username.toLowerCase().includes(query) ||
+              (u.nickname && u.nickname.toLowerCase().includes(query))
+          )
+        ) {
+          return true;
+        }
+      }
+
+      // 3. Search in tags
+      if (task.secondaryTagIds && task.secondaryTagIds.length > 0) {
+        const sIds = task.secondaryTagIds;
+        const taskTags = tags.filter((t) => sIds.includes(t.id));
+        if (taskTags.some((t) => t.name.toLowerCase().includes(query))) {
+          return true;
+        }
+      }
+
+      return false;
+    });
+  }, [tasks, searchQuery, users, tags]);
+
   // Render based on view mode
   if (viewMode === "daily") {
     return (
       <DailyList
-        tasks={tasks}
+        tasks={filteredTasks}
         users={users}
         tags={tags}
         onTaskClick={handleTaskClick}
@@ -49,7 +99,7 @@ const ListView: React.FC<ListViewProps> = ({ tasks, users, tags }) => {
     const weekStart = getWeekStart(new Date(selectedDate));
     return (
       <WeeklyList
-        tasks={tasks}
+        tasks={filteredTasks}
         users={users}
         weekStart={weekStart}
         onTaskClick={handleTaskClick}
@@ -60,7 +110,7 @@ const ListView: React.FC<ListViewProps> = ({ tasks, users, tags }) => {
   // Monthly view
   return (
     <MonthlyCalendar
-      tasks={tasks}
+      tasks={filteredTasks}
       users={users}
       selectedDate={selectedDate}
       onTaskClick={handleTaskClick}

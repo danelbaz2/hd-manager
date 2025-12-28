@@ -128,9 +128,11 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
           />
         </div>
 
-        {displayMode === "tags" && onSearchChange && (
+        {(displayMode === "tags" || displayMode === "list") && onSearchChange && (
           <SearchInput
-            placeholder="חיפוש לפי תגית..."
+            placeholder={
+              displayMode === "tags" ? "חיפוש לפי תגית..." : "חיפוש משימה..."
+            }
             isDarkMode={isDarkMode}
             onChange={onSearchChange}
           />
