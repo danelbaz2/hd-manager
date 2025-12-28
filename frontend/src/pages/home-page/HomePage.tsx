@@ -134,7 +134,12 @@ const HomePage: React.FC = () => {
 
       case "list":
         return (
-          <ListView tasks={filteredTasks} users={users} tags={secondaryTags} />
+          <ListView
+            tasks={filteredTasks}
+            users={users}
+            tags={secondaryTags}
+            searchQuery={searchQuery}
+          />
         );
 
       case "tags":
