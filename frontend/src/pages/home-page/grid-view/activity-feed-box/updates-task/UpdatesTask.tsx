@@ -1,16 +1,10 @@
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useCallback } from "react";
+import { Virtuoso } from "react-virtuoso";
 import { UpdateItem } from "./UpdateItem";
-import { DateSeparator } from "./DateSeparator";
 import { useUpdatesData } from "./useUpdatesData";
-import { useUpdatesSocket } from "./useUpdatesSocket";
-import type { UpdatesTaskProps, ListItem } from "./types";
-
-// Get start of day helper
-const getStartOfDay = (ts: number): number => {
-  const d = new Date(ts);
-  d.setHours(0, 0, 0, 0);
-  return d.getTime();
-};
+import { useTaskUpdates } from "../../../../../contexts";
+import type { UpdatesTaskProps } from "./types";
+import type { TaskHistoryEntry } from "../../../../../api/tasksApi";
 
 export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   taskTitleMap,
@@ -18,41 +12,40 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   isDarkMode,
   selectedDate,
   onUpdateClick,
+  onDataRefresh,
 }) => {
-  const { updates, isLoading, error, fetchUpdates, addUpdate } = useUpdatesData(
-    { selectedDate }
-  );
+  const { updates, isLoading, error, fetchUpdates } = useUpdatesData({
+    selectedDate,
+  });
 
-  // WebSocket for real-time updates
-  useUpdatesSocket({ onNewUpdate: addUpdate, enabled: true });
+  // Handle WebSocket updates - refetch and notify parent
+  const handleSocketUpdate = useCallback(() => {
+    fetchUpdates();
+    onDataRefresh?.();
+  }, [fetchUpdates, onDataRefresh]);
+
+  // Subscribe to global WebSocket updates
+  useTaskUpdates(handleSocketUpdate, true);
 
   // Fetch when date changes
   useEffect(() => {
     fetchUpdates();
   }, [fetchUpdates]);
 
-  // Build list items with date separators
-  const listItems = useMemo((): ListItem[] => {
-    const items: ListItem[] = [];
-    let lastDateKey: string | null = null;
-
-    for (const entry of updates) {
-      const dateKey = new Date(entry.timestamp).toDateString();
-
-      if (dateKey !== lastDateKey) {
-        items.push({
-          type: "date",
-          date: getStartOfDay(entry.timestamp),
-          key: `date-${dateKey}`,
-        });
-        lastDateKey = dateKey;
-      }
-
-      items.push({ type: "update", entry, key: entry.id });
-    }
-
-    return items;
-  }, [updates]);
+  // Render single item for virtuoso
+  const renderItem = useCallback(
+    (_index: number, entry: TaskHistoryEntry) => (
+      <UpdateItem
+        key={entry.id}
+        entry={entry}
+        taskTitle={taskTitleMap[entry.taskId]}
+        isDarkMode={isDarkMode}
+        users={users}
+        onClick={() => onUpdateClick(entry.taskId)}
+      />
+    ),
+    [taskTitleMap, isDarkMode, users, onUpdateClick]
+  );
 
   // Loading state
   if (isLoading && updates.length === 0) {
@@ -92,32 +85,12 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   }
 
   return (
-    <div
-      className={`h-full overflow-y-auto ${
-        isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-      }`}
-      dir="rtl"
-    >
-      <div className="flex flex-col">
-        {listItems.map((item) =>
-          item.type === "date" ? (
-            <DateSeparator
-              key={item.key}
-              date={item.date}
-              isDarkMode={isDarkMode}
-            />
-          ) : (
-            <UpdateItem
-              key={item.key}
-              entry={item.entry}
-              taskTitle={taskTitleMap[item.entry.taskId]}
-              isDarkMode={isDarkMode}
-              users={users}
-              onClick={() => onUpdateClick(item.entry.taskId)}
-            />
-          )
-        )}
-      </div>
-    </div>
+    <Virtuoso
+      data={updates}
+      itemContent={renderItem}
+      className={`h-full ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}
+      style={{ height: "100%" }}
+      overscan={200}
+    />
   );
 };

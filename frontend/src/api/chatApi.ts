@@ -11,17 +11,15 @@ export interface ChatMessageBase {
 }
 
 export interface ChatMessage {
-  entityId: string;
-  content?: string;
-  senderId?: string;
-  receiverId?: string;
+  id: string;
+  senderUserId?: string;
+  message?: string;
   base?: ChatMessageBase;
 }
 
 export interface ChatMessageFormData {
-  content?: string;
-  senderId?: string;
-  receiverId?: string;
+  senderUserId: string;
+  message: string;
 }
 
 /**

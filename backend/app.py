@@ -1,3 +1,6 @@
+import eventlet
+eventlet.monkey_patch()
+
 from flask import Flask
 from flask_cors import CORS
 from flask_socketio import SocketIO
@@ -12,7 +15,7 @@ load_dotenv()
 app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app, origins=["http://localhost:5173"])
 
-app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/hd_manager")
+app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017/hd_manager")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "hd-manager-secret-key")
 mongo.init_app(app)
 

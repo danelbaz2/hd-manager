@@ -219,9 +219,9 @@ def seed(clean_only=False, bulk_tasks=False):
             
             created_tasks = []
             
-            for i in range(100):
+            for i in range(1000):
                 # Date spread over 7 days (0 = today, 1-6 = future days)
-                day_offset = i % 7  # Spread tasks across the week
+                day_offset = i % 15  # Spread tasks across the week
                 task_date = get_relative_date(day_offset)
                 deadline = get_relative_date(day_offset + random.randint(1, 3))
                 

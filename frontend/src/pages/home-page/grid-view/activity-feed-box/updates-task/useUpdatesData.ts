@@ -39,10 +39,10 @@ export const useUpdatesData = ({ selectedDate }: UseUpdatesDataOptions) => {
       });
 
       if (response.success && response.data) {
-        // Filter to selected date and sort oldest first
+        // Filter to selected date and sort newest first
         const filtered = response.data
           .filter((u) => u.timestamp >= dayStart && u.timestamp <= dayEnd)
-          .sort((a, b) => a.timestamp - b.timestamp);
+          .sort((a, b) => b.timestamp - a.timestamp);
         setUpdates(filtered);
       } else {
         setError(response.error || "Failed to load updates");
@@ -66,7 +66,7 @@ export const useUpdatesData = ({ selectedDate }: UseUpdatesDataOptions) => {
         // Check if already exists
         if (prev.some((u) => u.id === update.id)) return prev;
         // Add and sort
-        return [...prev, update].sort((a, b) => a.timestamp - b.timestamp);
+        return [...prev, update].sort((a, b) => b.timestamp - a.timestamp);
       });
     }
   }, [selectedDate]);

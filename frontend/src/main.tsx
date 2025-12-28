@@ -7,6 +7,7 @@ import {
   SettingsProvider,
   ViewStateProvider,
   AuthProvider,
+  SocketProvider,
 } from "./contexts";
 import { TaskModalProvider, TaskModal } from "./components/modal/modal-task";
 import { TourProvider } from "./components/demos/tour-provider";
@@ -16,18 +17,20 @@ createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AuthProvider>
       <ThemeProvider>
-        <SettingsProvider>
-          <ViewStateProvider>
-            <TaskModalProvider>
-              <TourProvider>
-                <App />
-                <TaskModal />
-                {/* Guided Tour Overlay */}
-                <TourOverlay />
-              </TourProvider>
-            </TaskModalProvider>
-          </ViewStateProvider>
-        </SettingsProvider>
+        <SocketProvider>
+          <SettingsProvider>
+            <ViewStateProvider>
+              <TaskModalProvider>
+                <TourProvider>
+                  <App />
+                  <TaskModal />
+                  {/* Guided Tour Overlay */}
+                  <TourOverlay />
+                </TourProvider>
+              </TaskModalProvider>
+            </ViewStateProvider>
+          </SettingsProvider>
+        </SocketProvider>
       </ThemeProvider>
     </AuthProvider>
   </StrictMode>

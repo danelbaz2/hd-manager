@@ -7,9 +7,11 @@ import {
   LayoutGrid,
   AlignJustify,
   Tags,
+  HelpCircle,
 } from "lucide-react";
 import { useTheme, useAuth } from "../../contexts";
 import { IconToggleButton, IconButtonToggle, SearchInput } from "./components";
+import { useTour } from "../../components/demos/tour-provider";
 
 type ViewMode = "daily" | "weekly" | "monthly";
 type DisplayMode = "grid" | "list" | "tags";
@@ -49,8 +51,10 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
 }) => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
+  const { startTour, hasSeenTour } = useTour();
 
   const isAdmin = user?.role === "admin";
+  const showHelpPulse = !hasSeenTour("home");
 
   const [internalViewMode, setInternalViewMode] = useState<ViewMode>("daily");
   const [internalDisplayMode, setInternalDisplayMode] =
@@ -78,12 +82,24 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
       handleViewModeChange(e.detail);
     };
 
-    window.addEventListener('tour:set-display-mode', handleSetDisplayMode as EventListener);
-    window.addEventListener('tour:set-view-mode', handleSetViewMode as EventListener);
+    window.addEventListener(
+      "tour:set-display-mode",
+      handleSetDisplayMode as EventListener
+    );
+    window.addEventListener(
+      "tour:set-view-mode",
+      handleSetViewMode as EventListener
+    );
 
     return () => {
-      window.removeEventListener('tour:set-display-mode', handleSetDisplayMode as EventListener);
-      window.removeEventListener('tour:set-view-mode', handleSetViewMode as EventListener);
+      window.removeEventListener(
+        "tour:set-display-mode",
+        handleSetDisplayMode as EventListener
+      );
+      window.removeEventListener(
+        "tour:set-view-mode",
+        handleSetViewMode as EventListener
+      );
     };
   }, []);
 
@@ -93,9 +109,10 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
       className={`
         flex items-center justify-between
         px-4 lg:px-6 xl:px-8 py-3 lg:py-4 
-        ${isDarkMode
-          ? "bg-slate-900 border-slate-800"
-          : "bg-slate-50 border-slate-200"
+        ${
+          isDarkMode
+            ? "bg-slate-900 border-slate-800"
+            : "bg-slate-50 border-slate-200"
         }
       `}
       dir="rtl"
@@ -130,6 +147,23 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
             onChange={handleViewModeChange}
           />
         </div>
+
+        {/* Help Button */}
+        <button
+          onClick={() => startTour("home")}
+          className={`
+            p-2 rounded-xl transition-all duration-200
+            ${
+              isDarkMode
+                ? "bg-slate-700 hover:bg-slate-600 text-slate-300"
+                : "bg-white hover:bg-slate-100 text-slate-600 border border-slate-200"
+            }
+            ${showHelpPulse ? "animate-pulse" : ""}
+          `}
+          title="עזרה"
+        >
+          <HelpCircle className="w-5 h-5" />
+        </button>
 
         {isAdmin && (
           <button

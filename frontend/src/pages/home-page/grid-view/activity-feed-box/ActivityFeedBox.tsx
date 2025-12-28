@@ -1,13 +1,18 @@
 import React, { useMemo, useState, useCallback } from "react";
 import { MessageSquare, ClipboardList } from "lucide-react";
-import { useTheme, useSettings, useViewState } from "../../../../contexts";
+import {
+  useTheme,
+  useSettings,
+  useViewState,
+  useAuth,
+} from "../../../../contexts";
 import { useTaskModal } from "../../../../components/modal/modal-task";
 import { type Task } from "../../../../api/tasksApi";
 import { type UserData } from "../../../../schemas/userTypes";
 import { useTour } from "../../../../components/demos/tour-provider";
 import { DEMO_TASKS } from "../../../../components/demos/shared/tourData";
 import { UpdatesTask } from "./updates-task";
-import { NotificationTeam } from "./notification-team/NotificationTeam";
+import { UpdateTeam } from "./update-team";
 
 type TabType = "tasks" | "team";
 
@@ -21,14 +26,20 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
   usersOverride,
 }) => {
   const { isDarkMode } = useTheme();
-  const { tasks: globalTasks, users: globalUsers } = useSettings();
+  const {
+    tasks: globalTasks,
+    users: globalUsers,
+    refreshTasks,
+  } = useSettings();
   const { selectedDate } = useViewState();
 
   const { state: tourState } = useTour();
   const [activeTab, setActiveTab] = useState<TabType>("tasks");
   const { openTaskModal } = useTaskModal();
+  const { user } = useAuth();
 
   const isTourActive = tourState.isActive && tourState.currentPageId === "home";
+  const isAdmin = user?.role === "admin";
 
   // Data Logic
   const tasks = useMemo(() => {
@@ -135,18 +146,15 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
             isDarkMode={isDarkMode}
             selectedDate={selectedDate}
             onUpdateClick={handleActivityClick}
+            onDataRefresh={refreshTasks}
           />
         ) : (
-          <div
-            className={`h-full overflow-y-auto px-3 py-3 ${
-              isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-            }`}
-          >
-            <NotificationTeam
-              isTourActive={isTourActive}
-              isDarkMode={isDarkMode}
-            />
-          </div>
+          <UpdateTeam
+            users={users}
+            isDarkMode={isDarkMode}
+            currentUserId={user?.id}
+            isAdmin={isAdmin}
+          />
         )}
       </div>
     </div>

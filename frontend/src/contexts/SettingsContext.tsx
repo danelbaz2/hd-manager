@@ -25,6 +25,7 @@ import {
 } from "../schemas/tagTypes";
 import { type ContactData } from "../schemas/contactTypes";
 import { useAuth } from "./AuthContext";
+import { useSocket } from "./SocketContext";
 
 // Helper function to convert API User to UserData
 const mapUserToUserData = (user: User): UserData => ({
@@ -323,6 +324,27 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       // Don't clear the data - let the user retry.
     }
   }, [isAuthenticated, isAuthLoading, refreshAll, clearAllData]);
+
+  // Subscribe to WebSocket updates for real-time task sync across all clients
+  const { subscribe, isConnected } = useSocket();
+
+  useEffect(() => {
+    if (!isAuthenticated || !isConnected) return;
+
+    // When any task update comes via WebSocket, refresh tasks and history
+    const unsubscribe = subscribe(() => {
+      refreshTasks();
+      refreshTaskHistory();
+    });
+
+    return unsubscribe;
+  }, [
+    isAuthenticated,
+    isConnected,
+    subscribe,
+    refreshTasks,
+    refreshTaskHistory,
+  ]);
 
   const value: SettingsContextState = {
     users,
