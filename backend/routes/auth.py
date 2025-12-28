@@ -17,6 +17,7 @@ def serialize_user(doc):
         'role': doc.get('role'),
         'color': doc.get('color'),
         'profileImage': doc.get('profileImage'),
+        'nickname': doc.get('nickname'),  # Optional display nickname
         'base': doc.get('base')
     }
     return user

@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_cors import CORS
+from flask_socketio import SocketIO
 import os
 from dotenv import load_dotenv
 
@@ -12,7 +13,11 @@ app = Flask(__name__, static_folder='static', static_url_path='/static')
 CORS(app, origins=["http://localhost:5173"])
 
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://localhost:27017/hd_manager")
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "hd-manager-secret-key")
 mongo.init_app(app)
+
+# Initialize SocketIO
+socketio = SocketIO(app, cors_allowed_origins=["http://localhost:5173"])
 
 # Import routes after app initialization to avoid circular imports
 from routes import tasks, users, contacts, history_entries, chat_messages, auth, primary_tags, secondary_tags, uploads
@@ -27,9 +32,13 @@ app.register_blueprint(chat_messages.bp)
 app.register_blueprint(auth.bp)
 app.register_blueprint(uploads.bp)
 
+# Register SocketIO events
+from websocket_events import register_socket_events
+register_socket_events(socketio)
+
 @app.route('/')
 def hello():
     return "HD Manager API Running"
 
 if __name__ == '__main__':
-    app.run(debug=True, port=int(os.getenv("PORT", 5000)))
+    socketio.run(app, debug=True, port=int(os.getenv("PORT", 5000)))

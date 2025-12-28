@@ -9,6 +9,7 @@ export interface AuthUser {
   role: string;
   color: string;
   profileImage: string | null;
+  nickname: string | null;  // Optional display nickname
 }
 
 export interface LoginRequest {

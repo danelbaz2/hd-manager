@@ -156,8 +156,31 @@ export interface TaskHistoryEntry {
 /**
  * Get ALL tasks history (for global fetch at login)
  */
-export const getAllTasksHistory = async (): Promise<ApiResponse<TaskHistoryEntry[]>> => {
-  return apiRequest<TaskHistoryEntry[]>(`${API_ENDPOINTS.tasks}/history`);
+export interface HistoryQueryParams {
+  limit?: number;
+  before?: number; // Timestamp cursor - load older
+  after?: number;  // Timestamp cursor - load newer
+}
+
+/**
+ * Get ALL tasks history (for global fetch at login) - supports pagination
+ */
+export const getAllTasksHistory = async (params?: HistoryQueryParams): Promise<ApiResponse<TaskHistoryEntry[]>> => {
+  let url = `${API_ENDPOINTS.tasks}/history`;
+
+  if (params) {
+    const queryParams = new URLSearchParams();
+    if (params.limit !== undefined) queryParams.append("limit", params.limit.toString());
+    if (params.before !== undefined) queryParams.append("before", params.before.toString());
+    if (params.after !== undefined) queryParams.append("after", params.after.toString());
+    
+    const queryString = queryParams.toString();
+    if (queryString) {
+      url += `?${queryString}`;
+    }
+  }
+
+  return apiRequest<TaskHistoryEntry[]>(url);
 };
 
 /**

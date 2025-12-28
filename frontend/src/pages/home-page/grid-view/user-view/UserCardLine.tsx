@@ -35,7 +35,11 @@ const UserCardLine: React.FC<UserCardLineProps> = ({
   const handleClick = () => {
     if (isClickable) {
       // If tour is active on home page and user clicks their card, complete the tour
-      if (tourState.isActive && tourState.currentPageId === "home" && isCurrentUser) {
+      if (
+        tourState.isActive &&
+        tourState.currentPageId === "home" &&
+        isCurrentUser
+      ) {
         completeTour();
       }
       onUserClick?.(user);
@@ -78,12 +82,15 @@ const UserCardLine: React.FC<UserCardLineProps> = ({
         {/* Avatar Section */}
         <div className="relative shrink-0">
           <div
-            className="w-14 h-14 rounded-full flex items-center justify-center 
-              ring-2 ring-offset-2 transition-all duration-300 user-ring-hover"
+            className={`w-14 h-14 rounded-full flex items-center justify-center 
+              transition-all duration-300 ${
+                isDarkMode ? "bg-slate-700" : "bg-slate-100"
+              }`}
             style={{
-              backgroundColor: user.color,
-              ["--tw-ring-color" as string]: isDarkMode ? "rgb(71 85 105)" : "rgb(226 232 240)",
-              ["--tw-ring-offset-color" as string]: "transparent",
+              border: `3px solid ${user.color}`,
+              boxShadow: `0 0 0 2px ${
+                isDarkMode ? "rgba(30, 41, 59, 1)" : "rgba(255, 255, 255, 1)"
+              }`,
             }}
           >
             {user.profileImage ? (
@@ -105,20 +112,29 @@ const UserCardLine: React.FC<UserCardLineProps> = ({
           />
         </div>
 
-        {/* Name - hover color based on user color */}
-        <div className="flex flex-col items-start gap-1 min-w-0 flex-1">
+        {/* Name + Nickname - hover color based on user color */}
+        <div className="flex flex-col items-start min-w-0 flex-1">
           <h3
-            className={`text-lg font-semibold truncate transition-colors duration-300 user-name-hover ${isDarkMode ? "text-white" : "text-slate-800"
-              }`}
+            className={`text-lg font-semibold truncate transition-colors duration-300 user-name-hover ${
+              isDarkMode ? "text-white" : "text-slate-800"
+            }`}
           >
             {user.fullName}
           </h3>
+          <span
+            className={`text-xs truncate ${
+              isDarkMode ? "text-slate-400" : "text-slate-500"
+            }`}
+          >
+            {user.nickname || "משתמש"}
+          </span>
         </div>
 
         {/* Divider */}
         <div
-          className={`w-px h-10 ${isDarkMode ? "bg-slate-700" : "bg-slate-200"
-            }`}
+          className={`w-px h-10 ${
+            isDarkMode ? "bg-slate-700" : "bg-slate-200"
+          }`}
         />
 
         {/* Task Counts - Inline */}
@@ -131,8 +147,9 @@ const UserCardLine: React.FC<UserCardLineProps> = ({
                 {taskCounts.open}
               </span>
               <span
-                className={`text-[10px] ${isDarkMode ? "text-slate-500" : "text-slate-400"
-                  }`}
+                className={`text-[10px] ${
+                  isDarkMode ? "text-slate-500" : "text-slate-400"
+                }`}
               >
                 פתוח
               </span>
@@ -147,8 +164,9 @@ const UserCardLine: React.FC<UserCardLineProps> = ({
                 {taskCounts.inProgress}
               </span>
               <span
-                className={`text-[10px] ${isDarkMode ? "text-slate-500" : "text-slate-400"
-                  }`}
+                className={`text-[10px] ${
+                  isDarkMode ? "text-slate-500" : "text-slate-400"
+                }`}
               >
                 בטיפול
               </span>
@@ -160,14 +178,16 @@ const UserCardLine: React.FC<UserCardLineProps> = ({
             <CheckCircle2 className="w-4 h-4 text-slate-400" />
             <div className="flex flex-col items-start">
               <span
-                className={`text-lg font-bold ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                  }`}
+                className={`text-lg font-bold ${
+                  isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
               >
                 {taskCounts.closed}
               </span>
               <span
-                className={`text-[10px] ${isDarkMode ? "text-slate-500" : "text-slate-400"
-                  }`}
+                className={`text-[10px] ${
+                  isDarkMode ? "text-slate-500" : "text-slate-400"
+                }`}
               >
                 סגור
               </span>
@@ -178,8 +198,9 @@ const UserCardLine: React.FC<UserCardLineProps> = ({
         {/* Arrow indicator for clickable */}
         {isClickable && (
           <div
-            className={`shrink-0 transition-transform duration-300 group-hover:-translate-x-1 ${isDarkMode ? "text-slate-500" : "text-slate-400"
-              }`}
+            className={`shrink-0 transition-transform duration-300 group-hover:-translate-x-1 ${
+              isDarkMode ? "text-slate-500" : "text-slate-400"
+            }`}
           >
             <svg
               className="w-5 h-5"

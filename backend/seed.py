@@ -64,15 +64,15 @@ def seed(clean_only=False, bulk_tasks=False):
         print("  Loading profile images as base64...")
         
         users_data = [
-            { "fullName": 'עדן טירם', "username": "eden", "passwordHash": "123456", "role": 'admin', "color": '#93C5FD', "profileImage": load_profile_image_base64("eden"), "base": create_base("user")},
-            { "fullName": 'מאור נובחוב', "username": "maor", "passwordHash": "123456", "role": 'regular', "color": '#FDBA74', "profileImage": load_profile_image_base64("maor"), "base": create_base("user")},
-            { "fullName": 'עילי אדמוני', "username": "ilay", "passwordHash": "123456", "role": 'admin', "color": '#86EFAC', "profileImage": load_profile_image_base64("ilay"), "base": create_base("user")},
-            { "fullName": 'דן אלבז', "username": "dan", "passwordHash": "123456", "role": 'admin', "color": '#FCD34D', "profileImage": load_profile_image_base64("dan"), "base": create_base("user")},
-            { "fullName": 'אוראל חסידיאן', "username": "orel", "passwordHash": "123456", "role": 'regular', "color": '#C4B5FD', "profileImage": load_profile_image_base64("orel"), "base": create_base("user")},
-            { "fullName": 'אליה דנאל', "username": "eliya", "passwordHash": "123456", "role": 'regular', "color": '#FDA4AF', "profileImage": load_profile_image_base64("eliya"), "base": create_base("user")},
-            { "fullName": 'אורי רוגוזיק', "username": "ori", "passwordHash": "123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("ori"), "base": create_base("user")},
-            { "fullName": 'עדי פליישמן', "username": "adi", "passwordHash": "123456", "role": 'regular', "color": '#F9A8D4', "profileImage": load_profile_image_base64("adi"), "base": create_base("user")},
-            { "fullName": 'גל פרץ', "username": "gal", "passwordHash": "123456", "role": 'regular', "color": '#93C5FD', "profileImage": load_profile_image_base64("gal"), "base": create_base("user")},
+            { "fullName": 'עדן טירם', "username": "eden", "passwordHash": "123456", "role": 'admin', "color": '#93C5FD', "profileImage": load_profile_image_base64("eden"), "nickname": "ראש צוות HD", "base": create_base("user")},
+            { "fullName": 'מאור נובחוב', "username": "maor", "passwordHash": "123456", "role": 'regular', "color": '#FDBA74', "profileImage": load_profile_image_base64("maor"), "nickname": "ג'ינג'י", "base": create_base("user")},
+            { "fullName": 'עילי אדמוני', "username": "ilay", "passwordHash": "123456", "role": 'admin', "color": '#86EFAC', "profileImage": load_profile_image_base64("ilay"), "nickname": "בחפיפה", "base": create_base("user")},
+            { "fullName": 'דן אלבז', "username": "dan", "passwordHash": "123456", "role": 'admin', "color": '#FCD34D', "profileImage": load_profile_image_base64("dan"), "nickname": "הצרפתי", "base": create_base("user")},
+            { "fullName": 'אוראל חסידיאן', "username": "orel", "passwordHash": "123456", "role": 'regular', "color": '#C4B5FD', "profileImage": load_profile_image_base64("orel"), "nickname": "רנ\"ג דסק", "base": create_base("user")},
+            { "fullName": 'אליה דנאל', "username": "eliya", "passwordHash": "123456", "role": 'regular', "color": '#FDA4AF', "profileImage": load_profile_image_base64("eliya"), "nickname": "משתמש", "base": create_base("user")},
+            { "fullName": 'אורי רוגוזיק', "username": "ori", "passwordHash": "123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("ori"), "nickname": "נינג'ה", "base": create_base("user")},
+            { "fullName": 'עדי פליישמן', "username": "adi", "passwordHash": "123456", "role": 'regular', "color": '#F9A8D4', "profileImage": load_profile_image_base64("adi"), "nickname": "משתמש", "base": create_base("user")},
+            { "fullName": 'גל פרץ', "username": "gal", "passwordHash": "123456", "role": 'regular', "color": '#93C5FD', "profileImage": load_profile_image_base64("gal"), "nickname": "הסטודנט", "base": create_base("user")},
         ]
         
         user_ids = []
@@ -658,15 +658,15 @@ def seed_init():
         print("  Loading profile images as base64...")
         
         users_data = [
-            { "fullName": 'עדן טירם', "username": "eden", "passwordHash": "123456", "role": 'admin', "color": '#93C5FD', "profileImage": load_profile_image_base64("eden"), "base": create_base("user")},
-            { "fullName": 'מאור נובחוב', "username": "maor", "passwordHash": "123456", "role": 'regular', "color": '#FDBA74', "profileImage": load_profile_image_base64("maor"), "base": create_base("user")},
-            { "fullName": 'עילי אדמוני', "username": "ilay", "passwordHash": "123456", "role": 'admin', "color": '#86EFAC', "profileImage": load_profile_image_base64("ilay"), "base": create_base("user")},
-            { "fullName": 'דן אלבז', "username": "dan", "passwordHash": "123456", "role": 'admin', "color": '#FCD34D', "profileImage": load_profile_image_base64("dan"), "base": create_base("user")},
-            { "fullName": 'אוראל חסידיאן', "username": "orel", "passwordHash": "123456", "role": 'regular', "color": '#C4B5FD', "profileImage": load_profile_image_base64("orel"), "base": create_base("user")},
-            { "fullName": 'אליה דנאל', "username": "eliya", "passwordHash": "123456", "role": 'regular', "color": '#FDA4AF', "profileImage": load_profile_image_base64("eliya"), "base": create_base("user")},
-            { "fullName": 'אורי רוגוזיק', "username": "ori", "passwordHash": "123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("ori"), "base": create_base("user")},
-            { "fullName": 'עדי פליישמן', "username": "adi", "passwordHash": "123456", "role": 'regular', "color": '#F9A8D4', "profileImage": load_profile_image_base64("adi"), "base": create_base("user")},
-            { "fullName": 'גל פרץ', "username": "gal", "passwordHash": "123456", "role": 'regular', "color": '#93C5FD', "profileImage": load_profile_image_base64("gal"), "base": create_base("user")},
+            { "fullName": 'עדן טירם', "username": "eden", "passwordHash": "123456", "role": 'admin', "color": '#93C5FD', "profileImage": load_profile_image_base64("eden"), "nickname": "ראש צוות HD", "base": create_base("user")},
+            { "fullName": 'מאור נובחוב', "username": "maor", "passwordHash": "123456", "role": 'regular', "color": '#FDBA74', "profileImage": load_profile_image_base64("maor"), "nickname": "ג'ינג'י", "base": create_base("user")},
+            { "fullName": 'עילי אדמוני', "username": "ilay", "passwordHash": "123456", "role": 'admin', "color": '#86EFAC', "profileImage": load_profile_image_base64("ilay"), "nickname": "בחפיפה", "base": create_base("user")},
+            { "fullName": 'דן אלבז', "username": "dan", "passwordHash": "123456", "role": 'admin', "color": '#FCD34D', "profileImage": load_profile_image_base64("dan"), "nickname": "הצרפתי", "base": create_base("user")},
+            { "fullName": 'אוראל חסידיאן', "username": "orel", "passwordHash": "123456", "role": 'regular', "color": '#C4B5FD', "profileImage": load_profile_image_base64("orel"), "nickname": "רנ\"ג דסק", "base": create_base("user")},
+            { "fullName": 'אליה דנאל', "username": "eliya", "passwordHash": "123456", "role": 'regular', "color": '#FDA4AF', "profileImage": load_profile_image_base64("eliya"), "nickname": "משתמש", "base": create_base("user")},
+            { "fullName": 'אורי רוגוזיק', "username": "ori", "passwordHash": "123456", "role": 'regular', "color": '#FCD34D', "profileImage": load_profile_image_base64("ori"), "nickname": "נינג'ה", "base": create_base("user")},
+            { "fullName": 'עדי פליישמן', "username": "adi", "passwordHash": "123456", "role": 'regular', "color": '#F9A8D4', "profileImage": load_profile_image_base64("adi"), "nickname": "משתמש", "base": create_base("user")},
+            { "fullName": 'גל פרץ', "username": "gal", "passwordHash": "123456", "role": 'regular', "color": '#93C5FD', "profileImage": load_profile_image_base64("gal"), "nickname": "הסטודנט", "base": create_base("user")},
         ]
         
         user_ids = []

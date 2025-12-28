@@ -51,4 +51,36 @@ def log_history(entity_type, entity_id, action, user_id='system', old_val=None, 
         "n": clean_doc(new_val)        # New: entity after changes
     }
 
-    mongo.db.ents_archive.insert_one(entry)
+    result = mongo.db.ents_archive.insert_one(entry)
+    
+    # Broadcast update via WebSocket
+    try:
+        from websocket_events import broadcast_task_update
+        
+        # Format entry for frontend (similar to get_all_tasks_history)
+        task_id = (clean_doc(new_val) or {}).get('id') or (clean_doc(old_val) or {}).get('id') or ''
+        
+        # Determine action type label
+        action_label = action
+        if action == 'UPDATE' and change_data.get('status') == 'in_progress':
+            action_label = 'IN_PROGRESS'
+        elif action == 'UPDATE' and change_data.get('status') == 'completed':
+            action_label = 'CLOSE'
+        elif action == 'UPDATE' and 'responsibleUserIds' in change_data:
+            action_label = 'ASSIGN'
+        
+        history_item = {
+            'id': str(result.inserted_id),
+            'taskId': str(task_id),
+            'action': action_label,
+            'timestamp': now,
+            'updatedBy': change_data.get('base', {}).get('updatedBy') or 'מערכת',
+            'changes': {k: v for k, v in change_data.items() if k not in ['action', 'timestamp', 'base']},
+            'oldValues': {k: v for k, v in (clean_doc(old_val) or {}).items() if k != 'base' and k != 'id'},
+            'note': change_data.get('note'),
+            'file': change_data.get('file')
+        }
+        
+        broadcast_task_update(history_item)
+    except Exception as e:
+        print(f"Failed to broadcast update: {e}")

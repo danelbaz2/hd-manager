@@ -44,6 +44,10 @@ def create_user():
     hashed = bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt())
     data['passwordHash'] = hashed.decode('utf-8')  # Store as 'passwordHash'
 
+    # Ensure nickname field exists (null if not provided)
+    if 'nickname' not in data:
+        data['nickname'] = None
+
     data['_id'] = str(ObjectId())
     mongo.db.users.insert_one(data)
     
@@ -56,7 +60,7 @@ def create_user():
 def update_user(id):
     try:
         validated = UserUpdateModel(**request.json)
-        data = validated.model_dump(exclude_none=True)
+        data = validated.model_dump(exclude_unset=True)
         
         # Fetch old document first
         old_doc = mongo.db.users.find_one({'_id': id})

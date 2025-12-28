@@ -12,6 +12,7 @@ class UserModel(BaseModel):
     role: str = Field(..., pattern="^(regular|admin)$")
     color: str = Field(..., pattern="^#[0-9a-fA-F]{6}$")
     profileImage: Optional[str] = None
+    nickname: Optional[str] = Field(None, max_length=50)  # Optional display nickname
     base: Optional[BaseEntityMeta] = None
 
 # Update Model - all fields optional but validated when provided
@@ -25,4 +26,5 @@ class UserUpdateModel(BaseModel):
     role: Optional[str] = Field(None, pattern="^(regular|admin)$")
     color: Optional[str] = Field(None, pattern="^#[0-9a-fA-F]{6}$")
     profileImage: Optional[str] = None
+    nickname: Optional[str] = Field(None, max_length=50)  # Optional display nickname
 

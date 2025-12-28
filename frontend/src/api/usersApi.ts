@@ -10,6 +10,7 @@ export interface User {
   role: string;
   color: string;
   profileImage: string | null;
+  nickname: string | null;  // Optional display nickname
   base?: {
     isDeleted: boolean;
     isActive: boolean;

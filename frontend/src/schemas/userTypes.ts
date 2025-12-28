@@ -7,6 +7,7 @@ export interface UserData {
   role: UserRole;
   color: string;
   profileImage: string | null;
+  nickname: string | null;  // Optional display nickname
 }
 
 export interface UserFormData {
@@ -17,6 +18,7 @@ export interface UserFormData {
   role: UserRole;
   color: string;
   profileImage: string | null;
+  nickname?: string | null;  // Optional display nickname
 }
 
 // Clean, light, modern color palette
@@ -40,5 +42,6 @@ export const DEFAULT_FORM_DATA: UserFormData = {
   role: "regular",
   color: AVAILABLE_COLORS[0], // Default to Light Blue
   profileImage: null,
+  nickname: null,  // Optional display nickname
 };
 

@@ -185,6 +185,15 @@ const UserCard: React.FC<UserCardProps> = ({
             {user.fullName}
           </h3>
 
+          {/* Nickname */}
+          <span
+            className={`text-[10px] truncate w-full text-center -mt-1 ${
+              isDarkMode ? "text-slate-400" : "text-slate-500"
+            }`}
+          >
+            {user.nickname || "משתמש"}
+          </span>
+
           {/* Completion badge */}
           {total > 0 && (
             <div

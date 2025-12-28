@@ -8,8 +8,31 @@
    - 65" display: ~3840px 4K (3xl breakpoint)
    ===================================================== */
 
+/* Base font size - this affects all rem units globally */
+html {
+  font-size: 16px; /* Default for standard screens */
+}
+
+/* Small laptops (14" screens, ~1366px) - scale down */
+@media (max-width: 1440px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+/* Very small screens (13" or smaller) */
+@media (max-width: 1280px) {
+  html {
+    font-size: 13px;
+  }
+}
+
 /* Custom 3xl breakpoint for very large screens (65" 4K displays) */
 @media (min-width: 1920px) {
+  html {
+    font-size: 16px; /* Reset to default for large screens */
+  }
+
   .container-3xl {
     max-width: 1800px;
   }
@@ -189,7 +212,6 @@
 }
 
 @media (min-width: 1920px) {
-
   .dark-scrollbar::-webkit-scrollbar,
   .light-scrollbar::-webkit-scrollbar {
     width: 10px;
@@ -198,7 +220,6 @@
 }
 
 @media (min-width: 2560px) {
-
   .dark-scrollbar::-webkit-scrollbar,
   .light-scrollbar::-webkit-scrollbar {
     width: 12px;

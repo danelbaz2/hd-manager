@@ -259,8 +259,35 @@ def get_all_tasks_history():
             ]
         }
         
-        # Get history entries sorted by timestamp (oldest first)
-        entries = list(mongo.db.ents_archive.find(query).sort('c.timestamp', 1))
+        # Optional pagination
+        before = request.args.get('before')
+        after = request.args.get('after')
+        limit = request.args.get('limit')
+
+        # Build timestamp query
+        timestamp_query = {}
+        if before:
+            timestamp_query['$lt'] = int(before)
+        if after:
+            timestamp_query['$gt'] = int(after)
+        
+        if timestamp_query:
+            query['c.timestamp'] = timestamp_query
+        
+        # Sort order: DESC (-1) if 'before' is used, ASC (1) if 'after' is used or no pagination
+        if after:
+            sort_order = 1  # ASC for newer activities
+        elif before or limit:
+            sort_order = -1  # DESC for older activities
+        else:
+            sort_order = 1  # Default ASC
+        
+        cursor = mongo.db.ents_archive.find(query).sort('c.timestamp', sort_order)
+        
+        if limit:
+            cursor = cursor.limit(int(limit))
+            
+        entries = list(cursor)
         
         # Fields that represent data changes (not metadata)
         DATA_FIELDS = ['title', 'description', 'priority', 'status', 'date', 'deadline', 

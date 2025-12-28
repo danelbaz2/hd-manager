@@ -51,10 +51,10 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
         transition-all duration-300 ease-out group 
         ${
           isClickable
-            ? `cursor-pointer hover:shadow-lg hover:shadow-slate-500/10 hover:scale-[1.02] ${
+            ? `cursor-pointer hover:shadow-lg hover:scale-[1.02] ${
                 isDarkMode
-                  ? "bg-slate-800 border border-slate-700 hover:border-slate-600"
-                  : "bg-white border border-slate-200 hover:border-slate-300 shadow-sm"
+                  ? "bg-slate-800 border border-slate-700 hover:border-slate-500"
+                  : "bg-white border border-slate-200 shadow-sm"
               }`
             : `cursor-default ${
                 isDarkMode
@@ -63,9 +63,31 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
               }`
         }
       `}
+      style={
+        {
+          // Use CSS custom property for hover effect
+          "--user-color": user.color,
+          "--user-color-light": `${user.color}20`, // 20 = 12% opacity
+          "--user-color-dark": `${user.color}30`, // 30 = 19% opacity
+        } as React.CSSProperties
+      }
+      onMouseEnter={(e) => {
+        if (isClickable) {
+          e.currentTarget.style.backgroundColor = isDarkMode
+            ? `${user.color}25` // ~15% opacity for dark mode
+            : `${user.color}15`; // ~8% opacity for light mode
+          e.currentTarget.style.borderColor = user.color;
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (isClickable) {
+          e.currentTarget.style.backgroundColor = "";
+          e.currentTarget.style.borderColor = "";
+        }
+      }}
     >
-      {/* Top Section - Avatar, Name, Role */}
-      <div className="flex-1 pt-4 pb-2 px-4 flex flex-col items-center justify-center gap-2">
+      {/* Top Section - Avatar, Name, Nickname */}
+      <div className="flex-1 pt-3 pb-1 px-4 flex flex-col items-center justify-center gap-1">
         {/* Avatar */}
         <div
           className={`w-14 h-14 rounded-full flex items-center justify-center
@@ -103,6 +125,15 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
         >
           {user.fullName}
         </h3>
+
+        {/* Nickname */}
+        <span
+          className={`text-[10px] truncate w-full text-center ${
+            isDarkMode ? "text-slate-400" : "text-slate-500"
+          }`}
+        >
+          {user.nickname || "משתמש"}
+        </span>
       </div>
 
       {/* Bottom Section - Task Counts Bar */}
