@@ -4,7 +4,7 @@ from datetime import datetime
 from bson.objectid import ObjectId
 from models.user_model import UserModel, UserUpdateModel
 from utils.history import log_history
-from utils.jwt_utils import jwt_required
+from utils.jwt_utils import jwt_required, admin_required, self_or_admin_required
 import bcrypt
 
 bp = Blueprint('users', __name__, url_prefix='/api/users')
@@ -21,7 +21,7 @@ def get_users():
     return jsonify([serialize_doc(u) for u in users])
 
 @bp.route('/', methods=['POST'])
-@jwt_required
+@admin_required
 def create_user():
     try:
         data = UserModel(**request.json).model_dump(exclude_none=True)
@@ -52,7 +52,7 @@ def create_user():
     return jsonify(serialize_doc(data)), 201
 
 @bp.route('/<id>', methods=['PUT'])
-@jwt_required
+@self_or_admin_required
 def update_user(id):
     try:
         validated = UserUpdateModel(**request.json)
@@ -86,7 +86,7 @@ def update_user(id):
         return jsonify({"error": str(e)}), 400
 
 @bp.route('/<id>', methods=['DELETE'])
-@jwt_required
+@admin_required
 def delete_user(id):
     try:
         old_doc = mongo.db.users.find_one({'_id': id})

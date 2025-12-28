@@ -11,7 +11,7 @@ def serialize_doc(doc):
     doc['id'] = doc.pop('_id')
     return doc
 
-from utils.jwt_utils import jwt_required
+from utils.jwt_utils import jwt_required, admin_required
 
 @bp.route('/', methods=['GET'])
 @jwt_required
@@ -119,7 +119,7 @@ def update_task(id):
     return jsonify(serialize_doc(updated))
 
 @bp.route('/<id>', methods=['DELETE'])
-@jwt_required
+@admin_required
 def delete_task(id):
     try:
         old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'task'})

@@ -31,7 +31,11 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
   const handleClick = () => {
     if (isClickable) {
       // If tour is active on home page and user clicks their card, complete the tour
-      if (tourState.isActive && tourState.currentPageId === "home" && isCurrentUser) {
+      if (
+        tourState.isActive &&
+        tourState.currentPageId === "home" &&
+        isCurrentUser
+      ) {
         completeTour();
       }
       onUserClick?.(user);
@@ -43,27 +47,36 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
       onClick={handleClick}
       disabled={!isClickable}
       className={`
-        w-full h-38 w-64 rounded-xl overflow-hidden flex flex-col
-        transition-all duration-300 ease-out group
-        ${isClickable
-          ? `cursor-pointer hover:shadow-lg hover:shadow-slate-500/10 hover:scale-[1.02] ${isDarkMode
-            ? "bg-slate-800 border border-slate-700 hover:border-slate-600"
-            : "bg-white border border-slate-200 hover:border-slate-300 shadow-sm"
-          }`
-          : `cursor-default ${isDarkMode
-            ? "bg-slate-800/50 border border-slate-800/50"
-            : "bg-slate-100 border border-slate-300"
-          }`
+        w-full h-38 rounded-xl overflow-hidden flex flex-col
+        transition-all duration-300 ease-out group 
+        ${
+          isClickable
+            ? `cursor-pointer hover:shadow-lg hover:shadow-slate-500/10 hover:scale-[1.02] ${
+                isDarkMode
+                  ? "bg-slate-800 border border-slate-700 hover:border-slate-600"
+                  : "bg-white border border-slate-200 hover:border-slate-300 shadow-sm"
+              }`
+            : `cursor-default ${
+                isDarkMode
+                  ? "bg-slate-800/50 border border-slate-800/50"
+                  : "bg-slate-100 border border-slate-300"
+              }`
         }
       `}
     >
       {/* Top Section - Avatar, Name, Role */}
-      <div className="flex-1 pt-4 pb-2 px-4 flex flex-col items-center justify-center gap-1">
+      <div className="flex-1 pt-4 pb-2 px-4 flex flex-col items-center justify-center gap-2">
         {/* Avatar */}
         <div
-          className={`w-10 h-10 rounded-full flex items-center justify-center
+          className={`w-14 h-14 rounded-full flex items-center justify-center
             transition-all duration-300 group-hover:scale-105
-            ${isDarkMode ? "bg-blue-500/20" : "bg-blue-100"}`}
+            ${isDarkMode ? "bg-slate-700" : "bg-slate-100"}`}
+          style={{
+            border: `3px solid ${user.color}`,
+            boxShadow: `0 0 0 2px ${
+              isDarkMode ? "rgba(30, 41, 59, 1)" : "rgba(255, 255, 255, 1)"
+            }`,
+          }}
         >
           {user.profileImage ? (
             <img
@@ -73,18 +86,20 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
             />
           ) : (
             <User
-              className={`w-5 h-5 ${isDarkMode ? "text-blue-400" : "text-blue-500"
-                }`}
+              className={`w-7 h-7 ${
+                isDarkMode ? "text-slate-300" : "text-slate-500"
+              }`}
             />
           )}
         </div>
 
         {/* Name */}
         <h3
-          className={`text-xs font-bold truncate w-full text-center transition-colors duration-300 ${isDarkMode
+          className={`text-xs font-bold truncate w-full text-center transition-colors duration-300 ${
+            isDarkMode
               ? "text-white group-hover:text-blue-300"
               : "text-slate-800 group-hover:text-blue-600"
-            }`}
+          }`}
         >
           {user.fullName}
         </h3>
@@ -95,18 +110,21 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
         {/* Open (פתוח) - Green */}
         <div
           className={`flex flex-col items-center py-1.5 transition-colors duration-200
-            ${isDarkMode ? " hover:bg-emerald-500/25" : "hover:bg-emerald-100"
+            ${
+              isDarkMode ? " hover:bg-emerald-500/25" : "hover:bg-emerald-100"
             }`}
         >
           <span
-            className={`text-sm font-bold ${isDarkMode ? "text-emerald-400" : "text-emerald-600"
-              }`}
+            className={`text-sm font-bold ${
+              isDarkMode ? "text-emerald-400" : "text-emerald-600"
+            }`}
           >
             {taskCounts.open}
           </span>
           <span
-            className={`text-[8px] font-medium ${isDarkMode ? "text-emerald-400/80" : "text-emerald-600/80"
-              }`}
+            className={`text-[8px] font-medium ${
+              isDarkMode ? "text-emerald-400/80" : "text-emerald-600/80"
+            }`}
           >
             פתוח
           </span>
@@ -118,14 +136,16 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
             ${isDarkMode ? " hover:bg-amber-500/25" : " hover:bg-amber-100"}`}
         >
           <span
-            className={`text-sm font-bold ${isDarkMode ? "text-amber-400" : "text-amber-600"
-              }`}
+            className={`text-sm font-bold ${
+              isDarkMode ? "text-amber-400" : "text-amber-600"
+            }`}
           >
             {taskCounts.inProgress}
           </span>
           <span
-            className={`text-[8px] font-medium ${isDarkMode ? "text-amber-400/80" : "text-amber-600/80"
-              }`}
+            className={`text-[8px] font-medium ${
+              isDarkMode ? "text-amber-400/80" : "text-amber-600/80"
+            }`}
           >
             בטיפול
           </span>
@@ -137,14 +157,16 @@ const AdminUserCard: React.FC<AdminUserCardProps> = ({
             ${isDarkMode ? "hover:bg-slate-600/50" : " hover:bg-slate-200"}`}
         >
           <span
-            className={`text-sm font-bold ${isDarkMode ? "text-slate-300" : "text-slate-600"
-              }`}
+            className={`text-sm font-bold ${
+              isDarkMode ? "text-slate-300" : "text-slate-600"
+            }`}
           >
             {taskCounts.closed}
           </span>
           <span
-            className={`text-[8px] font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+            className={`text-[8px] font-medium ${
+              isDarkMode ? "text-slate-400" : "text-slate-500"
+            }`}
           >
             סגור
           </span>

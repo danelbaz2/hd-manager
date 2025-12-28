@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings, Moon, Sun, LogOut, FileOutput } from "lucide-react";
+import { Settings, Moon, Sun, LogOut, FileOutput, UserCog } from "lucide-react";
 import { useTheme, useAuth } from "../../../contexts";
 import ManageSetting from "../../modal/modal-setting/ManageSetting";
 import { ExportModal } from "../../modal/modal-export-excel";
+import { UserPreferenceModal } from "../../modal/modal-user-preference";
 
 interface MenuItemProfileProps {
   isOpen: boolean;
@@ -19,6 +20,7 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
   const navigate = useNavigate();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Check if user is admin
   const isAdmin = user?.role === "admin";
@@ -39,9 +41,15 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
     onClose(); // Close the profile menu
   };
 
+  const handleOpenProfile = () => {
+    setIsProfileOpen(true);
+    onClose(); // Close the profile menu
+  };
+
   // Get role display text in Hebrew
 
-  if (!isOpen && !isSettingsOpen && !isExportOpen) return null;
+  if (!isOpen && !isSettingsOpen && !isExportOpen && !isProfileOpen)
+    return null;
 
   return (
     <>
@@ -82,6 +90,24 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
               ) : (
                 <Sun size={18} className="text-slate-400" />
               )}
+            </button>
+
+            {/* Profile Settings - Available for all users */}
+            <button
+              onClick={handleOpenProfile}
+              className={`
+                w-full flex items-center justify-between
+                px-4 py-3
+                text-sm transition-colors
+                ${
+                  isDarkMode
+                    ? "hover:bg-slate-700 text-slate-200"
+                    : "hover:bg-slate-50 text-slate-700"
+                }
+              `}
+            >
+              <span>הגדרות פרופיל</span>
+              <UserCog size={18} className="text-slate-400" />
             </button>
 
             {/* Settings - Only visible for admin users */}
@@ -157,6 +183,12 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
           onClose={() => setIsExportOpen(false)}
         />
       )}
+
+      {/* User Preference Modal - Available for all users */}
+      <UserPreferenceModal
+        isOpen={isProfileOpen}
+        onClose={() => setIsProfileOpen(false)}
+      />
     </>
   );
 };

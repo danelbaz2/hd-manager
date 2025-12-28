@@ -5,6 +5,7 @@ import {
   Calendar,
   CalendarDays,
   CalendarRange,
+  HelpCircle,
 } from "lucide-react";
 import { useTheme, useSettings, useViewState, useAuth } from "../../contexts";
 import { KanbanBoard } from "./parts";
@@ -12,6 +13,8 @@ import { updateTask, type Task, type TaskStatus } from "../../api/tasksApi";
 import { useTaskModal } from "../../components/modal/modal-task";
 import { useTour } from "../../components/demos/tour-provider";
 import { DEMO_TASKS, DEMO_USERS } from "../../components/demos/shared/tourData";
+import { KanbanOnboardingDemo } from "../../components/demos/kanban-onboarding";
+import { Tooltip } from "../../components/tags-tooltip";
 import type { UserData } from "../../schemas/userTypes";
 
 interface LocationState {
@@ -92,7 +95,8 @@ const TaskPage: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth(); // Needed for augment logic
   const { checkAndStartTour, state: tourState } = useTour();
-  const isTourActive = tourState.isActive && tourState.currentPageId === "kanban";
+  const isTourActive =
+    tourState.isActive && tourState.currentPageId === "kanban";
 
   // Real Data
   const {
@@ -106,19 +110,24 @@ const TaskPage: React.FC = () => {
   const { tasks, users } = useMemo(() => {
     if (isTourActive) {
       // Augment demo data to include current user with tasks
-      const effectiveUsers = user ? [user as any as UserData, ...DEMO_USERS.filter(u => u.id !== user.id)] : DEMO_USERS;
+      const effectiveUsers = user
+        ? [
+            user as any as UserData,
+            ...DEMO_USERS.filter((u) => u.id !== user.id),
+          ]
+        : DEMO_USERS;
 
       const myDemoTasks = user
-        ? DEMO_TASKS.map(t => ({
-          ...t,
-          id: `my-${t.id}`,
-          responsibleUserIds: [user.id]
-        }))
+        ? DEMO_TASKS.map((t) => ({
+            ...t,
+            id: `my-${t.id}`,
+            responsibleUserIds: [user.id],
+          }))
         : [];
 
       return {
         tasks: [...DEMO_TASKS, ...myDemoTasks],
-        users: effectiveUsers
+        users: effectiveUsers,
       };
     }
     return { tasks: dbTasks, users: dbUsers };
@@ -132,6 +141,9 @@ const TaskPage: React.FC = () => {
 
   // Optimistic UI state
   const [optimisticTasks, setOptimisticTasks] = useState(tasks);
+
+  // Kanban demo modal state
+  const [showKanbanDemo, setShowKanbanDemo] = useState(false);
 
   // Trigger tour on first visit
   useEffect(() => {
@@ -164,12 +176,16 @@ const TaskPage: React.FC = () => {
 
     // If tour is active, ensure demo tasks are included regardless of filters
     if (tourState.isActive && tourState.currentPageId === "kanban") {
-      const demoTasks = optimisticTasks.filter(t => t.id.startsWith('demo-') || t.id.startsWith('my-')); // Include augmented IDs
-      const demoIds = new Set(demoTasks.map(t => t.id));
+      const demoTasks = optimisticTasks.filter(
+        (t) => t.id.startsWith("demo-") || t.id.startsWith("my-")
+      ); // Include augmented IDs
+      const demoIds = new Set(demoTasks.map((t) => t.id));
 
       // Filter real tasks normally
-      const filteredRealTasks = dateFilteredTasks.filter((task) =>
-        !demoIds.has(task.id) && task.responsibleUserIds?.includes(selectedUserId)
+      const filteredRealTasks = dateFilteredTasks.filter(
+        (task) =>
+          !demoIds.has(task.id) &&
+          task.responsibleUserIds?.includes(selectedUserId)
       );
 
       return [...demoTasks, ...filteredRealTasks];
@@ -179,7 +195,14 @@ const TaskPage: React.FC = () => {
     return dateFilteredTasks.filter((task) =>
       task.responsibleUserIds?.includes(selectedUserId)
     );
-  }, [optimisticTasks, selectedDate, viewMode, selectedUserId, tourState.isActive, tourState.currentPageId]);
+  }, [
+    optimisticTasks,
+    selectedDate,
+    viewMode,
+    selectedUserId,
+    tourState.isActive,
+    tourState.currentPageId,
+  ]);
 
   // Handle back navigation
   const handleBack = () => {
@@ -303,9 +326,10 @@ const TaskPage: React.FC = () => {
             className={`
               p-2 rounded-full
               transition-colors
-              ${isDarkMode
-                ? "hover:bg-slate-700 text-slate-300"
-                : "hover:bg-slate-100 text-slate-600"
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-700 text-slate-300"
+                  : "hover:bg-slate-100 text-slate-600"
               }
             `}
             aria-label="חזרה לדף הבית"
@@ -320,6 +344,24 @@ const TaskPage: React.FC = () => {
           >
             המשימות של {userName}
           </h1>
+          {/* Help Icon for Kanban Demo */}
+          <Tooltip content="איך עובד לוח המשימות?" position="bottom">
+            <button
+              onClick={() => setShowKanbanDemo(true)}
+              className={`
+                p-2 rounded-full
+                transition-colors
+                ${
+                  isDarkMode
+                    ? "hover:bg-slate-700 text-slate-400 hover:text-blue-400"
+                    : "hover:bg-slate-100 text-slate-500 hover:text-blue-500"
+                }
+              `}
+              aria-label="עזרה - איך עובד לוח המשימות"
+            >
+              <HelpCircle className="w-5 h-5 lg:w-6 lg:h-6" />
+            </button>
+          </Tooltip>
         </div>
 
         {/* Left side - View Mode Toggle (Same as HomePage) */}
@@ -342,11 +384,12 @@ const TaskPage: React.FC = () => {
                   rounded-md
                   text-xs lg:text-sm font-medium
                   transition-all duration-200
-                  ${viewMode === mode.id
-                    ? isDarkMode
-                      ? "bg-slate-600 text-white shadow-sm"
-                      : "bg-white text-blue-600 shadow-sm"
-                    : isDarkMode
+                  ${
+                    viewMode === mode.id
+                      ? isDarkMode
+                        ? "bg-slate-600 text-white shadow-sm"
+                        : "bg-white text-blue-600 shadow-sm"
+                      : isDarkMode
                       ? "text-slate-400 hover:text-slate-200"
                       : "text-slate-500 hover:text-slate-700"
                   }
@@ -360,8 +403,6 @@ const TaskPage: React.FC = () => {
         </div>
       </header>
 
-
-
       {/* Kanban Board */}
       <div className="flex-1 overflow-hidden">
         <KanbanBoard
@@ -372,6 +413,11 @@ const TaskPage: React.FC = () => {
           onTaskClick={handleTaskClick}
         />
       </div>
+
+      {/* Kanban Onboarding Demo Modal */}
+      {showKanbanDemo && (
+        <KanbanOnboardingDemo onDismiss={() => setShowKanbanDemo(false)} />
+      )}
     </div>
   );
 };

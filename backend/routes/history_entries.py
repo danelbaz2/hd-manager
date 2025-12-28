@@ -3,6 +3,7 @@ from database import mongo
 from models.history_entry_model import EntityHistoryModel
 from bson.objectid import ObjectId
 from datetime import datetime
+from utils.jwt_utils import jwt_required
 
 bp = Blueprint('history_entries', __name__, url_prefix='/api/history')
 
@@ -11,6 +12,7 @@ def serialize_doc(doc):
     return doc
 
 @bp.route('/', methods=['GET'])
+@jwt_required
 def get_history_entries():
     # Optional filtering by entityId
     entity_id = request.args.get('entityId')
@@ -22,6 +24,7 @@ def get_history_entries():
     return jsonify([serialize_doc(e) for e in entries])
 
 @bp.route('/', methods=['POST'])
+@jwt_required
 def create_history_entry():
     try:
         # Validate incoming data using HistoryEntryModel

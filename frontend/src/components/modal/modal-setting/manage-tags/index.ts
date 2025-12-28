@@ -2,18 +2,30 @@
 export { default as ManageTagsTwoTier } from "./ManageTagsTwoTier";
 export { default } from "./ManageTagsTwoTier";
 
-// Sub-components (modular architecture)
+// Shared components
 export { default as TagCard } from "./TagCard";
 export { default as ModeToggle } from "./ModeToggle";
-export { default as PrimaryTagForm } from "./PrimaryTagForm";
-export { default as SecondaryTagForm } from "./SecondaryTagForm";
-export { default as PrimaryTagsList } from "./PrimaryTagsList";
-export { default as SecondaryTagsList } from "./SecondaryTagsList";
+export { default as TagDeleteConfirmModal } from "./TagDeleteConfirmModal";
+export { default as TagFormsSection } from "./TagFormsSection";
+export { default as TagListsSection } from "./TagListsSection";
+
+// Primary tags (from subdirectory)
+export {
+  PrimaryTagForm,
+  PrimaryTagsList,
+  usePrimaryTagHandlers,
+} from "./primary-tags";
+
+// Secondary tags (from subdirectory)
+export {
+  SecondaryTagForm,
+  SecondaryTagsList,
+  useSecondaryTagHandlers,
+} from "./secondary-tags";
 
 // Re-export types
 export type { TagMode } from "./ModeToggle";
 export type { TagCardProps } from "./TagCard";
-export type { PrimaryTagFormProps } from "./PrimaryTagForm";
-export type { SecondaryTagFormProps } from "./SecondaryTagForm";
-export type { PrimaryTagsListProps } from "./PrimaryTagsList";
-export type { SecondaryTagsListProps } from "./SecondaryTagsList";
+export type { DeleteTarget } from "./TagDeleteConfirmModal";
+export type { PrimaryTagFormProps, PrimaryTagsListProps } from "./primary-tags";
+export type { SecondaryTagFormProps, SecondaryTagsListProps } from "./secondary-tags";

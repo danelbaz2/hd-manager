@@ -3,9 +3,9 @@ import {
   type PrimaryTagData,
   type SecondaryTagData,
   getLighterColor,
-} from "../../../../schemas/tagTypes";
-import { darkenColor, hexWithAlpha } from "../../../../utils/colorUtils";
-import TagCard from "./TagCard";
+} from "../../../../../schemas/tagTypes";
+import { darkenColor, hexWithAlpha } from "../../../../../utils/colorUtils";
+import TagCard from "../TagCard";
 
 export interface SecondaryTagsListProps {
   secondaryTags: SecondaryTagData[];

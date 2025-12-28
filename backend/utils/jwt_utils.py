@@ -127,3 +127,121 @@ def jwt_required(f):
         return f(*args, **kwargs)
     
     return decorated_function
+
+
+def admin_required(f):
+    """
+    Decorator to protect routes that require admin role.
+    Includes JWT validation and admin role check.
+    
+    Usage:
+        @bp.route('/admin-only')
+        @admin_required
+        def admin_only_route():
+            # Only admins can access this
+            pass
+    
+    Returns:
+        401 if no valid token
+        403 if user is not an admin
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = get_token_from_header()
+        
+        if not token:
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        payload = decode_token(token)
+        
+        if not payload:
+            return jsonify({'error': 'Invalid or expired token'}), 401
+        
+        # Add user info to request object for use in route
+        request.user_id = payload.get('user_id')
+        request.username = payload.get('username')
+        request.role = payload.get('role')
+        request.user_full_name = payload.get('fullName')
+
+        # If fullName is missing in token (legacy token), fetch from DB
+        if not request.user_full_name and request.user_id:
+            try:
+                user = mongo.db.users.find_one({'_id': request.user_id})
+                if user:
+                    request.user_full_name = user.get('fullName')
+            except Exception:
+                pass  # Fallback to None or username if DB fails
+        
+        # Fallback if still no full name
+        if not request.user_full_name:
+            request.user_full_name = request.username
+
+        # Check admin role
+        if request.role != 'admin':
+            return jsonify({'error': 'Admin access required'}), 403
+
+        return f(*args, **kwargs)
+    
+    return decorated_function
+
+
+def self_or_admin_required(f):
+    """
+    Decorator to protect user update routes.
+    Allows:
+    - Admins to update any user
+    - Regular users to only update themselves
+    
+    Usage:
+        @bp.route('/<id>', methods=['PUT'])
+        @self_or_admin_required
+        def update_user(id):
+            # Admins can update any user
+            # Regular users can only update if id == their own user_id
+            pass
+    
+    Returns:
+        401 if no valid token
+        403 if regular user tries to update another user
+    """
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        token = get_token_from_header()
+        
+        if not token:
+            return jsonify({'error': 'Authentication required'}), 401
+        
+        payload = decode_token(token)
+        
+        if not payload:
+            return jsonify({'error': 'Invalid or expired token'}), 401
+        
+        # Add user info to request object for use in route
+        request.user_id = payload.get('user_id')
+        request.username = payload.get('username')
+        request.role = payload.get('role')
+        request.user_full_name = payload.get('fullName')
+
+        # If fullName is missing in token (legacy token), fetch from DB
+        if not request.user_full_name and request.user_id:
+            try:
+                user = mongo.db.users.find_one({'_id': request.user_id})
+                if user:
+                    request.user_full_name = user.get('fullName')
+            except Exception:
+                pass  # Fallback to None or username if DB fails
+        
+        # Fallback if still no full name
+        if not request.user_full_name:
+            request.user_full_name = request.username
+
+        # Check permissions: admin can do anything, regular users can only update themselves
+        if request.role != 'admin':
+            # Get the user ID from the URL parameter
+            target_user_id = kwargs.get('id')
+            if target_user_id and target_user_id != request.user_id:
+                return jsonify({'error': 'You can only update your own profile'}), 403
+
+        return f(*args, **kwargs)
+    
+    return decorated_function

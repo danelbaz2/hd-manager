@@ -2,8 +2,8 @@ import React from "react";
 import {
   type PrimaryTagData,
   type SecondaryTagData,
-} from "../../../../schemas/tagTypes";
-import TagCard from "./TagCard";
+} from "../../../../../schemas/tagTypes";
+import TagCard from "../TagCard";
 
 export interface PrimaryTagsListProps {
   primaryTags: PrimaryTagData[];

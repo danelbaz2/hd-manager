@@ -19,6 +19,7 @@ interface AuthContextType {
   login: (user: AuthUser, token: string) => void;
   logout: () => void;
   getToken: () => string | null;
+  refreshUser: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -187,6 +188,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return token || sessionStorage.getItem(AUTH_TOKEN_KEY);
   }, [token]);
 
+  const refreshUser = useCallback(async () => {
+    const currentToken = token || sessionStorage.getItem(AUTH_TOKEN_KEY);
+    if (!currentToken) return;
+
+    try {
+      const response = await getCurrentUser(currentToken);
+      if (response.success && response.data) {
+        setUser(response.data.user);
+      }
+    } catch (error) {
+      console.error("Error refreshing user data:", error);
+    }
+  }, [token]);
+
   const isAuthenticated = user !== null && token !== null;
 
   return (
@@ -199,6 +214,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         login,
         logout,
         getToken,
+        refreshUser,
       }}
     >
       {children}

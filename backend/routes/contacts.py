@@ -11,7 +11,7 @@ def serialize_doc(doc):
     doc['id'] = doc.pop('_id')
     return doc
 
-from utils.jwt_utils import jwt_required
+from utils.jwt_utils import jwt_required, admin_required
 
 @bp.route('/', methods=['GET'])
 @jwt_required
@@ -20,7 +20,7 @@ def get_contacts():
     return jsonify([serialize_doc(c) for c in contacts])
 
 @bp.route('/', methods=['POST'])
-@jwt_required
+@admin_required
 def create_contact():
     try:
         data = ContactModel(**request.json).model_dump(exclude_none=True)
@@ -46,7 +46,7 @@ def create_contact():
     return jsonify(serialize_doc(data)), 201
 
 @bp.route('/<id>', methods=['PUT'])
-@jwt_required
+@admin_required
 def update_contact(id):
     try:
         validated = ContactUpdateModel(**request.json)
@@ -76,7 +76,7 @@ def update_contact(id):
     return jsonify(serialize_doc(updated))
 
 @bp.route('/<id>', methods=['DELETE'])
-@jwt_required
+@admin_required
 def delete_contact(id):
     try:
         old_doc = mongo.db.contacts.find_one({'_id': id})
