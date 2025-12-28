@@ -12,18 +12,26 @@ import type { TourPageId } from "../shared/types";
 
 interface PageHelpButtonProps {
     pageId: TourPageId;
+    onClick?: () => void;
+    showPulse?: boolean;
+    title?: string;
 }
 
-const PageHelpButton: React.FC<PageHelpButtonProps> = ({ pageId }) => {
+const PageHelpButton: React.FC<PageHelpButtonProps> = ({ pageId, onClick, showPulse: customShowPulse, title }) => {
     const { isDarkMode } = useTheme();
     const { startTour, hasSeenTour } = useTour();
 
     const handleClick = () => {
-        startTour(pageId);
+        if (onClick) {
+            onClick();
+        } else {
+            startTour(pageId);
+        }
     };
 
     // Show a subtle pulse animation if user hasn't seen the tour yet
-    const showPulse = !hasSeenTour(pageId);
+    // Use custom prop if provided, otherwise check tour state
+    const shouldShowPulse = customShowPulse !== undefined ? customShowPulse : !hasSeenTour(pageId);
 
     return (
         <button
@@ -40,10 +48,10 @@ const PageHelpButton: React.FC<PageHelpButtonProps> = ({ pageId }) => {
                     ? "bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500"
                     : "bg-gradient-to-br from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400"
                 }
-                ${showPulse ? "animate-pulse" : ""}
+                ${shouldShowPulse ? "animate-pulse" : ""}
             `}
-            title="הצג הדרכה"
-            aria-label="הצג הדרכה"
+            title={title}
+            aria-label={title}
         >
             <HelpCircle className="w-6 h-6 text-white drop-shadow-sm" />
 
@@ -57,7 +65,7 @@ const PageHelpButton: React.FC<PageHelpButtonProps> = ({ pageId }) => {
                     : "bg-white text-slate-700 shadow-lg border border-slate-200"
                 }
             `}>
-                הצג הדרכה
+                {title}
             </span>
         </button>
     );

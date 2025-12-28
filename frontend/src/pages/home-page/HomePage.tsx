@@ -194,7 +194,9 @@ const HomePage: React.FC = () => {
       </div>
 
       {/* Floating Help Button */}
-      <PageHelpButton pageId="home" />
+      <PageHelpButton
+        title="הצג הדרכה"
+        pageId="home" />
     </div>
   );
 };
