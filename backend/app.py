@@ -1,10 +1,11 @@
-import eventlet
-eventlet.monkey_patch()
+from gevent import monkey
+monkey.patch_all()
 
-from flask import Flask
+from flask import Flask, jsonify
 from flask_cors import CORS
 from flask_socketio import SocketIO
 import os
+import logging
 from dotenv import load_dotenv
 
 from database import mongo
@@ -13,6 +14,10 @@ load_dotenv()
 
 # Initialize Flask with static files support
 app = Flask(__name__, static_folder='static', static_url_path='/static')
+
+# Hide basic request logs by default (clean terminal)
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
+
 CORS(app, origins=["http://localhost:5173"])
 
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017/hd_manager")
@@ -39,9 +44,23 @@ app.register_blueprint(uploads.bp)
 from websocket_events import register_socket_events
 register_socket_events(socketio)
 
+# Register Admin Routes
+from routes.admin import register_admin_routes
+register_admin_routes(app)
+
 @app.route('/')
 def hello():
     return "HD Manager API Running"
 
 if __name__ == '__main__':
-    socketio.run(app, debug=True, port=int(os.getenv("PORT", 5000)))
+    from utils.logging_utils import setup_access_logging
+    
+    # Get the adapter that pipes gevent logs to our controlled logger
+    access_log_adapter = setup_access_logging()
+    
+    socketio.run(
+        app, 
+        debug=True, 
+        port=int(os.getenv("PORT", 5000)),
+        log=access_log_adapter
+    )
