@@ -1,9 +1,16 @@
-from app import app
+import sys
+import os
+from flask import Flask
+from dotenv import load_dotenv
 from database import mongo
 from datetime import datetime, timedelta
 from utils.history import log_history
-import sys
-import os
+
+# Initialize minimal app for seeding to avoid eventlet/socketio overhead
+load_dotenv()
+app = Flask(__name__)
+app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017/hd_manager")
+mongo.init_app(app)
 import base64
 from bson.objectid import ObjectId
 import bcrypt
