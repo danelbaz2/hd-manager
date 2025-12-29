@@ -2,14 +2,14 @@ import React from "react";
 import { CheckCircle, Clock, AlertCircle, TrendingUp } from "lucide-react";
 import { useTheme } from "../../../contexts";
 
-interface StatisticsProps {
+interface TaskStatusSummaryProps {
   open: number;
   inProgress: number;
   closed: number;
   title?: string;
 }
 
-const Statistics: React.FC<StatisticsProps> = ({
+const TaskStatusSummary: React.FC<TaskStatusSummaryProps> = ({
   open,
   inProgress,
   closed,
@@ -43,20 +43,18 @@ const Statistics: React.FC<StatisticsProps> = ({
 
   return (
     <div
-      className={`rounded-2xl border p-3 ${
-        isDarkMode
+      className={`rounded-2xl border p-3 ${isDarkMode
           ? "bg-slate-800 border-slate-700"
           : "bg-white border-slate-200"
-      }`}
+        }`}
       dir="rtl"
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-2">
         <TrendingUp className="w-4 h-4 text-blue-500" />
         <h3
-          className={`font-bold text-sm ${
-            isDarkMode ? "text-white" : "text-slate-800"
-          }`}
+          className={`font-bold text-sm ${isDarkMode ? "text-white" : "text-slate-800"
+            }`}
         >
           {title}
         </h3>
@@ -92,9 +90,8 @@ const StatCard: React.FC<StatCardProps> = ({ stat, isDarkMode }) => {
       </div>
       <p className={`text-xl font-bold ${stat.color}`}>{stat.value}</p>
       <p
-        className={`text-[10px] ${
-          isDarkMode ? "text-slate-400" : "text-slate-500"
-        }`}
+        className={`text-[10px] ${isDarkMode ? "text-slate-400" : "text-slate-500"
+          }`}
       >
         {stat.label}
       </p>
@@ -102,4 +99,4 @@ const StatCard: React.FC<StatCardProps> = ({ stat, isDarkMode }) => {
   );
 };
 
-export default Statistics;
+export default TaskStatusSummary;

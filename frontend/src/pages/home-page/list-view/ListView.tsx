@@ -18,7 +18,7 @@ interface ListViewProps {
   primaryTags: PrimaryTagData[];
   secondaryTags: SecondaryTagData[];
   searchQuery?: string;
-  statusFilter?: TaskStatus | null;
+  statusFilter?: Set<TaskStatus>;
 }
 
 /**
@@ -33,7 +33,7 @@ const ListView: React.FC<ListViewProps> = ({
   primaryTags,
   secondaryTags,
   searchQuery = "",
-  statusFilter = null,
+  statusFilter = new Set(),
 }) => {
   const { viewMode, selectedDate } = useViewState();
   const { openTaskModal } = useTaskModal();
@@ -103,10 +103,10 @@ const ListView: React.FC<ListViewProps> = ({
     });
   }, [tasks, searchQuery, users, primaryTags, secondaryTags]);
 
-  // Apply status filter (null = show all)
+  // Apply status filter (empty Set = show all)
   const filteredTasks = React.useMemo(() => {
-    if (statusFilter === null) return searchFilteredTasks;
-    return searchFilteredTasks.filter((task) => task.status === statusFilter);
+    if (statusFilter.size === 0) return searchFilteredTasks;
+    return searchFilteredTasks.filter((task) => task.status && statusFilter.has(task.status));
   }, [searchFilteredTasks, statusFilter]);
 
   // Render based on view mode

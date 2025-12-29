@@ -4,7 +4,7 @@ import { type Task } from "../../../../api/tasksApi";
 import UserCardLine from "./UserCardLine";
 import TaskBrief from "./TaskBrief";
 import MotivationalBanner from "../MotivationalBanner";
-import Statistics from "../Statistics";
+import TaskStatusSummary from "../TaskStatusSummary";
 
 interface UserViewProps {
   user: UserData;
@@ -54,7 +54,7 @@ const UserView: React.FC<UserViewProps> = ({
 
   return (
     <div className="flex flex-col h-full">
-      {/* Header Section - 20% height: Banner + UserCard in a row */}
+      {/* Header Section - Banner + UserCard in a row */}
       <div className="min-h-[100px] flex items-center shrink-0" dir="rtl">
         <div className="flex items-center w-full gap-4">
           {/* Motivational Banner */}
@@ -76,14 +76,14 @@ const UserView: React.FC<UserViewProps> = ({
         </div>
       </div>
 
-      {/* Task Brief - Takes remaining space */}
-      <div className="flex-1 overflow-auto">
+      {/* Task Brief - Takes available space */}
+      <div className="flex-1 overflow-auto min-h-0">
         <TaskBrief tasks={tasks} />
       </div>
 
-      {/* Team Statistics */}
-      <div className="shrink-0 mt-4">
-        <Statistics
+      {/* Team Statistics - Pushed to bottom to align with ActivityFeedBox */}
+      <div className="shrink-0 mt-auto pb-16">
+        <TaskStatusSummary
           open={teamStats.open}
           inProgress={teamStats.inProgress}
           closed={teamStats.closed}
