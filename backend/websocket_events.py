@@ -136,3 +136,21 @@ def broadcast_chat_update(message_data=None):
             })
         except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
             pass  # Client disconnected, ignore
+
+
+def broadcast_user_update(action, user_data=None, user_id=None):
+    """Broadcast a user update to all connected clients"""
+    if _socketio:
+        try:
+            uid = user_id or (user_data.get('id') if user_data else 'unknown')
+            _log_ws_event('BROADCAST', f'User update sent', f"user={uid} | action={action}")
+            
+            _socketio.emit('user_update', {
+                'type': 'user_update',
+                'action': action,  # 'create', 'update', 'delete'
+                'payload': user_data,
+                'userId': uid
+            })
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+            pass  # Client disconnected, ignore
+

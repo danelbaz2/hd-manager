@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 from models.user_model import UserModel, UserUpdateModel
 from utils.history import log_history
 from utils.jwt_utils import jwt_required, admin_required, self_or_admin_required
+from websocket_events import broadcast_user_update
 import bcrypt
 
 bp = Blueprint('users', __name__, url_prefix='/api/users')
@@ -53,7 +54,11 @@ def create_user():
     
     log_history('user', data['_id'], 'CREATE', getattr(request, 'user_full_name', 'system'), None, data, data)
     
-    return jsonify(serialize_doc(data)), 201
+    # Broadcast user creation to all clients
+    serialized = serialize_doc(data.copy())
+    broadcast_user_update('create', serialized)
+    
+    return jsonify(serialized), 201
 
 @bp.route('/<id>', methods=['PUT'])
 @self_or_admin_required
@@ -84,8 +89,12 @@ def update_user(id):
         updated = mongo.db.users.find_one({'_id': id})
         
         log_history('user', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, data)
+        
+        # Broadcast user update to all clients
+        serialized = serialize_doc(updated.copy())
+        broadcast_user_update('update', serialized)
             
-        return jsonify(serialize_doc(updated))
+        return jsonify(serialized)
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
@@ -107,7 +116,11 @@ def delete_user(id):
         updated = mongo.db.users.find_one({'_id': id})
         log_history('user', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, updated, {'base': {'isDeleted': True}})
         
+        # Broadcast user deletion to all clients
+        broadcast_user_update('delete', None, id)
+        
     except Exception as e:
         return jsonify({"error": str(e)}), 400
     return jsonify({"message": "Deleted"}), 200
+
 

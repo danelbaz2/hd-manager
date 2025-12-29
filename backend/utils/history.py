@@ -53,7 +53,11 @@ def log_history(entity_type, entity_id, action, user_id='system', old_val=None, 
 
     result = mongo.db.ents_archive.insert_one(entry)
     
-    # Broadcast update via WebSocket
+    # Broadcast update via WebSocket - ONLY for task entities
+    # Other entity types (users, contacts, tags) are logged but not broadcast
+    if entity_type != 'task':
+        return  # Skip broadcasting for non-task entities
+    
     try:
         from websocket_events import broadcast_task_update
         
@@ -69,6 +73,13 @@ def log_history(entity_type, entity_id, action, user_id='system', old_val=None, 
         elif action == 'UPDATE' and 'responsibleUserIds' in change_data:
             action_label = 'ASSIGN'
         
+        # Get the full task object for the frontend to update its state
+        full_task = None
+        if action in ['CREATE', 'UPDATE'] and new_val:
+            cleaned_new_val = clean_doc(new_val)
+            if cleaned_new_val:
+                full_task = cleaned_new_val
+        
         history_item = {
             'id': str(result.inserted_id),
             'taskId': str(task_id),
@@ -78,9 +89,11 @@ def log_history(entity_type, entity_id, action, user_id='system', old_val=None, 
             'changes': {k: v for k, v in change_data.items() if k not in ['action', 'timestamp', 'base']},
             'oldValues': {k: v for k, v in (clean_doc(old_val) or {}).items() if k != 'base' and k != 'id'},
             'note': change_data.get('note'),
-            'file': change_data.get('file')
+            'file': change_data.get('file'),
+            'fullTask': full_task  # Include full task data for real-time updates
         }
         
         broadcast_task_update(history_item)
     except Exception as e:
         print(f"Failed to broadcast update: {e}")
+
