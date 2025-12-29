@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts";
 import { type UserData } from "../../../schemas/userTypes";
 import { type Task } from "../../../api/tasksApi";
+import { type TeamMessage } from "./activity-feed-box/update-team/types";
 import { ActivityFeedBox } from "./activity-feed-box";
 import { AdminView } from "./admin-view";
 import { UserView } from "./user-view";
@@ -11,14 +12,14 @@ interface GridViewProps {
   users: UserData[];
   tasks: Task[];
   viewMode?: "daily" | "weekly" | "monthly";
-  taskHistory?: any[];
+  teamUpdatesOverride?: TeamMessage[];
 }
 
 const GridView: React.FC<GridViewProps> = ({
   users,
   tasks,
   viewMode = "daily",
-  taskHistory,
+  teamUpdatesOverride,
 }) => {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
@@ -68,11 +69,11 @@ const GridView: React.FC<GridViewProps> = ({
       </div>
 
       {/* Left Side - Activity Feed (35%) */}
-      <div className="w-[35%] h-full" data-tour="activity-feed">
+      <div className="w-[35%] h-full pb-16" data-tour="activity-feed">
         <ActivityFeedBox
           tasksOverride={tasks}
           usersOverride={users}
-          historyOverride={taskHistory}
+          teamUpdatesOverride={teamUpdatesOverride}
         />
       </div>
     </div>

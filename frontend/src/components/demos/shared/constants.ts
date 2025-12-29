@@ -22,6 +22,7 @@ const HOME_TOUR: PageTourConfig = {
             onEnter: () => {
                 window.dispatchEvent(new CustomEvent('tour:set-display-mode', { detail: 'grid' }));
                 window.dispatchEvent(new CustomEvent('tour:set-view-mode', { detail: 'daily' }));
+                window.dispatchEvent(new CustomEvent('tour:reset-date'));
             },
         },
         {
@@ -38,6 +39,7 @@ const HOME_TOUR: PageTourConfig = {
             onEnter: () => {
                 window.dispatchEvent(new CustomEvent('tour:set-display-mode', { detail: 'grid' }));
                 window.dispatchEvent(new CustomEvent('tour:set-view-mode', { detail: 'daily' }));
+                window.dispatchEvent(new CustomEvent('tour:reset-date'));
             },
         },
         {
@@ -54,6 +56,7 @@ const HOME_TOUR: PageTourConfig = {
             onEnter: () => {
                 window.dispatchEvent(new CustomEvent('tour:set-display-mode', { detail: 'grid' }));
                 window.dispatchEvent(new CustomEvent('tour:set-view-mode', { detail: 'daily' }));
+                window.dispatchEvent(new CustomEvent('tour:reset-date'));
             },
         },
         {
@@ -68,6 +71,7 @@ const HOME_TOUR: PageTourConfig = {
             onEnter: () => {
                 window.dispatchEvent(new CustomEvent('tour:set-display-mode', { detail: 'grid' }));
                 window.dispatchEvent(new CustomEvent('tour:set-view-mode', { detail: 'daily' }));
+                window.dispatchEvent(new CustomEvent('tour:reset-date'));
             },
             loop: true,
             simulateClicks: [
@@ -88,6 +92,7 @@ const HOME_TOUR: PageTourConfig = {
             onEnter: () => {
                 window.dispatchEvent(new CustomEvent('tour:set-display-mode', { detail: 'grid' }));
                 window.dispatchEvent(new CustomEvent('tour:set-view-mode', { detail: 'daily' }));
+                window.dispatchEvent(new CustomEvent('tour:reset-date'));
                 // Click tasks tab to ensure we start from tasks view
                 setTimeout(() => {
                     const tasksTab = document.querySelector("[data-tour='tasks-updates-tab']") as HTMLElement;
@@ -114,6 +119,7 @@ const HOME_TOUR: PageTourConfig = {
             onEnter: () => {
                 window.dispatchEvent(new CustomEvent('tour:set-display-mode', { detail: 'grid' }));
                 window.dispatchEvent(new CustomEvent('tour:set-view-mode', { detail: 'daily' }));
+                window.dispatchEvent(new CustomEvent('tour:reset-date'));
             },
             // Use the same cursor demonstrator to point at the card
             simulateClicks: ["[data-tour='my-user-card']"],

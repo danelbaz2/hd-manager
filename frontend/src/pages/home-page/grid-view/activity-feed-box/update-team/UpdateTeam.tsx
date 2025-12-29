@@ -11,9 +11,15 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
   isDarkMode,
   currentUserId,
   isAdmin,
+  messagesOverride,
 }) => {
-  const { messages, isLoading, isSending, error, fetchMessages, sendMessage } =
+  const { messages: apiMessages, isLoading: apiLoading, isSending, error: apiError, fetchMessages, sendMessage } =
     useTeamMessages();
+
+  // Use override if available
+  const messages = messagesOverride || apiMessages;
+  const isLoading = messagesOverride ? false : apiLoading;
+  const error = messagesOverride ? null : apiError;
 
   // Subscribe to WebSocket for real-time updates
   const { subscribe, isConnected } = useSocket();
@@ -56,9 +62,8 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
   if (isLoading && messages.length === 0) {
     return (
       <div
-        className={`h-full flex items-center justify-center text-sm ${
-          isDarkMode ? "text-slate-400" : "text-slate-500"
-        }`}
+        className={`h-full flex items-center justify-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
+          }`}
       >
         טוען עדכונים...
       </div>
@@ -79,9 +84,8 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
     return (
       <div className="h-full flex flex-col">
         <div
-          className={`flex-1 flex items-center justify-center text-sm ${
-            isDarkMode ? "text-slate-400" : "text-slate-500"
-          }`}
+          className={`flex-1 flex items-center justify-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
+            }`}
         >
           אין עדכוני צוות עדיין
         </div>
@@ -101,9 +105,8 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
       <Virtuoso
         data={messages}
         itemContent={renderMessage}
-        className={`flex-1 ${
-          isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-        }`}
+        className={`flex-1 ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+          }`}
         style={{ height: "100%" }}
         overscan={200}
       />

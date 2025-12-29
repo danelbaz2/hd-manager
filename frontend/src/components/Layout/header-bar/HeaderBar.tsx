@@ -140,6 +140,18 @@ const HeaderBar: React.FC<HeaderBarProps> = ({ className }) => {
     };
   }, [isUserMenuOpen, isCalendarOpen]);
 
+  // Listen for tour reset date event
+  useEffect(() => {
+    const handleResetDate = () => {
+      setSelectedDate(Date.now());
+    };
+
+    window.addEventListener("tour:reset-date", handleResetDate);
+    return () => {
+      window.removeEventListener("tour:reset-date", handleResetDate);
+    };
+  }, [setSelectedDate]);
+
   return (
     <header
       className={`

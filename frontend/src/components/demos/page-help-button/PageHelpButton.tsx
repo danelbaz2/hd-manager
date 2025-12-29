@@ -43,18 +43,17 @@ const PageHelpButton: React.FC<PageHelpButtonProps> = ({
     <button
       onClick={handleClick}
       className={`
-                fixed top-4 left-4 z-[9999]
+                fixed bottom-4 left-4 z-[9999]
                 w-10 h-10 rounded-full
                 flex items-center justify-center
                 shadow-lg hover:shadow-xl
                 transition-all duration-300 ease-out
                 hover:scale-110 active:scale-95
                 group
-                ${
-                  isDarkMode
-                    ? "bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500"
-                    : "bg-gradient-to-br from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400"
-                }
+                ${isDarkMode
+          ? "bg-gradient-to-br from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500"
+          : "bg-gradient-to-br from-blue-500 to-purple-500 hover:from-blue-400 hover:to-purple-400"
+        }
                 ${shouldShowPulse ? "animate-pulse" : ""}
             `}
       title={title}
@@ -68,11 +67,10 @@ const PageHelpButton: React.FC<PageHelpButtonProps> = ({
                 absolute left-full ml-3 px-3 py-1.5 rounded-lg text-sm font-medium whitespace-nowrap
                 opacity-0 group-hover:opacity-100 pointer-events-none
                 transition-opacity duration-200
-                ${
-                  isDarkMode
-                    ? "bg-slate-800 text-white shadow-lg"
-                    : "bg-white text-slate-700 shadow-lg border border-slate-200"
-                }
+                ${isDarkMode
+            ? "bg-slate-800 text-white shadow-lg"
+            : "bg-white text-slate-700 shadow-lg border border-slate-200"
+          }
             `}
       >
         {title}

@@ -13,10 +13,15 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   selectedDate,
   onUpdateClick,
   onDataRefresh,
+  updatesOverride,
 }) => {
-  const { updates, isLoading, error, fetchUpdates } = useUpdatesData({
+  const { updates: apiUpdates, isLoading: apiLoading, error: apiError, fetchUpdates } = useUpdatesData({
     selectedDate,
   });
+
+  const updates = updatesOverride || apiUpdates;
+  const isLoading = updatesOverride ? false : apiLoading;
+  const error = updatesOverride ? null : apiError;
 
   // Handle WebSocket updates - refetch and notify parent
   const handleSocketUpdate = useCallback(() => {
@@ -51,9 +56,8 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   if (isLoading && updates.length === 0) {
     return (
       <div
-        className={`h-full flex items-center justify-center text-sm ${
-          isDarkMode ? "text-slate-400" : "text-slate-500"
-        }`}
+        className={`h-full flex items-center justify-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
+          }`}
       >
         טוען עדכונים...
       </div>
@@ -75,9 +79,8 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   if (updates.length === 0) {
     return (
       <div
-        className={`h-full flex items-center justify-center text-sm ${
-          isDarkMode ? "text-slate-400" : "text-slate-500"
-        }`}
+        className={`h-full flex items-center justify-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
+          }`}
       >
         אין עדכונים למשימות ביום זה
       </div>

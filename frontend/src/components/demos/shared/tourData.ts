@@ -228,6 +228,25 @@ export const DEMO_HISTORY: any[] = [
         changes: { title: "שיחת סטטוס עם לקוח" },
         oldValues: {}
     },
+    {
+        id: "demo-hist-9",
+        taskId: "demo-task-1",
+        action: "NOTE",
+        timestamp: today - 45000,
+        updatedBy: "ישראל ישראלי",
+        note: "להוסיף אנימציות בכניסה",
+        changes: {},
+        oldValues: {}
+    },
+    {
+        id: "demo-hist-10",
+        taskId: "demo-task-2",
+        action: "UPDATE",
+        timestamp: today - 20000,
+        updatedBy: "מערכת",
+        changes: { priority: "high" },
+        oldValues: { priority: "medium" }
+    },
     // Future history items (for demo purposes when switching dates)
     {
         id: "demo-hist-4",
@@ -263,7 +282,7 @@ export const DEMO_HISTORY: any[] = [
 export const DEMO_TEAM_UPDATES = [
     {
         id: "update-1",
-        author: "ישראל ישראלי",
+        senderId: "demo-user-1",
         role: "admin",
         message: "בוקר טוב לכולם! מזכיר שישיבת הצוות היום תתקיים ב-14:00.",
         timestamp: Date.now() - 3600000 * 2,
@@ -271,7 +290,7 @@ export const DEMO_TEAM_UPDATES = [
     },
     {
         id: "update-2",
-        author: "דני לוי",
+        senderId: "demo-user-3",
         role: "regular",
         message: "סיימתי את המוקאפ הראשוני למובייל, אשמח לפידבק.",
         timestamp: Date.now() - 3600000 * 4,
@@ -279,10 +298,26 @@ export const DEMO_TEAM_UPDATES = [
     },
     {
         id: "update-3",
-        author: "מערכת",
+        senderId: "system", // System messages might need special handling or a system user
         role: "system",
         message: "🎉 ברכות לשרה על סגירת 5 משימות השבוע!",
         timestamp: Date.now() - 86400000,
+        type: "celebration"
+    },
+    {
+        id: "update-4",
+        senderId: "demo-user-2",
+        role: "regular",
+        message: "מישהו יכול לעבור על ה-PR שלי? דחוף!",
+        timestamp: Date.now() - 3600000 * 5,
+        type: "update"
+    },
+    {
+        id: "update-5",
+        senderId: "demo-user-3",
+        role: "regular",
+        message: "יש עוגות במטבח! 🍰",
+        timestamp: Date.now() - 3600000 * 6,
         type: "celebration"
     }
 ];

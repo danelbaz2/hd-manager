@@ -11,7 +11,8 @@ export interface UpdatesTaskProps {
   isDarkMode: boolean;
   selectedDate: number;
   onUpdateClick: (taskId: string) => void;
-  onDataRefresh?: () => void; // Called when WebSocket update arrives to refresh parent data
+  onDataRefresh?: () => void;
+  updatesOverride?: TaskHistoryEntry[];
 }
 
 // Re-export types from other modules

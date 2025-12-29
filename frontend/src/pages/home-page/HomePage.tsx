@@ -11,7 +11,7 @@ import { useTaskModal } from "../../components/modal/modal-task";
 import { type Task } from "../../api/tasksApi";
 import { useTour } from "../../components/demos/tour-provider";
 import { PageHelpButton } from "../../components/demos/page-help-button";
-import { DEMO_TASKS, DEMO_USERS, DEMO_HISTORY, DEMO_PRIMARY_TAGS, DEMO_SECONDARY_TAGS } from "../../components/demos/shared/tourData";
+import { DEMO_TASKS, DEMO_USERS, DEMO_HISTORY, DEMO_PRIMARY_TAGS, DEMO_SECONDARY_TAGS, DEMO_TEAM_UPDATES } from "../../components/demos/shared/tourData";
 import type { UserData } from "../../schemas/userTypes";
 
 const HomePage: React.FC = () => {
@@ -37,9 +37,9 @@ const HomePage: React.FC = () => {
   const {
     tasks,
     users,
-    formattedHistory: taskHistory,
     primaryTags,
     secondaryTags,
+    teamUpdates,
   } = useMemo(() => {
     if (isTourActive) {
       // Augment demo data to include current user with tasks
@@ -53,12 +53,20 @@ const HomePage: React.FC = () => {
         }))
         : [];
 
+      const demoTeamUpdates = DEMO_TEAM_UPDATES.map(u => ({
+        id: u.id,
+        content: u.message,
+        senderId: u.senderId,
+        base: { createdAt: u.timestamp }
+      }));
+
       return {
         tasks: [...DEMO_TASKS, ...myDemoTasks],
         users: effectiveUsers,
         formattedHistory: [...DEMO_HISTORY],
         primaryTags: [...realPrimaryTags, ...DEMO_PRIMARY_TAGS],
         secondaryTags: [...realSecondaryTags, ...DEMO_SECONDARY_TAGS],
+        teamUpdates: demoTeamUpdates,
       };
     }
     return {
@@ -67,6 +75,7 @@ const HomePage: React.FC = () => {
       formattedHistory: realHistory,
       primaryTags: realPrimaryTags,
       secondaryTags: realSecondaryTags,
+      teamUpdates: undefined,
     };
   }, [isTourActive, user, realTasks, realUsers, realHistory, realPrimaryTags, realSecondaryTags]);
 
@@ -129,7 +138,7 @@ const HomePage: React.FC = () => {
     switch (displayMode) {
       case "grid":
         return (
-          <GridView users={users} tasks={filteredTasks} viewMode={viewMode} taskHistory={taskHistory} />
+          <GridView users={users} tasks={filteredTasks} viewMode={viewMode} teamUpdatesOverride={teamUpdates} />
         );
 
       case "list":
@@ -157,7 +166,7 @@ const HomePage: React.FC = () => {
 
       default:
         return (
-          <GridView users={users} tasks={filteredTasks} viewMode={viewMode} />
+          <GridView users={users} tasks={filteredTasks} viewMode={viewMode} teamUpdatesOverride={teamUpdates} />
         );
     }
   };

@@ -109,10 +109,9 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
       className={`
         flex items-center justify-between
         px-4 lg:px-6 xl:px-8 py-3 lg:py-4 
-        ${
-          isDarkMode
-            ? "bg-slate-900 border-slate-800"
-            : "bg-slate-50 border-slate-200"
+        ${isDarkMode
+          ? "bg-slate-900 border-slate-800"
+          : "bg-slate-50 border-slate-200"
         }
       `}
       dir="rtl"
@@ -149,24 +148,6 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
             onChange={handleViewModeChange}
           />
         </div>
-
-        {/* Help Button */}
-        <button
-          onClick={() => startTour("home")}
-          className={`
-            p-2 rounded-xl transition-all duration-200
-            ${
-              isDarkMode
-                ? "bg-slate-700 hover:bg-slate-600 text-slate-300"
-                : "bg-white hover:bg-slate-100 text-slate-600 border border-slate-200"
-            }
-            ${showHelpPulse ? "animate-pulse" : ""}
-          `}
-          title="עזרה"
-        >
-          <HelpCircle className="w-5 h-5" />
-        </button>
-
         {isAdmin && (
           <button
             onClick={onCreateTask}
