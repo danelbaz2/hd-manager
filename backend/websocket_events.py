@@ -81,8 +81,8 @@ def broadcast_task_update(update_data):
     """Broadcast a task update to all connected clients"""
     if _socketio:
         try:
-            task_id = update_data.get('ent', {}).get('_id', 'unknown')
-            action_type = update_data.get('a', 'update')
+            task_id = update_data.get('taskId', 'unknown')
+            action_type = update_data.get('action', 'update')
             _log_ws_event('BROADCAST', f'Task update sent', f"task={task_id} | action={action_type}")
             
             _socketio.emit('task_update', {

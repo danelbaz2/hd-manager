@@ -1,5 +1,5 @@
 import React from "react";
-import type { TaskHistoryEntry, UserData } from "./types";
+import type { TaskHistoryEntry, UserData, PrimaryTagData, SecondaryTagData } from "./types";
 import { getIconConfig } from "../../../../../components/modal/modal-task/history/historyConfig";
 import { FIELD_LABELS, formatTime } from "./updateFormatters";
 import { UserAvatar } from "./UserAvatar";
@@ -10,7 +10,10 @@ interface UpdateItemProps {
   taskTitle?: string;
   isDarkMode: boolean;
   users: UserData[];
+  primaryTags: PrimaryTagData[];
+  secondaryTags: SecondaryTagData[];
   onClick?: () => void;
+  isNew?: boolean;
 }
 
 export const UpdateItem: React.FC<UpdateItemProps> = ({
@@ -18,7 +21,10 @@ export const UpdateItem: React.FC<UpdateItemProps> = ({
   taskTitle,
   isDarkMode,
   users,
+  primaryTags,
+  secondaryTags,
   onClick,
+  isNew = false,
 }) => {
   const config = getIconConfig(entry);
   const title =
@@ -29,15 +35,18 @@ export const UpdateItem: React.FC<UpdateItemProps> = ({
   const userColor = user?.color || "#94a3b8";
   const changedFields = entry.changes
     ? Object.keys(entry.changes).filter((k) =>
-        Object.keys(FIELD_LABELS).includes(k)
-      )
+      Object.keys(FIELD_LABELS).includes(k)
+    )
     : [];
 
   return (
     <div
-      className={`flex items-start gap-3 cursor-pointer transition-all py-3 px-2 ${
-        isDarkMode ? "hover:bg-slate-700/30" : "hover:bg-slate-50"
-      }`}
+      className={`flex items-start gap-3 cursor-pointer transition-all py-3 px-2 ${isDarkMode ? "hover:bg-slate-700/30" : "hover:bg-slate-50"
+        } ${isNew ? "animate-fadeSlideIn" : ""}`}
+      style={isNew ? {
+        animation: "fadeSlideIn 0.4s ease-out forwards",
+        backgroundColor: isDarkMode ? "rgba(59, 130, 246, 0.1)" : "rgba(59, 130, 246, 0.05)"
+      } : undefined}
       dir="rtl"
       onClick={onClick}
     >
@@ -53,9 +62,8 @@ export const UpdateItem: React.FC<UpdateItemProps> = ({
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap mb-0.5">
           <span
-            className={`font-semibold text-sm ${
-              isDarkMode ? "text-white" : "text-slate-800"
-            }`}
+            className={`font-semibold text-sm ${isDarkMode ? "text-white" : "text-slate-800"
+              }`}
           >
             {entry.updatedBy}
           </span>
@@ -72,14 +80,15 @@ export const UpdateItem: React.FC<UpdateItemProps> = ({
           changedFields={changedFields}
           isDarkMode={isDarkMode}
           users={users}
+          primaryTags={primaryTags}
+          secondaryTags={secondaryTags}
           actionLabel={config.label}
         />
       </div>
 
       <div
-        className={`shrink-0 text-xs font-medium ${
-          isDarkMode ? "text-slate-400" : "text-slate-500"
-        }`}
+        className={`shrink-0 text-xs font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
+          }`}
       >
         {formatTime(entry.timestamp)}
       </div>

@@ -32,6 +32,8 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
   const {
     tasks: globalTasks,
     users: globalUsers,
+    primaryTags,
+    secondaryTags,
     refreshTasks,
   } = useSettings();
   const { selectedDate } = useViewState();
@@ -153,6 +155,8 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
           <UpdatesTask
             taskTitleMap={taskTitleMap}
             users={users}
+            primaryTags={primaryTags}
+            secondaryTags={secondaryTags}
             isDarkMode={isDarkMode}
             selectedDate={selectedDate}
             onUpdateClick={handleActivityClick}

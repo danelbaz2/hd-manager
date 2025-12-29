@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { getAllTasksHistory, type TaskHistoryEntry } from "../../../../../api/tasksApi";
 
 // Get start/end of day helpers
@@ -22,6 +22,8 @@ export const useUpdatesData = ({ selectedDate }: UseUpdatesDataOptions) => {
   const [updates, setUpdates] = useState<TaskHistoryEntry[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [newIds, setNewIds] = useState<Set<string>>(new Set());
+  const timeoutRefs = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map());
 
   // Fetch updates for the selected date
   const fetchUpdates = useCallback(async () => {
@@ -55,7 +57,7 @@ export const useUpdatesData = ({ selectedDate }: UseUpdatesDataOptions) => {
     }
   }, [selectedDate]);
 
-  // Add a new update (from WebSocket)
+  // Add a new update (from WebSocket) with animation
   const addUpdate = useCallback((update: TaskHistoryEntry) => {
     const dayStart = getStartOfDay(selectedDate);
     const dayEnd = getEndOfDay(selectedDate);
@@ -66,10 +68,32 @@ export const useUpdatesData = ({ selectedDate }: UseUpdatesDataOptions) => {
         // Check if already exists
         if (prev.some((u) => u.id === update.id)) return prev;
         // Add and sort
-        return [...prev, update].sort((a, b) => b.timestamp - a.timestamp);
+        return [update, ...prev.filter(u => u.id !== update.id)].sort((a, b) => b.timestamp - a.timestamp);
       });
+
+      // Mark as new for animation
+      setNewIds((prev) => new Set(prev).add(update.id));
+
+      // Clear existing timeout if any
+      const existingTimeout = timeoutRefs.current.get(update.id);
+      if (existingTimeout) clearTimeout(existingTimeout);
+
+      // Remove "new" status after 3 seconds
+      const timeout = setTimeout(() => {
+        setNewIds((prev) => {
+          const next = new Set(prev);
+          next.delete(update.id);
+          return next;
+        });
+        timeoutRefs.current.delete(update.id);
+      }, 3000);
+
+      timeoutRefs.current.set(update.id, timeout);
     }
   }, [selectedDate]);
 
-  return { updates, isLoading, error, fetchUpdates, addUpdate };
+  // Check if an update is new
+  const isNew = useCallback((id: string) => newIds.has(id), [newIds]);
+
+  return { updates, isLoading, error, fetchUpdates, addUpdate, isNew };
 };

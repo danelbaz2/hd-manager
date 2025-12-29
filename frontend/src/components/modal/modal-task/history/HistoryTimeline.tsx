@@ -30,10 +30,10 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
   getActionDescription,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [newEntryId, setNewEntryId] = useState<string | null>(null);
-  const prevLengthRef = useRef(history.length);
-  const waitingForNewEntry = useRef(false);
+  const [newEntryIds, setNewEntryIds] = useState<Set<string>>(new Set());
+  const knownIdsRef = useRef<Set<string>>(new Set());
   const isInitialMount = useRef(true);
+  const pendingOwnEntryRef = useRef(false); // Track if we're expecting our own entry
 
   // Get user by name
   const getUserByName = (name: string): UserData | undefined => {
@@ -42,38 +42,73 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
 
   // Initial scroll to bottom (instant, no animation)
   useEffect(() => {
-    if (scrollRef.current && isInitialMount.current) {
+    if (scrollRef.current && isInitialMount.current && history.length > 0) {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+      // Mark all initial entries as known
+      history.forEach((e) => knownIdsRef.current.add(e.id));
       isInitialMount.current = false;
     }
-  }, []);
+  }, [history]);
 
-  // Handle history changes - smooth scroll only on new entries
+  // Handle history changes - detect new entries and animate them
+  const prevHistoryLengthRef = useRef(history.length);
+
   useEffect(() => {
-    // If we're waiting for a new entry and history grew, animate the NEW entry
-    if (waitingForNewEntry.current && history.length > prevLengthRef.current) {
-      const newEntry = history[history.length - 1];
-      if (newEntry?.id) {
-        setNewEntryId(newEntry.id);
-        setTimeout(() => setNewEntryId(null), 1000);
-      }
-      waitingForNewEntry.current = false;
+    if (isInitialMount.current) return;
 
-      // Smooth scroll only for new entries
-      if (scrollRef.current) {
-        scrollRef.current.scrollTo({
+    // Detect if history grew
+    const historyGrew = history.length > prevHistoryLengthRef.current;
+    prevHistoryLengthRef.current = history.length;
+
+    // Find entries we haven't seen before
+    const newIds: string[] = [];
+    history.forEach((entry) => {
+      if (!knownIdsRef.current.has(entry.id)) {
+        // If we're expecting our own entry, mark it as known but don't animate
+        if (pendingOwnEntryRef.current) {
+          knownIdsRef.current.add(entry.id);
+          pendingOwnEntryRef.current = false;
+        } else {
+          // This is from someone else - animate it
+          newIds.push(entry.id);
+          knownIdsRef.current.add(entry.id);
+        }
+      }
+    });
+
+    if (newIds.length > 0) {
+      // Mark these entries as new for animation
+      setNewEntryIds((prev) => {
+        const next = new Set(prev);
+        newIds.forEach((id) => next.add(id));
+        return next;
+      });
+
+      // Remove "new" status after animation completes
+      setTimeout(() => {
+        setNewEntryIds((prev) => {
+          const next = new Set(prev);
+          newIds.forEach((id) => next.delete(id));
+          return next;
+        });
+      }, 1500);
+    }
+
+    // Smooth scroll to bottom whenever history grows (own entries or from others)
+    if (historyGrew && scrollRef.current) {
+      // Use requestAnimationFrame for smoother scrolling after DOM update
+      requestAnimationFrame(() => {
+        scrollRef.current?.scrollTo({
           top: scrollRef.current.scrollHeight,
           behavior: 'smooth'
         });
-      }
+      });
     }
-
-    prevLengthRef.current = history.length;
   }, [history]);
 
-  // Handle note submission
+  // Handle note submission - mark that we're expecting our own entry
   const handleAddNote = async (text: string) => {
-    waitingForNewEntry.current = true;
+    pendingOwnEntryRef.current = true;
     await onAddNote(text);
   };
 
@@ -107,7 +142,7 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
                 isDarkMode={isDarkMode}
                 user={getUserByName(entry.updatedBy)}
                 getActionDescription={getActionDescription}
-                isNew={entry.id === newEntryId}
+                isNew={newEntryIds.has(entry.id)}
               />
             ))}
 

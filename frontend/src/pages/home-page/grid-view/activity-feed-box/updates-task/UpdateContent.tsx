@@ -1,6 +1,6 @@
 import React from "react";
 import { ArrowLeft } from "lucide-react";
-import type { TaskHistoryEntry, UserData } from "./types";
+import type { TaskHistoryEntry, UserData, PrimaryTagData, SecondaryTagData } from "./types";
 import { FIELD_LABELS, formatValue } from "./updateFormatters";
 
 interface UpdateContentProps {
@@ -9,6 +9,8 @@ interface UpdateContentProps {
   changedFields: string[];
   isDarkMode: boolean;
   users: UserData[];
+  primaryTags: PrimaryTagData[];
+  secondaryTags: SecondaryTagData[];
   actionLabel: string;
 }
 
@@ -18,6 +20,8 @@ export const UpdateContent: React.FC<UpdateContentProps> = ({
   changedFields,
   isDarkMode,
   users,
+  primaryTags,
+  secondaryTags,
   actionLabel,
 }) => {
   const textColor = isDarkMode ? "text-slate-300" : "text-slate-600";
@@ -50,21 +54,20 @@ export const UpdateContent: React.FC<UpdateContentProps> = ({
         {changedFields.map((field) => (
           <div
             key={field}
-            className={`text-sm flex items-center gap-1.5 flex-wrap ${
-              isDarkMode ? "text-slate-300" : "text-slate-700"
-            }`}
+            className={`text-sm flex items-center gap-1.5 flex-wrap ${isDarkMode ? "text-slate-300" : "text-slate-700"
+              }`}
           >
             <span className="font-medium">{FIELD_LABELS[field]}:</span>
             {entry.oldValues?.[field] !== undefined && (
               <>
                 <span className="opacity-60 line-through">
-                  {formatValue(field, entry.oldValues[field], users)}
+                  {formatValue(field, entry.oldValues[field], users, primaryTags, secondaryTags)}
                 </span>
                 <ArrowLeft className="w-3 h-3 opacity-50" />
               </>
             )}
             <span className={isDarkMode ? "text-blue-300" : "text-blue-600"}>
-              {formatValue(field, entry.changes?.[field], users)}
+              {formatValue(field, entry.changes?.[field], users, primaryTags, secondaryTags)}
             </span>
           </div>
         ))}

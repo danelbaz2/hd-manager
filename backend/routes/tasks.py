@@ -406,6 +406,13 @@ def add_task_note(task_id):
             'note': note_text
         }
         
+        # Broadcast the note via WebSocket to all connected clients
+        try:
+            from websocket_events import broadcast_task_update
+            broadcast_task_update(response)
+        except Exception as e:
+            print(f"Failed to broadcast note: {e}")
+        
         return jsonify(response), 201
         
     except Exception as e:

@@ -10,7 +10,8 @@
 
 /* Base font size - this affects all rem units globally */
 html {
-  font-size: 16px; /* Default for standard screens */
+  font-size: 16px;
+  /* Default for standard screens */
 }
 
 /* Small laptops (14" screens, ~1366px) - scale down */
@@ -30,7 +31,8 @@ html {
 /* Custom 3xl breakpoint for very large screens (65" 4K displays) */
 @media (min-width: 1920px) {
   html {
-    font-size: 16px; /* Reset to default for large screens */
+    font-size: 16px;
+    /* Reset to default for large screens */
   }
 
   .container-3xl {
@@ -212,6 +214,7 @@ html {
 }
 
 @media (min-width: 1920px) {
+
   .dark-scrollbar::-webkit-scrollbar,
   .light-scrollbar::-webkit-scrollbar {
     width: 10px;
@@ -220,6 +223,7 @@ html {
 }
 
 @media (min-width: 2560px) {
+
   .dark-scrollbar::-webkit-scrollbar,
   .light-scrollbar::-webkit-scrollbar {
     width: 12px;
@@ -363,4 +367,21 @@ html {
 
 .animate-fadeUp {
   animation: fadeUp 0.3s ease-out;
+}
+
+/* Fade slide in animation for new activity updates */
+@keyframes fadeSlideIn {
+  0% {
+    opacity: 0;
+    transform: translateX(-10px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fadeSlideIn {
+  animation: fadeSlideIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }

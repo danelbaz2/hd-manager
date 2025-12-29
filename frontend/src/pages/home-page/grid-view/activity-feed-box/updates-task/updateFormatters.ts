@@ -24,7 +24,7 @@ export const PRIORITY_LABELS: Record<string, string> = {
   high: "גבוהה",
 };
 
-import type { UserData } from "./types";
+import type { UserData, PrimaryTagData, SecondaryTagData } from "./types";
 
 // Format time as HH:MM
 export const formatTime = (ts: number): string =>
@@ -38,7 +38,9 @@ export const formatTime = (ts: number): string =>
 export const formatValue = (
   field: string,
   value: unknown,
-  users: UserData[]
+  users: UserData[],
+  primaryTags?: PrimaryTagData[],
+  secondaryTags?: SecondaryTagData[]
 ): string => {
   if (value === null || value === undefined) return "ריק";
   if (field === "priority") return PRIORITY_LABELS[value as string] || String(value);
@@ -50,6 +52,18 @@ export const formatValue = (
       .map((id) => users.find((u) => u.id === id)?.fullName)
       .filter(Boolean);
     return names.length > 0 ? names.join(", ") : "אין אחראים";
+  }
+  if (field === "primaryTagIds" && primaryTags) {
+    const names = (value as string[])
+      .map((id) => primaryTags.find((t) => t.id === id)?.name)
+      .filter(Boolean);
+    return names.length > 0 ? names.join(", ") : "ללא קטגוריות";
+  }
+  if (field === "secondaryTagIds" && secondaryTags) {
+    const names = (value as string[])
+      .map((id) => secondaryTags.find((t) => t.id === id)?.name)
+      .filter(Boolean);
+    return names.length > 0 ? names.join(", ") : "ללא תגיות";
   }
   return String(value);
 };

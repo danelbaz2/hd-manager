@@ -8,6 +8,8 @@ export type ListItem =
 export interface UpdatesTaskProps {
   taskTitleMap: Record<string, string>;
   users: UserData[];
+  primaryTags: PrimaryTagData[];
+  secondaryTags: SecondaryTagData[];
   isDarkMode: boolean;
   selectedDate: number;
   onUpdateClick: (taskId: string) => void;

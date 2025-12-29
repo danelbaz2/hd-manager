@@ -84,6 +84,7 @@ interface SettingsContextState {
   // History helpers
   addHistoryEntry: (entry: TaskHistoryEntry) => void;
   getHistoryForTask: (taskId: string) => TaskHistoryEntry[];
+  getHistoryForDate: (date: number) => TaskHistoryEntry[];
 }
 
 // Default context value
@@ -100,14 +101,15 @@ const defaultContextValue: SettingsContextState = {
   isLoadingContacts: false,
   isLoadingTasks: false,
   isLoadingHistory: false,
-  refreshUsers: async () => {},
-  refreshTags: async () => {},
-  refreshContacts: async () => {},
-  refreshTasks: async () => {},
-  refreshTaskHistory: async () => {},
-  refreshAll: async () => {},
-  addHistoryEntry: () => {},
+  refreshUsers: async () => { },
+  refreshTags: async () => { },
+  refreshContacts: async () => { },
+  refreshTasks: async () => { },
+  refreshTaskHistory: async () => { },
+  refreshAll: async () => { },
+  addHistoryEntry: () => { },
   getHistoryForTask: () => [],
+  getHistoryForDate: () => [],
 };
 
 // Create Context
@@ -258,15 +260,34 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     }
   }, []);
 
-  // Add a single history entry (after adding a note)
+  // Add a single history entry (after adding a note) - with deduplication
   const addHistoryEntry = useCallback((entry: TaskHistoryEntry) => {
-    setTaskHistory((prev) => [...prev, entry]);
+    setTaskHistory((prev) => {
+      // Check if entry already exists to prevent duplicates
+      if (prev.some((e) => e.id === entry.id)) return prev;
+      return [...prev, entry];
+    });
   }, []);
 
   // Get history entries for a specific task
   const getHistoryForTask = useCallback(
     (taskId: string): TaskHistoryEntry[] => {
       return taskHistory.filter((entry) => entry.taskId === taskId);
+    },
+    [taskHistory]
+  );
+
+  // Get history entries for a specific date (for Activity Feed)
+  const getHistoryForDate = useCallback(
+    (date: number): TaskHistoryEntry[] => {
+      const dayStart = new Date(date);
+      dayStart.setHours(0, 0, 0, 0);
+      const dayEnd = new Date(date);
+      dayEnd.setHours(23, 59, 59, 999);
+
+      return taskHistory
+        .filter((entry) => entry.timestamp >= dayStart.getTime() && entry.timestamp <= dayEnd.getTime())
+        .sort((a, b) => b.timestamp - a.timestamp); // Newest first
     },
     [taskHistory]
   );
@@ -331,10 +352,19 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   useEffect(() => {
     if (!isAuthenticated || !isConnected) return;
 
-    // When any task update comes via WebSocket, refresh tasks and history
-    const unsubscribe = subscribe(() => {
-      refreshTasks();
-      refreshTaskHistory();
+    // When a task update comes via WebSocket, add it directly to history
+    // This prevents the "jump" effect from full refetches
+    const unsubscribe = subscribe((update) => {
+      // Add the update to history if it doesn't already exist
+      setTaskHistory((prev) => {
+        if (prev.some((e) => e.id === update.id)) return prev;
+        return [...prev, update].sort((a, b) => a.timestamp - b.timestamp);
+      });
+
+      // Note: We don't call refreshTasks() here to avoid UI jumping
+      // Task updates (like status changes) will be reflected when the user
+      // navigates or manually refreshes. For real-time task list sync,
+      // consider implementing incremental task updates separately.
     });
 
     return unsubscribe;
@@ -342,8 +372,6 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     isAuthenticated,
     isConnected,
     subscribe,
-    refreshTasks,
-    refreshTaskHistory,
   ]);
 
   const value: SettingsContextState = {
@@ -367,6 +395,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     refreshAll,
     addHistoryEntry,
     getHistoryForTask,
+    getHistoryForDate,
   };
 
   return (

@@ -1,41 +1,76 @@
-import React, { useEffect, useCallback } from "react";
+import React, { useEffect, useCallback, useState, useRef, useMemo } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { UpdateItem } from "./UpdateItem";
-import { useUpdatesData } from "./useUpdatesData";
-import { useTaskUpdates } from "../../../../../contexts";
+import { useSettings } from "../../../../../contexts";
 import type { UpdatesTaskProps } from "./types";
 import type { TaskHistoryEntry } from "../../../../../api/tasksApi";
 
 export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   taskTitleMap,
   users,
+  primaryTags,
+  secondaryTags,
   isDarkMode,
   selectedDate,
   onUpdateClick,
-  onDataRefresh,
+  onDataRefresh: _onDataRefresh, // Prefixed to silence unused warning - kept for API compatibility
   updatesOverride,
 }) => {
-  const { updates: apiUpdates, isLoading: apiLoading, error: apiError, fetchUpdates } = useUpdatesData({
-    selectedDate,
-  });
+  // Use global taskHistory from SettingsContext
+  const { getHistoryForDate, isLoadingHistory } = useSettings();
 
-  const updates = updatesOverride || apiUpdates;
-  const isLoading = updatesOverride ? false : apiLoading;
-  const error = updatesOverride ? null : apiError;
+  // Get updates for this date from the global source
+  const contextUpdates = useMemo(() => getHistoryForDate(selectedDate), [getHistoryForDate, selectedDate]);
 
-  // Handle WebSocket updates - refetch and notify parent
-  const handleSocketUpdate = useCallback(() => {
-    fetchUpdates();
-    onDataRefresh?.();
-  }, [fetchUpdates, onDataRefresh]);
+  // Use override if provided (for demo/tour), otherwise use context data
+  const updates = updatesOverride || contextUpdates;
+  const isLoading = updatesOverride ? false : isLoadingHistory;
 
-  // Subscribe to global WebSocket updates
-  useTaskUpdates(handleSocketUpdate, true);
+  // Track new entries for animation
+  const [newIds, setNewIds] = useState<Set<string>>(new Set());
+  const knownIdsRef = useRef<Set<string>>(new Set());
+  const isInitialMount = useRef(true);
 
-  // Fetch when date changes
+  // Initialize known IDs on first render
   useEffect(() => {
-    fetchUpdates();
-  }, [fetchUpdates]);
+    if (isInitialMount.current && updates.length > 0) {
+      updates.forEach((u) => knownIdsRef.current.add(u.id));
+      isInitialMount.current = false;
+    }
+  }, [updates]);
+
+  // Detect new entries and animate them
+  useEffect(() => {
+    if (isInitialMount.current) return;
+
+    const newEntryIds: string[] = [];
+    updates.forEach((entry) => {
+      if (!knownIdsRef.current.has(entry.id)) {
+        newEntryIds.push(entry.id);
+        knownIdsRef.current.add(entry.id);
+      }
+    });
+
+    if (newEntryIds.length > 0) {
+      setNewIds((prev) => {
+        const next = new Set(prev);
+        newEntryIds.forEach((id) => next.add(id));
+        return next;
+      });
+
+      // Remove "new" status after animation
+      setTimeout(() => {
+        setNewIds((prev) => {
+          const next = new Set(prev);
+          newEntryIds.forEach((id) => next.delete(id));
+          return next;
+        });
+      }, 3000);
+    }
+  }, [updates]);
+
+  // Check if an entry is new
+  const isNew = useCallback((id: string) => newIds.has(id), [newIds]);
 
   // Render single item for virtuoso
   const renderItem = useCallback(
@@ -46,10 +81,13 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
         taskTitle={taskTitleMap[entry.taskId]}
         isDarkMode={isDarkMode}
         users={users}
+        primaryTags={primaryTags}
+        secondaryTags={secondaryTags}
         onClick={() => onUpdateClick(entry.taskId)}
+        isNew={isNew(entry.id)}
       />
     ),
-    [taskTitleMap, isDarkMode, users, onUpdateClick]
+    [taskTitleMap, isDarkMode, users, primaryTags, secondaryTags, onUpdateClick, isNew]
   );
 
   // Loading state
@@ -60,17 +98,6 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
           }`}
       >
         טוען עדכונים...
-      </div>
-    );
-  }
-
-  // Error state
-  if (error) {
-    return (
-      <div
-        className={`h-full flex items-center justify-center text-sm text-red-500`}
-      >
-        שגיאה: {error}
       </div>
     );
   }
