@@ -1,5 +1,6 @@
 import React from "react";
 import type { MessageItemProps } from "./types";
+import { MentionText } from "./mention";
 
 // Format time as HH:MM
 const formatTime = (ts: number): string =>
@@ -25,6 +26,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   message,
   sender,
   isDarkMode,
+  onMentionClick,
 }) => {
   const senderColor = sender?.color || "#6366f1";
   const senderName = sender?.fullName || message.base?.createdBy || "מנהל";
@@ -85,13 +87,17 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           </div>
         </div>
 
-        {/* Message Content */}
+        {/* Message Content with Mentions */}
         <p
           className={`text-sm leading-relaxed whitespace-pre-wrap ${
             isDarkMode ? "text-slate-200" : "text-slate-700"
           }`}
         >
-          {message.content}
+          <MentionText
+            content={message.content}
+            isDarkMode={isDarkMode}
+            onMentionClick={onMentionClick}
+          />
         </p>
       </div>
     </div>

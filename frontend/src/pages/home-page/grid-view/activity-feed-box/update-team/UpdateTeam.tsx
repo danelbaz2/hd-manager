@@ -1,9 +1,10 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { MessageItem } from "./MessageItem";
 import { MessageInput } from "./MessageInput";
 import { useTeamMessages } from "./useTeamMessages";
 import { useSocket } from "../../../../../contexts";
+import { ContactDetailModal, useContacts } from "./mention";
 import type { UpdateTeamProps, TeamMessage } from "./types";
 
 export const UpdateTeam: React.FC<UpdateTeamProps> = ({
@@ -13,64 +14,90 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
   isAdmin,
   messagesOverride,
 }) => {
-  const { messages: apiMessages, isLoading: apiLoading, isSending, error: apiError, fetchMessages, sendMessage } =
-    useTeamMessages();
+  const {
+    messages: apiMessages,
+    isLoading: apiLoading,
+    isSending,
+    error: apiError,
+    fetchMessages,
+    sendMessage,
+  } = useTeamMessages();
+  const {
+    contacts,
+    isLoading: contactsLoading,
+    selectedContact,
+    setSelectedContact,
+    findContactByName,
+  } = useContacts();
 
-  // Use override if available
   const messages = messagesOverride || apiMessages;
   const isLoading = messagesOverride ? false : apiLoading;
   const error = messagesOverride ? null : apiError;
 
-  // Subscribe to WebSocket for real-time updates
   const { subscribe, isConnected } = useSocket();
-  React.useEffect(() => {
+  useEffect(() => {
     if (!isConnected) return;
-    const unsubscribe = subscribe(() => fetchMessages());
-    return unsubscribe;
+    return subscribe(() => fetchMessages());
   }, [isConnected, subscribe, fetchMessages]);
 
-  // Find sender data for a message
   const getSender = useCallback(
     (senderId: string) => users.find((u) => u.id === senderId),
     [users]
   );
 
-  // Handle send message
   const handleSend = useCallback(
     async (content: string) => {
-      if (currentUserId) {
-        await sendMessage(content, currentUserId);
-      }
+      if (currentUserId) await sendMessage(content, currentUserId);
     },
     [currentUserId, sendMessage]
   );
 
-  // Render message item for virtuoso
+  const handleMentionClick = useCallback(
+    (contactName: string) => {
+      const contact = findContactByName(contactName);
+      if (contact) setSelectedContact(contact);
+    },
+    [findContactByName, setSelectedContact]
+  );
+
   const renderMessage = useCallback(
-    (_index: number, msg: TeamMessage) => (
+    (_i: number, msg: TeamMessage) => (
       <MessageItem
         key={msg.id}
         message={msg}
         sender={getSender(msg.senderId)}
         isDarkMode={isDarkMode}
+        onMentionClick={handleMentionClick}
       />
     ),
-    [getSender, isDarkMode]
+    [getSender, isDarkMode, handleMentionClick]
   );
 
-  // Loading state
+  const inputProps = {
+    isDarkMode,
+    onSend: handleSend,
+    isLoading: isSending,
+    contacts,
+    contactsLoading,
+  };
+  const modalProps = {
+    contact: selectedContact,
+    isOpen: !!selectedContact,
+    onClose: () => setSelectedContact(null),
+    isDarkMode,
+  };
+
   if (isLoading && messages.length === 0) {
     return (
       <div
-        className={`h-full flex items-center justify-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
-          }`}
+        className={`h-full flex items-center justify-center text-sm 
+                       ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}
       >
         טוען עדכונים...
       </div>
     );
   }
 
-  // Error state
   if (error && messages.length === 0) {
     return (
       <div className="h-full flex items-center justify-center text-sm text-red-500">
@@ -79,23 +106,17 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
     );
   }
 
-  // Empty state
   if (messages.length === 0) {
     return (
       <div className="h-full flex flex-col">
         <div
-          className={`flex-1 flex items-center justify-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
-            }`}
+          className={`flex-1 flex items-center justify-center text-sm 
+                         ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}
         >
           אין עדכוני צוות עדיין
         </div>
-        {isAdmin && (
-          <MessageInput
-            isDarkMode={isDarkMode}
-            onSend={handleSend}
-            isLoading={isSending}
-          />
-        )}
+        {isAdmin && <MessageInput {...inputProps} />}
+        <ContactDetailModal {...modalProps} />
       </div>
     );
   }
@@ -105,18 +126,14 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
       <Virtuoso
         data={messages}
         itemContent={renderMessage}
-        className={`flex-1 ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-          }`}
+        className={`flex-1 ${
+          isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+        }`}
         style={{ height: "100%" }}
         overscan={200}
       />
-      {isAdmin && (
-        <MessageInput
-          isDarkMode={isDarkMode}
-          onSend={handleSend}
-          isLoading={isSending}
-        />
-      )}
+      {isAdmin && <MessageInput {...inputProps} />}
+      <ContactDetailModal {...modalProps} />
     </div>
   );
 };

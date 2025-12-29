@@ -59,7 +59,7 @@ const HeaderArchivePage: React.FC<Props> = ({ filters, onFiltersChange }) => {
             <Hash className={ico} />
             <input
               type="text"
-              placeholder="MS-123"
+              placeholder="c6a8cb"
               value={filters.taskId}
               onChange={(e) => upd("taskId", e.target.value)}
               className={inp}
