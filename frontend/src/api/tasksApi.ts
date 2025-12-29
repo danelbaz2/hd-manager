@@ -151,6 +151,7 @@ export interface TaskHistoryEntry {
   oldValues?: Record<string, unknown>;
   note?: string;
   file?: FileMetadata;
+  fullTask?: Task;  // Full task data for real-time updates
 }
 
 /**
@@ -173,7 +174,7 @@ export const getAllTasksHistory = async (params?: HistoryQueryParams): Promise<A
     if (params.limit !== undefined) queryParams.append("limit", params.limit.toString());
     if (params.before !== undefined) queryParams.append("before", params.before.toString());
     if (params.after !== undefined) queryParams.append("after", params.after.toString());
-    
+
     const queryString = queryParams.toString();
     if (queryString) {
       url += `?${queryString}`;

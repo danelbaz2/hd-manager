@@ -49,16 +49,21 @@ const UserPreferenceModal: React.FC<UserPreferenceModalProps> = ({
   };
 
   return (
-    <ModalContainer isOpen={isOpen} onClose={onClose} title="הגדרות פרופיל">
+    <ModalContainer
+      isOpen={isOpen}
+      onClose={onClose}
+      title="הגדרות פרופיל"
+      color={formData.color}
+    >
       <ToastContainer
         alerts={alerts}
         onDismiss={dismissAlert}
         isDarkMode={isDarkMode}
       />
 
-      <div className="space-y-6" dir="rtl">
+      <div className="p-6" dir="rtl">
         {/* Avatar Section - Centered */}
-        <div className="flex justify-center pb-2">
+        <div className="flex flex-col items-center mb-8">
           <ProfileAvatar
             profileImage={formData.profileImage}
             color={formData.color}
@@ -67,74 +72,71 @@ const UserPreferenceModal: React.FC<UserPreferenceModalProps> = ({
           />
         </div>
 
-        {/* Row 1: Full Name + Nickname */}
-        <div className="grid grid-cols-2 gap-4">
-          <TextInput
-            label="שם מלא"
-            value={formData.fullName}
-            onChange={(val) => handleFieldChange("fullName", val)}
-            placeholder="הזן שם מלא (לפחות 2 תווים)..."
-          />
-          <TextInput
-            label="כינוי (אופציונלי)"
-            value={formData.nickname}
-            onChange={(val) => handleFieldChange("nickname", val)}
-            placeholder="הזן כינוי..."
-          />
-        </div>
+        {/* Form Fields */}
+        <div className="space-y-5">
+          {/* Row 1: Full Name + Nickname */}
+          <div className="grid grid-cols-2 gap-4">
+            <TextInput
+              label="שם מלא"
+              value={formData.fullName}
+              onChange={(val) => handleFieldChange("fullName", val)}
+              placeholder="הזן שם מלא..."
+            />
+            <TextInput
+              label="כינוי (אופציונלי)"
+              value={formData.nickname}
+              onChange={(val) => handleFieldChange("nickname", val)}
+              placeholder="הזן כינוי..."
+            />
+          </div>
 
-        {/* Row 2: Username (disabled) + Password */}
-        <div className="grid grid-cols-2 gap-4">
-          <TextInput
-            label="שם משתמש"
-            value={formData.username}
-            onChange={() => {}}
-            disabled
-          />
-          <PasswordField
-            password={formData.password}
-            onPasswordChange={(pwd) => handleFieldChange("password", pwd)}
-          />
-        </div>
+          {/* Row 2: Username (disabled) + Password */}
+          <div className="grid grid-cols-2 gap-4">
+            <TextInput
+              label="שם משתמש"
+              value={formData.username}
+              onChange={() => { }}
+              disabled
+            />
+            <PasswordField
+              password={formData.password}
+              onPasswordChange={(pwd) => handleFieldChange("password", pwd)}
+            />
+          </div>
 
-        {/* Color Picker */}
-        <ColorPicker
-          selectedColor={formData.color}
-          onColorChange={(color) => handleFieldChange("color", color)}
-        />
-
-        {/* Save Button */}
-        <div className="pt-4">
-          <button
-            onClick={onSave}
-            disabled={isSaving || !hasChanges}
-            className={`
-              w-full flex items-center justify-center gap-2
-              px-6 py-3 rounded-xl font-medium
-              transition-all duration-200
-              ${
-                hasChanges && !isSaving
-                  ? "bg-gradient-to-l from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl"
-                  : isDarkMode
-                  ? "bg-slate-700 text-slate-400 cursor-not-allowed"
-                  : "bg-slate-200 text-slate-400 cursor-not-allowed"
-              }
-            `}
-          >
-            {isSaving ? (
-              <>
-                <Loader2 size={18} className="animate-spin" />
-                <span>שומר...</span>
-              </>
-            ) : (
-              <>
-                <Save size={18} />
-                <span>שמור שינויים</span>
-              </>
-            )}
-          </button>
+          {/* Color Picker */}
+          <div className="pt-2">
+            <ColorPicker
+              selectedColor={formData.color}
+              onColorChange={(color) => handleFieldChange("color", color)}
+            />
+          </div>
         </div>
       </div>
+
+      {/* Save Button - Full width at bottom */}
+      <button
+        onClick={onSave}
+        disabled={isSaving || !hasChanges}
+        className={`w-full flex items-center justify-center gap-2 px-6 py-4 font-medium text-lg transition-all duration-200 ${hasChanges && !isSaving
+            ? "bg-gradient-to-l from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
+            : isDarkMode
+              ? "bg-slate-700 text-slate-400 cursor-not-allowed"
+              : "bg-slate-300 text-slate-500 cursor-not-allowed"
+          }`}
+      >
+        {isSaving ? (
+          <>
+            <Loader2 size={20} className="animate-spin" />
+            <span>שומר שינויים...</span>
+          </>
+        ) : (
+          <>
+            <Save size={20} />
+            <span>שמור שינויים</span>
+          </>
+        )}
+      </button>
     </ModalContainer>
   );
 };

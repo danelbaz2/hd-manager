@@ -347,13 +347,12 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   }, [isAuthenticated, isAuthLoading, refreshAll, clearAllData]);
 
   // Subscribe to WebSocket updates for real-time task sync across all clients
-  const { subscribe, isConnected } = useSocket();
+  const { subscribe, subscribeToUsers, isConnected } = useSocket();
 
   useEffect(() => {
     if (!isAuthenticated || !isConnected) return;
 
-    // When a task update comes via WebSocket, add it directly to history
-    // This prevents the "jump" effect from full refetches
+    // When a task update comes via WebSocket, update both history and tasks
     const unsubscribe = subscribe((update) => {
       // Add the update to history if it doesn't already exist
       setTaskHistory((prev) => {
@@ -361,10 +360,24 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         return [...prev, update].sort((a, b) => a.timestamp - b.timestamp);
       });
 
-      // Note: We don't call refreshTasks() here to avoid UI jumping
-      // Task updates (like status changes) will be reflected when the user
-      // navigates or manually refreshes. For real-time task list sync,
-      // consider implementing incremental task updates separately.
+      // Handle task CRUD operations incrementally
+      const { action, taskId, fullTask } = update;
+
+      if (action === 'CREATE' && fullTask) {
+        // Add new task to the list
+        setTasks((prev) => {
+          if (prev.some((t) => t.id === fullTask.id)) return prev;
+          return [...prev, fullTask as Task];
+        });
+      } else if (action === 'DELETE') {
+        // Remove task from the list
+        setTasks((prev) => prev.filter((t) => t.id !== taskId));
+      } else if (['UPDATE', 'IN_PROGRESS', 'CLOSE', 'ASSIGN'].includes(action) && fullTask) {
+        // Update existing task
+        setTasks((prev) => prev.map((t) =>
+          t.id === taskId ? { ...t, ...fullTask as Task } : t
+        ));
+      }
     });
 
     return unsubscribe;
@@ -372,6 +385,37 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     isAuthenticated,
     isConnected,
     subscribe,
+  ]);
+
+  // Subscribe to WebSocket updates for real-time user sync across all clients
+  useEffect(() => {
+    if (!isAuthenticated || !isConnected) return;
+
+    const unsubscribe = subscribeToUsers((update) => {
+      const { action, payload, userId } = update;
+
+      if (action === 'create' && payload) {
+        // Add new user to the list
+        setUsers((prev) => {
+          if (prev.some((u) => u.id === payload.id)) return prev;
+          return [...prev, payload as UserData];
+        });
+      } else if (action === 'delete') {
+        // Remove user from the list
+        setUsers((prev) => prev.filter((u) => u.id !== userId));
+      } else if (action === 'update' && payload) {
+        // Update existing user
+        setUsers((prev) => prev.map((u) =>
+          u.id === payload.id ? { ...u, ...payload as UserData } : u
+        ));
+      }
+    });
+
+    return unsubscribe;
+  }, [
+    isAuthenticated,
+    isConnected,
+    subscribeToUsers,
   ]);
 
   const value: SettingsContextState = {

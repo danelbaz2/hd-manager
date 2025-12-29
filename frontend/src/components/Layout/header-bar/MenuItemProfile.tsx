@@ -61,10 +61,9 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
             rounded-xl shadow-xl border
             overflow-hidden
             z-50
-            ${
-              isDarkMode
-                ? "bg-slate-800 border-slate-700"
-                : "bg-white border-slate-200"
+            ${isDarkMode
+              ? "bg-slate-800 border-slate-700"
+              : "bg-white border-slate-200"
             }
           `}
         >
@@ -77,10 +76,9 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
                 w-full flex items-center justify-between
                 px-4 py-3
                 text-sm transition-colors
-                ${
-                  isDarkMode
-                    ? "hover:bg-slate-700 text-slate-200"
-                    : "hover:bg-slate-50 text-slate-700"
+                ${isDarkMode
+                  ? "hover:bg-slate-700 text-slate-200"
+                  : "hover:bg-slate-50 text-slate-700"
                 }
               `}
             >
@@ -92,23 +90,24 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
               )}
             </button>
 
-            {/* Profile Settings - Available for all users */}
-            <button
-              onClick={handleOpenProfile}
-              className={`
-                w-full flex items-center justify-between
-                px-4 py-3
-                text-sm transition-colors
-                ${
-                  isDarkMode
+            {/* Profile Settings - Only for regular users (admins access via Settings Modal) */}
+            {!isAdmin && (
+              <button
+                onClick={handleOpenProfile}
+                className={`
+                  w-full flex items-center justify-between
+                  px-4 py-3
+                  text-sm transition-colors
+                  ${isDarkMode
                     ? "hover:bg-slate-700 text-slate-200"
                     : "hover:bg-slate-50 text-slate-700"
-                }
-              `}
-            >
-              <span>הגדרות פרופיל</span>
-              <UserCog size={18} className="text-slate-400" />
-            </button>
+                  }
+                `}
+              >
+                <span>הגדרות פרופיל</span>
+                <UserCog size={18} className="text-slate-400" />
+              </button>
+            )}
 
             {/* Settings - Only visible for admin users */}
             {isAdmin && (
@@ -118,10 +117,9 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
                   w-full flex items-center justify-between
                   px-4 py-3
                   text-sm transition-colors
-                  ${
-                    isDarkMode
-                      ? "hover:bg-slate-700 text-slate-200"
-                      : "hover:bg-slate-50 text-slate-700"
+                  ${isDarkMode
+                    ? "hover:bg-slate-700 text-slate-200"
+                    : "hover:bg-slate-50 text-slate-700"
                   }
                 `}
               >
@@ -138,10 +136,9 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
                   w-full flex items-center justify-between
                   px-4 py-3
                   text-sm transition-colors
-                  ${
-                    isDarkMode
-                      ? "hover:bg-slate-700 text-slate-200"
-                      : "hover:bg-slate-50 text-slate-700"
+                  ${isDarkMode
+                    ? "hover:bg-slate-700 text-slate-200"
+                    : "hover:bg-slate-50 text-slate-700"
                   }
                 `}
               >

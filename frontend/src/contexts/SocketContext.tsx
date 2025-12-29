@@ -9,13 +9,23 @@ import React, {
 } from "react";
 import { io, type Socket } from "socket.io-client";
 import type { TaskHistoryEntry } from "../api/tasksApi";
+import type { UserData } from "../schemas/userTypes";
 
 const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
+// User update payload from WebSocket
+interface UserUpdatePayload {
+  type: "user_update";
+  action: "create" | "update" | "delete";
+  payload: UserData | null;
+  userId: string;
+}
 
 interface SocketContextState {
   isConnected: boolean;
   subscribe: (callback: (update: TaskHistoryEntry) => void) => () => void;
   subscribeToChat: (callback: () => void) => () => void;
+  subscribeToUsers: (callback: (update: UserUpdatePayload) => void) => () => void;
 }
 
 const SocketContext = createContext<SocketContextState | null>(null);
@@ -30,6 +40,9 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     new Set()
   );
   const chatSubscribersRef = useRef<Set<() => void>>(new Set());
+  const userSubscribersRef = useRef<Set<(update: UserUpdatePayload) => void>>(
+    new Set()
+  );
   const [isConnected, setIsConnected] = useState(false);
 
   // Initialize socket connection once
@@ -69,6 +82,13 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       chatSubscribersRef.current.forEach((callback) => callback());
     });
 
+    // User updates - real-time user CRUD
+    socket.on("user_update", (data: UserUpdatePayload) => {
+      if (data.type === "user_update") {
+        userSubscribersRef.current.forEach((callback) => callback(data));
+      }
+    });
+
     socket.on("connect_error", (error) => {
       console.error("Socket.IO connection error:", error);
     });
@@ -100,8 +120,21 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     };
   }, []);
 
+  // Subscribe to user updates
+  const subscribeToUsers = useCallback(
+    (callback: (update: UserUpdatePayload) => void) => {
+      userSubscribersRef.current.add(callback);
+      return () => {
+        userSubscribersRef.current.delete(callback);
+      };
+    },
+    []
+  );
+
   return (
-    <SocketContext.Provider value={{ isConnected, subscribe, subscribeToChat }}>
+    <SocketContext.Provider
+      value={{ isConnected, subscribe, subscribeToChat, subscribeToUsers }}
+    >
       {children}
     </SocketContext.Provider>
   );
@@ -144,3 +177,6 @@ export const useChatUpdates = (onUpdate: () => void, enabled = true) => {
 
   return { isConnected };
 };
+
+// Export the UserUpdatePayload type for use in other components
+export type { UserUpdatePayload };

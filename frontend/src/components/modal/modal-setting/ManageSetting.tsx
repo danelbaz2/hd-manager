@@ -1,16 +1,17 @@
 import React, { useState } from "react";
-import { X, Settings, Users, UserPlus, Tag } from "lucide-react";
+import { X, Settings, Users, UserPlus, Tag, UserCog } from "lucide-react";
 import { useTheme } from "../../../contexts";
 import ManageUser from "./manage-user/ManageUser.tsx";
 import ManageContact from "./manage-contact/ManageContact.tsx";
 import ManageTagsTwoTier from "./manage-tags";  // New two-tier tag management
+import { ProfileSettings } from "./profile-settings";
 
 interface ManageSettingProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type TabType = "users" | "contacts" | "tags";
+type TabType = "users" | "contacts" | "tags" | "profile";
 
 const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
   const { isDarkMode } = useTheme();
@@ -22,6 +23,7 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
     { id: "users" as TabType, label: "עובדים", icon: Users },
     { id: "contacts" as TabType, label: "אנשי קשר", icon: UserPlus },
     { id: "tags" as TabType, label: "תגיות", icon: Tag },
+    { id: "profile" as TabType, label: "פרופיל", icon: UserCog },
   ];
 
   const renderContent = () => {
@@ -32,6 +34,8 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
         return <ManageContact />;
       case "tags":
         return <ManageTagsTwoTier />;
+      case "profile":
+        return <ProfileSettings />;
       default:
         return <ManageUser />;
     }
