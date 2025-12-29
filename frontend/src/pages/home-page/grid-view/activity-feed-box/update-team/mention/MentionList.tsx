@@ -1,7 +1,7 @@
 // MentionList - Dropdown component for showing contact suggestions
 import React from "react";
 import { User, Loader2 } from "lucide-react";
-import type { MentionListProps } from "./types";
+import type { MentionListProps } from "../../../../../../schemas/mentionTypes";
 
 export const MentionList: React.FC<MentionListProps> = ({
   contacts,
@@ -107,11 +107,8 @@ export const MentionList: React.FC<MentionListProps> = ({
           >
             {/* Avatar */}
             <div
-              className={`
-                w-9 h-9 rounded-full flex items-center justify-center
-                bg-gradient-to-br from-blue-500 to-purple-500
-                shadow-lg
-              `}
+              className="w-9 h-9 rounded-full flex items-center justify-center
+                            bg-gradient-to-br from-blue-500 to-purple-500 shadow-lg"
             >
               <User className="w-5 h-5 text-white" />
             </div>
@@ -119,19 +116,17 @@ export const MentionList: React.FC<MentionListProps> = ({
             {/* Info */}
             <div className="flex-1 min-w-0">
               <p
-                className={`
-                  font-medium text-sm truncate
-                  ${isDarkMode ? "text-white" : "text-slate-800"}
-                `}
+                className={`font-bold text-sm truncate ${
+                  isDarkMode ? "text-white" : "text-slate-800"
+                }`}
               >
                 {contact.fullName}
               </p>
               {contact.position && (
                 <p
-                  className={`
-                    text-xs truncate
-                    ${isDarkMode ? "text-slate-400" : "text-slate-500"}
-                  `}
+                  className={`text-xs truncate ${
+                    isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
                 >
                   {contact.position}
                 </p>

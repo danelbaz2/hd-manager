@@ -15,6 +15,7 @@ const SOCKET_URL = import.meta.env.VITE_API_URL || "http://localhost:5000";
 interface SocketContextState {
   isConnected: boolean;
   subscribe: (callback: (update: TaskHistoryEntry) => void) => () => void;
+  subscribeToChat: (callback: () => void) => () => void;
 }
 
 const SocketContext = createContext<SocketContextState | null>(null);
@@ -28,6 +29,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const subscribersRef = useRef<Set<(update: TaskHistoryEntry) => void>>(
     new Set()
   );
+  const chatSubscribersRef = useRef<Set<() => void>>(new Set());
   const [isConnected, setIsConnected] = useState(false);
 
   // Initialize socket connection once
@@ -52,15 +54,20 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
       setIsConnected(false);
     });
 
+    // Task updates
     socket.on(
       "task_update",
       (data: { type: string; payload: TaskHistoryEntry }) => {
         if (data.type === "task_update" && data.payload) {
-          // Notify all subscribers
           subscribersRef.current.forEach((callback) => callback(data.payload));
         }
       }
     );
+
+    // Chat message updates - notify all chat subscribers to refetch
+    socket.on("chat_update", () => {
+      chatSubscribersRef.current.forEach((callback) => callback());
+    });
 
     socket.on("connect_error", (error) => {
       console.error("Socket.IO connection error:", error);
@@ -74,7 +81,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     };
   }, []);
 
-  // Subscribe to updates - returns unsubscribe function
+  // Subscribe to task updates
   const subscribe = useCallback(
     (callback: (update: TaskHistoryEntry) => void) => {
       subscribersRef.current.add(callback);
@@ -85,8 +92,16 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     []
   );
 
+  // Subscribe to chat updates
+  const subscribeToChat = useCallback((callback: () => void) => {
+    chatSubscribersRef.current.add(callback);
+    return () => {
+      chatSubscribersRef.current.delete(callback);
+    };
+  }, []);
+
   return (
-    <SocketContext.Provider value={{ isConnected, subscribe }}>
+    <SocketContext.Provider value={{ isConnected, subscribe, subscribeToChat }}>
       {children}
     </SocketContext.Provider>
   );
@@ -101,7 +116,7 @@ export const useSocket = () => {
   return context;
 };
 
-// Hook to subscribe to task updates - compatible with existing useUpdatesSocket interface
+// Hook to subscribe to task updates
 export const useTaskUpdates = (
   onUpdate: (update: TaskHistoryEntry) => void,
   enabled = true
@@ -113,6 +128,19 @@ export const useTaskUpdates = (
     const unsubscribe = subscribe(onUpdate);
     return unsubscribe;
   }, [subscribe, onUpdate, enabled]);
+
+  return { isConnected };
+};
+
+// Hook to subscribe to chat updates
+export const useChatUpdates = (onUpdate: () => void, enabled = true) => {
+  const { subscribeToChat, isConnected } = useSocket();
+
+  useEffect(() => {
+    if (!enabled) return;
+    const unsubscribe = subscribeToChat(onUpdate);
+    return unsubscribe;
+  }, [subscribeToChat, onUpdate, enabled]);
 
   return { isConnected };
 };

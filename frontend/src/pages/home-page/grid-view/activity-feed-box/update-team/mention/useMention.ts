@@ -1,7 +1,7 @@
 // Custom hook for mention functionality
 import { useState, useCallback, useMemo } from "react";
 import type { Contact } from "../../../../../../api/contactsApi";
-import type { MentionState, UseMentionReturn } from "./types";
+import type { MentionState, UseMentionReturn } from "../../../../../../schemas/mentionTypes";
 
 const INITIAL_STATE: MentionState = {
   isActive: false,

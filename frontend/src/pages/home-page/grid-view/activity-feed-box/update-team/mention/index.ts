@@ -1,7 +1,5 @@
 // Mention module exports
-export * from "./types";
-export * from "./useMention";
-export * from "./useContacts";
-export * from "./MentionList";
-export * from "./ContactDetailModal";
-export * from "./MentionText";
+export { useMention } from "./useMention";
+export { useContacts } from "./useContacts";
+export { MentionList } from "./MentionList";
+export { MentionText } from "./MentionText";

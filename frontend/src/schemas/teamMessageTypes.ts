@@ -1,6 +1,6 @@
-// Types for the Update Team component
-import type { UserData } from "../../../../../schemas/userTypes";
-import type { Contact } from "../../../../../api/contactsApi";
+// Types for team messages and related components
+import type { UserData } from "./userTypes";
+import type { Contact } from "../api/contactsApi";
 
 export interface TeamMessage {
   id: string;

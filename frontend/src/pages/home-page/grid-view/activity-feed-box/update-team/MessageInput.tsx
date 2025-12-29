@@ -1,6 +1,6 @@
 import React, { useState, useCallback, useRef } from "react";
 import { Send } from "lucide-react";
-import type { MessageInputProps } from "./types";
+import type { MessageInputProps } from "../../../../../schemas/teamMessageTypes";
 import { useMention, MentionList } from "./mention";
 
 export const MessageInput: React.FC<MessageInputProps> = ({
@@ -119,6 +119,10 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         value={content}
         onChange={handleChange}
         onKeyDown={handleKeyDown}
+        onBlur={() => {
+          // Delay to allow click on MentionList item before closing
+          setTimeout(() => resetMention(), 150);
+        }}
         placeholder="כתוב עדכון לצוות... (@ לאזכור)"
         rows={1}
         className={`flex-1 resize-none rounded-xl px-4 py-2.5 text-sm outline-none transition-all ${

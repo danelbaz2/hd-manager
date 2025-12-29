@@ -4,3 +4,5 @@ export * from "./userTypes";
 export * from "./tagTypes";
 export * from "./contactTypes";
 export * from "./alertTypes";
+export * from "./teamMessageTypes";
+export * from "./mentionTypes";

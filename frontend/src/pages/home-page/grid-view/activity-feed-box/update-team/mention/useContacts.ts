@@ -1,15 +1,7 @@
 // Custom hook for fetching and managing contacts
 import { useState, useEffect, useCallback } from "react";
 import { getAllContacts, type Contact } from "../../../../../../api/contactsApi";
-
-export interface UseContactsReturn {
-  contacts: Contact[];
-  isLoading: boolean;
-  error: string | null;
-  selectedContact: Contact | null;
-  setSelectedContact: (contact: Contact | null) => void;
-  findContactByName: (name: string) => Contact | undefined;
-}
+import type { UseContactsReturn } from "../../../../../../schemas/mentionTypes";
 
 export const useContacts = (): UseContactsReturn => {
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -38,12 +30,25 @@ export const useContacts = (): UseContactsReturn => {
     loadContacts();
   }, []);
 
-  // Find contact by name (case-insensitive)
+  // Find contact by name (flexible matching - exact, contains, or trimmed)
   const findContactByName = useCallback(
     (name: string): Contact | undefined => {
-      return contacts.find(
-        (c) => c.fullName.toLowerCase() === name.toLowerCase()
+      const searchName = name.toLowerCase().trim();
+      
+      // Try exact match first
+      let contact = contacts.find(
+        (c) => c.fullName.toLowerCase().trim() === searchName
       );
+      
+      // If no exact match, try contains match
+      if (!contact) {
+        contact = contacts.find(
+          (c) => c.fullName.toLowerCase().includes(searchName) ||
+                 searchName.includes(c.fullName.toLowerCase())
+        );
+      }
+      
+      return contact;
     },
     [contacts]
   );

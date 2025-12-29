@@ -1,11 +1,15 @@
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { MessageItem } from "./MessageItem";
 import { MessageInput } from "./MessageInput";
 import { useTeamMessages } from "./useTeamMessages";
-import { useSocket } from "../../../../../contexts";
-import { ContactDetailModal, useContacts } from "./mention";
-import type { UpdateTeamProps, TeamMessage } from "./types";
+import { useChatUpdates } from "../../../../../contexts";
+import { useContacts } from "./mention";
+import { ContactDetailModal } from "../../../../../components/modal/modal-contact-detail";
+import type {
+  UpdateTeamProps,
+  TeamMessage,
+} from "../../../../../schemas/teamMessageTypes";
 
 export const UpdateTeam: React.FC<UpdateTeamProps> = ({
   users,
@@ -22,6 +26,7 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
     fetchMessages,
     sendMessage,
   } = useTeamMessages();
+
   const {
     contacts,
     isLoading: contactsLoading,
@@ -34,11 +39,8 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
   const isLoading = messagesOverride ? false : apiLoading;
   const error = messagesOverride ? null : apiError;
 
-  const { subscribe, isConnected } = useSocket();
-  useEffect(() => {
-    if (!isConnected) return;
-    return subscribe(() => fetchMessages());
-  }, [isConnected, subscribe, fetchMessages]);
+  // Subscribe to real-time chat updates via WebSocket
+  useChatUpdates(fetchMessages, !messagesOverride);
 
   const getSender = useCallback(
     (senderId: string) => users.find((u) => u.id === senderId),
@@ -120,6 +122,7 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
       </div>
     );
   }
+  console.log("messages", messages[0].content);
 
   return (
     <div className="h-full flex flex-col">

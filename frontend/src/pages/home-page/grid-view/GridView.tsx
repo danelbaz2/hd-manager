@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts";
 import { type UserData } from "../../../schemas/userTypes";
 import { type Task } from "../../../api/tasksApi";
-import { type TeamMessage } from "./activity-feed-box/update-team/types";
+import { type TeamMessage } from "../../../schemas/teamMessageTypes";
 import { ActivityFeedBox } from "./activity-feed-box";
 import { AdminView } from "./admin-view";
 import { UserView } from "./user-view";

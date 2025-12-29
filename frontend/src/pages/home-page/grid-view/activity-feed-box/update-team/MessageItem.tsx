@@ -1,5 +1,5 @@
 import React from "react";
-import type { MessageItemProps } from "./types";
+import type { MessageItemProps } from "../../../../../schemas/teamMessageTypes";
 import { MentionText } from "./mention";
 
 // Format time as HH:MM

@@ -1,5 +1,5 @@
 // Types for the mention system
-import type { Contact } from "../../../../../../api/contactsApi";
+import type { Contact } from "../api/contactsApi";
 
 export interface MentionState {
   isActive: boolean;
@@ -32,4 +32,13 @@ export interface UseMentionReturn {
   handleKeyDown: (e: React.KeyboardEvent) => boolean;
   handleSelectContact: (contact: Contact) => string;
   resetMention: () => void;
+}
+
+export interface UseContactsReturn {
+  contacts: Contact[];
+  isLoading: boolean;
+  error: string | null;
+  selectedContact: Contact | null;
+  setSelectedContact: (contact: Contact | null) => void;
+  findContactByName: (name: string) => Contact | undefined;
 }
