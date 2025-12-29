@@ -1,5 +1,6 @@
-// Types for the Update Team component
-import type { UserData } from "../../../../../schemas/userTypes";
+// Types for team messages and related components
+import type { UserData } from "./userTypes";
+import type { Contact } from "../api/contactsApi";
 
 export interface TeamMessage {
   id: string;
@@ -26,10 +27,13 @@ export interface MessageItemProps {
   message: TeamMessage;
   sender?: UserData;
   isDarkMode: boolean;
+  onMentionClick?: (contactName: string) => void;
 }
 
 export interface MessageInputProps {
   isDarkMode: boolean;
   onSend: (content: string) => Promise<void>;
   isLoading: boolean;
+  contacts: Contact[];
+  contactsLoading?: boolean;
 }

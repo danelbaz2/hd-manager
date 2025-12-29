@@ -4,7 +4,7 @@ from models.chat_message_model import ChatMessageModel
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.jwt_utils import jwt_required, admin_required
-from websocket_events import broadcast_task_update
+from websocket_events import broadcast_chat_update
 
 bp = Blueprint('chat_messages', __name__, url_prefix='/api/chat')
 
@@ -42,12 +42,7 @@ def create_message():
     
     # Broadcast to all connected clients for real-time updates
     result = serialize_doc(data.copy())
-    broadcast_task_update({
-        'type': 'chat_message',
-        'id': result['id'],
-        'content': result.get('content', ''),
-        'senderId': result.get('senderId', ''),
-        'base': result.get('base', {})
-    })
+    broadcast_chat_update(result)
     
     return jsonify(result), 201
+

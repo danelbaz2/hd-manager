@@ -121,3 +121,18 @@ def broadcast_task_deleted(task_id, history_entry):
             })
         except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
             pass
+
+
+def broadcast_chat_update(message_data=None):
+    """Broadcast a chat update to all connected clients"""
+    if _socketio:
+        try:
+            msg_id = message_data.get('id', 'unknown') if message_data else 'unknown'
+            _log_ws_event('BROADCAST', f'Chat update sent', f"message={msg_id}")
+            
+            _socketio.emit('chat_update', {
+                'type': 'chat_update',
+                'payload': message_data
+            })
+        except (ConnectionAbortedError, ConnectionResetError, BrokenPipeError):
+            pass  # Client disconnected, ignore

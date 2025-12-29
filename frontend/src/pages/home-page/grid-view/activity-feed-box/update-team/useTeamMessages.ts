@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { getAllChatMessages, createChatMessage } from "../../../../../api/chatApi";
-import type { TeamMessage } from "./types";
+import type { TeamMessage } from "../../../../../schemas/teamMessageTypes";
 
 export const useTeamMessages = () => {
   const [messages, setMessages] = useState<TeamMessage[]>([]);
@@ -36,19 +36,40 @@ export const useTeamMessages = () => {
     }
   }, []);
 
-  // Send a new message
+  // Send a new message - optimistic update + API call
   const sendMessage = useCallback(async (content: string, senderId: string) => {
     if (!content.trim()) return;
     setIsSending(true);
+    setError(null);
+
+    // Create optimistic message
+    const optimisticId = `temp-${Date.now()}`;
+    const optimisticMessage: TeamMessage = {
+      id: optimisticId,
+      content: content.trim(),
+      senderId,
+      base: {
+        createdAt: Date.now(),
+        createdBy: senderId,
+      },
+    };
+
+    // Add to messages immediately (optimistic update)
+    setMessages((prev) => [optimisticMessage, ...prev]);
+
     try {
       const response = await createChatMessage({ message: content, senderUserId: senderId });
       if (response.success) {
-        // Refetch to get the new message with proper formatting
+        // Refetch to get the real message with proper ID and sync with server
         await fetchMessages();
       } else {
+        // Remove optimistic message on error
+        setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
         setError(response.error || "Failed to send message");
       }
     } catch (e) {
+      // Remove optimistic message on error
+      setMessages((prev) => prev.filter((m) => m.id !== optimisticId));
       setError("Failed to send message");
       console.error("Error sending message:", e);
     } finally {
