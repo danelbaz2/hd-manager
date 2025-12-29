@@ -1,6 +1,6 @@
 import React from "react";
 import { useTheme, useSettings } from "../../../contexts";
-import { type Task } from "../../../api/tasksApi";
+import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
 import {
   type PrimaryTagData,
@@ -12,6 +12,7 @@ interface TagsViewProps {
   tasks: Task[];
   users: UserData[];
   searchQuery?: string;
+  statusFilter?: Set<TaskStatus>;
   onTaskClick?: (task: Task) => void;
   primaryTags?: PrimaryTagData[];
   secondaryTags?: SecondaryTagData[];
@@ -48,11 +49,13 @@ const filterTagsBySearch = (
 /**
  * TagsView - Shows tasks grouped by tags in accordion style
  * Search filters by tag names (primary or secondary)
+ * Status filter applies to tasks within each tag group
  */
 export const TagsView: React.FC<TagsViewProps> = ({
   tasks,
   users,
   searchQuery = "",
+  statusFilter = new Set(),
   onTaskClick,
   primaryTags: propsPrimaryTags,
   secondaryTags: propsSecondaryTags,
@@ -61,6 +64,12 @@ export const TagsView: React.FC<TagsViewProps> = ({
 
   const primaryTags = propsPrimaryTags || globalPrimaryTags;
   const secondaryTags = propsSecondaryTags || globalSecondaryTags;
+
+  // Apply status filter to tasks first (empty Set = show all)
+  const statusFilteredTasks = React.useMemo(() => {
+    if (statusFilter.size === 0) return tasks;
+    return tasks.filter((task) => task.status && statusFilter.has(task.status));
+  }, [tasks, statusFilter]);
 
   // Filter tags by search query (matches tag names)
   const filteredPrimaryTags = filterTagsBySearch(
@@ -77,7 +86,7 @@ export const TagsView: React.FC<TagsViewProps> = ({
     );
 
     // Get tasks that have any of these secondary tags
-    const tagTasks = tasks.filter((task) =>
+    const tagTasks = statusFilteredTasks.filter((task) =>
       task.secondaryTagIds?.some((tagId) =>
         relatedSecondaryTags.some((st) => st.id === tagId)
       )

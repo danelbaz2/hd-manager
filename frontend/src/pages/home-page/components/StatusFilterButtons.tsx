@@ -1,73 +1,96 @@
 import React from "react";
-import { Circle, Clock, CheckCircle2 } from "lucide-react";
+import { AlertCircle, Clock, CheckCircle } from "lucide-react";
 import type { TaskStatus } from "../../../api/tasksApi";
 
-// Status configuration with colors and labels (no 'all' or 'cancelled')
+/**
+ * Status configuration matching Statistics.tsx colors
+ * - pending: green (פתוח)
+ * - in_progress: amber (בטיפול)
+ * - completed: slate (סגור)
+ */
 const STATUS_OPTIONS: {
     id: TaskStatus;
     label: string;
     icon: React.ElementType;
     activeColor: string;
-    activeBg: string;
+    activeBgLight: string;
+    activeBgDark: string;
+    hoverBgLight: string;
+    hoverBgDark: string;
 }[] = [
         {
             id: "pending",
             label: "פתוח",
-            icon: Circle,
-            activeColor: "text-amber-600",
-            activeBg: "bg-amber-100 dark:bg-amber-900/40",
+            icon: AlertCircle,
+            activeColor: "text-green-500",
+            activeBgLight: "bg-green-50 border-green-200",
+            activeBgDark: "bg-green-500/15 border-green-500/30",
+            hoverBgLight: "hover:bg-green-50/50",
+            hoverBgDark: "hover:bg-green-500/10",
         },
         {
             id: "in_progress",
             label: "בטיפול",
             icon: Clock,
-            activeColor: "text-blue-600",
-            activeBg: "bg-blue-100 dark:bg-blue-900/40",
+            activeColor: "text-amber-500",
+            activeBgLight: "bg-amber-50 border-amber-200",
+            activeBgDark: "bg-amber-500/15 border-amber-500/30",
+            hoverBgLight: "hover:bg-amber-50/50",
+            hoverBgDark: "hover:bg-amber-500/10",
         },
         {
             id: "completed",
             label: "סגור",
-            icon: CheckCircle2,
-            activeColor: "text-green-600",
-            activeBg: "bg-green-100 dark:bg-green-900/40",
+            icon: CheckCircle,
+            activeColor: "text-slate-400",
+            activeBgLight: "bg-slate-100 border-slate-300",
+            activeBgDark: "bg-slate-500/15 border-slate-500/30",
+            hoverBgLight: "hover:bg-slate-100/50",
+            hoverBgDark: "hover:bg-slate-500/10",
         },
     ];
 
 interface StatusFilterButtonsProps {
-    selectedStatus: TaskStatus | null; // null means show all
-    onChange: (status: TaskStatus | null) => void;
+    /** Set of selected statuses (empty = show all) */
+    selectedStatuses: Set<TaskStatus>;
+    /** Called when selection changes */
+    onChange: (statuses: Set<TaskStatus>) => void;
     isDarkMode: boolean;
 }
 
 /**
- * StatusFilterButtons - Filter tasks by status
- * Shows clickable buttons for each status with color indication
- * Click again to deselect (toggle behavior)
- * When nothing is selected, all tasks are shown
+ * StatusFilterButtons - Filter tasks by multiple statuses
+ * Colors match the Statistics.tsx component
+ * - Click to toggle status selection
+ * - Multiple statuses can be selected
+ * - Empty selection = show all tasks
  */
 const StatusFilterButtons: React.FC<StatusFilterButtonsProps> = ({
-    selectedStatus,
+    selectedStatuses,
     onChange,
     isDarkMode,
 }) => {
     const handleClick = (status: TaskStatus) => {
-        // Toggle: if already selected, deselect (show all)
-        if (selectedStatus === status) {
-            onChange(null);
+        const newSet = new Set(selectedStatuses);
+        if (newSet.has(status)) {
+            newSet.delete(status);
         } else {
-            onChange(status);
+            newSet.add(status);
         }
+        onChange(newSet);
     };
 
     return (
         <div
             className={`
-        flex items-center gap-1 p-1 rounded-lg
-        ${isDarkMode ? "bg-slate-700" : "bg-slate-100"}
+        flex items-center gap-1.5 p-1.5 rounded-xl
+        ${isDarkMode ? "bg-slate-800/50" : "bg-white/80"}
+        border ${isDarkMode ? "border-slate-700" : "border-slate-200"}
+        shadow-sm
       `}
         >
             {STATUS_OPTIONS.map((option) => {
-                const isSelected = selectedStatus === option.id;
+                const isSelected = selectedStatuses.has(option.id);
                 const Icon = option.icon;
 
                 return (
@@ -77,18 +100,21 @@ const StatusFilterButtons: React.FC<StatusFilterButtonsProps> = ({
                         className={`
               flex items-center gap-1.5
               px-3 py-1.5
-              rounded-md
-              text-xs font-medium
+              rounded-lg
+              text-xs font-semibold
+              border
               transition-all duration-200
               ${isSelected
-                                ? `${option.activeBg} ${option.activeColor} shadow-sm`
-                                : isDarkMode
-                                    ? "text-slate-400 hover:text-slate-200 hover:bg-slate-600"
-                                    : "text-slate-500 hover:text-slate-700 hover:bg-slate-200"
+                                ? `${option.activeColor} ${isDarkMode ? option.activeBgDark : option.activeBgLight
+                                } shadow-sm scale-[1.02]`
+                                : `${isDarkMode ? "text-slate-400" : "text-slate-500"} 
+                     border-transparent
+                     ${isDarkMode ? option.hoverBgDark : option.hoverBgLight}
+                     hover:text-slate-${isDarkMode ? "200" : "700"}`
                             }
             `}
                     >
-                        <Icon className="w-3.5 h-3.5" />
+                        <Icon className={`w-3.5 h-3.5 ${isSelected ? option.activeColor : ""}`} />
                         <span>{option.label}</span>
                     </button>
                 );

@@ -2,7 +2,7 @@ import React from "react";
 import { type UserData } from "../../../../schemas/userTypes";
 import { type Task } from "../../../../api/tasksApi";
 import AdminUserGrid from "./AdminUserGrid";
-import Statistics from "../Statistics";
+import TaskStatusSummary from "../TaskStatusSummary";
 import MotivationalBanner from "../MotivationalBanner";
 import { useAuth } from "../../../../contexts";
 
@@ -61,9 +61,9 @@ const AdminView: React.FC<AdminViewProps> = ({
         />
       </div>
 
-      {/* Statistics */}
-      <div className="shrink-0 mt-4">
-        <Statistics
+      {/* Statistics - Pushed to bottom to align with ActivityFeedBox */}
+      <div className="shrink-0 mt-auto pb-16">
+        <TaskStatusSummary
           open={stats.open}
           inProgress={stats.inProgress}
           closed={stats.closed}

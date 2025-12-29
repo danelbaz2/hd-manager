@@ -32,10 +32,10 @@ interface HeaderHomePageProps {
   onViewModeChange?: (mode: ViewMode) => void;
   onDisplayModeChange?: (mode: DisplayMode) => void;
   onSearchChange?: (query: string) => void;
-  onStatusFilterChange?: (status: TaskStatus | null) => void;
+  onStatusFilterChange?: (statuses: Set<TaskStatus>) => void;
   viewMode?: ViewMode;
   displayMode?: DisplayMode;
-  statusFilter?: TaskStatus | null;
+  statusFilter?: Set<TaskStatus>;
 }
 
 /**
@@ -60,7 +60,7 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
   const [internalViewMode, setInternalViewMode] = useState<ViewMode>("daily");
   const [internalDisplayMode, setInternalDisplayMode] =
     useState<DisplayMode>("grid");
-  const [internalStatusFilter, setInternalStatusFilter] = useState<TaskStatus | null>(null);
+  const [internalStatusFilter, setInternalStatusFilter] = useState<Set<TaskStatus>>(new Set());
 
   const viewMode = externalViewMode ?? internalViewMode;
   const displayMode = externalDisplayMode ?? internalDisplayMode;
@@ -76,9 +76,9 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
     onDisplayModeChange?.(mode);
   };
 
-  const handleStatusFilterChange = (status: TaskStatus | null) => {
-    setInternalStatusFilter(status);
-    onStatusFilterChange?.(status);
+  const handleStatusFilterChange = (statuses: Set<TaskStatus>) => {
+    setInternalStatusFilter(statuses);
+    onStatusFilterChange?.(statuses);
   };
 
   // Listen for tour events to change display/view modes
@@ -145,10 +145,10 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
           />
         )}
 
-        {/* Status Filter - Only show in list mode */}
-        {displayMode === "list" && (
+        {/* Status Filter - Show in list and tags modes */}
+        {(displayMode === "list" || displayMode === "tags") && (
           <StatusFilterButtons
-            selectedStatus={statusFilter}
+            selectedStatuses={statusFilter}
             onChange={handleStatusFilterChange}
             isDarkMode={isDarkMode}
           />

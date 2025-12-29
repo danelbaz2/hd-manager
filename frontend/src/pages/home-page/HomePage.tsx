@@ -119,8 +119,8 @@ const HomePage: React.FC = () => {
   // Search state for tags view
   const [searchQuery, setSearchQuery] = useState("");
 
-  // Status filter state for list view (null = show all)
-  const [statusFilter, setStatusFilter] = useState<TaskStatus | null>(null);
+  // Status filter state (empty Set = show all)
+  const [statusFilter, setStatusFilter] = useState<Set<TaskStatus>>(new Set());
 
   // Filter tasks based on current view (date range only)
   const filteredTasks = useMemo(() => {
@@ -136,7 +136,7 @@ const HomePage: React.FC = () => {
   };
 
   const handleSearchChange = (query: string) => setSearchQuery(query);
-  const handleStatusFilterChange = (status: TaskStatus | null) => setStatusFilter(status);
+  const handleStatusFilterChange = (statuses: Set<TaskStatus>) => setStatusFilter(statuses);
 
   // Handle task click - open task modal
   const handleTaskClick = useCallback(
@@ -171,6 +171,7 @@ const HomePage: React.FC = () => {
             tasks={filteredTasks}
             users={users}
             searchQuery={searchQuery}
+            statusFilter={statusFilter}
             onTaskClick={handleTaskClick}
             primaryTags={primaryTags}
             secondaryTags={secondaryTags}

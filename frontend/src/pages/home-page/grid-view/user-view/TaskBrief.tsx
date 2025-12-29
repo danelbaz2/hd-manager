@@ -72,14 +72,14 @@ const TaskBrief: React.FC<TaskBriefProps> = ({ tasks }) => {
 
   return (
     <div
-      className={`rounded-2xl border p-4 h-full flex flex-col ${isDarkMode
+      className={`rounded-2xl border p-3 min-h-[500px] max-h-[60vh] flex flex-col mb-4 ${isDarkMode
           ? "bg-slate-800 border-slate-700"
           : "bg-white border-slate-200"
         }`}
       dir="rtl"
     >
       {/* Header */}
-      <div className="flex items-center gap-2 mb-3">
+      <div className="flex items-center gap-2 mb-2">
         <ClipboardList className="w-5 h-5 text-blue-500" />
         <h3
           className={`font-bold text-sm ${isDarkMode ? "text-white" : "text-slate-800"
@@ -112,8 +112,8 @@ const TaskBrief: React.FC<TaskBriefProps> = ({ tasks }) => {
                   key={task.id}
                   onClick={() => handleTaskClick(task)}
                   className={`flex items-center gap-3 p-3 rounded-xl relative overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${isDarkMode
-                      ? "bg-slate-700/50 hover:bg-slate-700"
-                      : "bg-slate-50 hover:bg-slate-100"
+                    ? "bg-slate-700/50 hover:bg-slate-700"
+                    : "bg-slate-50 hover:bg-slate-100"
                     }`}
                 >
                   {/* Priority indicator bar on right edge */}
@@ -145,8 +145,8 @@ const TaskBrief: React.FC<TaskBriefProps> = ({ tasks }) => {
                             <span
                               key={i}
                               className={`text-[10px] px-1.5 py-0.5 rounded ${isDarkMode
-                                  ? "bg-slate-600 text-slate-300"
-                                  : "bg-slate-200 text-slate-600"
+                                ? "bg-slate-600 text-slate-300"
+                                : "bg-slate-200 text-slate-600"
                                 }`}
                             >
                               {tagId.slice(0, 6)}
