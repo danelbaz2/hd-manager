@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import { useTheme } from "../../../../contexts/ThemeContext";
 import {
@@ -35,6 +35,9 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  // Ref-based lock to prevent multiple rapid submissions
+  const isSubmittingRef = useRef(false);
+
   const { alerts, showSuccess, showError, showWarning, dismissAlert } =
     useToast();
 
@@ -51,8 +54,14 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     );
   };
 
-  // Validation and submission
+  // Validation and submission with ref-based lock to prevent duplicates
   const handleAddClick = async () => {
+    // Check ref-based lock first (synchronous, prevents race condition)
+    if (isSubmittingRef.current) {
+      console.log("Submission already in progress, ignoring click");
+      return;
+    }
+
     const MIN_NAME_LENGTH = 2;
     const MIN_USERNAME_LENGTH = 2;
     const VALID_ROLES = ["regular", "admin"] as const;
@@ -88,6 +97,8 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
       return;
     }
 
+    // Set both ref and state
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
@@ -97,12 +108,27 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
           "המשתמש נוצר בהצלחה! 🎉",
           `העובד ${formData.fullName} נוסף למערכת`
         );
-        setTimeout(() => onAdd(), 1500);
+        // WebSocket will update the users list automatically
+        // No need to call refreshUsers() - just reset the form
+        setTimeout(() => {
+          isSubmittingRef.current = false;
+          setIsSubmitting(false);
+          onAdd(); // Reset form
+        }, 1500);
+      } else if (response.aborted) {
+        // Request was aborted - silently ignore, WebSocket will handle UI update if user was created
+        console.log("User creation request was aborted");
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
+        // Don't show any message or call onAdd - we don't know if it succeeded
       } else {
         showError(
           "שגיאה ביצירת המשתמש",
           response.error || "אירעה שגיאה, נסה שוב"
         );
+        // Reset lock on error to allow retry
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error("Error creating user:", error);
@@ -110,7 +136,8 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         "שגיאה בלתי צפויה",
         "אירעה שגיאה בלתי צפויה, נסה שוב מאוחר יותר"
       );
-    } finally {
+      // Reset lock on error to allow retry
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };

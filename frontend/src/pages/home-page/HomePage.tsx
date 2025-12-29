@@ -11,7 +11,14 @@ import { useTaskModal } from "../../components/modal/modal-task";
 import { type Task, type TaskStatus } from "../../api/tasksApi";
 import { useTour } from "../../components/demos/tour-provider";
 import { PageHelpButton } from "../../components/demos/page-help-button";
-import { DEMO_TASKS, DEMO_USERS, DEMO_HISTORY, DEMO_PRIMARY_TAGS, DEMO_SECONDARY_TAGS, DEMO_TEAM_UPDATES } from "../../components/demos/shared/tourData";
+import {
+  DEMO_TASKS,
+  DEMO_USERS,
+  DEMO_HISTORY,
+  DEMO_PRIMARY_TAGS,
+  DEMO_SECONDARY_TAGS,
+  DEMO_TEAM_UPDATES,
+} from "../../components/demos/shared/tourData";
 import type { UserData } from "../../schemas/userTypes";
 
 const HomePage: React.FC = () => {
@@ -19,7 +26,12 @@ const HomePage: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
   /* Demos */
-  const { checkAndStartTour, startTour, state: tourState, isFirstTimeUser } = useTour();
+  const {
+    checkAndStartTour,
+    startTour,
+    state: tourState,
+    isFirstTimeUser,
+  } = useTour();
   const isTourActive = tourState.isActive && tourState.currentPageId === "home";
 
   // Check if this is a first-time user - show demo data immediately
@@ -33,54 +45,62 @@ const HomePage: React.FC = () => {
     secondaryTags: realSecondaryTags,
     refreshTasks,
     refreshTaskHistory,
-    taskHistory: realHistory
+    taskHistory: realHistory,
   } = useSettings();
 
   // Merge real and demo data for the tour OR first-time users
-  const {
-    tasks,
-    users,
-    primaryTags,
-    secondaryTags,
-    teamUpdates,
-  } = useMemo(() => {
-    if (showDemoData) {
-      // Augment demo data to include current user with tasks
-      const effectiveUsers = user ? [user as any as UserData, ...DEMO_USERS.filter(u => u.id !== user.id)] : DEMO_USERS;
+  const { tasks, users, primaryTags, secondaryTags, teamUpdates } =
+    useMemo(() => {
+      if (showDemoData) {
+        // Augment demo data to include current user with tasks
+        const effectiveUsers = user
+          ? [
+              user as any as UserData,
+              ...DEMO_USERS.filter((u) => u.id !== user.id),
+            ]
+          : DEMO_USERS;
 
-      const myDemoTasks = user
-        ? DEMO_TASKS.map(t => ({
-          ...t,
-          id: `my-${t.id}`,
-          responsibleUserIds: [user.id]
-        }))
-        : [];
+        const myDemoTasks = user
+          ? DEMO_TASKS.map((t) => ({
+              ...t,
+              id: `my-${t.id}`,
+              responsibleUserIds: [user.id],
+            }))
+          : [];
 
-      const demoTeamUpdates = DEMO_TEAM_UPDATES.map(u => ({
-        id: u.id,
-        content: u.message,
-        senderId: u.senderId,
-        base: { createdAt: u.timestamp }
-      }));
+        const demoTeamUpdates = DEMO_TEAM_UPDATES.map((u) => ({
+          id: u.id,
+          content: u.message,
+          senderId: u.senderId,
+          base: { createdAt: u.timestamp },
+        }));
 
+        return {
+          tasks: [...DEMO_TASKS, ...myDemoTasks],
+          users: effectiveUsers,
+          formattedHistory: [...DEMO_HISTORY],
+          primaryTags: [...realPrimaryTags, ...DEMO_PRIMARY_TAGS],
+          secondaryTags: [...realSecondaryTags, ...DEMO_SECONDARY_TAGS],
+          teamUpdates: demoTeamUpdates,
+        };
+      }
       return {
-        tasks: [...DEMO_TASKS, ...myDemoTasks],
-        users: effectiveUsers,
-        formattedHistory: [...DEMO_HISTORY],
-        primaryTags: [...realPrimaryTags, ...DEMO_PRIMARY_TAGS],
-        secondaryTags: [...realSecondaryTags, ...DEMO_SECONDARY_TAGS],
-        teamUpdates: demoTeamUpdates,
+        tasks: realTasks,
+        users: realUsers,
+        formattedHistory: realHistory,
+        primaryTags: realPrimaryTags,
+        secondaryTags: realSecondaryTags,
+        teamUpdates: undefined,
       };
-    }
-    return {
-      tasks: realTasks,
-      users: realUsers,
-      formattedHistory: realHistory,
-      primaryTags: realPrimaryTags,
-      secondaryTags: realSecondaryTags,
-      teamUpdates: undefined,
-    };
-  }, [showDemoData, user, realTasks, realUsers, realHistory, realPrimaryTags, realSecondaryTags]);
+    }, [
+      showDemoData,
+      user,
+      realTasks,
+      realUsers,
+      realHistory,
+      realPrimaryTags,
+      realSecondaryTags,
+    ]);
 
   const { viewMode, setViewMode, displayMode, setDisplayMode, selectedDate } =
     useViewState();
@@ -136,7 +156,8 @@ const HomePage: React.FC = () => {
   };
 
   const handleSearchChange = (query: string) => setSearchQuery(query);
-  const handleStatusFilterChange = (status: TaskStatus | null) => setStatusFilter(status);
+  const handleStatusFilterChange = (status: TaskStatus | null) =>
+    setStatusFilter(status);
 
   // Handle task click - open task modal
   const handleTaskClick = useCallback(
@@ -151,7 +172,12 @@ const HomePage: React.FC = () => {
     switch (displayMode) {
       case "grid":
         return (
-          <GridView users={users} tasks={filteredTasks} viewMode={viewMode} teamUpdatesOverride={teamUpdates} />
+          <GridView
+            users={users}
+            tasks={filteredTasks}
+            viewMode={viewMode}
+            teamUpdatesOverride={teamUpdates}
+          />
         );
 
       case "list":
@@ -159,7 +185,8 @@ const HomePage: React.FC = () => {
           <ListView
             tasks={filteredTasks}
             users={users}
-            tags={secondaryTags}
+            primaryTags={primaryTags}
+            secondaryTags={secondaryTags}
             searchQuery={searchQuery}
             statusFilter={statusFilter}
           />
@@ -177,10 +204,14 @@ const HomePage: React.FC = () => {
           />
         );
 
-
       default:
         return (
-          <GridView users={users} tasks={filteredTasks} viewMode={viewMode} teamUpdatesOverride={teamUpdates} />
+          <GridView
+            users={users}
+            tasks={filteredTasks}
+            viewMode={viewMode}
+            teamUpdatesOverride={teamUpdates}
+          />
         );
     }
   };
@@ -215,21 +246,19 @@ const HomePage: React.FC = () => {
       <div
         data-tour="main-content-area"
         className={`flex-1 overflow-y-auto p-4 lg:p-4 xl:p-2
-          ${isDarkMode
-            ? "bg-slate-900 dark-scrollbar"
-            : "bg-slate-50 light-scrollbar"
+          ${
+            isDarkMode
+              ? "bg-slate-900 dark-scrollbar"
+              : "bg-slate-50 light-scrollbar"
           }`}
       >
         {renderContent()}
       </div>
 
       {/* Floating Help Button */}
-      <PageHelpButton
-        title="הצג הדרכה"
-        pageId="home" />
+      <PageHelpButton title="הצג הדרכה" pageId="home" />
     </div>
   );
 };
 
 export default HomePage;
-

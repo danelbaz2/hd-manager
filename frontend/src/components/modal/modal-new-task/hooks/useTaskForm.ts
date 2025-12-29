@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { type TaskPriority, type TaskFormData } from "../../../../schemas/taskTypes";
 import { createTask } from "../../../../api/tasksApi";
 import { useToast } from "../../../alert-feedback";
@@ -64,6 +64,7 @@ export const useTaskForm = ({
   onClose,
 }: UseTaskFormOptions): UseTaskFormReturn => {
   const { alerts, showSuccess, showError, showWarning, dismissAlert, clearAllAlerts } = useToast();
+  
   // Form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -74,12 +75,18 @@ export const useTaskForm = ({
   const [deadline, setDeadline] = useState<string>("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Ref-based lock to prevent multiple rapid submissions
+  const isSubmittingRef = useRef(false);
 
   // Reset form and set default dates when modal opens/closes
   useEffect(() => {
     if (isOpen) {
       // Clear any existing alerts when modal opens
       clearAllAlerts();
+      
+      // Reset submission lock
+      isSubmittingRef.current = false;
 
       // Reset all fields
       setTitle("");
@@ -97,8 +104,9 @@ export const useTaskForm = ({
       // Set default deadline to same as start date
       setDeadline(startDateStr);
     } else {
-      // Clear alerts when modal closes
+      // Clear alerts and reset lock when modal closes
       clearAllAlerts();
+      isSubmittingRef.current = false;
     }
   }, [isOpen, initialDate, clearAllAlerts]);
 
@@ -142,13 +150,21 @@ export const useTaskForm = ({
     }
   };
 
-  // Handle submit
+  // Handle submit with ref-based lock to prevent multiple submissions
   const handleSubmit = async () => {
+    // Check ref-based lock first (synchronous, prevents race condition)
+    if (isSubmittingRef.current) {
+      console.log("Submission already in progress, ignoring click");
+      return;
+    }
+    
     if (!title.trim()) {
       showWarning("שדה חסר", "נא להזין כותרת משימה");
       return;
     }
 
+    // Set both ref and state
+    isSubmittingRef.current = true;
     setIsSubmitting(true);
 
     try {
@@ -180,11 +196,21 @@ export const useTaskForm = ({
         }, 1500);
       } else {
         showError("שגיאה ביצירת משימה", response.error || "אירעה שגיאה, נסה שוב");
+        // Reset lock on error to allow retry
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
       }
     } catch (error) {
       console.error("Error creating task:", error);
-      showError("שגיאה בלתי צפויה", "אירעה שגיאה בלתי צפויה");
-    } finally {
+      // Check if it's an abort error (which can happen with WebSocket race conditions)
+      if (error instanceof Error && error.name === "AbortError") {
+        // The request might have succeeded - don't show error
+        console.log("Request was aborted, but task may have been created");
+      } else {
+        showError("שגיאה בלתי צפויה", "אירעה שגיאה בלתי צפויה");
+      }
+      // Reset lock on error to allow retry
+      isSubmittingRef.current = false;
       setIsSubmitting(false);
     }
   };

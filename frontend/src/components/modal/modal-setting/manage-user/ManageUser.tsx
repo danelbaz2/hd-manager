@@ -16,14 +16,14 @@ const ManageUser: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { refreshUsers } = useSettings();
   const [formData, setFormData] = useState<UserFormData>(DEFAULT_FORM_DATA);
-  const [originalData, setOriginalData] = useState<UserFormData>(DEFAULT_FORM_DATA);
+  const [originalData, setOriginalData] =
+    useState<UserFormData>(DEFAULT_FORM_DATA);
   const [editingUserId, setEditingUserId] = useState<string | null>(null);
   const { alerts, showSuccess, showError, dismissAlert } = useToast();
 
   const handleAddUser = () => {
-    // Reset form and refresh the list from context
+    // Reset form - WebSocket already handles the users list update
     setFormData(DEFAULT_FORM_DATA);
-    refreshUsers();
   };
 
   const handleEditUser = (user: UserData) => {

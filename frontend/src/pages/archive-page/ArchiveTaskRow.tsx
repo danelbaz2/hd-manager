@@ -3,28 +3,43 @@ import { User, Calendar } from "lucide-react";
 import { useTheme } from "../../contexts";
 import { type Task } from "../../api/tasksApi";
 import { type UserData } from "../../schemas/userTypes";
-import { type SecondaryTagData } from "../../schemas/tagTypes";
+import {
+  type PrimaryTagData,
+  type SecondaryTagData,
+  getTextColor,
+} from "../../schemas/tagTypes";
 import { getStatusStyle, getGradientStyle } from "../home-page/shared";
-import { Tooltip } from "../../components/tags-tooltip";
+import { TagBadge } from "../../components/tags-tooltip";
 
 interface Props {
   task: Task;
   users: UserData[];
-  tags: SecondaryTagData[];
+  primaryTags: PrimaryTagData[];
+  secondaryTags: SecondaryTagData[];
   onTaskClick?: (task: Task) => void;
 }
 
 const ArchiveTaskRow: React.FC<Props> = ({
   task,
   users,
-  tags,
+  primaryTags,
+  secondaryTags,
   onTaskClick,
 }) => {
   const { isDarkMode } = useTheme();
   const status = getStatusStyle(task.status);
   const assigned = users.filter((u) => task.responsibleUserIds?.includes(u.id));
   const colors = assigned.map((u) => u.color);
-  const taskTags = tags.filter((t) => task.secondaryTagIds?.includes(t.id));
+
+  // Get both primary and secondary tags for this task
+  const taskPrimaryTags = primaryTags.filter((t) =>
+    task.primaryTagIds?.includes(t.id)
+  );
+  const taskSecondaryTags = secondaryTags.filter((t) =>
+    task.secondaryTagIds?.includes(t.id)
+  );
+  const allTags = [...taskPrimaryTags, ...taskSecondaryTags];
+
   const fmtDate = (ts?: number) =>
     ts ? new Date(ts).toLocaleDateString("he-IL") : "---";
 
@@ -39,13 +54,18 @@ const ArchiveTaskRow: React.FC<Props> = ({
       dir="rtl"
       onClick={() => onTaskClick?.(task)}
     >
+      {/* Color Bar */}
       <div
         className="w-1 h-14 rounded-full shrink-0"
         style={getGradientStyle(colors)}
       />
+
+      {/* ID Column */}
       <div className="shrink-0 w-16 lg:w-20 text-xs font-mono text-center text-slate-400">
         {task.id?.slice(-6) || "---"}
       </div>
+
+      {/* Description Column */}
       <div className="flex-1 min-w-0">
         <h3
           className={`font-semibold text-sm lg:text-base truncate ${
@@ -54,33 +74,44 @@ const ArchiveTaskRow: React.FC<Props> = ({
         >
           {task.title || "ללא כותרת"}
         </h3>
-        {taskTags.length > 0 && (
-          <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-            {taskTags.slice(0, 3).map((tag) => (
-              <Tooltip key={tag.id} content={tag.description} position="top">
-                <span
-                  className="px-2 py-0.5 rounded text-xs font-medium"
-                  style={{
-                    backgroundColor: (tag.color || "#94A3B8") + "40",
-                    color: tag.color || "#94A3B8",
-                  }}
-                >
-                  {tag.name}
-                </span>
-              </Tooltip>
+      </div>
+
+      {/* Tags Column - Both Primary and Secondary */}
+      <div className="w-28 lg:w-32 shrink-0 flex flex-wrap items-center justify-center gap-1">
+        {allTags.length > 0 ? (
+          <>
+            {allTags.slice(0, 2).map((tag) => (
+              <TagBadge
+                key={tag.id}
+                name={tag.name}
+                color={tag.color || "#94A3B8"}
+                textColor={getTextColor(tag.color || "#94A3B8")}
+                description={tag.description}
+                size="sm"
+              />
             ))}
-            {taskTags.length > 3 && (
+            {allTags.length > 2 && (
               <span
                 className={`text-xs ${
                   isDarkMode ? "text-slate-400" : "text-slate-500"
                 }`}
               >
-                +{taskTags.length - 3}
+                +{allTags.length - 2}
               </span>
             )}
-          </div>
+          </>
+        ) : (
+          <span
+            className={`text-xs ${
+              isDarkMode ? "text-slate-500" : "text-slate-400"
+            }`}
+          >
+            ---
+          </span>
         )}
       </div>
+
+      {/* Status Column */}
       <div className="w-20 lg:w-24 shrink-0 flex justify-center">
         <span
           className={`px-3 py-1.5 rounded-full text-xs font-semibold ${status.bg} ${status.text}`}
@@ -88,7 +119,9 @@ const ArchiveTaskRow: React.FC<Props> = ({
           {status.label}
         </span>
       </div>
-      <div className="w-24 lg:w-28 shrink-0 flex items-center gap-1.5">
+
+      {/* Date Column */}
+      <div className="w-24 lg:w-28 shrink-0 flex items-center justify-center gap-1.5">
         <Calendar className="w-4 h-4 text-slate-400" />
         <span
           className={`text-xs lg:text-sm ${
@@ -98,7 +131,9 @@ const ArchiveTaskRow: React.FC<Props> = ({
           {fmtDate(task.date)}
         </span>
       </div>
-      <div className="w-36 lg:w-44 shrink-0 flex items-center gap-2">
+
+      {/* Assigned Column */}
+      <div className="w-32 lg:w-40 shrink-0 flex items-center gap-2">
         {assigned.length > 0 ? (
           <>
             <div className="flex -space-x-2 space-x-reverse">

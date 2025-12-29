@@ -2,7 +2,10 @@ import React, { useCallback } from "react";
 import { useViewState } from "../../../contexts";
 import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
-import { type SecondaryTagData } from "../../../schemas/tagTypes";
+import {
+  type PrimaryTagData,
+  type SecondaryTagData,
+} from "../../../schemas/tagTypes";
 import DailyList from "./DailyList";
 import WeeklyList from "./WeeklyList";
 import MonthlyCalendar from "./MonthlyCalendar";
@@ -12,7 +15,8 @@ import { useTaskModal } from "../../../components/modal/modal-task";
 interface ListViewProps {
   tasks: Task[];
   users: UserData[];
-  tags: SecondaryTagData[];
+  primaryTags: PrimaryTagData[];
+  secondaryTags: SecondaryTagData[];
   searchQuery?: string;
   statusFilter?: TaskStatus | null;
 }
@@ -26,7 +30,8 @@ interface ListViewProps {
 const ListView: React.FC<ListViewProps> = ({
   tasks,
   users,
-  tags,
+  primaryTags,
+  secondaryTags,
   searchQuery = "",
   statusFilter = null,
 }) => {
@@ -72,18 +77,31 @@ const ListView: React.FC<ListViewProps> = ({
         }
       }
 
-      // 3. Search in tags
+      // 3. Search in primary tags
+      if (task.primaryTagIds && task.primaryTagIds.length > 0) {
+        const pIds = task.primaryTagIds;
+        const taskPrimaryTags = primaryTags.filter((t) => pIds.includes(t.id));
+        if (taskPrimaryTags.some((t) => t.name.toLowerCase().includes(query))) {
+          return true;
+        }
+      }
+
+      // 4. Search in secondary tags
       if (task.secondaryTagIds && task.secondaryTagIds.length > 0) {
         const sIds = task.secondaryTagIds;
-        const taskTags = tags.filter((t) => sIds.includes(t.id));
-        if (taskTags.some((t) => t.name.toLowerCase().includes(query))) {
+        const taskSecondaryTags = secondaryTags.filter((t) =>
+          sIds.includes(t.id)
+        );
+        if (
+          taskSecondaryTags.some((t) => t.name.toLowerCase().includes(query))
+        ) {
           return true;
         }
       }
 
       return false;
     });
-  }, [tasks, searchQuery, users, tags]);
+  }, [tasks, searchQuery, users, primaryTags, secondaryTags]);
 
   // Apply status filter (null = show all)
   const filteredTasks = React.useMemo(() => {
@@ -97,7 +115,8 @@ const ListView: React.FC<ListViewProps> = ({
       <DailyList
         tasks={filteredTasks}
         users={users}
-        tags={tags}
+        primaryTags={primaryTags}
+        secondaryTags={secondaryTags}
         onTaskClick={handleTaskClick}
       />
     );

@@ -13,7 +13,7 @@ import { useTaskModal } from "../../components/modal/modal-task";
 const ArchivePage: React.FC = () => {
   const { isDarkMode } = useTheme();
   // Use useSettings to get users and tags with computed colors (same as home page)
-  const { users, secondaryTags } = useSettings();
+  const { users, primaryTags, secondaryTags } = useSettings();
   const [filters, setFilters] = useState<ArchiveFilters>(defaultFilters);
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -74,7 +74,8 @@ const ArchivePage: React.FC = () => {
         <ListTaskArchive
           tasks={tasks}
           users={users}
-          tags={secondaryTags}
+          primaryTags={primaryTags}
+          secondaryTags={secondaryTags}
           filters={filters}
           onTaskClick={handleTaskClick}
         />

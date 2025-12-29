@@ -20,6 +20,7 @@ export interface ApiResponse<T> {
   data?: T;
   message?: string;
   error?: string;
+  aborted?: boolean;  // Flag to indicate request was aborted (not a real error)
 }
 
 // Generic fetch wrapper with error handling
@@ -60,6 +61,19 @@ export async function apiRequest<T>(
       data: data,
     };
   } catch (error) {
+    // Handle AbortError silently - this happens when:
+    // 1. Component unmounts during request
+    // 2. WebSocket triggers a refresh that cancels pending requests
+    // 3. User navigates away from the page
+    if (error instanceof Error && error.name === "AbortError") {
+      console.log("API request aborted (this is usually fine):", url);
+      return {
+        success: false,
+        aborted: true,
+        error: "Request was cancelled",
+      };
+    }
+    
     console.error("API Request Error:", error);
     return {
       success: false,

@@ -3,18 +3,23 @@ import { User, Calendar } from "lucide-react";
 import { useTheme } from "../../../contexts";
 import { type Task } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
-import { type SecondaryTagData } from "../../../schemas/tagTypes";
+import {
+  type PrimaryTagData,
+  type SecondaryTagData,
+  getTextColor,
+} from "../../../schemas/tagTypes";
 import {
   getStatusStyle,
   getGradientStyle,
   getDaysRemaining,
 } from "./taskItemUtils";
-import { Tooltip } from "../../../components/tags-tooltip";
+import { TagBadge } from "../../../components/tags-tooltip";
 
 interface TaskListItemProps {
   task: Task;
   users: UserData[];
-  tags: SecondaryTagData[];
+  primaryTags: PrimaryTagData[];
+  secondaryTags: SecondaryTagData[];
   onTaskClick?: (task: Task) => void;
 }
 
@@ -25,7 +30,8 @@ interface TaskListItemProps {
 const TaskListItem: React.FC<TaskListItemProps> = ({
   task,
   users,
-  tags,
+  primaryTags,
+  secondaryTags,
   onTaskClick,
 }) => {
   const { isDarkMode } = useTheme();
@@ -39,8 +45,14 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
   // Get user colors for gradient
   const userColors = assignedUsers.map((user) => user.color);
 
-  // Get task tags
-  const taskTags = tags.filter((tag) => task.secondaryTagIds?.includes(tag.id));
+  // Get both primary and secondary tags for this task
+  const taskPrimaryTags = primaryTags.filter((t) =>
+    task.primaryTagIds?.includes(t.id)
+  );
+  const taskSecondaryTags = secondaryTags.filter((t) =>
+    task.secondaryTagIds?.includes(t.id)
+  );
+  const allTags = [...taskPrimaryTags, ...taskSecondaryTags];
 
   return (
     <div
@@ -70,7 +82,7 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
         {task.id?.slice(-6) || "---"}
       </div>
 
-      {/* Task Content - Title & Tags */}
+      {/* Task Content - Title only */}
       <div className="flex-1 min-w-0">
         <h3
           className={`font-semibold text-sm lg:text-base truncate
@@ -78,31 +90,40 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
         >
           {task.title || "ללא כותרת"}
         </h3>
-        {taskTags.length > 0 && (
-          <div className="flex items-center gap-2 mt-1">
-            {taskTags.slice(0, 2).map((tag) => (
-              <Tooltip key={tag.id} content={tag.description} position="top">
-                <span
-                  className="px-2 py-0.5 rounded text-xs font-medium cursor-default"
-                  style={{
-                    backgroundColor: (tag.color || "#94A3B8") + "30",
-                    color: tag.color || "#94A3B8",
-                  }}
-                >
-                  {tag.name}
-                </span>
-              </Tooltip>
+      </div>
+
+      {/* Tags Column - Both Primary and Secondary */}
+      <div className="w-28 lg:w-32 shrink-0 flex flex-wrap items-center justify-center gap-1">
+        {allTags.length > 0 ? (
+          <>
+            {allTags.slice(0, 2).map((tag) => (
+              <TagBadge
+                key={tag.id}
+                name={tag.name}
+                color={tag.color || "#94A3B8"}
+                textColor={getTextColor(tag.color || "#94A3B8")}
+                description={tag.description}
+                size="sm"
+              />
             ))}
-            {taskTags.length > 2 && (
+            {allTags.length > 2 && (
               <span
                 className={`text-xs ${
                   isDarkMode ? "text-slate-400" : "text-slate-500"
                 }`}
               >
-                +{taskTags.length - 2}
+                +{allTags.length - 2}
               </span>
             )}
-          </div>
+          </>
+        ) : (
+          <span
+            className={`text-xs ${
+              isDarkMode ? "text-slate-500" : "text-slate-400"
+            }`}
+          >
+            ---
+          </span>
         )}
       </div>
 
@@ -132,7 +153,7 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
       })()}
 
       {/* Assigned Users */}
-      <div className="w-40 lg:w-48 shrink-0 flex items-center gap-2">
+      <div className="w-32 lg:w-40 shrink-0 flex items-center gap-2">
         {assignedUsers.length > 0 ? (
           <>
             <div className="flex -space-x-2 space-x-reverse">

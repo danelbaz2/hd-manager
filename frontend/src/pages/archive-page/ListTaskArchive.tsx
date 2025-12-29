@@ -4,14 +4,18 @@ import { Archive } from "lucide-react";
 import { useTheme } from "../../contexts";
 import { type Task } from "../../api/tasksApi";
 import { type UserData } from "../../schemas/userTypes";
-import { type SecondaryTagData } from "../../schemas/tagTypes";
+import {
+  type PrimaryTagData,
+  type SecondaryTagData,
+} from "../../schemas/tagTypes";
 import { type ArchiveFilters } from "../../schemas/archiveTypes";
 import ArchiveTaskRow from "./ArchiveTaskRow";
 
 interface Props {
   tasks: Task[];
   users: UserData[];
-  tags: SecondaryTagData[];
+  primaryTags: PrimaryTagData[];
+  secondaryTags: SecondaryTagData[];
   filters: ArchiveFilters;
   onTaskClick?: (task: Task) => void;
 }
@@ -21,7 +25,8 @@ const ROW_HEIGHT = 80; // Approximate height of each row in pixels
 const ListTaskArchive: React.FC<Props> = ({
   tasks,
   users,
-  tags,
+  primaryTags,
+  secondaryTags,
   filters,
   onTaskClick,
 }) => {
@@ -99,10 +104,11 @@ const ListTaskArchive: React.FC<Props> = ({
       >
         <div className="w-1" />
         <div className="w-16 lg:w-20 text-center">ID</div>
-        <div className="flex-1">תיאור משימה</div>
+        <div className="flex-1 min-w-0">שם משימה</div>
+        <div className="w-28 lg:w-32 text-center">תגיות</div>
         <div className="w-20 lg:w-24 text-center">סטטוס</div>
-        <div className="w-24 lg:w-28">תאריך</div>
-        <div className="w-36 lg:w-44">משויך ל...</div>
+        <div className="w-24 lg:w-28 text-center">תאריך</div>
+        <div className="w-32 lg:w-40">משויך ל...</div>
       </div>
 
       {/* Virtualized List Container */}
@@ -146,7 +152,8 @@ const ListTaskArchive: React.FC<Props> = ({
                 <ArchiveTaskRow
                   task={task}
                   users={users}
-                  tags={tags}
+                  primaryTags={primaryTags}
+                  secondaryTags={secondaryTags}
                   onTaskClick={onTaskClick}
                 />
               </div>
