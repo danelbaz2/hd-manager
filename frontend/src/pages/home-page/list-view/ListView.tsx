@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { useViewState } from "../../../contexts";
-import { type Task } from "../../../api/tasksApi";
+import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
 import { type SecondaryTagData } from "../../../schemas/tagTypes";
 import DailyList from "./DailyList";
@@ -14,6 +14,7 @@ interface ListViewProps {
   users: UserData[];
   tags: SecondaryTagData[];
   searchQuery?: string;
+  statusFilter?: TaskStatus | null;
 }
 
 /**
@@ -27,6 +28,7 @@ const ListView: React.FC<ListViewProps> = ({
   users,
   tags,
   searchQuery = "",
+  statusFilter = null,
 }) => {
   const { viewMode, selectedDate } = useViewState();
   const { openTaskModal } = useTaskModal();
@@ -40,7 +42,7 @@ const ListView: React.FC<ListViewProps> = ({
   );
 
   // Filter tasks based on search query
-  const filteredTasks = React.useMemo(() => {
+  const searchFilteredTasks = React.useMemo(() => {
     if (!searchQuery.trim()) return tasks;
 
     const query = searchQuery.toLowerCase();
@@ -82,6 +84,12 @@ const ListView: React.FC<ListViewProps> = ({
       return false;
     });
   }, [tasks, searchQuery, users, tags]);
+
+  // Apply status filter (null = show all)
+  const filteredTasks = React.useMemo(() => {
+    if (statusFilter === null) return searchFilteredTasks;
+    return searchFilteredTasks.filter((task) => task.status === statusFilter);
+  }, [searchFilteredTasks, statusFilter]);
 
   // Render based on view mode
   if (viewMode === "daily") {

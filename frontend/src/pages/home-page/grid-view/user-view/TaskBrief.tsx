@@ -16,8 +16,6 @@ const getStatusLabel = (status?: string) => {
       return { label: "בטיפול", color: "bg-amber-100 text-amber-700" };
     case "completed":
       return { label: "סגור", color: "bg-blue-100 text-blue-700" };
-    case "cancelled":
-      return { label: "בוטל", color: "bg-slate-100 text-slate-600" };
     default:
       return { label: "פתוח", color: "bg-green-100 text-green-700" };
   }
@@ -39,12 +37,11 @@ const getPriorityColor = (priority?: string) => {
 // Priority order: high > medium > low
 const priorityOrder: Record<string, number> = { high: 0, medium: 1, low: 2 };
 
-// Status order: pending > in_progress > completed > cancelled
+// Status order: pending > in_progress > completed
 const statusOrder: Record<string, number> = {
   pending: 0,
   in_progress: 1,
   completed: 2,
-  cancelled: 3,
 };
 
 const sortTasks = (tasks: Task[]): Task[] => {
@@ -75,20 +72,18 @@ const TaskBrief: React.FC<TaskBriefProps> = ({ tasks }) => {
 
   return (
     <div
-      className={`rounded-2xl border p-4 h-full flex flex-col ${
-        isDarkMode
+      className={`rounded-2xl border p-4 h-full flex flex-col ${isDarkMode
           ? "bg-slate-800 border-slate-700"
           : "bg-white border-slate-200"
-      }`}
+        }`}
       dir="rtl"
     >
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <ClipboardList className="w-5 h-5 text-blue-500" />
         <h3
-          className={`font-bold text-sm ${
-            isDarkMode ? "text-white" : "text-slate-800"
-          }`}
+          className={`font-bold text-sm ${isDarkMode ? "text-white" : "text-slate-800"
+            }`}
         >
           המשימות שלי ({tasks.length})
         </h3>
@@ -96,15 +91,13 @@ const TaskBrief: React.FC<TaskBriefProps> = ({ tasks }) => {
 
       {/* Task List - Scrollable */}
       <div
-        className={`flex-1 overflow-y-auto overflow-x-hidden min-h-0 ${
-          isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-        }`}
+        className={`flex-1 overflow-y-auto overflow-x-hidden min-h-0 ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+          }`}
       >
         {sortedTasks.length === 0 ? (
           <div
-            className={`text-center py-6 ${
-              isDarkMode ? "text-slate-400" : "text-slate-500"
-            }`}
+            className={`text-center py-6 ${isDarkMode ? "text-slate-400" : "text-slate-500"
+              }`}
           >
             <p className="text-sm">אין משימות להצגה</p>
           </div>
@@ -118,11 +111,10 @@ const TaskBrief: React.FC<TaskBriefProps> = ({ tasks }) => {
                 <div
                   key={task.id}
                   onClick={() => handleTaskClick(task)}
-                  className={`flex items-center gap-3 p-3 rounded-xl relative overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${
-                    isDarkMode
+                  className={`flex items-center gap-3 p-3 rounded-xl relative overflow-hidden cursor-pointer transition-all hover:scale-[1.01] ${isDarkMode
                       ? "bg-slate-700/50 hover:bg-slate-700"
                       : "bg-slate-50 hover:bg-slate-100"
-                  }`}
+                    }`}
                 >
                   {/* Priority indicator bar on right edge */}
                   <div
@@ -131,9 +123,8 @@ const TaskBrief: React.FC<TaskBriefProps> = ({ tasks }) => {
 
                   {/* Line index on right (after priority bar) */}
                   <span
-                    className={`text-xs font-mono shrink-0 w-6 text-center mr-1 ${
-                      isDarkMode ? "text-slate-500" : "text-slate-400"
-                    }`}
+                    className={`text-xs font-mono shrink-0 w-6 text-center mr-1 ${isDarkMode ? "text-slate-500" : "text-slate-400"
+                      }`}
                   >
                     {index + 1}
                   </span>
@@ -141,9 +132,8 @@ const TaskBrief: React.FC<TaskBriefProps> = ({ tasks }) => {
                   {/* Title + Tags */}
                   <div className="flex-1 min-w-0">
                     <span
-                      className={`text-sm font-medium truncate block ${
-                        isDarkMode ? "text-white" : "text-slate-800"
-                      }`}
+                      className={`text-sm font-medium truncate block ${isDarkMode ? "text-white" : "text-slate-800"
+                        }`}
                     >
                       {task.title}
                     </span>
@@ -154,11 +144,10 @@ const TaskBrief: React.FC<TaskBriefProps> = ({ tasks }) => {
                           .map((tagId: string, i: number) => (
                             <span
                               key={i}
-                              className={`text-[10px] px-1.5 py-0.5 rounded ${
-                                isDarkMode
+                              className={`text-[10px] px-1.5 py-0.5 rounded ${isDarkMode
                                   ? "bg-slate-600 text-slate-300"
                                   : "bg-slate-200 text-slate-600"
-                              }`}
+                                }`}
                             >
                               {tagId.slice(0, 6)}
                             </span>

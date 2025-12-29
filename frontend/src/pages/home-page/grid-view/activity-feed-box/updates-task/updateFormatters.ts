@@ -15,7 +15,6 @@ export const STATUS_LABELS: Record<string, string> = {
   pending: "פתוח",
   in_progress: "בטיפול",
   completed: "הושלם",
-  cancelled: "בוטל",
 };
 
 export const PRIORITY_LABELS: Record<string, string> = {

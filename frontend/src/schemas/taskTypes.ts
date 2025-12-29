@@ -1,7 +1,7 @@
 // Task types and constants
 
 export type TaskPriority = "low" | "medium" | "high";
-export type TaskStatus = "pending" | "in_progress" | "completed" | "cancelled";
+export type TaskStatus = "pending" | "in_progress" | "completed";
 
 export interface TaskData {
   id: string;
@@ -42,7 +42,6 @@ export const STATUS_OPTIONS: { id: TaskStatus; label: string }[] = [
   { id: "pending", label: "פתוח" },
   { id: "in_progress", label: "בטיפול" },
   { id: "completed", label: "סגור" },
-  { id: "cancelled", label: "בוטל" },
 ];
 
 // Priority colors for visual representation
@@ -57,7 +56,6 @@ export const STATUS_COLORS: Record<TaskStatus, { bg: string; text: string }> = {
   pending: { bg: "#D1FAE5", text: "#059669" }, // Emerald (green)
   in_progress: { bg: "#FEF3C7", text: "#D97706" }, // Amber (orange)
   completed: { bg: "#E2E8F0", text: "#64748B" }, // Slate (gray)
-  cancelled: { bg: "#FEE2E2", text: "#DC2626" }, // Red
 };
 
 // Default form data for creating new tasks

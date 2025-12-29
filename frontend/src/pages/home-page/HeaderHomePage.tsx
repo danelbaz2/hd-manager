@@ -7,11 +7,10 @@ import {
   LayoutGrid,
   AlignJustify,
   Tags,
-  HelpCircle,
 } from "lucide-react";
 import { useTheme, useAuth } from "../../contexts";
-import { IconToggleButton, IconButtonToggle, SearchInput } from "./components";
-import { useTour } from "../../components/demos/tour-provider";
+import { IconToggleButton, IconButtonToggle, SearchInput, StatusFilterButtons } from "./components";
+import type { TaskStatus } from "../../api/tasksApi";
 
 type ViewMode = "daily" | "weekly" | "monthly";
 type DisplayMode = "grid" | "list" | "tags";
@@ -33,8 +32,10 @@ interface HeaderHomePageProps {
   onViewModeChange?: (mode: ViewMode) => void;
   onDisplayModeChange?: (mode: DisplayMode) => void;
   onSearchChange?: (query: string) => void;
+  onStatusFilterChange?: (status: TaskStatus | null) => void;
   viewMode?: ViewMode;
   displayMode?: DisplayMode;
+  statusFilter?: TaskStatus | null;
 }
 
 /**
@@ -46,22 +47,24 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
   onViewModeChange,
   onDisplayModeChange,
   onSearchChange,
+  onStatusFilterChange,
   viewMode: externalViewMode,
   displayMode: externalDisplayMode,
+  statusFilter: externalStatusFilter,
 }) => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
-  const { startTour, hasSeenTour } = useTour();
 
   const isAdmin = user?.role === "admin";
-  const showHelpPulse = !hasSeenTour("home");
 
   const [internalViewMode, setInternalViewMode] = useState<ViewMode>("daily");
   const [internalDisplayMode, setInternalDisplayMode] =
     useState<DisplayMode>("grid");
+  const [internalStatusFilter, setInternalStatusFilter] = useState<TaskStatus | null>(null);
 
   const viewMode = externalViewMode ?? internalViewMode;
   const displayMode = externalDisplayMode ?? internalDisplayMode;
+  const statusFilter = externalStatusFilter ?? internalStatusFilter;
 
   const handleViewModeChange = (mode: ViewMode) => {
     setInternalViewMode(mode);
@@ -71,6 +74,11 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
   const handleDisplayModeChange = (mode: DisplayMode) => {
     setInternalDisplayMode(mode);
     onDisplayModeChange?.(mode);
+  };
+
+  const handleStatusFilterChange = (status: TaskStatus | null) => {
+    setInternalStatusFilter(status);
+    onStatusFilterChange?.(status);
   };
 
   // Listen for tour events to change display/view modes
@@ -116,7 +124,7 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
       `}
       dir="rtl"
     >
-      {/* Right Side - Display Toggle & Search */}
+      {/* Right Side - Display Toggle & Search & Status Filter */}
       <div className="flex items-center gap-3 lg:gap-4">
         <div data-tour="display-modes">
           <IconButtonToggle
@@ -134,6 +142,15 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
             }
             isDarkMode={isDarkMode}
             onChange={onSearchChange}
+          />
+        )}
+
+        {/* Status Filter - Only show in list mode */}
+        {displayMode === "list" && (
+          <StatusFilterButtons
+            selectedStatus={statusFilter}
+            onChange={handleStatusFilterChange}
+            isDarkMode={isDarkMode}
           />
         )}
       </div>

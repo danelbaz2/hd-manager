@@ -36,7 +36,6 @@ const STATUS_LABELS: Record<string, string> = {
   pending: "פתוח",
   in_progress: "בטיפול",
   completed: "סגור",
-  cancelled: "מבוטל",
 };
 
 // Priority labels in Hebrew
@@ -110,7 +109,7 @@ const prepareDataForExcel = (
 
   return tasks.map((task) => {
     const rowData: Record<string, string> = {};
-    
+
     enabledFields.forEach((field) => {
       rowData[field.label] = getFieldValue(task, field.key, context);
     });

@@ -127,9 +127,7 @@ const EmptyState: React.FC<{ searchQuery: string }> = ({ searchQuery }) => {
     >
       <p className="text-lg">אין משימות להצגה</p>
       <p className="text-sm mt-2">
-        {searchQuery
-          ? "לא נמצאו תגיות התואמות לחיפוש"
-          : "אין משימות עם תגיות בתאריך הנבחר"}
+        {searchQuery ? "לא נמצאו תגיות התואמות לחיפוש" : "אין משימות עם תגיות בתאריך הנבחר"}
       </p>
     </div>
   );

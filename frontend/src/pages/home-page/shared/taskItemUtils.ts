@@ -20,12 +20,6 @@ export const getStatusStyle = (status?: string) => {
         bg: "bg-blue-100",
         text: "text-blue-700",
       };
-    case "cancelled":
-      return {
-        label: "בוטל",
-        bg: "bg-slate-100",
-        text: "text-slate-600",
-      };
     default:
       return {
         label: "פתוח",

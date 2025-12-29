@@ -18,7 +18,7 @@ const getTaskCountsForUser = (tasks: Task[]) => ({
   open: tasks.filter((t) => t.status === "pending").length,
   inProgress: tasks.filter((t) => t.status === "in_progress").length,
   closed: tasks.filter(
-    (t) => t.status === "completed" || t.status === "cancelled"
+    (t) => t.status === "completed"
   ).length,
 });
 
@@ -27,7 +27,7 @@ const calculateTotalStats = (tasks: Task[]) => ({
   open: tasks.filter((t) => t.status === "pending").length,
   inProgress: tasks.filter((t) => t.status === "in_progress").length,
   closed: tasks.filter(
-    (t) => t.status === "completed" || t.status === "cancelled"
+    (t) => t.status === "completed"
   ).length,
 });
 

@@ -67,6 +67,7 @@ export interface TourContextValue {
     skipTour: () => void;
     completeTour: () => void;
     hasSeenTour: (pageId: TourPageId) => boolean;
+    isFirstTimeUser: () => boolean; // Check if user hasn't seen the home tour
     checkAndStartTour: (pageId: TourPageId, isAdmin: boolean) => void;
     getCurrentStep: () => TourStep | null;
     getTotalSteps: () => number;

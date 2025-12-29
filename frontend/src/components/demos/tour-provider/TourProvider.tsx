@@ -40,6 +40,11 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
         return localStorage.getItem(key) === "true";
     }, [getStorageKey]);
 
+    // Check if this is a first-time user (hasn't seen the home tour)
+    const isFirstTimeUser = useCallback((): boolean => {
+        return !hasSeenTour("home");
+    }, [hasSeenTour]);
+
     // Start a tour for a specific page
     const startTour = useCallback((pageId: TourPageId) => {
         const config = TOUR_CONFIGS[pageId];
@@ -157,10 +162,11 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
         skipTour,
         completeTour,
         hasSeenTour,
+        isFirstTimeUser,
         checkAndStartTour,
         getCurrentStep,
         getTotalSteps,
-    }), [state, startTour, nextStep, prevStep, skipTour, completeTour, hasSeenTour, checkAndStartTour, getCurrentStep, getTotalSteps]);
+    }), [state, startTour, nextStep, prevStep, skipTour, completeTour, hasSeenTour, isFirstTimeUser, checkAndStartTour, getCurrentStep, getTotalSteps]);
 
     return (
         <TourContext.Provider value={value}>

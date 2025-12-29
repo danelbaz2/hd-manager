@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { X, Settings, Users, UserPlus, Tag, UserCog } from "lucide-react";
+import { X, Settings, Group, UserPlus, Tag, UserCog } from "lucide-react";
 import { useTheme } from "../../../contexts";
 import ManageUser from "./manage-user/ManageUser.tsx";
 import ManageContact from "./manage-contact/ManageContact.tsx";
@@ -20,7 +20,7 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
 
   const tabs = [
-    { id: "users" as TabType, label: "עובדים", icon: Users },
+    { id: "users" as TabType, label: "עובדים", icon: Group },
     { id: "contacts" as TabType, label: "אנשי קשר", icon: UserPlus },
     { id: "tags" as TabType, label: "תגיות", icon: Tag },
     { id: "profile" as TabType, label: "פרופיל", icon: UserCog },

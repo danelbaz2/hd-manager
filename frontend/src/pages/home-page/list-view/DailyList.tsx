@@ -12,7 +12,7 @@ interface DailyListProps {
   onTaskClick?: (task: Task) => void;
 }
 
-// Status priority order: pending (1), in_progress (2), completed (3), cancelled (4)
+// Status priority order: pending (1), in_progress (2), completed (3)
 const getStatusPriority = (status?: string): number => {
   switch (status) {
     case "pending":
@@ -21,10 +21,8 @@ const getStatusPriority = (status?: string): number => {
       return 2;
     case "completed":
       return 3;
-    case "cancelled":
-      return 4;
     default:
-      return 5;
+      return 4;
   }
 };
 
@@ -49,7 +47,6 @@ const DailyList: React.FC<DailyListProps> = ({
       >
         <p className="text-lg">אין משימות להצגה</p>
         <p className="text-sm mt-2">
-          לחץ על "יצירת משימה" כדי להוסיף משימה חדשה
         </p>
       </div>
     );
@@ -61,10 +58,9 @@ const DailyList: React.FC<DailyListProps> = ({
       <div
         className={`flex items-center gap-4 px-5 py-3 rounded-xl
           text-xs lg:text-sm font-semibold
-          ${
-            isDarkMode
-              ? "text-slate-400 bg-slate-800/50"
-              : "text-slate-500 bg-slate-100"
+          ${isDarkMode
+            ? "text-slate-400 bg-slate-800/50"
+            : "text-slate-500 bg-slate-100"
           }`}
       >
         <div className="w-1.5" /> {/* Color spacer */}

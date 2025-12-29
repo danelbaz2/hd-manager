@@ -25,8 +25,6 @@ export const getWeeklyStatusColor = (status?: string): string => {
       return "bg-amber-500";
     case "completed":
       return "bg-slate-400";
-    case "cancelled":
-      return "bg-red-400";
     default:
       return "bg-slate-400";
   }

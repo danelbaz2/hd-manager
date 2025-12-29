@@ -8,7 +8,7 @@ import { ListView } from "./list-view";
 import { TagsView } from "./tags-view";
 import { filterTasksByDateRange } from "./shared";
 import { useTaskModal } from "../../components/modal/modal-task";
-import { type Task } from "../../api/tasksApi";
+import { type Task, type TaskStatus } from "../../api/tasksApi";
 import { useTour } from "../../components/demos/tour-provider";
 import { PageHelpButton } from "../../components/demos/page-help-button";
 import { DEMO_TASKS, DEMO_USERS, DEMO_HISTORY, DEMO_PRIMARY_TAGS, DEMO_SECONDARY_TAGS, DEMO_TEAM_UPDATES } from "../../components/demos/shared/tourData";
@@ -19,8 +19,11 @@ const HomePage: React.FC = () => {
   const { user } = useAuth();
   const location = useLocation();
   /* Demos */
-  const { checkAndStartTour, state: tourState } = useTour();
+  const { checkAndStartTour, startTour, state: tourState, isFirstTimeUser } = useTour();
   const isTourActive = tourState.isActive && tourState.currentPageId === "home";
+
+  // Check if this is a first-time user - show demo data immediately
+  const showDemoData = isTourActive || isFirstTimeUser();
 
   // Real Data
   const {
@@ -33,7 +36,7 @@ const HomePage: React.FC = () => {
     taskHistory: realHistory
   } = useSettings();
 
-  // Merge real and demo data for the tour
+  // Merge real and demo data for the tour OR first-time users
   const {
     tasks,
     users,
@@ -41,7 +44,7 @@ const HomePage: React.FC = () => {
     secondaryTags,
     teamUpdates,
   } = useMemo(() => {
-    if (isTourActive) {
+    if (showDemoData) {
       // Augment demo data to include current user with tasks
       const effectiveUsers = user ? [user as any as UserData, ...DEMO_USERS.filter(u => u.id !== user.id)] : DEMO_USERS;
 
@@ -77,18 +80,24 @@ const HomePage: React.FC = () => {
       secondaryTags: realSecondaryTags,
       teamUpdates: undefined,
     };
-  }, [isTourActive, user, realTasks, realUsers, realHistory, realPrimaryTags, realSecondaryTags]);
+  }, [showDemoData, user, realTasks, realUsers, realHistory, realPrimaryTags, realSecondaryTags]);
 
   const { viewMode, setViewMode, displayMode, setDisplayMode, selectedDate } =
     useViewState();
   const { openTaskModal } = useTaskModal();
 
-  // Trigger tour on first visit
+  // Trigger tour on first visit - start immediately for first-time users
   useEffect(() => {
     if (user) {
-      checkAndStartTour("home", user.role === "admin");
+      if (isFirstTimeUser()) {
+        // Start tour immediately for first-time users (no delay)
+        startTour("home");
+      } else {
+        // For returning users, use the normal check
+        checkAndStartTour("home", user.role === "admin");
+      }
     }
-  }, [user, checkAndStartTour]);
+  }, [user, isFirstTimeUser, startTour, checkAndStartTour]);
 
   // Handle navigation state from menu
   useEffect(() => {
@@ -110,6 +119,9 @@ const HomePage: React.FC = () => {
   // Search state for tags view
   const [searchQuery, setSearchQuery] = useState("");
 
+  // Status filter state for list view (null = show all)
+  const [statusFilter, setStatusFilter] = useState<TaskStatus | null>(null);
+
   // Filter tasks based on current view (date range only)
   const filteredTasks = useMemo(() => {
     return filterTasksByDateRange(tasks, selectedDate, viewMode);
@@ -124,6 +136,7 @@ const HomePage: React.FC = () => {
   };
 
   const handleSearchChange = (query: string) => setSearchQuery(query);
+  const handleStatusFilterChange = (status: TaskStatus | null) => setStatusFilter(status);
 
   // Handle task click - open task modal
   const handleTaskClick = useCallback(
@@ -148,6 +161,7 @@ const HomePage: React.FC = () => {
             users={users}
             tags={secondaryTags}
             searchQuery={searchQuery}
+            statusFilter={statusFilter}
           />
         );
 
@@ -189,8 +203,10 @@ const HomePage: React.FC = () => {
             onViewModeChange={setViewMode}
             onDisplayModeChange={setDisplayMode}
             onSearchChange={handleSearchChange}
+            onStatusFilterChange={handleStatusFilterChange}
             viewMode={viewMode}
             displayMode={displayMode}
+            statusFilter={statusFilter}
           />
         </div>
       </div>

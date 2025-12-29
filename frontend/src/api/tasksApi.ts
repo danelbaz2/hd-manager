@@ -10,8 +10,8 @@ export interface TaskBase {
   entityType: string;
 }
 
-// Valid status values: pending (פתוח), in_progress (בטיפול), completed (סגור), cancelled (מבוטל)
-export type TaskStatus = "pending" | "in_progress" | "completed" | "cancelled";
+// Valid status values: pending (פתוח), in_progress (בטיפול), completed (סגור)
+export type TaskStatus = "pending" | "in_progress" | "completed";
 
 // Valid priority values: low, medium, high
 export type TaskPriority = "low" | "medium" | "high";

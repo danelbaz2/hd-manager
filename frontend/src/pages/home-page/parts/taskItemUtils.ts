@@ -17,8 +17,6 @@ export const getStatusStyle = (
       return { bg: "bg-orange-100", text: "text-orange-700", label: "בטיפול" };
     case "completed":
       return { bg: "bg-slate-100", text: "text-slate-600", label: "סגור" };
-    case "cancelled":
-      return { bg: "bg-red-100", text: "text-red-700", label: "בוטל" };
     default:
       return { bg: "bg-slate-100", text: "text-slate-600", label: "לא ידוע" };
   }
@@ -86,8 +84,6 @@ export const getStatusColor = (status?: string): string => {
       return "#f97316"; // orange-500
     case "completed":
       return "#64748b"; // slate-500
-    case "cancelled":
-      return "#ef4444"; // red-500
     default:
       return "#94a3b8"; // slate-400
   }

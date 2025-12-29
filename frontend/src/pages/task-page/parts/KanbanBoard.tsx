@@ -39,7 +39,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
       pending: [],
       in_progress: [],
       completed: [],
-      cancelled: [],
     };
 
     // Group tasks by status first
@@ -74,13 +73,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
     // Sort completed by updatedAt ascending (oldest first, newest at bottom)
     grouped.completed.sort((a, b) => {
-      const timeA = a.base?.updatedAt || a.base?.createdAt || 0;
-      const timeB = b.base?.updatedAt || b.base?.createdAt || 0;
-      return timeA - timeB;
-    });
-
-    // Sort cancelled by updatedAt ascending as well
-    grouped.cancelled.sort((a, b) => {
       const timeA = a.base?.updatedAt || a.base?.createdAt || 0;
       const timeB = b.base?.updatedAt || b.base?.createdAt || 0;
       return timeA - timeB;

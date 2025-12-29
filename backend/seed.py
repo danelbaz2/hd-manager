@@ -188,7 +188,7 @@ def seed(clean_only=False, bulk_tasks=False):
         print("Seeding Tasks...")
         
         # Status options for variation
-        statuses = ['pending', 'in_progress', 'completed', 'cancelled']
+        statuses = ['pending', 'in_progress', 'completed']
         priorities = ['low', 'medium', 'high']
         
         if bulk_tasks:

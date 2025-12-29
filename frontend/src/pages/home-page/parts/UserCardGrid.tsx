@@ -25,7 +25,7 @@ const getTaskCountsForUser = (
     inProgress: userTasks.filter((task) => task.status === "in_progress")
       .length,
     closed: userTasks.filter(
-      (task) => task.status === "completed" || task.status === "cancelled"
+      (task) => task.status === "completed"
     ).length,
   };
 };
