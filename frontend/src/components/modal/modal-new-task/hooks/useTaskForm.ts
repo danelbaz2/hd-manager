@@ -85,8 +85,9 @@ export const useTaskForm = ({
       // Clear any existing alerts when modal opens
       clearAllAlerts();
       
-      // Reset submission lock
+      // Reset submission lock and state
       isSubmittingRef.current = false;
+      setIsSubmitting(false);
 
       // Reset all fields
       setTitle("");
@@ -107,6 +108,7 @@ export const useTaskForm = ({
       // Clear alerts and reset lock when modal closes
       clearAllAlerts();
       isSubmittingRef.current = false;
+      setIsSubmitting(false);
     }
   }, [isOpen, initialDate, clearAllAlerts]);
 
@@ -194,6 +196,13 @@ export const useTaskForm = ({
           onSuccess?.();
           onClose?.();
         }, 1500);
+      } else if (response.aborted) {
+        // Request was aborted (usually due to WebSocket refresh) - task likely created
+        console.log("Task creation request was aborted, but task may have been created");
+        // Close modal silently - WebSocket will update UI if task was created
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
+        onClose?.();
       } else {
         showError("שגיאה ביצירת משימה", response.error || "אירעה שגיאה, נסה שוב");
         // Reset lock on error to allow retry
@@ -202,16 +211,21 @@ export const useTaskForm = ({
       }
     } catch (error) {
       console.error("Error creating task:", error);
-      // Check if it's an abort error (which can happen with WebSocket race conditions)
-      if (error instanceof Error && error.name === "AbortError") {
-        // The request might have succeeded - don't show error
-        console.log("Request was aborted, but task may have been created");
+      const errorMessage = error instanceof Error ? error.message : "";
+      
+      // Check if it's a network error that may have still succeeded
+      if (error instanceof Error && (error.name === "AbortError" || errorMessage.includes("Failed to fetch"))) {
+        // The request might have succeeded - close modal silently
+        console.log("Network error, but task may have been created");
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
+        onClose?.();
       } else {
         showError("שגיאה בלתי צפויה", "אירעה שגיאה בלתי צפויה");
+        // Reset lock on error to allow retry
+        isSubmittingRef.current = false;
+        setIsSubmitting(false);
       }
-      // Reset lock on error to allow retry
-      isSubmittingRef.current = false;
-      setIsSubmitting(false);
     }
   };
 

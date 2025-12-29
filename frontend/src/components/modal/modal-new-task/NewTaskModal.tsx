@@ -87,7 +87,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
       {/* Modal */}
       <div
         className={`
-          relative z-10 w-full max-w-2xl lg:max-w-3xl rounded-3xl border shadow-2xl flex flex-col
+          relative z-10 w-full max-w-2xl lg:max-w-3xl max-h-[80vh] rounded-3xl border shadow-2xl flex flex-col
           ${
             isDarkMode
               ? "bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 border-slate-700"
@@ -98,7 +98,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
       >
         {/* Header */}
         <div
-          className={`flex items-center justify-between px-6 md:px-8 py-4 md:py-5 border-b ${
+          className={`flex items-center justify-between px-6 md:px-8 py-4 md:py-5 border-b shrink-0 ${
             isDarkMode ? "border-slate-800/50" : "border-slate-200/50"
           }`}
         >
@@ -121,10 +121,10 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
           </button>
         </div>
 
-        {/* Content */}
+        {/* Content - Scrollable */}
         <DelayedLoader isLoading={isDataLoading} delay={200}>
           <div
-            className={`px-6 lg:px-8 py-4 ${
+            className={`px-6 lg:px-8 py-4 flex-1 overflow-y-auto ${
               isDarkMode ? "dark-scrollbar" : "light-scrollbar"
             }`}
           >
@@ -214,7 +214,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
 
         {/* Footer */}
         <div
-          className={`flex items-center justify-end gap-10 px-6 lg:px-8 py-4 lg:py-5 border-t ${
+          className={`flex items-center justify-end gap-10 px-6 lg:px-8 py-4 lg:py-5 border-t shrink-0 ${
             isDarkMode
               ? "border-slate-700/50 bg-slate-800/50"
               : "border-slate-200/50 bg-slate-50/50"
