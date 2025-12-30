@@ -53,14 +53,14 @@ const TaskStatusSummary: React.FC<TaskStatusSummaryProps> = ({
 
   return (
     <div
-      className={`rounded-lg border p-3 ${isDarkMode
+      className={`rounded-lg border p-2.5 ${isDarkMode
         ? "bg-slate-800 border-slate-700"
         : "bg-white border-slate-200"
         }`}
       dir="rtl"
     >
       {/* Header */}
-      <div className="flex items-center gap-1 mb-2">
+      <div className="flex items-center gap-1 mb-1">
         <TrendingUp className="w-3 h-3 text-blue-500" />
         <h3
           className={`font-bold text-[10px] ${isDarkMode ? "text-white" : "text-slate-800"
