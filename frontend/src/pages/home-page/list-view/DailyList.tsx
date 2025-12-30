@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useTheme } from "../../../contexts";
 import { type Task } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
@@ -7,6 +7,7 @@ import {
   type SecondaryTagData,
 } from "../../../schemas/tagTypes";
 import { TaskListItem } from "../parts";
+import { ScrollToLatestButton } from "../../../components/common/ScrollToLatestButton";
 
 interface DailyListProps {
   tasks: Task[];
@@ -38,6 +39,7 @@ const DailyList: React.FC<DailyListProps> = ({
   onTaskClick,
 }) => {
   const { isDarkMode } = useTheme();
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   // Sort tasks by status priority
   const sortedTasks = [...tasks].sort(
@@ -56,37 +58,63 @@ const DailyList: React.FC<DailyListProps> = ({
     );
   }
 
+  // Header uses SAME classes as TaskListItem: gap-2 lg:gap-4, p-3 lg:p-5
+  // Column widths match TaskListItem exactly
   return (
-    <div className="space-y-2 lg:space-y-3" dir="rtl">
-      {/* Header Row - Matches TaskListItem columns */}
+    <div className="flex flex-col h-full" dir="rtl">
+      {/* Header Row - Matches TaskListItem layout exactly */}
       <div
-        className={`flex items-center gap-2 lg:gap-4 px-3 lg:px-5 py-2 lg:py-3 rounded-xl
+        className={`flex items-center gap-2 lg:gap-4 lg:px-10 py-3 lg:py-5 rounded-t-xl border border-b-0
           text-xs lg:text-sm font-semibold
           ${isDarkMode
-            ? "text-slate-400 bg-slate-800/50"
-            : "text-slate-500 bg-slate-100"
+            ? "text-slate-400 bg-slate-800/80 border-slate-700"
+            : "text-slate-500 bg-slate-50 border-slate-200"
           }`}
       >
-        <div className="w-1 lg:w-1.5" /> {/* Color spacer */}
-        <div className="hidden md:block w-14 lg:w-20 text-center">ID</div>
+        {/* Color spacer - w-1 lg:w-1.5 */}
+        <div className="w-1 lg:w-1.5 shrink-0" />
+        {/* ID - hidden md:block w-14 lg:w-20 */}
+        <div className="hidden md:block w-14 lg:w-20 shrink-0 text-center">ID</div>
+        {/* Title - flex-1 min-w-0 */}
         <div className="flex-1 min-w-0">תיאור משימה</div>
-        <div className="hidden lg:block w-24 lg:w-32 text-center">תגיות</div>
-        <div className="w-16 lg:w-24 text-center">סטטוס</div>
-        <div className="hidden md:block w-20 lg:w-32 text-center">זמן נותר</div>
-        <div className="hidden sm:block w-24 lg:w-40">משויך ל...</div>
+        {/* Tags - hidden lg:flex w-24 lg:w-32 */}
+        <div className="hidden lg:flex w-24 lg:w-32 shrink-0 justify-center">תגיות</div>
+        {/* Status - w-16 lg:w-24 */}
+        <div className="w-16 lg:w-24 shrink-0 text-center">סטטוס</div>
+        {/* Days remaining - hidden md:flex w-20 lg:w-32 */}
+        <div className="hidden md:flex w-20 lg:w-32 shrink-0 justify-center">זמן נותר</div>
+        {/* Assigned - hidden sm:flex w-24 lg:w-40 */}
+        <div className="hidden sm:flex w-24 lg:w-40 shrink-0">משויך ל...</div>
       </div>
 
-      {/* Task Items - Sorted by status priority */}
-      {sortedTasks.map((task) => (
-        <TaskListItem
-          key={task.id}
-          task={task}
-          users={users}
-          primaryTags={primaryTags}
-          secondaryTags={secondaryTags}
-          onTaskClick={onTaskClick}
+      {/* Scrollable Task List Container */}
+      <div className="flex-1 min-h-0 relative">
+        <div
+          ref={scrollRef}
+          className={`absolute inset-0 overflow-y-auto rounded-b-xl border border-t-0 space-y-2 lg:space-y-3 px-3 py-3
+            ${isDarkMode
+              ? "border-slate-700 dark-scrollbar"
+              : "border-slate-200 light-scrollbar"
+            }`}
+        >
+          {/* Task Items - Sorted by status priority */}
+          {sortedTasks.map((task) => (
+            <TaskListItem
+              key={task.id}
+              task={task}
+              users={users}
+              primaryTags={primaryTags}
+              secondaryTags={secondaryTags}
+              onTaskClick={onTaskClick}
+            />
+          ))}
+        </div>
+        <ScrollToLatestButton
+          containerRef={scrollRef}
+          direction="up"
+          className="top-3"
         />
-      ))}
+      </div>
     </div>
   );
 };

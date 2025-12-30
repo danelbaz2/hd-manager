@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback, useEffect } from "react";
+import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import { useLocation } from "react-router-dom";
 import { useTheme, useSettings, useViewState, useAuth } from "../../contexts";
 import HeaderHomePage from "./HeaderHomePage";
@@ -105,6 +105,7 @@ const HomePage: React.FC = () => {
   const { viewMode, setViewMode, displayMode, setDisplayMode, selectedDate } =
     useViewState();
   const { openTaskModal } = useTaskModal();
+  const mainScrollRef = useRef<HTMLDivElement>(null);
 
   // Trigger tour on first visit - start immediately for first-time users
   useEffect(() => {
@@ -253,10 +254,9 @@ const HomePage: React.FC = () => {
 
       {/* Main Content */}
       <div
+        ref={mainScrollRef}
         data-tour="main-content-area"
-        className={`flex-1 min-h-0 overflow-y-auto p-2 md:p-3 lg:p-4 ${isDarkMode
-          ? "bg-slate-900 dark-scrollbar"
-          : "bg-slate-50 light-scrollbar"
+        className={`flex-1 min-h-0 overflow-y-auto p-2 md:p-3 lg:p-4 ${isDarkMode ? "bg-slate-900 dark-scrollbar" : "bg-slate-50 light-scrollbar"
           }`}
       >
         {renderContent()}
