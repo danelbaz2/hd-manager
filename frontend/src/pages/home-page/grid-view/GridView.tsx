@@ -2,7 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../contexts";
 import { type UserData } from "../../../schemas/userTypes";
-import { type Task } from "../../../api/tasksApi";
+import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type TeamMessage } from "../../../schemas/teamMessageTypes";
 import { ActivityFeedBox } from "./activity-feed-box";
 import { AdminView } from "./admin-view";
@@ -13,6 +13,7 @@ interface GridViewProps {
   tasks: Task[];
   viewMode?: "daily" | "weekly" | "monthly";
   teamUpdatesOverride?: TeamMessage[];
+  onStatusSummaryClick?: (status: TaskStatus) => void;
 }
 
 const GridView: React.FC<GridViewProps> = ({
@@ -20,6 +21,7 @@ const GridView: React.FC<GridViewProps> = ({
   tasks,
   viewMode = "daily",
   teamUpdatesOverride,
+  onStatusSummaryClick,
 }) => {
   const navigate = useNavigate();
   const { user: authUser } = useAuth();
@@ -56,6 +58,7 @@ const GridView: React.FC<GridViewProps> = ({
             viewMode={viewMode}
             onUserClick={handleUserClick}
             isUserClickable={isUserClickable}
+            onStatusSummaryClick={onStatusSummaryClick}
           />
         ) : currentUser ? (
           <UserView
@@ -64,6 +67,7 @@ const GridView: React.FC<GridViewProps> = ({
             allTasks={tasks}
             viewMode={viewMode}
             onUserClick={() => handleUserClick(currentUser)}
+            onStatusSummaryClick={onStatusSummaryClick}
           />
         ) : null}
       </div>

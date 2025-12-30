@@ -1,6 +1,6 @@
 import React from "react";
 import { type UserData } from "../../../../schemas/userTypes";
-import { type Task } from "../../../../api/tasksApi";
+import { type Task, type TaskStatus } from "../../../../api/tasksApi";
 import AdminUserGrid from "./AdminUserGrid";
 import TaskStatusSummary from "../TaskStatusSummary";
 import MotivationalBanner from "../MotivationalBanner";
@@ -12,6 +12,7 @@ interface AdminViewProps {
   viewMode: "daily" | "weekly" | "monthly";
   onUserClick?: (user: UserData) => void;
   isUserClickable?: (userId: string) => boolean;
+  onStatusSummaryClick?: (status: TaskStatus) => void;
 }
 
 // Calculate total stats from all tasks
@@ -40,6 +41,7 @@ const AdminView: React.FC<AdminViewProps> = ({
   viewMode,
   onUserClick,
   isUserClickable,
+  onStatusSummaryClick,
 }) => {
   const { user } = useAuth();
   const stats = calculateTotalStats(tasks);
@@ -68,6 +70,7 @@ const AdminView: React.FC<AdminViewProps> = ({
           inProgress={stats.inProgress}
           closed={stats.closed}
           title={getStatTitle(viewMode)}
+          onStatusClick={onStatusSummaryClick}
         />
       </div>
     </div>

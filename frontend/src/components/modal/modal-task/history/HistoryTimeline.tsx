@@ -8,6 +8,7 @@ import type { UserData } from "../../../../schemas/userTypes";
 import HistoryEntry from "./HistoryEntry";
 import ChatInput from "./ChatInput";
 import { type ActionConfigItem } from "./historyConfig";
+import { ScrollToLatestButton } from "../../../../components/common/ScrollToLatestButton";
 
 interface HistoryTimelineProps {
   history: TaskHistoryEntry[];
@@ -157,6 +158,13 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Scroll to bottom button */}
+      <ScrollToLatestButton
+        containerRef={scrollRef}
+        direction="down"
+        className="bottom-42"
+      />
 
       {/* Chat Input - Always visible */}
       <div

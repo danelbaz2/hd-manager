@@ -159,6 +159,12 @@ const HomePage: React.FC = () => {
   const handleStatusFilterChange = (statuses: Set<TaskStatus>) =>
     setStatusFilter(statuses);
 
+  // Handle clicking on status summary in Grid View
+  const handleStatusSummaryClick = (status: TaskStatus) => {
+    setDisplayMode("list");
+    setStatusFilter(new Set([status]));
+  };
+
   // Handle task click - open task modal
   const handleTaskClick = useCallback(
     (task: Task) => {
@@ -177,6 +183,7 @@ const HomePage: React.FC = () => {
             tasks={filteredTasks}
             viewMode={viewMode}
             teamUpdatesOverride={teamUpdates}
+            onStatusSummaryClick={handleStatusSummaryClick}
           />
         );
 
@@ -212,6 +219,7 @@ const HomePage: React.FC = () => {
             tasks={filteredTasks}
             viewMode={viewMode}
             teamUpdatesOverride={teamUpdates}
+            onStatusSummaryClick={handleStatusSummaryClick}
           />
         );
     }
@@ -247,8 +255,8 @@ const HomePage: React.FC = () => {
       <div
         data-tour="main-content-area"
         className={`flex-1 min-h-0 overflow-y-auto p-2 md:p-3 lg:p-4 ${isDarkMode
-            ? "bg-slate-900 dark-scrollbar"
-            : "bg-slate-50 light-scrollbar"
+          ? "bg-slate-900 dark-scrollbar"
+          : "bg-slate-50 light-scrollbar"
           }`}
       >
         {renderContent()}

@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useRef } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { MessageItem } from "./MessageItem";
 import { MessageInput } from "./MessageInput";
@@ -6,6 +6,7 @@ import { useTeamMessages } from "./useTeamMessages";
 import { useChatUpdates } from "../../../../../contexts";
 import { useContacts } from "./mention";
 import { ContactDetailModal } from "../../../../../components/modal/modal-contact-detail";
+import { ScrollToLatestButton } from "../../../../../components/common/ScrollToLatestButton";
 import type {
   UpdateTeamProps,
   TeamMessage,
@@ -18,6 +19,7 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
   isAdmin,
   messagesOverride,
 }) => {
+  // ... hooks
   const {
     messages: apiMessages,
     isLoading: apiLoading,
@@ -39,6 +41,8 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
   const isLoading = messagesOverride ? false : apiLoading;
   const error = messagesOverride ? null : apiError;
 
+  const scrollerRef = useRef<HTMLElement>(null);
+
   // Subscribe to real-time chat updates via WebSocket
   useChatUpdates(fetchMessages, !messagesOverride);
 
@@ -46,6 +50,7 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
     (senderId: string) => users.find((u) => u.id === senderId),
     [users]
   );
+  // ... handlers
 
   const handleSend = useCallback(
     async (content: string) => {
@@ -122,19 +127,23 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
       </div>
     );
   }
-  console.log("messages", messages[0].content);
 
   return (
     <div className="h-full flex flex-col">
-      <Virtuoso
-        data={messages}
-        itemContent={renderMessage}
-        className={`flex-1 ${
-          isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-        }`}
-        style={{ height: "100%" }}
-        overscan={200}
-      />
+      <div className="flex-1 relative">
+        <Virtuoso
+          data={messages}
+          itemContent={renderMessage}
+          className={`h-full ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+            }`}
+          style={{ height: "100%" }}
+          overscan={200}
+          scrollerRef={(ref) => {
+            if (ref) (scrollerRef as React.MutableRefObject<HTMLElement | null>).current = ref as HTMLElement;
+          }}
+        />
+        <ScrollToLatestButton containerRef={scrollerRef} direction="up" />
+      </div>
       {isAdmin && <MessageInput {...inputProps} />}
       <ContactDetailModal {...modalProps} />
     </div>

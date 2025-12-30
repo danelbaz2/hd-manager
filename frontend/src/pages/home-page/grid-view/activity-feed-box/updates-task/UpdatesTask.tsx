@@ -4,6 +4,7 @@ import { UpdateItem } from "./UpdateItem";
 import { useSettings } from "../../../../../contexts";
 import type { UpdatesTaskProps } from "./types";
 import type { TaskHistoryEntry } from "../../../../../api/tasksApi";
+import { ScrollToLatestButton } from "../../../../../components/common/ScrollToLatestButton";
 
 export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   taskTitleMap,
@@ -13,14 +14,17 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   isDarkMode,
   selectedDate,
   onUpdateClick,
-  onDataRefresh: _onDataRefresh, // Prefixed to silence unused warning - kept for API compatibility
+  onDataRefresh: _onDataRefresh,
   updatesOverride,
 }) => {
   // Use global taskHistory from SettingsContext
   const { getHistoryForDate, isLoadingHistory } = useSettings();
 
   // Get updates for this date from the global source
-  const contextUpdates = useMemo(() => getHistoryForDate(selectedDate), [getHistoryForDate, selectedDate]);
+  const contextUpdates = useMemo(
+    () => getHistoryForDate(selectedDate),
+    [getHistoryForDate, selectedDate]
+  );
 
   // Use override if provided (for demo/tour), otherwise use context data
   const updates = updatesOverride || contextUpdates;
@@ -30,6 +34,9 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   const [newIds, setNewIds] = useState<Set<string>>(new Set());
   const knownIdsRef = useRef<Set<string>>(new Set());
   const isInitialMount = useRef(true);
+
+  // Ref for scroll to top button
+  const scrollerRef = useRef<HTMLElement>(null);
 
   // Initialize known IDs on first render
   useEffect(() => {
@@ -87,7 +94,15 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
         isNew={isNew(entry.id)}
       />
     ),
-    [taskTitleMap, isDarkMode, users, primaryTags, secondaryTags, onUpdateClick, isNew]
+    [
+      taskTitleMap,
+      isDarkMode,
+      users,
+      primaryTags,
+      secondaryTags,
+      onUpdateClick,
+      isNew,
+    ]
   );
 
   // Loading state
@@ -115,12 +130,22 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   }
 
   return (
-    <Virtuoso
-      data={updates}
-      itemContent={renderItem}
-      className={`h-full ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}
-      style={{ height: "100%" }}
-      overscan={200}
-    />
+    <div className="h-full relative">
+      <Virtuoso
+        data={updates}
+        itemContent={renderItem}
+        className={`h-full ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+          }`}
+        style={{ height: "100%" }}
+        overscan={200}
+        scrollerRef={(ref) => {
+          if (ref)
+            (
+              scrollerRef as React.MutableRefObject<HTMLElement | null>
+            ).current = ref as HTMLElement;
+        }}
+      />
+      <ScrollToLatestButton containerRef={scrollerRef} direction="up" />
+    </div>
   );
 };

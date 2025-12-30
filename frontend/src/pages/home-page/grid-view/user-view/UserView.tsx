@@ -1,6 +1,6 @@
 import React from "react";
 import { type UserData } from "../../../../schemas/userTypes";
-import { type Task } from "../../../../api/tasksApi";
+import { type Task, type TaskStatus } from "../../../../api/tasksApi";
 import UserCardLine from "./UserCardLine";
 import TaskBrief from "./TaskBrief";
 import MotivationalBanner from "../MotivationalBanner";
@@ -12,6 +12,7 @@ interface UserViewProps {
   allTasks: Task[]; // All team tasks for statistics
   viewMode: "daily" | "weekly" | "monthly";
   onUserClick?: () => void;
+  onStatusSummaryClick?: (status: TaskStatus) => void;
 }
 
 const getTaskCountsForUser = (tasks: Task[]) => ({
@@ -48,6 +49,7 @@ const UserView: React.FC<UserViewProps> = ({
   allTasks,
   viewMode,
   onUserClick,
+  onStatusSummaryClick,
 }) => {
   const personalStats = getTaskCountsForUser(tasks);
   const teamStats = calculateTotalStats(allTasks);
@@ -88,6 +90,7 @@ const UserView: React.FC<UserViewProps> = ({
           inProgress={teamStats.inProgress}
           closed={teamStats.closed}
           title={getStatTitle(viewMode)}
+          onStatusClick={onStatusSummaryClick}
         />
       </div>
     </div>
