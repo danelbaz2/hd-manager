@@ -46,9 +46,9 @@ const GridView: React.FC<GridViewProps> = ({
     : [];
 
   return (
-    <div className="flex gap-4  h-full " dir="rtl">
-      {/* Right Side - Main Content (65%) */}
-      <div className="w-[65%] h-full overflow-hidden">
+    <div className="flex flex-col lg:flex-row gap-2 lg:gap-3 h-full" dir="rtl">
+      {/* Right Side - Main Content (full width on mobile, 65% on large screens) */}
+      <div className="w-full lg:w-[65%] h-auto lg:h-full overflow-hidden min-h-0 pb-10 lg:pb-12">
         {isAdmin ? (
           <AdminView
             users={users}
@@ -68,8 +68,8 @@ const GridView: React.FC<GridViewProps> = ({
         ) : null}
       </div>
 
-      {/* Left Side - Activity Feed (35%) */}
-      <div className="w-[35%] h-full pb-16" data-tour="activity-feed">
+      {/* Left Side - Activity Feed (full width on mobile, 35% on large screens) */}
+      <div className="w-full lg:w-[35%] h-[50vh] lg:h-full pb-10 lg:pb-12" data-tour="activity-feed">
         <ActivityFeedBox
           tasksOverride={tasks}
           usersOverride={users}

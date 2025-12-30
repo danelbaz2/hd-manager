@@ -57,24 +57,23 @@ const DailyList: React.FC<DailyListProps> = ({
   }
 
   return (
-    <div className="space-y-3" dir="rtl">
+    <div className="space-y-2 lg:space-y-3" dir="rtl">
       {/* Header Row - Matches TaskListItem columns */}
       <div
-        className={`flex items-center gap-4 px-5 py-3 rounded-xl
+        className={`flex items-center gap-2 lg:gap-4 px-3 lg:px-5 py-2 lg:py-3 rounded-xl
           text-xs lg:text-sm font-semibold
-          ${
-            isDarkMode
-              ? "text-slate-400 bg-slate-800/50"
-              : "text-slate-500 bg-slate-100"
+          ${isDarkMode
+            ? "text-slate-400 bg-slate-800/50"
+            : "text-slate-500 bg-slate-100"
           }`}
       >
-        <div className="w-1.5" /> {/* Color spacer */}
-        <div className="w-16 lg:w-20 text-center">ID</div>
+        <div className="w-1 lg:w-1.5" /> {/* Color spacer */}
+        <div className="hidden md:block w-14 lg:w-20 text-center">ID</div>
         <div className="flex-1 min-w-0">תיאור משימה</div>
-        <div className="w-28 lg:w-32 text-center">תגיות</div>
-        <div className="w-20 lg:w-24 text-center">סטטוס</div>
-        <div className="w-28 lg:w-32 text-center">זמן נותר</div>
-        <div className="w-32 lg:w-40">משויך ל...</div>
+        <div className="hidden lg:block w-24 lg:w-32 text-center">תגיות</div>
+        <div className="w-16 lg:w-24 text-center">סטטוס</div>
+        <div className="hidden md:block w-20 lg:w-32 text-center">זמן נותר</div>
+        <div className="hidden sm:block w-24 lg:w-40">משויך ל...</div>
       </div>
 
       {/* Task Items - Sorted by status priority */}

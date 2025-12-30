@@ -72,7 +72,7 @@ const TaskBrief: React.FC<TaskBriefProps> = ({ tasks }) => {
 
   return (
     <div
-      className={`rounded-2xl border p-3 min-h-[500px] max-h-[60vh] flex flex-col mb-4 ${isDarkMode
+      className={`rounded-2xl border p-3 flex flex-col h-full ${isDarkMode
           ? "bg-slate-800 border-slate-700"
           : "bg-white border-slate-200"
         }`}

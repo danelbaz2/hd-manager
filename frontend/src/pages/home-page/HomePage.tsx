@@ -55,17 +55,17 @@ const HomePage: React.FC = () => {
         // Augment demo data to include current user with tasks
         const effectiveUsers = user
           ? [
-              user as any as UserData,
-              ...DEMO_USERS.filter((u) => u.id !== user.id),
-            ]
+            user as any as UserData,
+            ...DEMO_USERS.filter((u) => u.id !== user.id),
+          ]
           : DEMO_USERS;
 
         const myDemoTasks = user
           ? DEMO_TASKS.map((t) => ({
-              ...t,
-              id: `my-${t.id}`,
-              responsibleUserIds: [user.id],
-            }))
+            ...t,
+            id: `my-${t.id}`,
+            responsibleUserIds: [user.id],
+          }))
           : [];
 
         const demoTeamUpdates = DEMO_TEAM_UPDATES.map((u) => ({
@@ -246,11 +246,9 @@ const HomePage: React.FC = () => {
       {/* Main Content */}
       <div
         data-tour="main-content-area"
-        className={`flex-1 overflow-y-auto p-4 lg:p-4 xl:p-2
-          ${
-            isDarkMode
-              ? "bg-slate-900 dark-scrollbar"
-              : "bg-slate-50 light-scrollbar"
+        className={`flex-1 min-h-0 overflow-y-auto p-2 md:p-3 lg:p-4 ${isDarkMode
+            ? "bg-slate-900 dark-scrollbar"
+            : "bg-slate-50 light-scrollbar"
           }`}
       >
         {renderContent()}

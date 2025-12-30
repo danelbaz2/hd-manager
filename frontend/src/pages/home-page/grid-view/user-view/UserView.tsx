@@ -53,20 +53,20 @@ const UserView: React.FC<UserViewProps> = ({
   const teamStats = calculateTotalStats(allTasks);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Header Section - Banner + UserCard in a row */}
-      <div className="min-h-[100px] flex items-center shrink-0" dir="rtl">
-        <div className="flex items-center w-full gap-4">
+      <div className="shrink-0 flex items-center py-2 lg:py-4" dir="rtl">
+        <div className="flex items-center w-full gap-2 lg:gap-4">
           {/* Motivational Banner */}
           <div className="shrink-0">
             <MotivationalBanner userName={user.fullName} userId={user.id} />
           </div>
 
           {/* Divider */}
-          <div className="w-px h-16 bg-slate-200 dark:bg-slate-700 shrink-0" />
+          <div className="w-px h-12 lg:h-16 bg-slate-200 dark:bg-slate-700 shrink-0" />
 
           {/* User Card - Line Style */}
-          <div className="flex-1" data-tour="my-user-card">
+          <div className="flex-1 min-w-0" data-tour="my-user-card">
             <UserCardLine
               user={user}
               taskCounts={personalStats}
@@ -76,13 +76,13 @@ const UserView: React.FC<UserViewProps> = ({
         </div>
       </div>
 
-      {/* Task Brief - Takes available space */}
-      <div className="flex-1 overflow-auto min-h-0">
+      {/* Task Brief - Takes available space with flex-1 */}
+      <div className="flex-1 overflow-hidden min-h-0">
         <TaskBrief tasks={tasks} />
       </div>
 
-      {/* Team Statistics - Pushed to bottom to align with ActivityFeedBox */}
-      <div className="shrink-0 mt-auto pb-16">
+      {/* Team Statistics - Fixed at bottom, aligned with ActivityFeedBox */}
+      <div className="shrink-0 pt-2">
         <TaskStatusSummary
           open={teamStats.open}
           inProgress={teamStats.inProgress}

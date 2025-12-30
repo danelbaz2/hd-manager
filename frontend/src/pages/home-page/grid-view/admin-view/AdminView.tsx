@@ -45,14 +45,14 @@ const AdminView: React.FC<AdminViewProps> = ({
   const stats = calculateTotalStats(tasks);
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full min-h-0">
       {/* Header Section - MotivationalBanner headline */}
-      <div className="">
+      <div className="shrink-0 py-1">
         <MotivationalBanner userName={user?.fullName} userId={user?.id} />
       </div>
 
       {/* User Cards Grid - takes remaining space */}
-      <div className="flex-1 min-h-5">
+      <div className="flex-1 min-h-0 overflow-hidden">
         <AdminUserGrid
           users={users}
           tasks={tasks}
@@ -61,8 +61,8 @@ const AdminView: React.FC<AdminViewProps> = ({
         />
       </div>
 
-      {/* Statistics - Pushed to bottom to align with ActivityFeedBox */}
-      <div className="shrink-0 mt-auto pb-16">
+      {/* Statistics - Compact bar at bottom */}
+      <div className="shrink-0 pt-1">
         <TaskStatusSummary
           open={stats.open}
           inProgress={stats.inProgress}

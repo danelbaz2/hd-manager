@@ -34,9 +34,8 @@ const MotivationalBanner: React.FC<MotivationalBannerProps> = ({
       <div className="flex flex-col gap-2">
         {/* Greeting with wave emoji */}
         <h1
-          className={`text-2xl font-semibold ${
-            isDarkMode ? "text-white" : "text-slate-800"
-          }`}
+          className={`text-2xl font-semibold ${isDarkMode ? "text-white" : "text-slate-800"
+            }`}
         >
           {greeting}
           {userName ? `, ${userName}` : ""}{" "}
@@ -46,9 +45,8 @@ const MotivationalBanner: React.FC<MotivationalBannerProps> = ({
         {/* Daily Emoji Section */}
         <div className="flex items-center gap-2">
           <span
-            className={`text-sm ${
-              isDarkMode ? "text-slate-400" : "text-slate-500"
-            }`}
+            className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
+              }`}
           >
             האימוג׳י היומי שלך הוא:
           </span>
