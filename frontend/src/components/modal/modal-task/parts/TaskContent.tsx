@@ -7,6 +7,7 @@ import type {
   SecondaryTagData,
 } from "../../../../schemas/tagTypes";
 import type { TaskPriority } from "../../../../schemas/taskTypes";
+import type { Contact } from "../../../../api/contactsApi";
 
 import { HistoryTimeline } from "../history";
 import { TaskForm } from "./TaskForm";
@@ -38,12 +39,14 @@ interface TaskContentProps {
   form: FormState;
   history: TaskHistoryEntry[];
   users: UserData[];
+  contacts: Contact[];
   primaryTags: PrimaryTagData[];
   secondaryTags: SecondaryTagData[];
   isDarkMode: boolean;
   isLoadingHistory: boolean;
-  onAddNote: (text: string) => void;
+  onAddNote: (text: string) => Promise<void>;
   getActionDescription: (entry: any, config: any) => React.ReactNode;
+  onMentionClick: (contactName: string) => void;
 }
 
 export const TaskContent: React.FC<TaskContentProps> = ({
@@ -53,12 +56,14 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   form,
   history,
   users,
+  contacts,
   primaryTags,
   secondaryTags,
   isDarkMode,
   isLoadingHistory,
   onAddNote,
   getActionDescription,
+  onMentionClick,
 }) => {
   if (isEditMode) {
     return (
@@ -92,10 +97,12 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       <HistoryTimeline
         history={history}
         users={users}
+        contacts={contacts}
         isDarkMode={isDarkMode}
         isLoading={isLoadingHistory}
         onAddNote={onAddNote}
         getActionDescription={getActionDescription}
+        onMentionClick={onMentionClick}
       />
     );
   }

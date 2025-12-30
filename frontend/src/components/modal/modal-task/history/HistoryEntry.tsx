@@ -13,9 +13,11 @@ interface HistoryEntryProps {
   user?: UserData;
   getActionDescription: (
     entry: TaskHistoryEntry,
-    config: ActionConfigItem
+    config: ActionConfigItem,
+    onMentionClick?: (contactName: string) => void
   ) => React.ReactNode;
   isNew?: boolean; // For animation
+  onMentionClick?: (contactName: string) => void;
 }
 
 const formatDateTime = (timestamp: number) => {
@@ -35,6 +37,7 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({
   user,
   getActionDescription,
   isNew = false,
+  onMentionClick,
 }) => {
   // Use dynamic icon config based on changed fields
   const config = getIconConfig(entry);
@@ -113,7 +116,7 @@ const HistoryEntry: React.FC<HistoryEntryProps> = ({
             }
           `}
         >
-          {getActionDescription(entry, config)}
+          {getActionDescription(entry, config, onMentionClick)}
         </div>
       </div>
     </div >

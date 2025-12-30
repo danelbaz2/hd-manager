@@ -5,6 +5,7 @@ interface MentionTextProps {
   content: string;
   isDarkMode: boolean;
   onMentionClick?: (contactName: string) => void;
+  validContactNames?: string[];
 }
 
 // Regex to match @mentions (Hebrew and English names with spaces)
@@ -16,6 +17,7 @@ export const MentionText: React.FC<MentionTextProps> = ({
   content,
   isDarkMode,
   onMentionClick,
+  validContactNames,
 }) => {
   const parts = useMemo(() => {
     const result: Array<{
@@ -33,6 +35,15 @@ export const MentionText: React.FC<MentionTextProps> = ({
     while ((match = MENTION_REGEX.exec(content)) !== null) {
       const mentionStart = match.index;
       const mentionEnd = match.index + match[0].length;
+      const name = match[1].trim();
+
+      // Check validation if list provided
+      const isValid = !validContactNames || validContactNames.includes(name);
+
+      if (!isValid) {
+        // Treat as plain text, skip regex capture group logic just continue
+        continue;
+      }
 
       // Check if text before mention needs space (doesn't end with space or start of string)
       const textBefore = content.slice(lastIndex, mentionStart);
@@ -40,7 +51,7 @@ export const MentionText: React.FC<MentionTextProps> = ({
 
       // Check if text after mention needs space (doesn't start with space, punctuation, or end)
       const charAfter = content[mentionEnd];
-      const needsSpaceAfter = charAfter && !/[\s.,!?@\n]/.test(charAfter);
+      const needsSpaceAfter = Boolean(charAfter && !/[\s.,!?@\n]/.test(charAfter));
 
       // Add text before mention
       if (mentionStart > lastIndex) {
@@ -53,7 +64,7 @@ export const MentionText: React.FC<MentionTextProps> = ({
       // Add mention with spacing flags
       result.push({
         type: "mention",
-        value: match[1].trim(),
+        value: name,
         needsSpaceBefore,
         needsSpaceAfter,
       });
@@ -70,7 +81,7 @@ export const MentionText: React.FC<MentionTextProps> = ({
     }
 
     return result;
-  }, [content]);
+  }, [content, validContactNames]);
 
   return (
     <>
@@ -87,10 +98,9 @@ export const MentionText: React.FC<MentionTextProps> = ({
                 className={`
                   inline-flex items-center px-2 py-0.5 rounded-lg
                   cursor-pointer transition-all duration-200
-                  ${
-                    isDarkMode
-                      ? "bg-blue-500/25 text-blue-300 hover:bg-blue-500/40"
-                      : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                  ${isDarkMode
+                    ? "bg-blue-500/25 text-blue-300 hover:bg-blue-500/40"
+                    : "bg-blue-100 text-blue-700 hover:bg-blue-200"
                   }
                   ${onMentionClick ? "hover:scale-105 hover:shadow-md" : ""}
                 `}

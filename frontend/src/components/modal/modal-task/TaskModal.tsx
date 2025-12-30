@@ -7,6 +7,8 @@ import { ConfirmModal } from "../modal-confirm";
 import { getActionDescription } from "./history/historyUtils";
 import { ModalContainer } from "./parts/ModalContainer";
 import { useTaskDelete, useTaskForm } from "./hooks";
+import { useContacts } from "../../../pages/home-page/grid-view/activity-feed-box/update-team/mention/useContacts";
+import { ContactDetailModal } from "../modal-contact-detail";
 import type { TaskHistoryEntry } from "../../../api/tasksApi";
 import type { ActionConfigItem } from "./history/historyConfig";
 
@@ -33,6 +35,7 @@ const TaskModal: React.FC = () => {
     dismissAlert,
     clearAllAlerts,
   } = useToast();
+  const { contacts, findContactByName, selectedContact, setSelectedContact } = useContacts();
   const [activeTab, setActiveTab] = useState<"details" | "history">("details");
   const isAdmin = authUser?.role === "admin";
 
@@ -78,14 +81,22 @@ const TaskModal: React.FC = () => {
     [task, addHistoryEntry, showError]
   );
 
+  const handleMentionClick = useCallback(
+    (contactName: string) => {
+      const contact = findContactByName(contactName);
+      if (contact) setSelectedContact(contact);
+    },
+    [findContactByName, setSelectedContact]
+  );
+
   const history = useMemo(
     () => (task ? taskHistory.filter((e) => e.taskId === task.id) : []),
     [task, taskHistory]
   );
   const getDesc = useCallback(
-    (e: TaskHistoryEntry, c: ActionConfigItem) =>
-      getActionDescription(e, c, users, secondaryTags, primaryTags, isDarkMode),
-    [users, secondaryTags, primaryTags, isDarkMode]
+    (e: TaskHistoryEntry, c: ActionConfigItem, onMentionClick?: (contactName: string) => void) =>
+      getActionDescription(e, c, users, secondaryTags, primaryTags, isDarkMode, onMentionClick, contacts),
+    [users, secondaryTags, primaryTags, isDarkMode, contacts]
   );
 
   if (!isOpen || !task) return null;
@@ -102,14 +113,22 @@ const TaskModal: React.FC = () => {
         setActiveTab={setActiveTab}
         history={history}
         users={users}
+        contacts={contacts}
         primaryTags={primaryTags}
         secondaryTags={secondaryTags}
         isLoadingHistory={isLoadingHistory}
         onAddNote={handleAddNote}
         getActionDescription={getDesc}
+        onMentionClick={handleMentionClick}
         closeTaskModal={closeTaskModal}
         alerts={alerts}
         dismissAlert={dismissAlert}
+      />
+      <ContactDetailModal
+        contact={selectedContact}
+        isOpen={!!selectedContact}
+        onClose={() => setSelectedContact(null)}
+        isDarkMode={isDarkMode}
       />
       <ConfirmModal
         isOpen={del.showDeleteConfirm}

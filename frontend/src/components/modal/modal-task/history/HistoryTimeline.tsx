@@ -9,10 +9,12 @@ import HistoryEntry from "./HistoryEntry";
 import ChatInput from "./ChatInput";
 import { type ActionConfigItem } from "./historyConfig";
 import { ScrollToLatestButton } from "../../../../components/common/ScrollToLatestButton";
+import type { Contact } from "../../../../api/contactsApi";
 
 interface HistoryTimelineProps {
   history: TaskHistoryEntry[];
   users: UserData[];
+  contacts: Contact[];
   isDarkMode: boolean;
   isLoading: boolean;
   onAddNote: (text: string) => Promise<void>;
@@ -20,15 +22,18 @@ interface HistoryTimelineProps {
     entry: TaskHistoryEntry,
     config: ActionConfigItem
   ) => React.ReactNode;
+  onMentionClick: (contactName: string) => void;
 }
 
 const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
   history,
   users,
+  contacts,
   isDarkMode,
   isLoading,
   onAddNote,
   getActionDescription,
+  onMentionClick,
 }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [newEntryIds, setNewEntryIds] = useState<Set<string>>(new Set());
@@ -40,6 +45,8 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
   const getUserByName = (name: string): UserData | undefined => {
     return users.find((u) => u.fullName === name);
   };
+
+
 
   // Initial scroll to bottom (instant, no animation)
   useEffect(() => {
@@ -144,6 +151,7 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
                 user={getUserByName(entry.updatedBy)}
                 getActionDescription={getActionDescription}
                 isNew={newEntryIds.has(entry.id)}
+                onMentionClick={onMentionClick}
               />
             ))}
 
@@ -174,6 +182,7 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
         <ChatInput
           onSend={handleAddNote}
           isDarkMode={isDarkMode}
+          contacts={contacts}
           placeholder="כתוב עדכון או הערה..."
         />
       </div>

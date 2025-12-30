@@ -58,7 +58,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
 
       <div
         className={`
-          p-4 rounded-xl border-2
+          p-3 rounded-xl border-2
           ${isDarkMode
             ? "bg-slate-700/30 border-slate-600"
             : "bg-slate-50/50 border-slate-200"

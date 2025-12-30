@@ -55,12 +55,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   isDarkMode,
 }) => {
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
       {/* Title & Priority Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="md:col-span-2">
           <label
-            className={`block text-sm lg:text-base font-medium mb-2 ${isDarkMode ? "text-slate-300" : "text-slate-700"
+            className={`block text-sm lg:text-base font-medium mb-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"
               }`}
           >
             כותרת המשימה
@@ -71,7 +71,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
             className={`
-              w-full px-4 py-3 rounded-xl border-2 text-sm lg:text-base font-medium transition-all
+              w-full px-3 py-2.5 rounded-xl border-2 text-sm lg:text-base font-medium transition-all
               ${isDarkMode
                 ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
                 : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
@@ -86,7 +86,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       {/* Description */}
       <div>
         <label
-          className={`block text-sm lg:text-base font-medium mb-2 ${isDarkMode ? "text-slate-300" : "text-slate-700"
+          className={`block text-sm lg:text-base font-medium mb-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"
             }`}
         >
           תיאור
@@ -97,7 +97,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           onChange={(e) => setDescription(e.target.value)}
           rows={2}
           className={`
-            w-full px-4 py-3 rounded-xl border-2 resize-none text-sm lg:text-base transition-all
+            w-full px-3 py-2.5 rounded-xl border-2 resize-none text-sm lg:text-base transition-all
             ${isDarkMode
               ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
               : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
@@ -107,29 +107,35 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         />
       </div>
 
-      {/* Tags & Dates Row */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <TwoTierTagsSelect
-          primaryTags={primaryTags}
-          secondaryTags={secondaryTags}
-          selectedSecondaryTagIds={selectedSecondaryTagIds}
-          onChange={setSelectedSecondaryTagIds}
-          selectedPrimaryTagIds={selectedPrimaryTagIds}
-          onChangePrimary={setSelectedPrimaryTagIds}
-          isLoading={false}
-        />
-        <DatePicker
-          label="תאריך התחלה"
-          value={startDate}
-          onChange={setStartDate}
-          placeholder="בחר תאריך"
-        />
-        <DatePicker
-          label="תאריך יעד"
-          value={deadline}
-          onChange={setDeadline}
-          placeholder="בחר תאריך"
-        />
+      {/* Tags & Dates Row - 12 col grid for better spacing */}
+      <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
+        <div className="md:col-span-6">
+          <TwoTierTagsSelect
+            primaryTags={primaryTags}
+            secondaryTags={secondaryTags}
+            selectedSecondaryTagIds={selectedSecondaryTagIds}
+            onChange={setSelectedSecondaryTagIds}
+            selectedPrimaryTagIds={selectedPrimaryTagIds}
+            onChangePrimary={setSelectedPrimaryTagIds}
+            isLoading={false}
+          />
+        </div>
+        <div className="md:col-span-3">
+          <DatePicker
+            label="תאריך התחלה"
+            value={startDate}
+            onChange={setStartDate}
+            placeholder="בחר תאריך"
+          />
+        </div>
+        <div className="md:col-span-3">
+          <DatePicker
+            label="תאריך יעד"
+            value={deadline}
+            onChange={setDeadline}
+            placeholder="בחר תאריך"
+          />
+        </div>
       </div>
 
       {/* Assignees */}

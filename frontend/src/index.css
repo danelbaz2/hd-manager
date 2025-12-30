@@ -204,21 +204,23 @@ html {
 }
 
 /* =====================================================
-   CUSTOM SCROLLBAR STYLES
+   CUSTOM SCROLLBAR STYLES - Modern & Premium Design
    ===================================================== */
 
-/* Custom Scrollbar Styles for Dark Mode */
-.dark-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+/* Base scrollbar - thin and elegant */
+.dark-scrollbar::-webkit-scrollbar,
+.light-scrollbar::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
 }
 
+/* Slightly larger on big screens */
 @media (min-width: 1920px) {
 
   .dark-scrollbar::-webkit-scrollbar,
   .light-scrollbar::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 5px;
+    height: 5px;
   }
 }
 
@@ -226,62 +228,60 @@ html {
 
   .dark-scrollbar::-webkit-scrollbar,
   .light-scrollbar::-webkit-scrollbar {
-    width: 12px;
-    height: 12px;
+    width: 6px;
+    height: 6px;
   }
 }
 
+/* Dark mode track - transparent for cleaner look */
 .dark-scrollbar::-webkit-scrollbar-track {
-  background: rgba(30, 41, 59, 0.5);
-  /* slate-800 with opacity */
-  border-radius: 4px;
+  background: transparent;
+  border-radius: 10px;
+  margin: 2px;
 }
 
+/* Dark mode thumb - gradient with glow effect */
 .dark-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(71, 85, 105, 0.8);
-  /* slate-600 with opacity */
-  border-radius: 4px;
-  transition: background 0.2s ease;
+  background: linear-gradient(180deg, rgba(100, 116, 139, 0.6) 0%, rgba(71, 85, 105, 0.8) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  transition: all 0.3s ease;
 }
 
 .dark-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.9);
-  /* slate-500 with opacity */
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.8) 0%, rgba(100, 116, 139, 0.9) 100%);
+  box-shadow: 0 0 8px rgba(148, 163, 184, 0.4);
 }
 
-/* Light mode scrollbar (optional - for consistency) */
-.light-scrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-
+/* Light mode track - transparent for cleaner look */
 .light-scrollbar::-webkit-scrollbar-track {
-  background: rgba(241, 245, 249, 0.8);
-  /* slate-100 with opacity */
-  border-radius: 4px;
+  background: transparent;
+  border-radius: 10px;
+  margin: 2px;
 }
 
+/* Light mode thumb - subtle gradient */
 .light-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(203, 213, 225, 0.8);
-  /* slate-300 with opacity */
-  border-radius: 4px;
-  transition: background 0.2s ease;
+  background: linear-gradient(180deg, rgba(203, 213, 225, 0.6) 0%, rgba(148, 163, 184, 0.7) 100%);
+  border-radius: 10px;
+  border: 1px solid rgba(226, 232, 240, 0.3);
+  transition: all 0.3s ease;
 }
 
 .light-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.9);
-  /* slate-400 with opacity */
+  background: linear-gradient(180deg, rgba(148, 163, 184, 0.8) 0%, rgba(100, 116, 139, 0.8) 100%);
+  box-shadow: 0 0 8px rgba(100, 116, 139, 0.3);
 }
 
-/* Firefox scrollbar support */
+/* Firefox scrollbar support - thin style */
 .dark-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(71, 85, 105, 0.8) rgba(30, 41, 59, 0.5);
+  scrollbar-color: rgba(100, 116, 139, 0.6) transparent;
 }
 
 .light-scrollbar {
   scrollbar-width: thin;
-  scrollbar-color: rgba(203, 213, 225, 0.8) rgba(241, 245, 249, 0.8);
+  scrollbar-color: rgba(203, 213, 225, 0.6) transparent;
 }
 
 /* Hidden scrollbar - scroll but invisible */

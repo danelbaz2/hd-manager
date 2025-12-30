@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { ChevronDown } from "lucide-react";
 import { useTheme } from "../../../../../contexts/ThemeContext";
 import {
@@ -12,21 +13,15 @@ import TagDropdownContent from "./TagDropdownContent";
 interface TwoTierTagsSelectProps {
     primaryTags: PrimaryTagData[];
     secondaryTags: SecondaryTagData[];
-    selectedPrimaryTagIds?: string[];  // Optional: for loading existing primary tags
+    selectedPrimaryTagIds?: string[];
     selectedSecondaryTagIds: string[];
     onChange: (secondaryTagIds: string[]) => void;
-    onChangePrimary?: (primaryTagIds: string[]) => void;  // Optional: for saving primary tags
+    onChangePrimary?: (primaryTagIds: string[]) => void;
     isLoading?: boolean;
 }
 
 /**
  * Two-Tier Tag Selection Component
- *
- * Flow:
- * 1. User selects Primary Tags (categories like DB, APP, NETWORK)
- * 2. If no secondary tags are chosen, the primary tag is displayed
- * 3. When secondary tags are selected, they replace the primary tag display
- * 4. Both Primary and Secondary Tag IDs can be stored on the task
  */
 const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
     primaryTags,
@@ -41,6 +36,8 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
     const [isOpen, setIsOpen] = useState(false);
     const [selectedPrimaryIds, setSelectedPrimaryIds] = useState<string[]>(selectedPrimaryTagIds);
     const ref = useRef<HTMLDivElement>(null);
+    const buttonRef = useRef<HTMLButtonElement>(null);
+    const [position, setPosition] = useState({ top: 0, right: 0, width: 0 });
 
     // Get selected secondary tags
     const selectedSecondaryTags = secondaryTags.filter((t) =>
@@ -56,7 +53,7 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
         return Array.from(primaryIds);
     }, [selectedSecondaryTags]);
 
-    // Get standalone primary tags (selected but no secondary tags from them are chosen)
+    // Get standalone primary tags
     const standalonePrimaryTags = useMemo(() => {
         return primaryTags.filter(
             (pt) =>
@@ -105,11 +102,10 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
         return grouped;
     }, [filteredSecondaryTags]);
 
-    // Toggle primary tag selection
+    // Toggle primary tag details
     const togglePrimaryTag = (primaryId: string) => {
         const isSelected = selectedPrimaryIds.includes(primaryId);
         if (isSelected) {
-            // Remove primary and its secondary tags
             const secondaryIdsToRemove = secondaryTags
                 .filter((st) => st.primaryTagId === primaryId)
                 .map((st) => st.id);
@@ -122,7 +118,6 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
         }
     };
 
-    // Toggle secondary tag selection
     const toggleSecondaryTag = (tagId: string) => {
         if (selectedSecondaryTagIds.includes(tagId)) {
             onChange(selectedSecondaryTagIds.filter((id) => id !== tagId));
@@ -131,27 +126,75 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
         }
     };
 
-    // Remove a secondary tag
     const removeSecondaryTag = (tagId: string, e: React.MouseEvent) => {
         e.stopPropagation();
         onChange(selectedSecondaryTagIds.filter((id) => id !== tagId));
     };
 
-    // Remove a standalone primary tag (deselects it)
     const removePrimaryTag = (primaryId: string, e: React.MouseEvent) => {
         e.stopPropagation();
         setSelectedPrimaryIds((prev) => prev.filter((id) => id !== primaryId));
     };
 
-    // Get primary tag by ID
     const getPrimaryTag = (primaryId: string): PrimaryTagData | undefined => {
         return primaryTags.find((pt) => pt.id === primaryId);
     };
 
-    // Close dropdown when clicking outside
+    // Calculate position
+    useEffect(() => {
+        if (isOpen && buttonRef.current) {
+            const rect = buttonRef.current.getBoundingClientRect();
+            setPosition({
+                top: rect.bottom + 8,
+                right: window.innerWidth - rect.right,
+                width: rect.width,
+            });
+        }
+    }, [isOpen]);
+
+    // Handle scroll/resize
+    useEffect(() => {
+        const handleScrollOrResize = (e: Event) => {
+            // If resizing window, close
+            if (e.type === "resize") {
+                setIsOpen(false);
+                return;
+            }
+
+            // If scrolling
+            if (e.type === "scroll" && isOpen) {
+                const target = e.target as HTMLElement;
+                const dropdownEl = document.getElementById("tags-dropdown");
+
+                // If scrolling INSIDE the dropdown, don't close
+                if (dropdownEl && dropdownEl.contains(target)) {
+                    return;
+                }
+
+                // If scrolling outside (e.g. main window or modal background), close
+                setIsOpen(false);
+            }
+        };
+
+        window.addEventListener("scroll", handleScrollOrResize, true);
+        window.addEventListener("resize", handleScrollOrResize);
+        return () => {
+            window.removeEventListener("scroll", handleScrollOrResize, true);
+            window.removeEventListener("resize", handleScrollOrResize);
+        };
+    }, [isOpen]);
+
+    // Close when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
-            if (ref.current && !ref.current.contains(event.target as Node)) {
+            const target = event.target as Node;
+            const dropdownEl = document.getElementById("tags-dropdown");
+            if (
+                ref.current &&
+                !ref.current.contains(target) &&
+                dropdownEl &&
+                !dropdownEl.contains(target)
+            ) {
                 setIsOpen(false);
             }
         };
@@ -169,20 +212,21 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
         <div ref={ref} className="relative">
             <label
                 className={`
-          block text-sm lg:text-base font-medium mb-2
+          block text-sm lg:text-base font-medium mb-1.5
           ${isDarkMode ? "text-slate-300" : "text-slate-700"}
         `}
             >
                 תגיות
             </label>
 
-            {/* Selected Tags Display / Dropdown Trigger */}
+            {/* Trigger */}
             <button
+                ref={buttonRef}
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className={`
-          w-full min-h-[48px] flex items-center justify-between gap-2
-          px-3 py-2
+          w-full min-h-[42px] flex items-center justify-between gap-2
+          px-3 py-2.5
           rounded-xl border-2
           text-sm lg:text-base
           transition-all duration-200
@@ -203,14 +247,13 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
                         } ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}
                 />
 
-                <div className="flex-1 flex flex-wrap gap-1.5 justify-end">
+                <div className={`flex-1 flex flex-wrap gap-1.5 justify-start max-h-[32px] overflow-y-auto ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}>
                     {!hasAnyTagsSelected ? (
                         <span className={isDarkMode ? "text-slate-400" : "text-slate-400"}>
                             בחר תגיות...
                         </span>
                     ) : (
                         <>
-                            {/* Standalone Primary Tags */}
                             {standalonePrimaryTags.map((pt) => (
                                 <PrimaryTagChip
                                     key={`primary-${pt.id}`}
@@ -218,7 +261,6 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
                                     onRemove={(e) => removePrimaryTag(pt.id, e)}
                                 />
                             ))}
-                            {/* Secondary Tags */}
                             {selectedSecondaryTags.map((tag) => (
                                 <SecondaryTagChip
                                     key={tag.id}
@@ -232,11 +274,12 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
                 </div>
             </button>
 
-            {/* Dropdown */}
-            {isOpen && (
+            {/* Portal Dropdown */}
+            {isOpen && createPortal(
                 <div
+                    id="tags-dropdown"
                     className={`
-            absolute top-full mt-2 right-0 left-0 z-30
+            fixed z-[99999]
             max-h-72 overflow-y-auto
             ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}
             rounded-xl border-2 shadow-xl
@@ -245,6 +288,12 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
                             : "bg-white border-slate-200"
                         }
           `}
+                    style={{
+                        top: position.top,
+                        right: position.right,
+                        width: position.width,
+                    }}
+                    dir="rtl"
                 >
                     <TagDropdownContent
                         primaryTags={primaryTags}
@@ -256,7 +305,8 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
                         onToggleSecondary={toggleSecondaryTag}
                         isLoading={isLoading}
                     />
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

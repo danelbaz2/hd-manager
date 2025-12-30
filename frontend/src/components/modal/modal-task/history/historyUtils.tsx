@@ -2,7 +2,6 @@ import React from "react";
 import {
   PRIORITY_OPTIONS,
   STATUS_OPTIONS,
-  type TaskPriority,
 } from "../../../../schemas/taskTypes";
 import type { TaskHistoryEntry } from "../../../../api/tasksApi";
 import type { UserData } from "../../../../schemas/userTypes";
@@ -11,6 +10,8 @@ import type {
   SecondaryTagData,
 } from "../../../../schemas/tagTypes";
 import type { ActionConfigItem } from "./historyConfig";
+import { MentionText } from "../../../../pages/home-page/grid-view/activity-feed-box/update-team/mention/MentionText";
+import type { Contact } from "../../../../api/contactsApi";
 
 // Helpers
 export const getUserNames = (
@@ -106,7 +107,9 @@ export const getActionDescription = (
   users: UserData[],
   secondaryTags: SecondaryTagData[],
   primaryTags: PrimaryTagData[],
-  isDarkMode: boolean
+  isDarkMode: boolean,
+  onMentionClick?: (contactName: string) => void,
+  contacts?: Contact[]
 ): React.ReactNode => {
   const changes = entry.changes || {};
   const oldValues = entry.oldValues || {};
@@ -114,7 +117,15 @@ export const getActionDescription = (
 
   // NOTE action
   if (entry.action === "NOTE" && entry.note) {
-    return entry.note;
+    const validNames = contacts?.map(c => c.fullName);
+    return (
+      <MentionText
+        content={entry.note}
+        isDarkMode={isDarkMode}
+        onMentionClick={onMentionClick}
+        validContactNames={validNames}
+      />
+    );
   }
 
   // CREATE action

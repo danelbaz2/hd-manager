@@ -9,6 +9,7 @@ import type {
   PrimaryTagData,
   SecondaryTagData,
 } from "../../../../schemas/tagTypes";
+import type { Contact } from "../../../../api/contactsApi";
 
 interface FormProps {
   isEditMode: boolean;
@@ -49,11 +50,13 @@ interface ModalContainerProps {
   setActiveTab: (v: "details" | "history") => void;
   history: TaskHistoryEntry[];
   users: UserData[];
+  contacts: Contact[];
   primaryTags: PrimaryTagData[];
   secondaryTags: SecondaryTagData[];
   isLoadingHistory: boolean;
-  onAddNote: (text: string) => void;
+  onAddNote: (text: string) => Promise<void>;
   getActionDescription: (e: any, c: any) => React.ReactNode;
+  onMentionClick: (contactName: string) => void;
   closeTaskModal: () => void;
   alerts: any[];
   dismissAlert: (id: number) => void;
@@ -69,11 +72,13 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
   setActiveTab,
   history,
   users,
+  contacts,
   primaryTags,
   secondaryTags,
   isLoadingHistory,
   onAddNote,
   getActionDescription,
+  onMentionClick,
   closeTaskModal,
   alerts,
   dismissAlert,
@@ -89,11 +94,10 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
       onClick={closeTaskModal}
     />
     <div
-      className={`relative z-10 w-full max-w-2xl lg:max-w-3xl max-h-[80vh] flex flex-col rounded-3xl border shadow-2xl ${
-        isDarkMode
-          ? "bg-slate-800 border-slate-700"
-          : "bg-white border-slate-200"
-      }`}
+      className={`relative z-10 w-full max-w-2xl lg:max-w-3xl h-[85vh] flex flex-col rounded-3xl border shadow-2xl ${isDarkMode
+        ? "bg-slate-800 border-slate-700"
+        : "bg-white border-slate-200"
+        }`}
       dir="rtl"
     >
       <TaskHeader
@@ -104,9 +108,8 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
         isDarkMode={isDarkMode}
       />
       <div
-        className={`px-6 py-4 flex-1 flex flex-col min-h-0 overflow-y-auto ${
-          isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-        }`}
+        className={`px-6 py-4 flex-1 flex flex-col min-h-0 overflow-y-auto ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+          }`}
       >
         <TaskContent
           isEditMode={form.isEditMode}
@@ -115,12 +118,14 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
           form={form}
           history={history}
           users={users}
+          contacts={contacts}
           primaryTags={primaryTags}
           secondaryTags={secondaryTags}
           isDarkMode={isDarkMode}
           isLoadingHistory={isLoadingHistory}
           onAddNote={onAddNote}
           getActionDescription={getActionDescription}
+          onMentionClick={onMentionClick}
         />
       </div>
       <TaskFooter
