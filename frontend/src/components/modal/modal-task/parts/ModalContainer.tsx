@@ -89,10 +89,11 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
       onClick={closeTaskModal}
     />
     <div
-      className={`relative z-10 w-full max-w-2xl lg:max-w-3xl min-h-[500px] h-[80vh] flex flex-col rounded-3xl border shadow-2xl ${isDarkMode
+      className={`relative z-10 w-full max-w-2xl lg:max-w-3xl max-h-[80vh] flex flex-col rounded-3xl border shadow-2xl ${
+        isDarkMode
           ? "bg-slate-800 border-slate-700"
           : "bg-white border-slate-200"
-        }`}
+      }`}
       dir="rtl"
     >
       <TaskHeader
@@ -103,10 +104,9 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
         isDarkMode={isDarkMode}
       />
       <div
-        className={`px-6 py-4 flex-1 flex flex-col min-h-0 ${form.isEditMode || (!form.isEditMode && activeTab === "history")
-            ? "overflow-visible"
-            : "overflow-y-auto"
-          } ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}
+        className={`px-6 py-4 flex-1 flex flex-col min-h-0 overflow-y-auto ${
+          isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+        }`}
       >
         <TaskContent
           isEditMode={form.isEditMode}
