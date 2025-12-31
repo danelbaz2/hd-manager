@@ -7,6 +7,7 @@ from utils.history import log_history
 from utils.jwt_utils import jwt_required, admin_required, self_or_admin_required
 from websocket_events import broadcast_user_update
 import bcrypt
+from utils.logger import logger
 
 bp = Blueprint('users', __name__, url_prefix='/api/users')
 
@@ -58,6 +59,8 @@ def create_user():
     serialized = serialize_doc(data.copy())
     broadcast_user_update('create', serialized)
     
+    logger.action("Create", "User", data['_id'], getattr(request, 'user_full_name', 'system'), f"Username: {data.get('username')}")
+
     return jsonify(serialized), 201
 
 @bp.route('/<id>', methods=['PUT'])
@@ -94,6 +97,8 @@ def update_user(id):
         serialized = serialize_doc(updated.copy())
         broadcast_user_update('update', serialized)
             
+        logger.action("Update", "User", id, getattr(request, 'user_full_name', 'system'), f"Changed: {list(data.keys())}")
+
         return jsonify(serialized)
     except Exception as e:
         return jsonify({"error": str(e)}), 400
@@ -118,6 +123,8 @@ def delete_user(id):
         
         # Broadcast user deletion to all clients
         broadcast_user_update('delete', None, id)
+        
+        logger.action("Delete", "User", id, getattr(request, 'user_full_name', 'system'))
         
     except Exception as e:
         return jsonify({"error": str(e)}), 400

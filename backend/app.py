@@ -28,7 +28,8 @@ mongo.init_app(app)
 socketio = SocketIO(app, cors_allowed_origins=["http://localhost:5173"])
 
 # Import routes after app initialization to avoid circular imports
-from routes import tasks, users, contacts, history_entries, chat_messages, auth, primary_tags, secondary_tags, uploads
+# Import routes after app initialization to avoid circular imports
+from routes import tasks, users, contacts, history_entries, chat_messages, auth, primary_tags, secondary_tags, uploads, logs
 
 app.register_blueprint(tasks.bp)
 app.register_blueprint(users.bp)
@@ -39,14 +40,11 @@ app.register_blueprint(history_entries.bp)
 app.register_blueprint(chat_messages.bp)
 app.register_blueprint(auth.bp)
 app.register_blueprint(uploads.bp)
+app.register_blueprint(logs.bp)
 
 # Register SocketIO events
 from websocket_events import register_socket_events
 register_socket_events(socketio)
-
-# Register Admin Routes
-from routes.admin import register_admin_routes
-register_admin_routes(app)
 
 @app.route('/')
 def hello():
@@ -57,6 +55,11 @@ if __name__ == '__main__':
     
     # Get the adapter that pipes gevent logs to our controlled logger
     access_log_adapter = setup_access_logging()
+    
+    # Print startup banner (only in the reloader process to avoid double print)
+    if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
+        from utils.startup_banner import print_banner
+        print_banner()
     
     socketio.run(
         app, 

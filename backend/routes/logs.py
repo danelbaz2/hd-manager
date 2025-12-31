@@ -1,8 +1,9 @@
 from flask import Blueprint
 import logging
 import os
+from utils.logger import logger
 
-bp = Blueprint("admin_logging", __name__, url_prefix="/api/logger")
+bp = Blueprint("logs", __name__, url_prefix="/api/logger")
 
 @bp.route('/<level>/<api_key>', methods=['GET'])
 def set_log_level(level, api_key):
@@ -37,5 +38,6 @@ def set_log_level(level, api_key):
     for logger_name in loggers_to_update:
         logging.getLogger(logger_name).setLevel(level_map[target_level_str])
     
-    print(f"Log level changed to {target_level_str}", flush=True)
+    # Log change using logger (yellow)
+    logger.warning(f"Log level changed to {target_level_str}")
     return "", 204

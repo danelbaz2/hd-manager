@@ -9,6 +9,7 @@ import logging
 # Configure WebSocket logger
 ws_logger = logging.getLogger('websocket')
 ws_logger.setLevel(logging.INFO)
+ws_logger.propagate = False
 
 # Create console handler with custom formatting
 if not ws_logger.handlers:

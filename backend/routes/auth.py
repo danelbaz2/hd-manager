@@ -3,6 +3,7 @@ from database import mongo
 from models.auth_model import LoginModel
 from utils.jwt_utils import generate_token, jwt_required
 import bcrypt
+from utils.logger import logger
 
 bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -67,6 +68,7 @@ def login():
         )
         
         # Return user data with token
+        logger.action("Login", "User", user['_id'], username)
         return jsonify({
             "message": "Login successful",
             "user": serialize_user(user),

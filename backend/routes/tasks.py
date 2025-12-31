@@ -12,6 +12,7 @@ def serialize_doc(doc):
     return doc
 
 from utils.jwt_utils import jwt_required, admin_required
+from utils.logger import logger
 
 @bp.route('/', methods=['GET'])
 @jwt_required
@@ -68,6 +69,8 @@ def create_task():
     mongo.db.ents.insert_one(data)
     
     log_history('task', data['_id'], 'CREATE', request.user_full_name, None, data, data)
+    
+    logger.action("Create", "Task", data['_id'], request.user_full_name, f"Title: {data.get('title', 'Untitled')}")
 
     return jsonify(serialize_doc(data)), 201
 
@@ -116,6 +119,8 @@ def update_task(id):
     # Even if only metadata changed, we log it, but 'c' will be minimal
     log_history('task', id, 'UPDATE', request.user_full_name, old_doc, updated, history_changes)
     
+    logger.action("Update", "Task", id, request.user_full_name, f"Changed: {list(changes.keys())}")
+
     return jsonify(serialize_doc(updated))
 
 @bp.route('/<id>', methods=['DELETE'])
@@ -144,6 +149,8 @@ def delete_task(id):
                 'updatedBy': request.user_full_name
             }
         })
+        
+        logger.action("Delete", "Task", id, request.user_full_name)
         
     except Exception as e:
         return jsonify({"error": str(e)}), 400
