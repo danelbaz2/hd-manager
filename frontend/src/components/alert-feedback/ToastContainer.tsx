@@ -1,4 +1,9 @@
+/**
+ * ToastContainer - Container for toast notifications.
+ * Uses portal to render at document body level for consistent positioning.
+ */
 import React from "react";
+import { createPortal } from "react-dom";
 import SuccessAlert from "./SuccessAlert";
 import ErrorAlert from "./ErrorAlert";
 import WarningAlert from "./WarningAlert";
@@ -17,9 +22,9 @@ const ToastContainer: React.FC<ToastContainerProps> = ({
 }) => {
   if (alerts.length === 0) return null;
 
-  return (
+  const content = (
     <div
-      className="fixed top-4 left-4 z-50 flex flex-col gap-3"
+      className="fixed top-4 left-4 z-[10000] flex flex-col gap-3"
       style={{ direction: "ltr" }}
     >
       {/* Global Animation Styles */}
@@ -107,6 +112,9 @@ const ToastContainer: React.FC<ToastContainerProps> = ({
       })}
     </div>
   );
+
+  // Use portal to render at document body level - above all modals
+  return createPortal(content, document.body);
 };
 
 export default ToastContainer;
