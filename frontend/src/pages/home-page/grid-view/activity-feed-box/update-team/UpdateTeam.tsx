@@ -1,4 +1,4 @@
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useRef, useMemo } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { MessageItem } from "./MessageItem";
 import { MessageInput } from "./MessageInput";
@@ -67,6 +67,12 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
     [findContactByName, setSelectedContact]
   );
 
+  // Extract valid contact names for mention parsing
+  const validContactNames = useMemo(
+    () => contacts.map(c => c.fullName),
+    [contacts]
+  );
+
   const renderMessage = useCallback(
     (_i: number, msg: TeamMessage) => (
       <MessageItem
@@ -75,9 +81,10 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
         sender={getSender(msg.senderId)}
         isDarkMode={isDarkMode}
         onMentionClick={handleMentionClick}
+        validContactNames={validContactNames}
       />
     ),
-    [getSender, isDarkMode, handleMentionClick]
+    [getSender, isDarkMode, handleMentionClick, validContactNames]
   );
 
   const inputProps = {

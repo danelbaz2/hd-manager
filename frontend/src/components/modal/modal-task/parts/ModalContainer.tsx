@@ -89,12 +89,9 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
       onDismiss={dismissAlert}
       isDarkMode={isDarkMode}
     />
+    {/* Modal Container - width comes from ModalOverlay */}
     <div
-      className="absolute inset-0 bg-black/60 backdrop-blur-sm"
-      onClick={closeTaskModal}
-    />
-    <div
-      className={`relative z-10 w-full max-w-2xl lg:max-w-3xl h-[85vh] flex flex-col rounded-3xl border shadow-2xl ${isDarkMode
+      className={`relative z-10 w-full h-[85vh] flex flex-col rounded-3xl border shadow-2xl ${isDarkMode
         ? "bg-slate-800 border-slate-700"
         : "bg-white border-slate-200"
         }`}

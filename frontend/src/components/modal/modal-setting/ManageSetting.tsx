@@ -1,9 +1,10 @@
 import React, { useState } from "react";
-import { X, Settings, Group, UserPlus, Tag, UserCog } from "lucide-react";
+import { X, Settings, Users, UserPlus, Tag, UserCog } from "lucide-react";
 import { useTheme } from "../../../contexts";
+import { ModalOverlay } from "../../common/ModalOverlay";
 import ManageUser from "./manage-user/ManageUser.tsx";
 import ManageContact from "./manage-contact/ManageContact.tsx";
-import ManageTagsTwoTier from "./manage-tags";  // New two-tier tag management
+import ManageTagsTwoTier from "./manage-tags";
 import { ProfileSettings } from "./profile-settings";
 
 interface ManageSettingProps {
@@ -17,10 +18,8 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
   const { isDarkMode } = useTheme();
   const [activeTab, setActiveTab] = useState<TabType>("users");
 
-  if (!isOpen) return null;
-
   const tabs = [
-    { id: "users" as TabType, label: "עובדים", icon: Group },
+    { id: "users" as TabType, label: "עובדים", icon: Users },
     { id: "contacts" as TabType, label: "אנשי קשר", icon: UserPlus },
     { id: "tags" as TabType, label: "תגיות", icon: Tag },
     { id: "profile" as TabType, label: "פרופיל", icon: UserCog },
@@ -42,18 +41,12 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Modal Container */}
+    <ModalOverlay isOpen={isOpen} onClose={onClose} maxWidthClass="max-w-5xl">
+      {/* Modal Container - keeps original size */}
       <div
         className={`
             relative flex
-            w-[95%] max-w-5xl h-[85vh]
+            w-full h-[85vh]
             rounded-2xl shadow-2xl overflow-hidden
             ${isDarkMode ? "bg-slate-800" : "bg-white"}
           `}
@@ -130,7 +123,7 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
           </nav>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 };
 

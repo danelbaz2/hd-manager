@@ -27,6 +27,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   sender,
   isDarkMode,
   onMentionClick,
+  validContactNames,
 }) => {
   const senderColor = sender?.color || "#6366f1";
   const senderName = sender?.fullName || message.base?.createdBy || "מנהל";
@@ -35,11 +36,10 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   return (
     <div className="px-3 py-2" dir="rtl">
       <div
-        className={`rounded-2xl p-3 shadow-sm ${
-          isDarkMode
-            ? "bg-slate-700/80 border border-slate-600"
-            : "bg-white border border-slate-100"
-        }`}
+        className={`rounded-2xl p-3 shadow-sm ${isDarkMode
+          ? "bg-slate-700/80 border border-slate-600"
+          : "bg-white border border-slate-100"
+          }`}
       >
         {/* Header: Avatar + Name + Time */}
         <div className="flex items-center gap-2 mb-2">
@@ -61,9 +61,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2">
               <span
-                className={`font-semibold text-sm ${
-                  isDarkMode ? "text-white" : "text-slate-800"
-                }`}
+                className={`font-semibold text-sm ${isDarkMode ? "text-white" : "text-slate-800"
+                  }`}
               >
                 {senderName}
               </span>
@@ -78,9 +77,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               </span>
             </div>
             <span
-              className={`text-xs ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               {formatDate(timestamp)} • {formatTime(timestamp)}
             </span>
@@ -89,14 +87,14 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
         {/* Message Content with Mentions */}
         <p
-          className={`text-sm leading-relaxed whitespace-pre-wrap ${
-            isDarkMode ? "text-slate-200" : "text-slate-700"
-          }`}
+          className={`text-sm leading-relaxed whitespace-pre-wrap ${isDarkMode ? "text-slate-200" : "text-slate-700"
+            }`}
         >
           <MentionText
             content={message.content}
             isDarkMode={isDarkMode}
             onMentionClick={onMentionClick}
+            validContactNames={validContactNames}
           />
         </p>
       </div>

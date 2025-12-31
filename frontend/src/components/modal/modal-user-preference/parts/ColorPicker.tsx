@@ -15,14 +15,7 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
 
   return (
     <div className="space-y-2">
-      <label
-        className={`block text-sm font-medium text-right ${
-          isDarkMode ? "text-slate-300" : "text-slate-700"
-        }`}
-      >
-        צבע פרופיל
-      </label>
-      <div className="flex flex-wrap gap-2 justify-end">
+      <div className="flex flex-wrap gap-2 justify-center">
         {AVAILABLE_COLORS.map((color) => (
           <button
             key={color}
@@ -30,15 +23,13 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
             onClick={() => onColorChange(color)}
             className={`
               w-8 h-8 rounded-full transition-transform hover:scale-110
-              ${
-                selectedColor === color
-                  ? "ring-2 ring-offset-2 ring-blue-500 scale-110"
-                  : ""
+              ${selectedColor === color
+                ? "ring-2 ring-offset-2 ring-blue-500 scale-110"
+                : ""
               }
-              ${
-                isDarkMode && selectedColor === color
-                  ? "ring-offset-slate-800"
-                  : ""
+              ${isDarkMode && selectedColor === color
+                ? "ring-offset-slate-800"
+                : ""
               }
             `}
             style={{ backgroundColor: color }}

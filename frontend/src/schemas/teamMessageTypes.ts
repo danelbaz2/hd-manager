@@ -28,6 +28,8 @@ export interface MessageItemProps {
   sender?: UserData;
   isDarkMode: boolean;
   onMentionClick?: (contactName: string) => void;
+  /** Valid contact names for proper mention parsing */
+  validContactNames?: string[];
 }
 
 export interface MessageInputProps {

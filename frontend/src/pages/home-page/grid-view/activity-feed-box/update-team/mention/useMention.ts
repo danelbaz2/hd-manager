@@ -58,14 +58,16 @@ export const useMention = (contacts: Contact[]): UseMentionReturn => {
       switch (e.key) {
         case "ArrowDown":
           e.preventDefault();
+          // Stop at the end, don't wrap around
           setSelectedIndex((prev) =>
-            prev < filteredContacts.length - 1 ? prev + 1 : 0
+            prev < filteredContacts.length - 1 ? prev + 1 : prev
           );
           return true;
         case "ArrowUp":
           e.preventDefault();
+          // Stop at the beginning, don't wrap around
           setSelectedIndex((prev) =>
-            prev > 0 ? prev - 1 : filteredContacts.length - 1
+            prev > 0 ? prev - 1 : prev
           );
           return true;
         case "Enter":

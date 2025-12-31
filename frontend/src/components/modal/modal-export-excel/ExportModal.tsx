@@ -1,10 +1,12 @@
 /**
- * ExportModal - Compact modal for Excel export with blue theme
+ * ExportModal - Modal for Excel export with blue theme
+ * Uses ModalOverlay for consistent backdrop behavior
  */
 import React, { useState, useCallback } from "react";
 import { X, FileSpreadsheet, Tag, Calendar, FileText } from "lucide-react";
 import { useTheme, useSettings } from "../../../contexts";
 import { exportTasksToExcel } from "../../../utils/excelExport";
+import { ModalOverlay } from "../../common/ModalOverlay";
 import TagsFilter from "./TagsFilter";
 import DateRangeFilter from "./DateRangeFilter";
 import FieldsSelector from "./FieldsSelector";
@@ -59,9 +61,8 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => {
               label: f.label,
               enabled: f.enabled,
             })),
-            filename: `HD_TASKS_EXPORT_${
-              new Date().toISOString().split("T")[0]
-            }`,
+            filename: `HD_TASKS_EXPORT_${new Date().toISOString().split("T")[0]
+              }`,
           },
           { getUserName, getTagName }
         );
@@ -75,20 +76,12 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => {
 
   const enabledFieldCount = fields.filter((f) => f.enabled).length;
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Modal */}
+    <ModalOverlay isOpen={isOpen} onClose={onClose} maxWidthClass="max-w-2xl">
+      {/* Modal - keeps original size */}
       <div
         className={`
-          relative w-[95%] max-w-2xl h-[600px] flex flex-col
+          w-full h-[600px] flex flex-col
           rounded-2xl shadow-2xl overflow-hidden
           ${isDarkMode ? "bg-slate-800" : "bg-white"}
         `}
@@ -104,9 +97,8 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => {
           <div className="flex items-center gap-3">
             <FileSpreadsheet size={24} className="text-blue-500" />
             <h1
-              className={`text-xl font-bold ${
-                isDarkMode ? "text-white" : "text-slate-800"
-              }`}
+              className={`text-xl font-bold ${isDarkMode ? "text-white" : "text-slate-800"
+                }`}
             >
               הפקת דוחות
             </h1>
@@ -115,10 +107,9 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => {
             onClick={onClose}
             className={`
               p-2 rounded-lg transition-colors
-              ${
-                isDarkMode
-                  ? "hover:bg-slate-700 text-slate-400"
-                  : "hover:bg-slate-100 text-slate-500"
+              ${isDarkMode
+                ? "hover:bg-slate-700 text-slate-400"
+                : "hover:bg-slate-100 text-slate-500"
               }
             `}
           >
@@ -133,9 +124,8 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center gap-2">
               <Tag size={16} className="text-blue-500" />
               <span
-                className={`text-sm font-medium ${
-                  isDarkMode ? "text-slate-300" : "text-slate-700"
-                }`}
+                className={`text-sm font-medium ${isDarkMode ? "text-slate-300" : "text-slate-700"
+                  }`}
               >
                 סינון לפי תגיות
               </span>
@@ -155,9 +145,8 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center gap-2">
               <Calendar size={16} className="text-blue-500" />
               <span
-                className={`text-sm font-medium ${
-                  isDarkMode ? "text-slate-300" : "text-slate-700"
-                }`}
+                className={`text-sm font-medium ${isDarkMode ? "text-slate-300" : "text-slate-700"
+                  }`}
               >
                 טווח תאריכים
               </span>
@@ -175,9 +164,8 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => {
             <div className="flex items-center gap-2">
               <FileText size={16} className="text-blue-500" />
               <span
-                className={`text-sm font-medium ${
-                  isDarkMode ? "text-slate-300" : "text-slate-700"
-                }`}
+                className={`text-sm font-medium ${isDarkMode ? "text-slate-300" : "text-slate-700"
+                  }`}
               >
                 שדות לייצוא
               </span>
@@ -201,7 +189,7 @@ const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => {
           />
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 };
 

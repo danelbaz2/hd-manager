@@ -9,6 +9,7 @@ import { ModalContainer } from "./parts/ModalContainer";
 import { useTaskDelete, useTaskForm } from "./hooks";
 import { useContacts } from "../../../pages/home-page/grid-view/activity-feed-box/update-team/mention/useContacts";
 import { ContactDetailModal } from "../modal-contact-detail";
+import { ModalOverlay } from "../../common/ModalOverlay";
 import type { TaskHistoryEntry } from "../../../api/tasksApi";
 import type { ActionConfigItem } from "./history/historyConfig";
 
@@ -99,31 +100,33 @@ const TaskModal: React.FC = () => {
     [users, secondaryTags, primaryTags, isDarkMode, contacts]
   );
 
-  if (!isOpen || !task) return null;
+  if (!task) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <ModalContainer
-        task={task}
-        isDarkMode={isDarkMode}
-        isAdmin={isAdmin}
-        form={form}
-        del={del}
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        history={history}
-        users={users}
-        contacts={contacts}
-        primaryTags={primaryTags}
-        secondaryTags={secondaryTags}
-        isLoadingHistory={isLoadingHistory}
-        onAddNote={handleAddNote}
-        getActionDescription={getDesc}
-        onMentionClick={handleMentionClick}
-        closeTaskModal={closeTaskModal}
-        alerts={alerts}
-        dismissAlert={dismissAlert}
-      />
+    <>
+      <ModalOverlay isOpen={isOpen} onClose={closeTaskModal}>
+        <ModalContainer
+          task={task}
+          isDarkMode={isDarkMode}
+          isAdmin={isAdmin}
+          form={form}
+          del={del}
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          history={history}
+          users={users}
+          contacts={contacts}
+          primaryTags={primaryTags}
+          secondaryTags={secondaryTags}
+          isLoadingHistory={isLoadingHistory}
+          onAddNote={handleAddNote}
+          getActionDescription={getDesc}
+          onMentionClick={handleMentionClick}
+          closeTaskModal={closeTaskModal}
+          alerts={alerts}
+          dismissAlert={dismissAlert}
+        />
+      </ModalOverlay>
       <ContactDetailModal
         contact={selectedContact}
         isOpen={!!selectedContact}
@@ -145,7 +148,7 @@ const TaskModal: React.FC = () => {
         variant="danger"
         showIrreversibleWarning
       />
-    </div>
+    </>
   );
 };
 

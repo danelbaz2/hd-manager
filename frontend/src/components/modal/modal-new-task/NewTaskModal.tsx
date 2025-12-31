@@ -3,6 +3,7 @@ import { X, Plus } from "lucide-react";
 import { useTheme, useSettings } from "../../../contexts";
 import { ToastContainer } from "../../alert-feedback";
 import DelayedLoader from "../../loaders/DelayedLoader";
+import { ModalOverlay } from "../../common/ModalOverlay";
 import {
   PrioritySelect,
   TwoTierTagsSelect,
@@ -20,7 +21,7 @@ interface NewTaskModalProps {
 
 /**
  * NewTaskModal - Modal for creating new tasks
- * Refactored to use useTaskForm hook for form logic
+ * Uses ModalOverlay for proper backdrop and z-index
  */
 const NewTaskModal: React.FC<NewTaskModalProps> = ({
   isOpen,
@@ -68,26 +69,18 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
     onClose,
   });
 
-  if (!isOpen) return null;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <ModalOverlay isOpen={isOpen} onClose={onClose}>
       <ToastContainer
         alerts={alerts}
         onDismiss={dismissAlert}
         isDarkMode={isDarkMode}
       />
 
-      {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60 backdrop-blur-sm"
-        onClick={onClose}
-      />
-
-      {/* Modal */}
+      {/* Modal - width comes from ModalOverlay */}
       <div
         className={`
-          relative z-10 w-full max-w-2xl lg:max-w-3xl h-[85vh] rounded-3xl border shadow-2xl flex flex-col
+          w-full h-[85vh] rounded-3xl border shadow-2xl flex flex-col
           ${isDarkMode
             ? "bg-gradient-to-br from-slate-800 via-slate-800 to-slate-900 border-slate-700"
             : "bg-gradient-to-br from-white via-white to-slate-50 border-slate-200"
@@ -167,7 +160,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
                 />
               </div>
 
-              {/* Tags & Dates Row - 12 col grid for better spacing */}
+              {/* Tags & Dates Row */}
               <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
                 <div className="md:col-span-6">
                   <TwoTierTagsSelect
@@ -238,7 +231,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </ModalOverlay>
   );
 };
 

@@ -15,6 +15,11 @@ export interface MentionListProps {
   selectedIndex: number;
   onSelect: (contact: Contact) => void;
   isLoading: boolean;
+  /** Optional position for portal-based rendering above modals */
+  position?: {
+    top: number;
+    right: number;
+  };
 }
 
 export interface ContactDetailModalProps {
