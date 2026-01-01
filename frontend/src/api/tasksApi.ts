@@ -75,6 +75,13 @@ export const getAllTasks = async (params?: TaskQueryParams): Promise<ApiResponse
 };
 
 /**
+ * Get a single task by ID
+ */
+export const getTaskById = async (taskId: string): Promise<ApiResponse<Task>> => {
+  return apiRequest<Task>(`${API_ENDPOINTS.tasks}/${taskId}`);
+};
+
+/**
  * Create a new task with idempotency protection
  */
 export const createTask = async (taskData: TaskFormData): Promise<ApiResponse<Task>> => {

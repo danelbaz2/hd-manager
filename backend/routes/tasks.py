@@ -51,6 +51,21 @@ def get_tasks():
     tasks = list(mongo.db.ents.find(query))
     return jsonify([serialize_doc(t) for t in tasks])
 
+@bp.route('/<id>', methods=['GET'])
+@jwt_required
+def get_task_by_id(id):
+    """Get a single task by ID"""
+    task = mongo.db.ents.find_one({
+        '_id': id, 
+        'base.entityType': 'task',
+        'base.isDeleted': {'$ne': True}
+    })
+    
+    if not task:
+        return jsonify({"error": "Task not found"}), 404
+    
+    return jsonify(serialize_doc(task))
+
 @bp.route('/', methods=['POST'])
 @jwt_required
 @idempotency_middleware

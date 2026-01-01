@@ -21,7 +21,6 @@ def get_contacts():
     return jsonify([serialize_doc(c) for c in contacts])
 
 @bp.route('/', methods=['POST'])
-@admin_required
 @handle_client_disconnect
 def create_contact():
     try:
@@ -48,7 +47,6 @@ def create_contact():
     return jsonify(serialize_doc(data)), 201
 
 @bp.route('/<id>', methods=['PUT'])
-@admin_required
 @handle_client_disconnect
 def update_contact(id):
     try:

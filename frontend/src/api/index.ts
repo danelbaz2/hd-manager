@@ -15,6 +15,7 @@ export {
 // Tasks API
 export {
   getAllTasks,
+  getTaskById,
   createTask,
   updateTask,
   deleteTask,
