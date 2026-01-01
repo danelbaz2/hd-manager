@@ -25,7 +25,7 @@ import {
 } from "../schemas/tagTypes";
 import { type ContactData } from "../schemas/contactTypes";
 import { useAuth } from "./AuthContext";
-import { useSocket } from "./SocketContext";
+import { useSocket } from "../socket";
 
 // Helper function to convert API User to UserData
 const mapUserToUserData = (user: User): UserData => ({
@@ -74,12 +74,12 @@ interface SettingsContextState {
   isLoadingHistory: boolean;
 
   // Refresh functions
-  refreshUsers: () => Promise<void>;
-  refreshTags: () => Promise<void>;
-  refreshContacts: () => Promise<void>;
-  refreshTasks: () => Promise<void>;
-  refreshTaskHistory: () => Promise<void>;
-  refreshAll: () => Promise<void>;
+  refreshUsers: (silent?: boolean) => Promise<void>;
+  refreshTags: (silent?: boolean) => Promise<void>;
+  refreshContacts: (silent?: boolean) => Promise<void>;
+  refreshTasks: (silent?: boolean) => Promise<void>;
+  refreshTaskHistory: (silent?: boolean) => Promise<void>;
+  refreshAll: (silent?: boolean) => Promise<void>;
 
   // History helpers
   addHistoryEntry: (entry: TaskHistoryEntry) => void;
@@ -101,13 +101,13 @@ const defaultContextValue: SettingsContextState = {
   isLoadingContacts: false,
   isLoadingTasks: false,
   isLoadingHistory: false,
-  refreshUsers: async () => { },
-  refreshTags: async () => { },
-  refreshContacts: async () => { },
-  refreshTasks: async () => { },
-  refreshTaskHistory: async () => { },
-  refreshAll: async () => { },
-  addHistoryEntry: () => { },
+  refreshUsers: async () => {},
+  refreshTags: async () => {},
+  refreshContacts: async () => {},
+  refreshTasks: async () => {},
+  refreshTaskHistory: async () => {},
+  refreshAll: async () => {},
+  addHistoryEntry: () => {},
   getHistoryForTask: () => [],
   getHistoryForDate: () => [],
 };
@@ -141,8 +141,9 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
 
   // Fetch users
-  const refreshUsers = useCallback(async () => {
-    setIsLoadingUsers(true);
+  // Fetch users
+  const refreshUsers = useCallback(async (silent = false) => {
+    if (!silent) setIsLoadingUsers(true);
     try {
       const response = await getAllUsers();
       if (response.success && response.data) {
@@ -153,13 +154,14 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     } catch (error) {
       console.error("Error fetching users:", error);
     } finally {
-      setIsLoadingUsers(false);
+      if (!silent) setIsLoadingUsers(false);
     }
   }, []);
 
   // Fetch tags (two-tier system: primary + secondary)
-  const refreshTags = useCallback(async () => {
-    setIsLoadingTags(true);
+  // Fetch tags (two-tier system: primary + secondary)
+  const refreshTags = useCallback(async (silent = false) => {
+    if (!silent) setIsLoadingTags(true);
     try {
       const [primaryResponse, secondaryResponse] = await Promise.all([
         getAllPrimaryTags(),
@@ -205,13 +207,14 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     } catch (error) {
       console.error("Error fetching tags:", error);
     } finally {
-      setIsLoadingTags(false);
+      if (!silent) setIsLoadingTags(false);
     }
   }, []);
 
   // Fetch contacts
-  const refreshContacts = useCallback(async () => {
-    setIsLoadingContacts(true);
+  // Fetch contacts
+  const refreshContacts = useCallback(async (silent = false) => {
+    if (!silent) setIsLoadingContacts(true);
     try {
       const response = await getAllContacts();
       if (response.success && response.data) {
@@ -222,13 +225,14 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     } catch (error) {
       console.error("Error fetching contacts:", error);
     } finally {
-      setIsLoadingContacts(false);
+      if (!silent) setIsLoadingContacts(false);
     }
   }, []);
 
   // Fetch tasks - gets all tasks without date filtering
-  const refreshTasks = useCallback(async () => {
-    setIsLoadingTasks(true);
+  // Fetch tasks - gets all tasks without date filtering
+  const refreshTasks = useCallback(async (silent = false) => {
+    if (!silent) setIsLoadingTasks(true);
     try {
       const response = await getAllTasks();
       if (response.success && response.data) {
@@ -239,13 +243,14 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     } catch (error) {
       console.error("Error fetching tasks:", error);
     } finally {
-      setIsLoadingTasks(false);
+      if (!silent) setIsLoadingTasks(false);
     }
   }, []);
 
   // Fetch all task history - for global access
-  const refreshTaskHistory = useCallback(async () => {
-    setIsLoadingHistory(true);
+  // Fetch all task history - for global access
+  const refreshTaskHistory = useCallback(async (silent = false) => {
+    if (!silent) setIsLoadingHistory(true);
     try {
       const response = await getAllTasksHistory();
       if (response.success && response.data) {
@@ -256,7 +261,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     } catch (error) {
       console.error("Error fetching task history:", error);
     } finally {
-      setIsLoadingHistory(false);
+      if (!silent) setIsLoadingHistory(false);
     }
   }, []);
 
@@ -286,30 +291,37 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       dayEnd.setHours(23, 59, 59, 999);
 
       return taskHistory
-        .filter((entry) => entry.timestamp >= dayStart.getTime() && entry.timestamp <= dayEnd.getTime())
+        .filter(
+          (entry) =>
+            entry.timestamp >= dayStart.getTime() &&
+            entry.timestamp <= dayEnd.getTime()
+        )
         .sort((a, b) => b.timestamp - a.timestamp); // Newest first
     },
     [taskHistory]
   );
 
   // Fetch all data
-  const refreshAll = useCallback(async () => {
-    setIsLoading(true);
-    await Promise.all([
-      refreshUsers(),
-      refreshTags(),
-      refreshContacts(),
-      refreshTasks(),
-      refreshTaskHistory(),
-    ]);
-    setIsLoading(false);
-  }, [
-    refreshUsers,
-    refreshTags,
-    refreshContacts,
-    refreshTasks,
-    refreshTaskHistory,
-  ]);
+  const refreshAll = useCallback(
+    async (silent = false) => {
+      if (!silent) setIsLoading(true);
+      await Promise.all([
+        refreshUsers(silent),
+        refreshTags(silent),
+        refreshContacts(silent),
+        refreshTasks(silent),
+        refreshTaskHistory(silent),
+      ]);
+      if (!silent) setIsLoading(false);
+    },
+    [
+      refreshUsers,
+      refreshTags,
+      refreshContacts,
+      refreshTasks,
+      refreshTaskHistory,
+    ]
+  );
 
   // Clear all data (used on logout)
   const clearAllData = useCallback(() => {
@@ -347,13 +359,23 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   }, [isAuthenticated, isAuthLoading, refreshAll, clearAllData]);
 
   // Subscribe to WebSocket updates for real-time task sync across all clients
-  const { subscribe, subscribeToUsers, isConnected } = useSocket();
+  const { subscribeToTasks, subscribeToUsers, isConnected } = useSocket();
+
+  // Refetch data when socket reconnects to ensure we have the latest state
+  useEffect(() => {
+    if (isAuthenticated && isConnected) {
+      console.log(
+        "[SettingsContext] Socket connected/reconnected, syncing data..."
+      );
+      refreshAll(true); // Silent refresh
+    }
+  }, [isConnected, isAuthenticated, refreshAll]);
 
   useEffect(() => {
     if (!isAuthenticated || !isConnected) return;
 
     // When a task update comes via WebSocket, update both history and tasks
-    const unsubscribe = subscribe((update) => {
+    const unsubscribe = subscribeToTasks((update: TaskHistoryEntry) => {
       // Add the update to history if it doesn't already exist
       setTaskHistory((prev) => {
         if (prev.some((e) => e.id === update.id)) return prev;
@@ -363,60 +385,65 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       // Handle task CRUD operations incrementally
       const { action, taskId, fullTask } = update;
 
-      if (action === 'CREATE' && fullTask) {
+      if (action === "CREATE" && fullTask) {
         // Add new task to the list
         setTasks((prev) => {
           if (prev.some((t) => t.id === fullTask.id)) return prev;
           return [...prev, fullTask as Task];
         });
-      } else if (action === 'DELETE') {
+      } else if (action === "DELETE") {
         // Remove task from the list
         setTasks((prev) => prev.filter((t) => t.id !== taskId));
-      } else if (['UPDATE', 'IN_PROGRESS', 'CLOSE', 'ASSIGN'].includes(action) && fullTask) {
+      } else if (
+        ["UPDATE", "IN_PROGRESS", "CLOSE", "ASSIGN"].includes(action) &&
+        fullTask
+      ) {
         // Update existing task
-        setTasks((prev) => prev.map((t) =>
-          t.id === taskId ? { ...t, ...fullTask as Task } : t
-        ));
+        setTasks((prev) =>
+          prev.map((t) =>
+            t.id === taskId ? { ...t, ...(fullTask as Task) } : t
+          )
+        );
       }
     });
 
     return unsubscribe;
-  }, [
-    isAuthenticated,
-    isConnected,
-    subscribe,
-  ]);
+  }, [isAuthenticated, isConnected, subscribeToTasks]);
 
   // Subscribe to WebSocket updates for real-time user sync across all clients
   useEffect(() => {
     if (!isAuthenticated || !isConnected) return;
 
-    const unsubscribe = subscribeToUsers((update) => {
-      const { action, payload, userId } = update;
+    const unsubscribe = subscribeToUsers(
+      (update: {
+        action: string;
+        payload: UserData | null;
+        userId: string;
+      }) => {
+        const { action, payload, userId } = update;
 
-      if (action === 'create' && payload) {
-        // Add new user to the list
-        setUsers((prev) => {
-          if (prev.some((u) => u.id === payload.id)) return prev;
-          return [...prev, payload as UserData];
-        });
-      } else if (action === 'delete') {
-        // Remove user from the list
-        setUsers((prev) => prev.filter((u) => u.id !== userId));
-      } else if (action === 'update' && payload) {
-        // Update existing user
-        setUsers((prev) => prev.map((u) =>
-          u.id === payload.id ? { ...u, ...payload as UserData } : u
-        ));
+        if (action === "create" && payload) {
+          // Add new user to the list
+          setUsers((prev) => {
+            if (prev.some((u) => u.id === payload.id)) return prev;
+            return [...prev, payload as UserData];
+          });
+        } else if (action === "delete") {
+          // Remove user from the list
+          setUsers((prev) => prev.filter((u) => u.id !== userId));
+        } else if (action === "update" && payload) {
+          // Update existing user
+          setUsers((prev) =>
+            prev.map((u) =>
+              u.id === payload.id ? { ...u, ...(payload as UserData) } : u
+            )
+          );
+        }
       }
-    });
+    );
 
     return unsubscribe;
-  }, [
-    isAuthenticated,
-    isConnected,
-    subscribeToUsers,
-  ]);
+  }, [isAuthenticated, isConnected, subscribeToUsers]);
 
   const value: SettingsContextState = {
     users,

@@ -4,6 +4,12 @@ from datetime import datetime
 from models.task_model import TaskModel, TaskUpdateModel
 from bson.objectid import ObjectId
 from utils.history import log_history
+from utils.error_handlers import handle_client_disconnect
+from middleware.idempotency import idempotency_middleware
+try:
+    from pymongo.errors import _OperationCancelled
+except ImportError:
+    _OperationCancelled = Exception
 
 bp = Blueprint('tasks', __name__, url_prefix='/api/tasks')
 
@@ -47,6 +53,8 @@ def get_tasks():
 
 @bp.route('/', methods=['POST'])
 @jwt_required
+@idempotency_middleware
+@handle_client_disconnect
 def create_task():
     try:
         data = TaskModel(**request.json).model_dump(exclude_none=True)
@@ -65,17 +73,34 @@ def create_task():
         'updatedBy': request.user_full_name
     }
     
+    # Use provided ID (from frontend/idempotency) or generate new
+    # If using Idempotency-Key, we could potentially rely on that, but mixing concepts is tricky.
+    # Ideally frontend sends an ID. But for now let's just use server ID.
     data['_id'] = str(ObjectId())
-    mongo.db.ents.insert_one(data)
     
-    log_history('task', data['_id'], 'CREATE', request.user_full_name, None, data, data)
-    
-    logger.action("Create", "Task", data['_id'], request.user_full_name, f"Title: {data.get('title', 'Untitled')}")
+    try:
+        mongo.db.ents.insert_one(data)
+    except _OperationCancelled:
+        # Check if the document was actually inserted despite the cancellation
+        # This prevents "false negatives" where client disconnected but DB op succeeded
+        if mongo.db.ents.find_one({'_id': data['_id']}):
+            logger.warning(f"Task {data['_id']} created despite client disconnect")
+            pass # Proceed to log history/action as if nothing happened
+        else:
+            raise # Re-raise if not found
+
+    # History logging is best-effort
+    try:
+        log_history('task', data['_id'], 'CREATE', request.user_full_name, None, data, data)
+        logger.action("Create", "Task", data['_id'], request.user_full_name, f"Title: {data.get('title', 'Untitled')}")
+    except:
+        pass # Don't fail request if logging fails
 
     return jsonify(serialize_doc(data)), 201
 
 @bp.route('/<id>', methods=['PUT'])
 @jwt_required
+@handle_client_disconnect
 def update_task(id):
     try:
         validated = TaskUpdateModel(**request.json)
@@ -125,6 +150,7 @@ def update_task(id):
 
 @bp.route('/<id>', methods=['DELETE'])
 @admin_required
+@handle_client_disconnect
 def delete_task(id):
     try:
         old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'task'})
@@ -415,7 +441,7 @@ def add_task_note(task_id):
         
         # Broadcast the note via WebSocket to all connected clients
         try:
-            from websocket_events import broadcast_task_update
+            from websocket import broadcast_task_update
             broadcast_task_update(response)
         except Exception as e:
             print(f"Failed to broadcast note: {e}")

@@ -4,7 +4,8 @@ from models.chat_message_model import ChatMessageModel
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.jwt_utils import jwt_required, admin_required
-from websocket_events import broadcast_chat_update
+from websocket import broadcast_chat_update
+from utils.error_handlers import handle_client_disconnect
 
 bp = Blueprint('chat_messages', __name__, url_prefix='/api/chat')
 
@@ -21,6 +22,7 @@ def get_messages():
 
 @bp.route('/', methods=['POST'])
 @admin_required  # Only admins can post team updates
+@handle_client_disconnect
 def create_message():
     try:
         data = ChatMessageModel(**request.json).model_dump(exclude_none=True)

@@ -42,8 +42,8 @@ app.register_blueprint(auth.bp)
 app.register_blueprint(uploads.bp)
 app.register_blueprint(logs.bp)
 
-# Register SocketIO events
-from websocket_events import register_socket_events
+# Register SocketIO events (new modular socket system)
+from websocket import register_socket_events
 register_socket_events(socketio)
 
 @app.route('/')

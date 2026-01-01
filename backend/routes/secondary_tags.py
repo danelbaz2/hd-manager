@@ -5,6 +5,7 @@ from models.secondary_tag_model import SecondaryTagModel, SecondaryTagUpdateMode
 from bson.objectid import ObjectId
 from utils.history import log_history
 from utils.jwt_utils import jwt_required, admin_required
+from utils.error_handlers import handle_client_disconnect
 
 bp = Blueprint('secondary_tags', __name__, url_prefix='/api/secondary-tags')
 
@@ -33,6 +34,7 @@ def get_secondary_tags():
 
 @bp.route('/', methods=['POST'])
 @admin_required
+@handle_client_disconnect
 def create_secondary_tag():
     """Create a new secondary tag"""
     try:
@@ -113,6 +115,7 @@ def get_secondary_tag(id):
 
 @bp.route('/<id>', methods=['PUT'])
 @admin_required
+@handle_client_disconnect
 def update_secondary_tag(id):
     """Update an existing secondary tag"""
     try:
@@ -154,6 +157,7 @@ def update_secondary_tag(id):
 
 @bp.route('/<id>', methods=['DELETE'])
 @admin_required
+@handle_client_disconnect
 def delete_secondary_tag(id):
     """Soft delete a secondary tag (sets isDeleted to true)"""
     try:

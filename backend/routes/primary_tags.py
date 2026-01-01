@@ -5,6 +5,7 @@ from models.primary_tag_model import PrimaryTagModel, PrimaryTagUpdateModel
 from bson.objectid import ObjectId
 from utils.history import log_history
 from utils.jwt_utils import jwt_required, admin_required
+from utils.error_handlers import handle_client_disconnect
 
 bp = Blueprint('primary_tags', __name__, url_prefix='/api/primary-tags')
 
@@ -21,6 +22,7 @@ def get_primary_tags():
 
 @bp.route('/', methods=['POST'])
 @admin_required
+@handle_client_disconnect
 def create_primary_tag():
     """Create a new primary tag"""
     try:
@@ -91,6 +93,7 @@ def get_primary_tag(id):
 
 @bp.route('/<id>', methods=['PUT'])
 @admin_required
+@handle_client_disconnect
 def update_primary_tag(id):
     """Update an existing primary tag"""
     try:
@@ -122,6 +125,7 @@ def update_primary_tag(id):
 
 @bp.route('/<id>', methods=['DELETE'])
 @admin_required
+@handle_client_disconnect
 def delete_primary_tag(id):
     """Soft delete a primary tag (sets isDeleted to true)"""
     try:

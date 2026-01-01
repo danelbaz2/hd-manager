@@ -1,5 +1,6 @@
 // Tasks API - handles all task-related API requests
 import { API_ENDPOINTS, apiRequest, type ApiResponse } from "./apiConfig";
+import { safeMutationAuto } from "./socketAwareApi";
 
 // Task interfaces
 export interface TaskBase {
@@ -74,53 +75,62 @@ export const getAllTasks = async (params?: TaskQueryParams): Promise<ApiResponse
 };
 
 /**
- * Create a new task
+ * Create a new task with idempotency protection
  */
 export const createTask = async (taskData: TaskFormData): Promise<ApiResponse<Task>> => {
-  const response = await apiRequest<Task>(`${API_ENDPOINTS.tasks}/`, {
-    method: "POST",
-    body: JSON.stringify(taskData),
+  // Use safeMutationAuto to ensure socket connection and prevent duplicates
+  return safeMutationAuto('createTask', async () => {
+    const response = await apiRequest<Task>(`${API_ENDPOINTS.tasks}/`, {
+      method: "POST",
+      body: JSON.stringify(taskData),
+    });
+
+    if (response.success) {
+      response.message = "Task created successfully";
+    }
+
+    console.log('[API] Task created:', response);
+
+    return response;
   });
-
-  if (response.success) {
-    response.message = "Task created successfully";
-  }
-
-  return response;
 };
 
 /**
- * Update a task by ID
+ * Update a task by ID with idempotency protection
  */
 export const updateTask = async (
   taskId: string,
   taskData: Partial<TaskFormData>
 ): Promise<ApiResponse<Task>> => {
-  const response = await apiRequest<Task>(`${API_ENDPOINTS.tasks}/${taskId}`, {
-    method: "PUT",
-    body: JSON.stringify(taskData),
+  return safeMutationAuto(`updateTask:${taskId}`, async () => {
+    const response = await apiRequest<Task>(`${API_ENDPOINTS.tasks}/${taskId}`, {
+      method: "PUT",
+      body: JSON.stringify(taskData),
+    });
+
+    if (response.success) {
+      response.message = "Task updated successfully";
+    }
+
+    return response;
   });
-
-  if (response.success) {
-    response.message = "Task updated successfully";
-  }
-
-  return response;
 };
 
 /**
- * Delete a task by ID
+ * Delete a task by ID with idempotency protection
  */
 export const deleteTask = async (taskId: string): Promise<ApiResponse<null>> => {
-  const response = await apiRequest<null>(`${API_ENDPOINTS.tasks}/${taskId}`, {
-    method: "DELETE",
+  return safeMutationAuto(`deleteTask:${taskId}`, async () => {
+    const response = await apiRequest<null>(`${API_ENDPOINTS.tasks}/${taskId}`, {
+      method: "DELETE",
+    });
+
+    if (response.success) {
+      response.message = "Task deleted successfully";
+    }
+
+    return response;
   });
-
-  if (response.success) {
-    response.message = "Task deleted successfully";
-  }
-
-  return response;
 };
 
 // ============== Task History ==============

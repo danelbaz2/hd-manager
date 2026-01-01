@@ -59,7 +59,7 @@ def log_history(entity_type, entity_id, action, user_id='system', old_val=None, 
         return  # Skip broadcasting for non-task entities
     
     try:
-        from websocket_events import broadcast_task_update
+        from websocket import broadcast_task_update
         
         # Format entry for frontend (similar to get_all_tasks_history)
         task_id = (clean_doc(new_val) or {}).get('id') or (clean_doc(old_val) or {}).get('id') or ''

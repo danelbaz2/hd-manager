@@ -5,9 +5,10 @@ from bson.objectid import ObjectId
 from models.user_model import UserModel, UserUpdateModel
 from utils.history import log_history
 from utils.jwt_utils import jwt_required, admin_required, self_or_admin_required
-from websocket_events import broadcast_user_update
+from websocket import broadcast_user_update
 import bcrypt
 from utils.logger import logger
+from utils.error_handlers import handle_client_disconnect
 
 bp = Blueprint('users', __name__, url_prefix='/api/users')
 
@@ -24,6 +25,7 @@ def get_users():
 
 @bp.route('/', methods=['POST'])
 @admin_required
+@handle_client_disconnect
 def create_user():
     try:
         data = UserModel(**request.json).model_dump(exclude_none=True)
@@ -65,6 +67,7 @@ def create_user():
 
 @bp.route('/<id>', methods=['PUT'])
 @self_or_admin_required
+@handle_client_disconnect
 def update_user(id):
     try:
         validated = UserUpdateModel(**request.json)
@@ -105,6 +108,7 @@ def update_user(id):
 
 @bp.route('/<id>', methods=['DELETE'])
 @admin_required
+@handle_client_disconnect
 def delete_user(id):
     try:
         old_doc = mongo.db.users.find_one({'_id': id})

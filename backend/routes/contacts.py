@@ -12,6 +12,7 @@ def serialize_doc(doc):
     return doc
 
 from utils.jwt_utils import jwt_required, admin_required
+from utils.error_handlers import handle_client_disconnect
 
 @bp.route('/', methods=['GET'])
 @jwt_required
@@ -21,6 +22,7 @@ def get_contacts():
 
 @bp.route('/', methods=['POST'])
 @admin_required
+@handle_client_disconnect
 def create_contact():
     try:
         data = ContactModel(**request.json).model_dump(exclude_none=True)
@@ -47,6 +49,7 @@ def create_contact():
 
 @bp.route('/<id>', methods=['PUT'])
 @admin_required
+@handle_client_disconnect
 def update_contact(id):
     try:
         validated = ContactUpdateModel(**request.json)
@@ -77,6 +80,7 @@ def update_contact(id):
 
 @bp.route('/<id>', methods=['DELETE'])
 @admin_required
+@handle_client_disconnect
 def delete_contact(id):
     try:
         old_doc = mongo.db.contacts.find_one({'_id': id})
