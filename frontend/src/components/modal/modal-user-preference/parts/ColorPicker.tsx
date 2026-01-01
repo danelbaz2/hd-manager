@@ -5,26 +5,28 @@ import { useTheme } from "../../../../contexts";
 interface ColorPickerProps {
   selectedColor: string;
   onColorChange: (color: string) => void;
+  compact?: boolean;
 }
 
 const ColorPicker: React.FC<ColorPickerProps> = ({
   selectedColor,
   onColorChange,
+  compact = false,
 }) => {
   const { isDarkMode } = useTheme();
 
   return (
-    <div className="space-y-2">
-      <div className="flex flex-wrap gap-2 justify-center">
+    <div className={compact ? "" : "space-y-2"}>
+      <div className={`flex ${compact ? "gap-1.5 justify-center" : "flex-wrap gap-2 justify-center"}`}>
         {AVAILABLE_COLORS.map((color) => (
           <button
             key={color}
             type="button"
             onClick={() => onColorChange(color)}
             className={`
-              w-8 h-8 rounded-full transition-transform hover:scale-110
+              ${compact ? "w-5 h-5" : "w-8 h-8"} rounded-full transition-transform hover:scale-110
               ${selectedColor === color
-                ? "ring-2 ring-offset-2 ring-blue-500 scale-110"
+                ? `ring-2 ${compact ? "ring-offset-1" : "ring-offset-2"} ring-blue-500 scale-110`
                 : ""
               }
               ${isDarkMode && selectedColor === color
@@ -41,3 +43,4 @@ const ColorPicker: React.FC<ColorPickerProps> = ({
 };
 
 export default ColorPicker;
+

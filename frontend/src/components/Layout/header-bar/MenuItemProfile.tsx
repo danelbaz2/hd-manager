@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Settings, Moon, Sun, LogOut, FileOutput, UserCog } from "lucide-react";
+import { Settings, Moon, Sun, LogOut, FileOutput } from "lucide-react";
 import { useTheme, useAuth } from "../../../contexts";
 import ManageSetting from "../../modal/modal-setting/ManageSetting";
 import { ExportModal } from "../../modal/modal-export-excel";
-import { UserPreferenceModal } from "../../modal/modal-user-preference";
 
 interface MenuItemProfileProps {
   isOpen: boolean;
@@ -20,7 +19,6 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
   const navigate = useNavigate();
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   // Check if user is admin
   const isAdmin = user?.role === "admin";
@@ -41,14 +39,7 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
     onClose(); // Close the profile menu
   };
 
-  const handleOpenProfile = () => {
-    setIsProfileOpen(true);
-    onClose(); // Close the profile menu
-  };
-
-  // Get role display text in Hebrew
-
-  if (!isOpen && !isSettingsOpen && !isExportOpen && !isProfileOpen)
+  if (!isOpen && !isSettingsOpen && !isExportOpen)
     return null;
 
   return (
@@ -90,43 +81,22 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
               )}
             </button>
 
-            {/* Profile Settings - Only for regular users (admins access via Settings Modal) */}
-            {!isAdmin && (
-              <button
-                onClick={handleOpenProfile}
-                className={`
-                  w-full flex items-center justify-between
-                  px-4 py-3
-                  text-sm transition-colors
-                  ${isDarkMode
-                    ? "hover:bg-slate-700 text-slate-200"
-                    : "hover:bg-slate-50 text-slate-700"
-                  }
-                `}
-              >
-                <span>הגדרות פרופיל</span>
-                <UserCog size={18} className="text-slate-400" />
-              </button>
-            )}
-
-            {/* Settings - Only visible for admin users */}
-            {isAdmin && (
-              <button
-                onClick={handleOpenSettings}
-                className={`
-                  w-full flex items-center justify-between
-                  px-4 py-3
-                  text-sm transition-colors
-                  ${isDarkMode
-                    ? "hover:bg-slate-700 text-slate-200"
-                    : "hover:bg-slate-50 text-slate-700"
-                  }
-                `}
-              >
-                <span>הגדרות</span>
-                <Settings size={18} className="text-slate-400" />
-              </button>
-            )}
+            {/* Settings - Available for ALL users (content filtered by role inside) */}
+            <button
+              onClick={handleOpenSettings}
+              className={`
+                w-full flex items-center justify-between
+                px-4 py-3
+                text-sm transition-colors
+                ${isDarkMode
+                  ? "hover:bg-slate-700 text-slate-200"
+                  : "hover:bg-slate-50 text-slate-700"
+                }
+              `}
+            >
+              <span>הגדרות</span>
+              <Settings size={18} className="text-slate-400" />
+            </button>
 
             {/* Export Reports - Only visible for admin users */}
             {isAdmin && (
@@ -165,13 +135,11 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
         </div>
       )}
 
-      {/* Settings Modal - Only render for admin */}
-      {isAdmin && (
-        <ManageSetting
-          isOpen={isSettingsOpen}
-          onClose={() => setIsSettingsOpen(false)}
-        />
-      )}
+      {/* Settings Modal - Available for all users (tabs filtered by role inside) */}
+      <ManageSetting
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+      />
 
       {/* Export Modal - Only render for admin */}
       {isAdmin && (
@@ -180,14 +148,9 @@ const MenuItemProfile: React.FC<MenuItemProfileProps> = ({
           onClose={() => setIsExportOpen(false)}
         />
       )}
-
-      {/* User Preference Modal - Available for all users */}
-      <UserPreferenceModal
-        isOpen={isProfileOpen}
-        onClose={() => setIsProfileOpen(false)}
-      />
     </>
   );
 };
 
 export default MenuItemProfile;
+

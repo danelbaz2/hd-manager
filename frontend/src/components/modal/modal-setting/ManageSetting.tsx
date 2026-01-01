@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { X, Settings, Users, UserPlus, Tag, UserCog } from "lucide-react";
-import { useTheme } from "../../../contexts";
+import { useTheme, useAuth } from "../../../contexts";
 import { ModalOverlay } from "../../common/ModalOverlay";
 import ManageUser from "./manage-user/ManageUser.tsx";
 import ManageContact from "./manage-contact/ManageContact.tsx";
@@ -14,16 +14,27 @@ interface ManageSettingProps {
 
 type TabType = "users" | "contacts" | "tags" | "profile";
 
+// All available tabs configuration
+const ALL_TABS = [
+  { id: "users" as TabType, label: "עובדים", icon: Users, adminOnly: true },
+  { id: "contacts" as TabType, label: "אנשי קשר", icon: UserPlus, adminOnly: false },
+  { id: "tags" as TabType, label: "תגיות", icon: Tag, adminOnly: true },
+  { id: "profile" as TabType, label: "פרופיל", icon: UserCog, adminOnly: false },
+];
+
 const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
   const { isDarkMode } = useTheme();
-  const [activeTab, setActiveTab] = useState<TabType>("users");
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
 
-  const tabs = [
-    { id: "users" as TabType, label: "עובדים", icon: Users },
-    { id: "contacts" as TabType, label: "אנשי קשר", icon: UserPlus },
-    { id: "tags" as TabType, label: "תגיות", icon: Tag },
-    { id: "profile" as TabType, label: "פרופיל", icon: UserCog },
-  ];
+  // Filter tabs based on user role
+  const tabs = useMemo(() => {
+    return ALL_TABS.filter(tab => isAdmin || !tab.adminOnly);
+  }, [isAdmin]);
+
+  // Default to first available tab
+  const defaultTab = tabs[0]?.id || "contacts";
+  const [activeTab, setActiveTab] = useState<TabType>(defaultTab);
 
   const renderContent = () => {
     switch (activeTab) {

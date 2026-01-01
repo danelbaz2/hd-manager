@@ -7,15 +7,25 @@ interface ProfileAvatarProps {
   color: string;
   fullName: string;
   onImageChange: (imageUrl: string | null) => void;
+  size?: "sm" | "md" | "lg";
 }
+
+// Size configurations
+const SIZE_CONFIG = {
+  sm: { container: "w-16 h-16", text: "text-xl", border: 3, icon: 16 },
+  md: { container: "w-24 h-24", text: "text-3xl", border: 4, icon: 24 },
+  lg: { container: "w-32 h-32", text: "text-4xl", border: 5, icon: 28 },
+};
 
 const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
   profileImage,
   color,
   fullName,
   onImageChange,
+  size = "md",
 }) => {
   const { isDarkMode } = useTheme();
+  const config = SIZE_CONFIG[size];
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -33,13 +43,13 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
   };
 
   return (
-    <div className="flex flex-col items-center gap-4">
+    <div className="flex flex-col items-center gap-3">
       {/* Avatar */}
       <div className="relative group">
         <div
-          className="w-24 h-24 rounded-full flex items-center justify-center overflow-hidden"
+          className={`${config.container} rounded-full flex items-center justify-center overflow-hidden`}
           style={{
-            border: `4px solid ${color}`,
+            border: `${config.border}px solid ${color}`,
             backgroundColor: isDarkMode ? "#334155" : "#f1f5f9",
           }}
         >
@@ -51,9 +61,8 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
             />
           ) : (
             <span
-              className={`text-3xl font-bold ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`${config.text} font-bold ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               {fullName.charAt(0)}
             </span>
