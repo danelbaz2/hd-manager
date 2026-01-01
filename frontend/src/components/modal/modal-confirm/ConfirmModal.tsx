@@ -63,25 +63,52 @@ const VARIANT_CONFIG: Record<ConfirmModalVariant, {
   },
 };
 
-const ConfirmModal: React.FC<ConfirmModalProps> = ({
-  isOpen,
-  title,
-  text,
-  onConfirm,
-  onCancel,
-  isDarkMode,
-  variant = "warning",
-  confirmText,
-  cancelText = "ביטול",
-  confirmIcon,
-  headerIcon,
-  showIrreversibleWarning = false,
-}) => {
+// Helper to keep content visible during exit animation
+const useCachedContent = <T,>(content: T, isOpen: boolean): T => {
+  const [cached, setCached] = React.useState(content);
+
+  React.useEffect(() => {
+    if (isOpen) {
+      setCached(content);
+    }
+  }, [isOpen, content]);
+
+  return isOpen ? content : cached;
+};
+
+const ConfirmModal: React.FC<ConfirmModalProps> = (props) => {
+  const {
+    isOpen,
+    onConfirm,
+    onCancel,
+    isDarkMode,
+  } = props;
+
+  // Cache display props so they persist during close animation
+  // (Even if parent clears data like 'text' happens to be null)
+  const displayProps = useCachedContent({
+    title: props.title,
+    text: props.text,
+    variant: props.variant || "warning",
+    confirmText: props.confirmText,
+    cancelText: props.cancelText || "ביטול",
+    showIrreversibleWarning: props.showIrreversibleWarning || false,
+    headerIcon: props.headerIcon,
+    confirmIcon: props.confirmIcon
+  }, isOpen);
+
+  // Destructure from cached props
+  const {
+    title, text, variant, confirmText,
+    cancelText, showIrreversibleWarning, headerIcon, confirmIcon
+  } = displayProps;
+
   const config = VARIANT_CONFIG[variant];
   const HeaderIcon = headerIcon || config.defaultIcon;
   const ConfirmIcon = confirmIcon || config.defaultConfirmIcon;
   const finalConfirmText = confirmText || config.defaultConfirmText;
 
+  // We explicitly use isOpen for the Overlay to trigger animation
   return (
     <ModalOverlay isOpen={isOpen} onClose={onCancel}>
       <div

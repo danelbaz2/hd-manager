@@ -9,7 +9,7 @@ import type { UserData } from '../schemas/userTypes';
 // Connection State
 // ============================================================================
 
-export type ConnectionStatus = 
+export type ConnectionStatus =
   | 'disconnected'    // Not connected
   | 'connecting'      // Attempting to connect
   | 'connected'       // Connected and ready
@@ -82,26 +82,26 @@ export type ConnectionChangeHandler = (status: ConnectionStatus) => void;
 export interface SocketConfig {
   /** Socket server URL */
   url: string;
-  
+
   /** Idle timeout in milliseconds before disconnect (default: 5 minutes) */
   idleTimeoutMs: number;
-  
+
   /** Debounce time for activity events (default: 1000ms) */
   activityDebounceMs: number;
-  
+
   /** Enable auto-reconnect on activity after idle disconnect */
   autoReconnectOnActivity: boolean;
-  
+
   /** Maximum reconnection attempts */
   maxReconnectAttempts: number;
-  
+
   /** Base delay between reconnection attempts (ms) */
   reconnectDelayMs: number;
 }
 
 export const DEFAULT_SOCKET_CONFIG: SocketConfig = {
   url: import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000',
-  idleTimeoutMs: 30 * 1000, // 30 seconds for testing
+  idleTimeoutMs: 300 * 1000, // disconnect after 5 minutes of inactivity
   activityDebounceMs: 1000,
   autoReconnectOnActivity: true,
   maxReconnectAttempts: 10,

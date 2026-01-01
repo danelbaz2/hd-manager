@@ -57,6 +57,7 @@ interface ModalContainerProps {
   onAddNote: (text: string) => Promise<void>;
   getActionDescription: (e: any, c: any) => React.ReactNode;
   onMentionClick: (contactName: string) => void;
+  onStatusChangeRequest: (newStatus: any) => void;
   closeTaskModal: () => void;
   alerts: any[];
   dismissAlert: (id: number) => void;
@@ -79,6 +80,7 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
   onAddNote,
   getActionDescription,
   onMentionClick,
+  onStatusChangeRequest,
   closeTaskModal,
   alerts,
   dismissAlert,
@@ -123,6 +125,7 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
           onAddNote={onAddNote}
           getActionDescription={getActionDescription}
           onMentionClick={onMentionClick}
+          onStatusChangeRequest={onStatusChangeRequest}
         />
       </div>
       <TaskFooter

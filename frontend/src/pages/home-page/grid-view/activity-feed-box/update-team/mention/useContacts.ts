@@ -3,14 +3,19 @@ import { useState, useEffect, useCallback } from "react";
 import { getAllContacts, type Contact } from "../../../../../../api/contactsApi";
 import type { UseContactsReturn } from "../../../../../../schemas/mentionTypes";
 
+import { useAuth } from "../../../../../../contexts/AuthContext";
+
 export const useContacts = (): UseContactsReturn => {
+  const { isAuthenticated } = useAuth();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
-  // Fetch contacts on mount
+  // Fetch contacts on mount or when authenticated
   useEffect(() => {
+    if (!isAuthenticated) return;
+
     const loadContacts = async () => {
       setIsLoading(true);
       setError(null);
@@ -28,26 +33,26 @@ export const useContacts = (): UseContactsReturn => {
       }
     };
     loadContacts();
-  }, []);
+  }, [isAuthenticated]);
 
   // Find contact by name (flexible matching - exact, contains, or trimmed)
   const findContactByName = useCallback(
     (name: string): Contact | undefined => {
       const searchName = name.toLowerCase().trim();
-      
+
       // Try exact match first
       let contact = contacts.find(
         (c) => c.fullName.toLowerCase().trim() === searchName
       );
-      
+
       // If no exact match, try contains match
       if (!contact) {
         contact = contacts.find(
           (c) => c.fullName.toLowerCase().includes(searchName) ||
-                 searchName.includes(c.fullName.toLowerCase())
+            searchName.includes(c.fullName.toLowerCase())
         );
       }
-      
+
       return contact;
     },
     [contacts]

@@ -47,6 +47,7 @@ interface TaskContentProps {
   onAddNote: (text: string) => Promise<void>;
   getActionDescription: (entry: any, config: any) => React.ReactNode;
   onMentionClick: (contactName: string) => void;
+  onStatusChangeRequest: (newStatus: any) => void;
 }
 
 export const TaskContent: React.FC<TaskContentProps> = ({
@@ -64,6 +65,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   onAddNote,
   getActionDescription,
   onMentionClick,
+  onStatusChangeRequest,
 }) => {
   if (isEditMode) {
     return (
@@ -114,6 +116,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
       primaryTags={primaryTags}
       secondaryTags={secondaryTags}
       users={users}
+      onStatusChangeRequest={onStatusChangeRequest}
     />
   );
 };

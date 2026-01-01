@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { updateTask, type TaskFormData, type Task } from "../../../../api/tasksApi";
+import { updateTask, type TaskFormData, type Task, type TaskStatus } from "../../../../api/tasksApi";
 import type { TaskPriority } from "../../../../schemas/taskTypes";
 import { parseDateToTimestamp, timestampToDateStr, hasFormChanges, initFormFromTask } from "./formUtils";
 
@@ -22,6 +22,7 @@ export const useTaskForm = ({
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
+  const [status, setStatus] = useState<TaskStatus>("pending");
   const [selectedSecondaryTagIds, setSelectedSecondaryTagIds] = useState<string[]>([]);
   const [selectedPrimaryTagIds, setSelectedPrimaryTagIds] = useState<string[]>([]);
   const [startDate, setStartDate] = useState("");
@@ -35,6 +36,7 @@ export const useTaskForm = ({
       setTitle(init.title);
       setDescription(init.description);
       setPriority(init.priority);
+      setStatus(task.status || "pending");
       setSelectedSecondaryTagIds(init.selectedSecondaryTagIds);
       setSelectedPrimaryTagIds(init.selectedPrimaryTagIds);
       setSelectedUserIds(init.selectedUserIds);
@@ -65,6 +67,7 @@ export const useTaskForm = ({
     setTitle(init.title);
     setDescription(init.description);
     setPriority(init.priority);
+    setStatus(task.status || "pending");
     setSelectedSecondaryTagIds(init.selectedSecondaryTagIds);
     setSelectedPrimaryTagIds(init.selectedPrimaryTagIds);
     setSelectedUserIds(init.selectedUserIds);
@@ -109,6 +112,7 @@ export const useTaskForm = ({
   return {
     isEditMode, setIsEditMode, isSubmitting,
     title, setTitle, description, setDescription, priority, setPriority,
+    status, setStatus,
     startDate, setStartDate: handleSetStartDate, deadline, setDeadline: handleSetDeadline,
     selectedUserIds, setSelectedUserIds, selectedSecondaryTagIds, setSelectedSecondaryTagIds,
     selectedPrimaryTagIds, setSelectedPrimaryTagIds, handleCancelEdit, handleSave,

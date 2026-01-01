@@ -81,11 +81,29 @@ export const ModalOverlay: React.FC<ModalOverlayProps> = ({
         e.stopPropagation();
     }, []);
 
+    // Focus management and Escape key handling
+    useEffect(() => {
+        if (isOpen && shouldRender) {
+            // Find the container element
+            const container = document.getElementById('modal-content-container');
+            if (container) {
+                container.focus();
+            }
+        }
+    }, [isOpen, shouldRender]);
+
+    const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
+        if (e.key === 'Escape' && closeOnBackdropClick) {
+            e.stopPropagation(); // Prevent bubbling to parent modals
+            onClose();
+        }
+    }, [closeOnBackdropClick, onClose]);
+
     if (!shouldRender) return null;
 
     const content = (
         <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center p-4"
+            className="fixed inset-0 z-[9999] flex items-center justify-center p-4 outline-none"
             onClick={handleOverlayClick}
             onMouseDown={handleOverlayClick}
         >
@@ -97,8 +115,11 @@ export const ModalOverlay: React.FC<ModalOverlayProps> = ({
 
             {/* Content container - animated, with configurable max-width */}
             <div
+                id="modal-content-container"
+                tabIndex={-1}
+                onKeyDown={handleKeyDown}
                 className={`
-          relative z-10 w-full ${maxWidthClass} transition-all
+          relative z-10 w-full ${maxWidthClass} transition-all outline-none
           ${isContentVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"}
         `}
                 style={{ transitionDuration: `${animationDuration}ms` }}

@@ -1,8 +1,10 @@
 import { useState, useCallback, useEffect } from "react";
 import { getAllChatMessages, createChatMessage } from "../../../../../api/chatApi";
 import type { TeamMessage } from "../../../../../schemas/teamMessageTypes";
+import { useAuth } from "../../../../../contexts/AuthContext";
 
 export const useTeamMessages = () => {
+  const { isAuthenticated } = useAuth();
   const [messages, setMessages] = useState<TeamMessage[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
@@ -79,8 +81,10 @@ export const useTeamMessages = () => {
 
   // Initial fetch
   useEffect(() => {
-    fetchMessages();
-  }, [fetchMessages]);
+    if (isAuthenticated) {
+      fetchMessages();
+    }
+  }, [fetchMessages, isAuthenticated]);
 
   return { messages, isLoading, isSending, error, fetchMessages, sendMessage };
 };
