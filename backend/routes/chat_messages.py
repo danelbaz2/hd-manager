@@ -21,7 +21,7 @@ def get_messages():
     return jsonify([serialize_doc(m) for m in messages])
 
 @bp.route('/', methods=['POST'])
-@admin_required  # Only admins can post team updates
+@jwt_required  # All authenticated users can post team updates
 @handle_client_disconnect
 def create_message():
     try:

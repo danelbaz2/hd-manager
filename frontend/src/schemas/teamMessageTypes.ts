@@ -19,7 +19,6 @@ export interface UpdateTeamProps {
   users: UserData[];
   isDarkMode: boolean;
   currentUserId?: string;
-  isAdmin: boolean;
   messagesOverride?: TeamMessage[];
 }
 

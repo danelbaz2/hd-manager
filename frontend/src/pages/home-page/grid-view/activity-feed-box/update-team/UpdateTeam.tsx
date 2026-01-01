@@ -16,7 +16,6 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
   users,
   isDarkMode,
   currentUserId,
-  isAdmin,
   messagesOverride,
 }) => {
   // ... hooks
@@ -129,7 +128,7 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
         >
           אין עדכוני צוות עדיין
         </div>
-        {isAdmin && <MessageInput {...inputProps} />}
+        <MessageInput {...inputProps} />
         <ContactDetailModal {...modalProps} />
       </div>
     );
@@ -151,7 +150,7 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
         />
         <ScrollToLatestButton containerRef={scrollerRef} direction="up" />
       </div>
-      {isAdmin && <MessageInput {...inputProps} />}
+      <MessageInput {...inputProps} />
       <ContactDetailModal {...modalProps} />
     </div>
   );
