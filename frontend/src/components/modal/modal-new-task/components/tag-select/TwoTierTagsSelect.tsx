@@ -247,7 +247,7 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
                         } ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}
                 />
 
-                <div className={`flex-1 flex flex-wrap gap-1.5 justify-start max-h-[32px] overflow-y-auto ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}>
+                <div className={`flex-1 flex flex-wrap gap-1.5 justify-start max-h-[32px] overflow-y-auto scrollbar-hide`}>
                     {!hasAnyTagsSelected ? (
                         <span className={isDarkMode ? "text-slate-400" : "text-slate-400"}>
                             בחר תגיות...
@@ -280,8 +280,8 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
                     id="tags-dropdown"
                     className={`
             fixed z-[99999]
-            max-h-72 overflow-y-auto
-            ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}
+
+            max-h-72 overflow-y-auto scrollbar-hide
             rounded-xl border-2 shadow-xl
             ${isDarkMode
                             ? "bg-slate-800 border-slate-600"

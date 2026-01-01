@@ -404,7 +404,7 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
       {/* Task Title */}
       <div className="flex justify-between items-start mb-2">
         <h4
-          className={`font-bold text-sm leading-tight ${isDarkMode ? "text-white" : "text-slate-800"
+          className={`font-bold text-sm leading-tight line-clamp-2 break-words whitespace-pre-line ${isDarkMode ? "text-white" : "text-slate-800"
             }`}
         >
           {task.title || "ללא כותרת"}
@@ -414,7 +414,7 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
       {/* Task Description */}
       {task.description && (
         <p
-          className={`text-xs mb-3 line-clamp-2 ${isDarkMode ? "text-slate-400" : "text-slate-500"
+          className={`text-xs mb-3 line-clamp-2 break-words whitespace-pre-line ${isDarkMode ? "text-slate-400" : "text-slate-500"
             }`}
         >
           {task.description}

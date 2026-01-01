@@ -127,7 +127,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
 
       {/* Title */}
       <h2
-        className={`text-2xl font-bold ${isDarkMode ? "text-white" : "text-slate-800"
+        className={`text-2xl font-bold break-words whitespace-pre-line ${isDarkMode ? "text-white" : "text-slate-800"
           }`}
       >
         {task.title}
@@ -170,7 +170,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
             </span>
           </div>
           <p
-            className={`text-sm leading-relaxed ${isDarkMode ? "text-slate-300" : "text-slate-600"
+            className={`text-sm leading-relaxed break-words whitespace-pre-line ${isDarkMode ? "text-slate-300" : "text-slate-600"
               }`}
           >
             {task.description}

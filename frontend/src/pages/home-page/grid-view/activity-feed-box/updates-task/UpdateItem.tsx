@@ -41,7 +41,7 @@ export const UpdateItem: React.FC<UpdateItemProps> = ({
 
   return (
     <div
-      className={`flex items-start gap-3 cursor-pointer transition-all py-3 px-2 ${isDarkMode ? "hover:bg-slate-700/30" : "hover:bg-slate-50"
+      className={`flex items-start gap-3 cursor-pointer transition-all py-3 px-2 overflow-hidden ${isDarkMode ? "hover:bg-slate-700/30" : "hover:bg-slate-50"
         } ${isNew ? "animate-fadeSlideIn" : ""}`}
       style={isNew ? {
         animation: "fadeSlideIn 0.4s ease-out forwards",
@@ -59,7 +59,7 @@ export const UpdateItem: React.FC<UpdateItemProps> = ({
         isDarkMode={isDarkMode}
       />
 
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 overflow-hidden">
         <div className="flex items-center gap-2 flex-wrap mb-0.5">
           <span
             className={`font-semibold text-sm ${isDarkMode ? "text-white" : "text-slate-800"

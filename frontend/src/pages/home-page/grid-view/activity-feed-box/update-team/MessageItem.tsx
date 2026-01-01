@@ -36,7 +36,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
   return (
     <div className="px-3 py-2" dir="rtl">
       <div
-        className={`rounded-2xl p-3 shadow-sm ${isDarkMode
+        className={`rounded-2xl p-3 shadow-sm overflow-hidden ${isDarkMode
           ? "bg-slate-700/80 border border-slate-600"
           : "bg-white border border-slate-100"
           }`}
@@ -87,7 +87,7 @@ export const MessageItem: React.FC<MessageItemProps> = ({
 
         {/* Message Content with Mentions */}
         <p
-          className={`text-sm leading-relaxed whitespace-pre-wrap ${isDarkMode ? "text-slate-200" : "text-slate-700"
+          className={`text-sm leading-relaxed whitespace-pre-wrap break-words ${isDarkMode ? "text-slate-200" : "text-slate-700"
             }`}
         >
           <MentionText

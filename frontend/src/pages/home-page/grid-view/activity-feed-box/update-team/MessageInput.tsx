@@ -132,6 +132,7 @@ export const MessageInput: React.FC<MessageInputProps> = ({
         }}
         placeholder="כתוב עדכון לצוות... (@ לאזכור)"
         rows={1}
+        maxLength={500}
         className={`flex-1 resize-none rounded-xl px-4 py-2.5 text-sm outline-none transition-all ${isDarkMode
           ? "bg-slate-700 text-white placeholder-slate-400 focus:ring-2 focus:ring-blue-500"
           : "bg-slate-100 text-slate-800 placeholder-slate-500 focus:ring-2 focus:ring-blue-400"

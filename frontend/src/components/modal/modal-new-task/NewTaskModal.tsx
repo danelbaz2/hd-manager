@@ -4,12 +4,7 @@ import { useTheme, useSettings } from "../../../contexts";
 import { ToastContainer } from "../../alert-feedback";
 import DelayedLoader from "../../loaders/DelayedLoader";
 import { ModalOverlay } from "../../common/ModalOverlay";
-import {
-  PrioritySelect,
-  TwoTierTagsSelect,
-  UserSelect,
-  DatePicker,
-} from "./components";
+import { TaskForm } from "../modal-task/parts/TaskForm";
 import { useTaskForm } from "./hooks";
 
 interface NewTaskModalProps {
@@ -21,7 +16,7 @@ interface NewTaskModalProps {
 
 /**
  * NewTaskModal - Modal for creating new tasks
- * Uses ModalOverlay for proper backdrop and z-index
+ * Uses shared TaskForm component for form fields
  */
 const NewTaskModal: React.FC<NewTaskModalProps> = ({
   isOpen,
@@ -116,89 +111,30 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
             className={`px-6 lg:px-8 py-4 flex-1 overflow-y-auto ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
               }`}
           >
-            <div className="space-y-3">
-              {/* Title & Priority Row */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-                <div className="md:col-span-2">
-                  <label
-                    className={`block text-sm lg:text-base font-medium mb-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"
-                      }`}
-                  >
-                    כותרת המשימה
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="לדוגמה: עדכון שרתי בסיס נתונים"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    className={`w-full px-3 py-2.5 rounded-xl border-2 text-sm lg:text-base font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${isDarkMode
-                      ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
-                      : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
-                      }`}
-                  />
-                </div>
-                <PrioritySelect value={priority} onChange={setPriority} />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label
-                  className={`block text-sm lg:text-base font-medium mb-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"
-                    }`}
-                >
-                  תיאור המשימה
-                </label>
-                <textarea
-                  placeholder="פרט את דרישות המשימה..."
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  rows={2}
-                  className={`w-full px-3 py-2.5 rounded-xl border-2 resize-none text-sm lg:text-base transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${isDarkMode
-                    ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
-                    : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
-                    }`}
-                />
-              </div>
-
-              {/* Tags & Dates Row */}
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-3">
-                <div className="md:col-span-6">
-                  <TwoTierTagsSelect
-                    primaryTags={primaryTags}
-                    secondaryTags={secondaryTags}
-                    selectedSecondaryTagIds={selectedSecondaryTagIds}
-                    onChange={setSelectedSecondaryTagIds}
-                    selectedPrimaryTagIds={selectedPrimaryTagIds}
-                    onChangePrimary={setSelectedPrimaryTagIds}
-                    isLoading={isDataLoading}
-                  />
-                </div>
-                <div className="md:col-span-3">
-                  <DatePicker
-                    label="תאריך התחלה"
-                    value={startDate}
-                    onChange={setStartDate}
-                    placeholder="בחר תאריך"
-                  />
-                </div>
-                <div className="md:col-span-3">
-                  <DatePicker
-                    label="תאריך יעד"
-                    value={deadline}
-                    onChange={setDeadline}
-                    placeholder="בחר תאריך"
-                  />
-                </div>
-              </div>
-
-              {/* Assignees */}
-              <UserSelect
-                users={users}
-                selectedUserIds={selectedUserIds}
-                onChange={setSelectedUserIds}
-                isLoading={isDataLoading}
-              />
-            </div>
+            {/* Shared TaskForm Component */}
+            <TaskForm
+              title={title}
+              setTitle={setTitle}
+              description={description}
+              setDescription={setDescription}
+              priority={priority}
+              setPriority={setPriority}
+              startDate={startDate}
+              setStartDate={setStartDate}
+              deadline={deadline}
+              setDeadline={setDeadline}
+              selectedUserIds={selectedUserIds}
+              setSelectedUserIds={setSelectedUserIds}
+              selectedSecondaryTagIds={selectedSecondaryTagIds}
+              setSelectedSecondaryTagIds={setSelectedSecondaryTagIds}
+              selectedPrimaryTagIds={selectedPrimaryTagIds}
+              setSelectedPrimaryTagIds={setSelectedPrimaryTagIds}
+              primaryTags={primaryTags}
+              secondaryTags={secondaryTags}
+              users={users}
+              isDarkMode={isDarkMode}
+              isLoading={isDataLoading}
+            />
           </div>
         </DelayedLoader>
 

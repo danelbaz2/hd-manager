@@ -94,12 +94,14 @@ const ProfileSettings: React.FC<ProfileSettingsProps> = ({ onSaveSuccess }) => {
                 value={formData.fullName}
                 onChange={(val) => handleFieldChange("fullName", val)}
                 placeholder="הזן שם מלא..."
+                maxLength={50}
               />
               <TextInput
                 label="כינוי (אופציונלי)"
                 value={formData.nickname}
                 onChange={(val) => handleFieldChange("nickname", val)}
                 placeholder="הזן כינוי..."
+                maxLength={30}
               />
             </div>
           </div>

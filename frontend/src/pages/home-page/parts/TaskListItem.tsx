@@ -82,7 +82,7 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
       </div>
 
       {/* Task Content - Title only */}
-      <div className="flex-1 min-w-0">
+      <div className="flex-1 min-w-0 overflow-hidden">
         <h3
           className={`font-semibold text-sm lg:text-base truncate
             ${isDarkMode ? "text-white" : "text-slate-800"}`}
