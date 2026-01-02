@@ -9,6 +9,11 @@ from websocket import broadcast_user_update
 import bcrypt
 from utils.logger import logger
 from utils.error_handlers import handle_client_disconnect
+from middleware.idempotency import idempotency_middleware
+try:
+    from pymongo.errors import _OperationCancelled
+except ImportError:
+    _OperationCancelled = Exception
 
 bp = Blueprint('users', __name__, url_prefix='/api/users')
 
@@ -25,6 +30,7 @@ def get_users():
 
 @bp.route('/', methods=['POST'])
 @admin_required
+@idempotency_middleware
 @handle_client_disconnect
 def create_user():
     try:
@@ -53,15 +59,30 @@ def create_user():
         data['nickname'] = None
 
     data['_id'] = str(ObjectId())
-    mongo.db.users.insert_one(data)
     
-    log_history('user', data['_id'], 'CREATE', getattr(request, 'user_full_name', 'system'), None, data, data)
+    try:
+        mongo.db.users.insert_one(data)
+    except _OperationCancelled:
+        # Check if the document was actually inserted despite the cancellation
+        if mongo.db.users.find_one({'_id': data['_id']}):
+            logger.warning(f"User {data['_id']} created despite client disconnect")
+            pass  # Proceed to log history/action as if nothing happened
+        else:
+            raise  # Re-raise if not found
+    
+    # History logging and broadcast are best-effort
+    try:
+        log_history('user', data['_id'], 'CREATE', getattr(request, 'user_full_name', 'system'), None, data, data)
+        logger.action("Create", "User", data['_id'], getattr(request, 'user_full_name', 'system'), f"Username: {data.get('username')}")
+    except:
+        pass  # Don't fail request if logging fails
     
     # Broadcast user creation to all clients
     serialized = serialize_doc(data.copy())
-    broadcast_user_update('create', serialized)
-    
-    logger.action("Create", "User", data['_id'], getattr(request, 'user_full_name', 'system'), f"Username: {data.get('username')}")
+    try:
+        broadcast_user_update('create', serialized)
+    except:
+        pass  # Don't fail request if broadcast fails
 
     return jsonify(serialized), 201
 
@@ -72,66 +93,100 @@ def update_user(id):
     try:
         validated = UserUpdateModel(**request.json)
         data = validated.model_dump(exclude_unset=True)
-        
-        # Fetch old document first
-        old_doc = mongo.db.users.find_one({'_id': id})
-        if not old_doc:
-            return jsonify({"error": "User not found"}), 404
-        
-        now = int(datetime.now().timestamp() * 1000)
-        data['base.updatedAt'] = now
-        data['base.updatedBy'] = getattr(request, 'user_full_name', 'system')
-        
-        # If password is being updated (and not empty), hash it
-        if 'password' in data and data['password']:
-            plain_password = data.pop('password')  # Remove 'password' from data
-            hashed = bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt())
-            data['passwordHash'] = hashed.decode('utf-8')  # Store as 'passwordHash'
-        elif 'password' in data:
-            # Empty password provided - remove from update to keep existing
-            del data['password']
-        
-        mongo.db.users.update_one({'_id': id}, {'$set': data})
-        updated = mongo.db.users.find_one({'_id': id})
-        
-        log_history('user', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, data)
-        
-        # Broadcast user update to all clients
-        serialized = serialize_doc(updated.copy())
-        broadcast_user_update('update', serialized)
-            
-        logger.action("Update", "User", id, getattr(request, 'user_full_name', 'system'), f"Changed: {list(data.keys())}")
-
-        return jsonify(serialized)
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+        
+    # Fetch old document first
+    old_doc = mongo.db.users.find_one({'_id': id})
+    if not old_doc:
+        return jsonify({"error": "User not found"}), 404
+    
+    now = int(datetime.now().timestamp() * 1000)
+    data['base.updatedAt'] = now
+    data['base.updatedBy'] = getattr(request, 'user_full_name', 'system')
+    
+    # If password is being updated (and not empty), hash it
+    if 'password' in data and data['password']:
+        plain_password = data.pop('password')  # Remove 'password' from data
+        hashed = bcrypt.hashpw(plain_password.encode('utf-8'), bcrypt.gensalt())
+        data['passwordHash'] = hashed.decode('utf-8')  # Store as 'passwordHash'
+    elif 'password' in data:
+        # Empty password provided - remove from update to keep existing
+        del data['password']
+    
+    try:
+        mongo.db.users.update_one({'_id': id}, {'$set': data})
+    except _OperationCancelled:
+        # Check if the update was applied despite the cancellation
+        check_doc = mongo.db.users.find_one({'_id': id})
+        if check_doc and check_doc.get('base', {}).get('updatedAt') == now:
+            logger.warning(f"User {id} updated despite client disconnect")
+            pass  # Proceed normally
+        else:
+            raise  # Re-raise if update didn't apply
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+    
+    updated = mongo.db.users.find_one({'_id': id})
+    
+    # History logging is best-effort
+    try:
+        log_history('user', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, data)
+        logger.action("Update", "User", id, getattr(request, 'user_full_name', 'system'), f"Changed: {list(data.keys())}")
+    except:
+        pass  # Don't fail request if logging fails
+    
+    # Broadcast user update to all clients (best-effort)
+    serialized = serialize_doc(updated.copy())
+    try:
+        broadcast_user_update('update', serialized)
+    except:
+        pass  # Don't fail request if broadcast fails
+
+    return jsonify(serialized)
 
 @bp.route('/<id>', methods=['DELETE'])
 @admin_required
 @handle_client_disconnect
 def delete_user(id):
+    old_doc = mongo.db.users.find_one({'_id': id})
+    if not old_doc:
+        return jsonify({"error": "User not found"}), 404
+    
+    now = int(datetime.now().timestamp() * 1000)
+    
     try:
-        old_doc = mongo.db.users.find_one({'_id': id})
-        if not old_doc:
-            return jsonify({"error": "User not found"}), 404
-        
-        now = int(datetime.now().timestamp() * 1000)
         mongo.db.users.update_one({'_id': id}, {'$set': {
             'base.isDeleted': True,
             'base.updatedAt': now,
             'base.updatedBy': getattr(request, 'user_full_name', 'system')
         }})
-        
-        updated = mongo.db.users.find_one({'_id': id})
-        log_history('user', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, updated, {'base': {'isDeleted': True}})
-        
-        # Broadcast user deletion to all clients
-        broadcast_user_update('delete', None, id)
-        
-        logger.action("Delete", "User", id, getattr(request, 'user_full_name', 'system'))
-        
+    except _OperationCancelled:
+        # Check if the delete was applied despite the cancellation
+        check_doc = mongo.db.users.find_one({'_id': id})
+        if check_doc and check_doc.get('base', {}).get('isDeleted') == True:
+            logger.warning(f"User {id} deleted despite client disconnect")
+            pass  # Proceed normally
+        else:
+            raise  # Re-raise if delete didn't apply
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    
+    updated = mongo.db.users.find_one({'_id': id})
+    
+    # History logging is best-effort
+    try:
+        log_history('user', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, updated, {'base': {'isDeleted': True}})
+        logger.action("Delete", "User", id, getattr(request, 'user_full_name', 'system'))
+    except:
+        pass  # Don't fail request if logging fails
+    
+    # Broadcast user deletion to all clients (best-effort)
+    try:
+        broadcast_user_update('delete', None, id)
+    except:
+        pass  # Don't fail request if broadcast fails
+        
     return jsonify({"message": "Deleted"}), 200
 
 

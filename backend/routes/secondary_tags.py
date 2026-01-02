@@ -6,6 +6,12 @@ from bson.objectid import ObjectId
 from utils.history import log_history
 from utils.jwt_utils import jwt_required, admin_required
 from utils.error_handlers import handle_client_disconnect
+from middleware.idempotency import idempotency_middleware
+from utils.logger import logger
+try:
+    from pymongo.errors import _OperationCancelled
+except ImportError:
+    _OperationCancelled = Exception
 
 bp = Blueprint('secondary_tags', __name__, url_prefix='/api/secondary-tags')
 
@@ -34,6 +40,7 @@ def get_secondary_tags():
 
 @bp.route('/', methods=['POST'])
 @admin_required
+@idempotency_middleware
 @handle_client_disconnect
 def create_secondary_tag():
     """Create a new secondary tag"""
@@ -80,7 +87,10 @@ def create_secondary_tag():
             mongo.db.ents.update_one({'_id': tag_id}, final_update)
             
             updated_tag = mongo.db.ents.find_one({'_id': tag_id})
-            log_history('secondary_tag', tag_id, 'RESTORE', getattr(request, 'user_full_name', 'system'), existing_tag, updated_tag, final_update['$set'])
+            try:
+                log_history('secondary_tag', tag_id, 'RESTORE', getattr(request, 'user_full_name', 'system'), existing_tag, updated_tag, final_update['$set'])
+            except:
+                pass  # Best-effort logging
             return jsonify(serialize_doc(updated_tag)), 201
         else:
             # Tag exists and is active
@@ -96,9 +106,23 @@ def create_secondary_tag():
         'updatedBy': getattr(request, 'user_full_name', 'system')
     }
     data['_id'] = str(ObjectId())
-    mongo.db.ents.insert_one(data)
     
-    log_history('secondary_tag', data['_id'], 'CREATE', getattr(request, 'user_full_name', 'system'), None, data, data)
+    try:
+        mongo.db.ents.insert_one(data)
+    except _OperationCancelled:
+        # Check if the document was actually inserted despite the cancellation
+        if mongo.db.ents.find_one({'_id': data['_id']}):
+            logger.warning(f"Secondary tag {data['_id']} created despite client disconnect")
+            pass  # Proceed to log history/action as if nothing happened
+        else:
+            raise  # Re-raise if not found
+    
+    # History logging is best-effort
+    try:
+        log_history('secondary_tag', data['_id'], 'CREATE', getattr(request, 'user_full_name', 'system'), None, data, data)
+        logger.action("Create", "SecondaryTag", data['_id'], getattr(request, 'user_full_name', 'system'), f"Name: {data.get('name', 'Unknown')}")
+    except:
+        pass  # Don't fail request if logging fails
     
     return jsonify(serialize_doc(data)), 201
 
@@ -145,12 +169,25 @@ def update_secondary_tag(id):
     
     try:
         mongo.db.ents.update_one({'_id': id}, {'$set': data})
+    except _OperationCancelled:
+        # Check if the update was applied despite the cancellation
+        check_doc = mongo.db.ents.find_one({'_id': id})
+        if check_doc and check_doc.get('base', {}).get('updatedAt') == now:
+            logger.warning(f"Secondary tag {id} updated despite client disconnect")
+            pass  # Proceed normally
+        else:
+            raise  # Re-raise if update didn't apply
     except Exception as e:
         return jsonify({"error": str(e)}), 400
         
     updated = mongo.db.ents.find_one({'_id': id})
     
-    log_history('secondary_tag', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, data)
+    # History logging is best-effort
+    try:
+        log_history('secondary_tag', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, data)
+        logger.action("Update", "SecondaryTag", id, getattr(request, 'user_full_name', 'system'), f"Changed: {list(data.keys())}")
+    except:
+        pass  # Don't fail request if logging fails
              
     return jsonify(serialize_doc(updated))
 
@@ -160,22 +197,37 @@ def update_secondary_tag(id):
 @handle_client_disconnect
 def delete_secondary_tag(id):
     """Soft delete a secondary tag (sets isDeleted to true)"""
+    old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'secondary_tag'})
+    if not old_doc:
+        return jsonify({"error": "Secondary tag not found"}), 404
+    
+    now = int(datetime.now().timestamp() * 1000)
+    
     try:
-        old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'secondary_tag'})
-        if not old_doc:
-            return jsonify({"error": "Secondary tag not found"}), 404
-        
-        now = int(datetime.now().timestamp() * 1000)
         mongo.db.ents.update_one({'_id': id}, {'$set': {
             'base.isDeleted': True,
             'base.updatedAt': now,
             'base.updatedBy': getattr(request, 'user_full_name', 'system')
         }})
-        
-        updated = mongo.db.ents.find_one({'_id': id})
-        log_history('secondary_tag', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, updated, {'base': {'isDeleted': True}})
-        
+    except _OperationCancelled:
+        # Check if the delete was applied despite the cancellation
+        check_doc = mongo.db.ents.find_one({'_id': id})
+        if check_doc and check_doc.get('base', {}).get('isDeleted') == True:
+            logger.warning(f"Secondary tag {id} deleted despite client disconnect")
+            pass  # Proceed normally
+        else:
+            raise  # Re-raise if delete didn't apply
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+    
+    updated = mongo.db.ents.find_one({'_id': id})
+    
+    # History logging is best-effort
+    try:
+        log_history('secondary_tag', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, updated, {'base': {'isDeleted': True}})
+        logger.action("Delete", "SecondaryTag", id, getattr(request, 'user_full_name', 'system'))
+    except:
+        pass  # Don't fail request if logging fails
+        
     return jsonify({"message": "Secondary tag deleted"}), 200
 
