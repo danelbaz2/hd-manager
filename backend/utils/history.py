@@ -2,12 +2,22 @@ from database import mongo
 from datetime import datetime
 from bson.objectid import ObjectId
 
-def log_history(entity_type, entity_id, action, user_id='system', old_val=None, new_val=None, change_val=None):
+def log_history(entity_type, entity_id, action, user_id='system', old_val=None, new_val=None, change_val=None, timestamp=None):
     """
     Logs a history entry.
     
     If action is CREATE: old_val is None, new_val is the object, change_val is the object.
     If action is UPDATE: old_val is full obj before, new_val is full obj after, change_val is the diff.
+    
+    Args:
+        entity_type: Type of entity (task, user, etc.)
+        entity_id: ID of the entity
+        action: Action performed (CREATE, UPDATE, DELETE)
+        user_id: ID of user performing the action
+        old_val: Entity state before changes (None for CREATE)
+        new_val: Entity state after changes
+        change_val: What changed (diff)
+        timestamp: Optional timestamp override (useful for seeding)
     """
     
     # helper to clean ObjectId from dicts before saving to history (as sub-documents)
@@ -37,7 +47,8 @@ def log_history(entity_type, entity_id, action, user_id='system', old_val=None, 
                 result[key] = value
         return result
 
-    now = int(datetime.now().timestamp() * 1000)
+    # Use provided timestamp or current time
+    now = timestamp if timestamp is not None else int(datetime.now().timestamp() * 1000)
     
     # c includes the changes performed and metadata about who/when/what action
     # Unflatten to convert 'base.updatedAt' to nested {'base': {'updatedAt': ...}}
