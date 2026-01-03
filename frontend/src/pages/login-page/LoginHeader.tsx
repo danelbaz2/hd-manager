@@ -35,6 +35,7 @@ const LoginHeader: React.FC<LoginHeaderProps> = ({ isDarkMode }) => {
 
       {/* Subtitle */}
       <p
+        dir="rtl"
         className={`
           text-center text-sm mb-8
           ${isDarkMode ? "text-slate-400" : "text-slate-500"}
