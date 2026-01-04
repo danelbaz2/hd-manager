@@ -9,7 +9,13 @@ import {
   Tags,
 } from "lucide-react";
 import { useTheme, useAuth } from "../../contexts";
-import { IconToggleButton, IconButtonToggle, SearchInput, StatusFilterButtons } from "./components";
+import {
+  IconToggleButton,
+  IconButtonToggle,
+  SearchInput,
+  StatusFilterButtons,
+  ResponsibleFilterButton,
+} from "./components";
 import type { TaskStatus } from "../../api/tasksApi";
 
 type ViewMode = "daily" | "weekly" | "monthly";
@@ -33,9 +39,11 @@ interface HeaderHomePageProps {
   onDisplayModeChange?: (mode: DisplayMode) => void;
   onSearchChange?: (query: string) => void;
   onStatusFilterChange?: (statuses: Set<TaskStatus>) => void;
+  onResponsibleFilterChange?: (filter: "all" | "without") => void;
   viewMode?: ViewMode;
   displayMode?: DisplayMode;
   statusFilter?: Set<TaskStatus>;
+  responsibleFilter?: "all" | "without";
 }
 
 /**
@@ -48,9 +56,11 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
   onDisplayModeChange,
   onSearchChange,
   onStatusFilterChange,
+  onResponsibleFilterChange,
   viewMode: externalViewMode,
   displayMode: externalDisplayMode,
   statusFilter: externalStatusFilter,
+  responsibleFilter = "all",
 }) => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
@@ -60,7 +70,9 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
   const [internalViewMode, setInternalViewMode] = useState<ViewMode>("daily");
   const [internalDisplayMode, setInternalDisplayMode] =
     useState<DisplayMode>("grid");
-  const [internalStatusFilter, setInternalStatusFilter] = useState<Set<TaskStatus>>(new Set());
+  const [internalStatusFilter, setInternalStatusFilter] = useState<
+    Set<TaskStatus>
+  >(new Set());
 
   const viewMode = externalViewMode ?? internalViewMode;
   const displayMode = externalDisplayMode ?? internalDisplayMode;
@@ -117,9 +129,10 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
       className={`
         flex items-center justify-between
         px-4 lg:px-6 xl:px-8 py-3 lg:py-4 
-        ${isDarkMode
-          ? "bg-slate-900 border-slate-800"
-          : "bg-slate-50 border-slate-200"
+        ${
+          isDarkMode
+            ? "bg-slate-900 border-slate-800"
+            : "bg-slate-50 border-slate-200"
         }
       `}
       dir="rtl"
@@ -135,21 +148,31 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
           />
         </div>
 
-        {(displayMode === "tags" || displayMode === "list") && onSearchChange && (
-          <SearchInput
-            placeholder={
-              displayMode === "tags" ? "חיפוש לפי תגית..." : "חיפוש משימה..."
-            }
-            isDarkMode={isDarkMode}
-            onChange={onSearchChange}
-          />
-        )}
+        {(displayMode === "tags" || displayMode === "list") &&
+          onSearchChange && (
+            <SearchInput
+              placeholder={
+                displayMode === "tags" ? "חיפוש לפי תגית..." : "חיפוש משימה..."
+              }
+              isDarkMode={isDarkMode}
+              onChange={onSearchChange}
+            />
+          )}
 
         {/* Status Filter - Show in list and tags modes */}
         {(displayMode === "list" || displayMode === "tags") && (
           <StatusFilterButtons
             selectedStatuses={statusFilter}
             onChange={handleStatusFilterChange}
+            isDarkMode={isDarkMode}
+          />
+        )}
+
+        {/* Responsible Filter - Show only in list mode */}
+        {displayMode === "list" && onResponsibleFilterChange && (
+          <ResponsibleFilterButton
+            selectedFilter={responsibleFilter}
+            onChange={onResponsibleFilterChange}
             isDarkMode={isDarkMode}
           />
         )}

@@ -5,6 +5,7 @@ export interface ArchiveFilters {
   taskId: string;
   startDate: number | null;
   endDate: number;
+  tagIds: string[];
 }
 
 export const defaultFilters: ArchiveFilters = {
@@ -12,4 +13,5 @@ export const defaultFilters: ArchiveFilters = {
   taskId: "",
   startDate: null,
   endDate: Date.now(),
+  tagIds: [],
 };
