@@ -49,7 +49,7 @@ const UserSelect: React.FC<UserSelectProps> = ({
     <div>
       <label
         className={`
-          block text-sm lg:text-base font-medium mb-3
+          block text-sm lg:text-base font-medium mb-1
           ${isDarkMode ? "text-slate-300" : "text-slate-700"}
         `}
       >

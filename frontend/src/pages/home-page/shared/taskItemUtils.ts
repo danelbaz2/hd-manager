@@ -14,9 +14,15 @@ export const getStatusStyle = (status?: string) => {
         bg: "bg-amber-100",
         text: "text-amber-700",
       };
+    case "pending_approval":
+      return {
+        label: "ממתין לאישור",
+        bg: "bg-purple-100",
+        text: "text-purple-700",
+      };
     case "completed":
       return {
-        label: "הושלם",
+        label: "סגור",
         bg: "bg-blue-100",
         text: "text-blue-700",
       };

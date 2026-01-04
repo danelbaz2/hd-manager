@@ -44,6 +44,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
   const canChangeStatus = useMemo(() => {
     if (!user) return false;
     if (user.role === "admin") return true;
+    if (task.status === "completed") return false;
     if (task.responsibleUserIds && task.responsibleUserIds.includes(user.id))
       return true;
     return false;
@@ -158,6 +159,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
           onStatusSelect={onStatusChangeRequest}
           isDarkMode={isDarkMode}
           disabled={!canChangeStatus}
+          excludeStatuses={user?.role !== "admin" ? ["completed"] : []}
         />
         <span
           className="px-3 py-1.5 rounded-lg text-xs font-semibold"

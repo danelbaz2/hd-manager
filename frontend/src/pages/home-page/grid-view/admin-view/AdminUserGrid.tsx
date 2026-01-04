@@ -19,9 +19,10 @@ const getTaskCountsForUser = (userId: string, tasks: Task[]) => {
     open: userTasks.filter((task) => task.status === "pending").length,
     inProgress: userTasks.filter((task) => task.status === "in_progress")
       .length,
-    closed: userTasks.filter(
-      (task) => task.status === "completed"
+    pendingApproval: userTasks.filter(
+      (task) => task.status === "pending_approval"
     ).length,
+    closed: userTasks.filter((task) => task.status === "completed").length,
   };
 };
 
@@ -38,12 +39,14 @@ const AdminUserGrid: React.FC<AdminUserGridProps> = ({
     <div className="h-full" dir="rtl">
       {users.length === 0 ? (
         <div
-          className={`h-full flex items-center justify-center rounded-2xl border ${isDarkMode ? "border-slate-700" : "border-slate-200"
-            }`}
+          className={`h-full flex items-center justify-center rounded-2xl border ${
+            isDarkMode ? "border-slate-700" : "border-slate-200"
+          }`}
         >
           <p
-            className={`text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+            className={`text-sm ${
+              isDarkMode ? "text-slate-400" : "text-slate-500"
+            }`}
           >
             אין משתמשים להצגה
           </p>
@@ -51,8 +54,9 @@ const AdminUserGrid: React.FC<AdminUserGridProps> = ({
       ) : (
         <div
           dir="ltr"
-          className={`h-full overflow-y-auto ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-            }`}
+          className={`h-full overflow-y-auto ${
+            isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+          }`}
         >
           <div
             dir="rtl"

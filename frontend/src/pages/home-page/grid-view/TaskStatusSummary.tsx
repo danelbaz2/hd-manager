@@ -1,5 +1,11 @@
 import React from "react";
-import { CheckCircle, Clock, AlertCircle, TrendingUp } from "lucide-react";
+import {
+  CheckCircle,
+  Clock,
+  AlertCircle,
+  TrendingUp,
+  ShieldCheck,
+} from "lucide-react";
 import { useTheme } from "../../../contexts";
 
 import { type TaskStatus } from "../../../api/tasksApi";
@@ -7,6 +13,7 @@ import { type TaskStatus } from "../../../api/tasksApi";
 interface TaskStatusSummaryProps {
   open: number;
   inProgress: number;
+  pendingApproval?: number;
   closed: number;
   title?: string;
   onStatusClick?: (status: TaskStatus) => void;
@@ -15,6 +22,7 @@ interface TaskStatusSummaryProps {
 const TaskStatusSummary: React.FC<TaskStatusSummaryProps> = ({
   open,
   inProgress,
+  pendingApproval = 0,
   closed,
   title = "סטטיסטיקה כללית",
   onStatusClick,
@@ -41,6 +49,15 @@ const TaskStatusSummary: React.FC<TaskStatusSummaryProps> = ({
       hoverBg: isDarkMode ? "hover:bg-amber-500/20" : "hover:bg-amber-100",
     },
     {
+      label: "ממתין לאישור",
+      value: pendingApproval,
+      status: "pending_approval" as TaskStatus,
+      icon: ShieldCheck,
+      color: "text-purple-500",
+      bg: isDarkMode ? "bg-purple-500/10" : "bg-purple-50",
+      hoverBg: isDarkMode ? "hover:bg-purple-500/20" : "hover:bg-purple-100",
+    },
+    {
       label: "סגור",
       value: closed,
       status: "completed" as TaskStatus,
@@ -53,25 +70,27 @@ const TaskStatusSummary: React.FC<TaskStatusSummaryProps> = ({
 
   return (
     <div
-      className={`rounded-lg border p-2.5 ${isDarkMode
-        ? "bg-slate-800 border-slate-700"
-        : "bg-white border-slate-200"
-        }`}
+      className={`rounded-lg border p-2.5 ${
+        isDarkMode
+          ? "bg-slate-800 border-slate-700"
+          : "bg-white border-slate-200"
+      }`}
       dir="rtl"
     >
       {/* Header */}
       <div className="flex items-center gap-1 mb-1">
         <TrendingUp className="w-3 h-3 text-blue-500" />
         <h3
-          className={`font-bold text-[10px] ${isDarkMode ? "text-white" : "text-slate-800"
-            }`}
+          className={`font-bold text-[10px] ${
+            isDarkMode ? "text-white" : "text-slate-800"
+          }`}
         >
           {title}
         </h3>
       </div>
 
       {/* Stats Grid - Compact cards */}
-      <div className="grid grid-cols-3 gap-1">
+      <div className="grid grid-cols-4 gap-1">
         {stats.map((stat) => {
           const Icon = stat.icon;
           return (
@@ -87,8 +106,9 @@ const TaskStatusSummary: React.FC<TaskStatusSummaryProps> = ({
                 {stat.value}
               </p>
               <p
-                className={`text-[8px] ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                  }`}
+                className={`text-[8px] ${
+                  isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
               >
                 {stat.label}
               </p>

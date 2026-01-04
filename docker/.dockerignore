@@ -1,0 +1,22 @@
+# Ignore the following files and directories when building Docker images
+*.pyc
+__pycache__/
+*.pyo
+*.pyd
+*.db
+*.env
+node_modules/
+build/
+dist/
+.dockerignore
+Dockerfile*
+docker-compose.yml
+*.log
+*.tmp
+*.swp
+.idea/
+.vscode/
+.git/
+.gitignore
+README.md
+docs/

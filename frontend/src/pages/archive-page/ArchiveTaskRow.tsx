@@ -46,10 +46,11 @@ const ArchiveTaskRow: React.FC<Props> = ({
   return (
     <div
       className={`flex items-center gap-4 p-4 lg:p-5 border-b cursor-pointer transition-colors duration-150
-      ${isDarkMode
+      ${
+        isDarkMode
           ? "bg-slate-800/50 border-slate-700/50 hover:bg-slate-800/70"
           : "bg-white border-slate-100 hover:bg-slate-50/80"
-        }`}
+      }`}
       dir="rtl"
       onClick={() => onTaskClick?.(task)}
     >
@@ -67,8 +68,9 @@ const ArchiveTaskRow: React.FC<Props> = ({
       {/* Description Column */}
       <div className="flex-1 min-w-0 overflow-hidden">
         <h3
-          className={`font-semibold text-sm lg:text-base truncate ${isDarkMode ? "text-white" : "text-slate-800"
-            }`}
+          className={`font-semibold text-sm lg:text-base truncate ${
+            isDarkMode ? "text-white" : "text-slate-800"
+          }`}
         >
           {task.title || "ללא כותרת"}
         </h3>
@@ -90,8 +92,9 @@ const ArchiveTaskRow: React.FC<Props> = ({
             ))}
             {allTags.length > 2 && (
               <span
-                className={`text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                  }`}
+                className={`text-xs ${
+                  isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
               >
                 +{allTags.length - 2}
               </span>
@@ -99,8 +102,9 @@ const ArchiveTaskRow: React.FC<Props> = ({
           </>
         ) : (
           <span
-            className={`text-xs ${isDarkMode ? "text-slate-500" : "text-slate-400"
-              }`}
+            className={`text-xs ${
+              isDarkMode ? "text-slate-500" : "text-slate-400"
+            }`}
           >
             ---
           </span>
@@ -108,9 +112,9 @@ const ArchiveTaskRow: React.FC<Props> = ({
       </div>
 
       {/* Status Column */}
-      <div className="w-20 lg:w-24 shrink-0 flex justify-center">
+      <div className="w-28 lg:w-32 shrink-0 flex justify-center">
         <span
-          className={`px-3 py-1.5 rounded-full text-xs font-semibold ${status.bg} ${status.text}`}
+          className={`px-3 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap ${status.bg} ${status.text}`}
         >
           {status.label}
         </span>
@@ -120,8 +124,9 @@ const ArchiveTaskRow: React.FC<Props> = ({
       <div className="w-24 lg:w-28 shrink-0 flex items-center justify-center gap-1.5">
         <Calendar className="w-4 h-4 text-slate-400" />
         <span
-          className={`text-xs lg:text-sm ${isDarkMode ? "text-slate-300" : "text-slate-600"
-            }`}
+          className={`text-xs lg:text-sm ${
+            isDarkMode ? "text-slate-300" : "text-slate-600"
+          }`}
         >
           {fmtDate(task.date)}
         </span>
@@ -152,15 +157,17 @@ const ArchiveTaskRow: React.FC<Props> = ({
             </div>
             <div className="hidden lg:block min-w-0">
               <p
-                className={`text-sm font-medium truncate ${isDarkMode ? "text-slate-200" : "text-slate-700"
-                  }`}
+                className={`text-sm font-medium truncate ${
+                  isDarkMode ? "text-slate-200" : "text-slate-700"
+                }`}
               >
                 {assigned[0].fullName}
               </p>
               {assigned.length > 1 && (
                 <p
-                  className={`text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                    }`}
+                  className={`text-xs ${
+                    isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
                 >
                   +{assigned.length - 1} נוספים
                 </p>
@@ -169,8 +176,9 @@ const ArchiveTaskRow: React.FC<Props> = ({
           </>
         ) : (
           <span
-            className={`text-xs ${isDarkMode ? "text-slate-500" : "text-slate-400"
-              }`}
+            className={`text-xs ${
+              isDarkMode ? "text-slate-500" : "text-slate-400"
+            }`}
           >
             לא משויך
           </span>

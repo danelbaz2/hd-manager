@@ -110,13 +110,14 @@ const ConfirmModal: React.FC<ConfirmModalProps> = (props) => {
 
   // We explicitly use isOpen for the Overlay to trigger animation
   return (
-    <ModalOverlay isOpen={isOpen} onClose={onCancel}>
+    <ModalOverlay isOpen={isOpen} onClose={onCancel} maxWidthClass="max-w-md">
       <div
         className={`
-          w-full max-w-md p-6 rounded-xl border shadow-2xl
+          w-full p-6 rounded-xl border shadow-2xl
           ${isDarkMode ? "bg-slate-800 border-slate-600" : "bg-white border-slate-200"}
         `}
         dir="rtl"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-center gap-3 mb-4">

@@ -14,8 +14,8 @@ import { ModalOverlay } from "../../common/ModalOverlay";
 import type { TaskHistoryEntry, TaskStatus } from "../../../api/tasksApi";
 import type { ActionConfigItem } from "./history/historyConfig";
 
-import { MoveLeft } from "lucide-react";
-import { KANBAN_COLUMNS } from "../../../pages/task-page/parts/KanbanColumn";
+import { MoveLeft, ShieldCheck } from "lucide-react";
+import { StatusChangeContent } from "../modal-confirm/StatusChangeContent";
 
 const TaskModal: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -30,12 +30,6 @@ const TaskModal: React.FC = () => {
     refreshTasks,
     refreshTaskHistory,
   } = useSettings();
-
-  // Helper from KanbanBoard
-  const getStatusLabel = (status: string): string => {
-    const column = KANBAN_COLUMNS.find((c) => c.status === status);
-    return column?.title || status;
-  };
 
   const { isOpen, task, closeTaskModal, onTaskUpdated, updateCurrentTask } =
     useTaskModal();
@@ -224,8 +218,8 @@ const TaskModal: React.FC = () => {
         title="מחיקת משימה"
         text={
           <>
-            האם אתה בטוח שברצונך למחוק את המשימה <strong>"{task.title}"</strong>
-            ?
+            האם אתה בטוח שברצונך למחוק את המשימה{" "}
+            <strong>"{task.title || ""}"</strong>?
           </>
         }
         onConfirm={del.confirmDelete}
@@ -238,61 +232,32 @@ const TaskModal: React.FC = () => {
       {/* Status Change Confirmation Modal */}
       <ConfirmModal
         isOpen={!!pendingStatus}
-        title="שינוי סטטוס משימה"
+        title={
+          pendingStatus === "pending_approval"
+            ? "שליחה לאישור"
+            : "שינוי סטטוס משימה"
+        }
         text={
           pendingStatus ? (
-            <div className="space-y-3">
-              <p>
-                האם להעביר את המשימה{" "}
-                <strong
-                  className={isDarkMode ? "text-white" : "text-slate-800"}
-                >
-                  "{task.title}"
-                </strong>
-                ?
-              </p>
-              {/* Status change visualization */}
-              <div
-                className={`flex items-center justify-center gap-3 py-3 px-4 rounded-xl ${
-                  isDarkMode ? "bg-slate-700/50" : "bg-slate-100/80"
-                }`}
-                dir="rtl"
-              >
-                <span
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${
-                    isDarkMode
-                      ? "bg-slate-600 text-slate-200"
-                      : "bg-white text-slate-700 border border-slate-200"
-                  }`}
-                >
-                  {getStatusLabel(task.status || "pending")}
-                </span>
-                <div
-                  className={`flex items-center justify-center w-8 h-8 rounded-full ${
-                    isDarkMode ? "bg-blue-500/20" : "bg-blue-100"
-                  }`}
-                >
-                  <MoveLeft size={16} className="text-blue-500" />
-                </div>
-                <span
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${
-                    isDarkMode
-                      ? "bg-blue-500/30 text-blue-300"
-                      : "bg-blue-500 text-white"
-                  }`}
-                >
-                  {getStatusLabel(pendingStatus)}
-                </span>
-              </div>
-            </div>
+            <StatusChangeContent
+              taskTitle={task.title || ""}
+              fromStatus={task.status || "pending"}
+              toStatus={pendingStatus}
+              isDarkMode={isDarkMode}
+            />
           ) : null
         }
         onConfirm={handleConfirmStatusChange}
         onCancel={() => setPendingStatus(null)}
         isDarkMode={isDarkMode}
-        confirmText="אישור"
+        confirmText={
+          pendingStatus === "pending_approval" ? "שלח לאישור" : "אישור"
+        }
         cancelText="ביטול"
-        variant="info"
+        variant={pendingStatus === "pending_approval" ? "info" : "info"}
+        confirmIcon={
+          pendingStatus === "pending_approval" ? ShieldCheck : undefined
+        }
         headerIcon={MoveLeft}
       />
     </>

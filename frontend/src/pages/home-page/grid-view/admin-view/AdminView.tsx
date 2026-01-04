@@ -16,12 +16,12 @@ interface AdminViewProps {
 }
 
 // Calculate total stats from all tasks
+// Calculate total stats from all tasks
 const calculateTotalStats = (tasks: Task[]) => ({
   open: tasks.filter((t) => t.status === "pending").length,
   inProgress: tasks.filter((t) => t.status === "in_progress").length,
-  closed: tasks.filter(
-    (t) => t.status === "completed"
-  ).length,
+  pendingApproval: tasks.filter((t) => t.status === "pending_approval").length,
+  closed: tasks.filter((t) => t.status === "completed").length,
 });
 
 const getStatTitle = (viewMode: string) => {
@@ -68,6 +68,7 @@ const AdminView: React.FC<AdminViewProps> = ({
         <TaskStatusSummary
           open={stats.open}
           inProgress={stats.inProgress}
+          pendingApproval={stats.pendingApproval}
           closed={stats.closed}
           title={getStatTitle(viewMode)}
           onStatusClick={onStatusSummaryClick}

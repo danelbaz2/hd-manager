@@ -18,18 +18,16 @@ interface UserViewProps {
 const getTaskCountsForUser = (tasks: Task[]) => ({
   open: tasks.filter((t) => t.status === "pending").length,
   inProgress: tasks.filter((t) => t.status === "in_progress").length,
-  closed: tasks.filter(
-    (t) => t.status === "completed"
-  ).length,
+  pendingApproval: tasks.filter((t) => t.status === "pending_approval").length,
+  closed: tasks.filter((t) => t.status === "completed").length,
 });
 
 // Calculate total stats from all tasks
 const calculateTotalStats = (tasks: Task[]) => ({
   open: tasks.filter((t) => t.status === "pending").length,
   inProgress: tasks.filter((t) => t.status === "in_progress").length,
-  closed: tasks.filter(
-    (t) => t.status === "completed"
-  ).length,
+  pendingApproval: tasks.filter((t) => t.status === "pending_approval").length,
+  closed: tasks.filter((t) => t.status === "completed").length,
 });
 
 const getStatTitle = (viewMode: string) => {
@@ -88,6 +86,7 @@ const UserView: React.FC<UserViewProps> = ({
         <TaskStatusSummary
           open={teamStats.open}
           inProgress={teamStats.inProgress}
+          pendingApproval={teamStats.pendingApproval}
           closed={teamStats.closed}
           title={getStatTitle(viewMode)}
           onStatusClick={onStatusSummaryClick}

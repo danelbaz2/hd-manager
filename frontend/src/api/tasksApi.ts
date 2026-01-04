@@ -15,7 +15,16 @@ export interface TaskBase {
 export type TaskStatus = "pending" | "in_progress" | "pending_approval" | "completed";
 
 // Valid priority values: low, medium, high
+// Valid priority values: low, medium, high
 export type TaskPriority = "low" | "medium" | "high";
+
+export interface TaskOptionals {
+  pikud?: string;
+  ugda?: string;
+  hativa?: string;
+  gdud?: string;
+  externalSystem?: string;
+}
 
 export interface Task {
   id: string;
@@ -27,6 +36,7 @@ export interface Task {
   participantIds?: string[];      // Optional: Contact IDs participating
   primaryTagIds?: string[];        // Primary Tag IDs (categories)
   secondaryTagIds?: string[];      // Secondary Tag IDs (new two-tier tag system)
+  optionals?: TaskOptionals;       // Optional nested fields
   priority?: TaskPriority;
   status?: TaskStatus;
   base?: TaskBase;
@@ -41,6 +51,7 @@ export interface TaskFormData {
   participantIds?: string[];      // Optional: Contact IDs
   primaryTagIds?: string[];        // Primary Tag IDs (categories)
   secondaryTagIds?: string[];      // Secondary Tag IDs (new two-tier tag system)
+  optionals?: TaskOptionals;       // Optional nested fields
   priority?: TaskPriority;
   status?: TaskStatus;
 }

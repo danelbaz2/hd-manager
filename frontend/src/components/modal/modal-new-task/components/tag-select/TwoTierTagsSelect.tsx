@@ -39,6 +39,10 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
     const buttonRef = useRef<HTMLButtonElement>(null);
     const [position, setPosition] = useState({ top: 0, right: 0, width: 0 });
 
+    // Unique ID for this dropdown instance to prevent collisions
+    const dropdownId = React.useId();
+    const dropdownElementId = `tags-dropdown-${dropdownId}`;
+
     // Get selected secondary tags
     const selectedSecondaryTags = secondaryTags.filter((t) =>
         selectedSecondaryTagIds.includes(t.id)
@@ -164,7 +168,7 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
             // If scrolling
             if (e.type === "scroll" && isOpen) {
                 const target = e.target as HTMLElement;
-                const dropdownEl = document.getElementById("tags-dropdown");
+                const dropdownEl = document.getElementById(dropdownElementId);
 
                 // If scrolling INSIDE the dropdown, don't close
                 if (dropdownEl && dropdownEl.contains(target)) {
@@ -182,13 +186,13 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
             window.removeEventListener("scroll", handleScrollOrResize, true);
             window.removeEventListener("resize", handleScrollOrResize);
         };
-    }, [isOpen]);
+    }, [isOpen, dropdownElementId]);
 
     // Close when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             const target = event.target as Node;
-            const dropdownEl = document.getElementById("tags-dropdown");
+            const dropdownEl = document.getElementById(dropdownElementId);
             if (
                 ref.current &&
                 !ref.current.contains(target) &&
@@ -206,7 +210,7 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
         return () => {
             document.removeEventListener("mousedown", handleClickOutside);
         };
-    }, [isOpen]);
+    }, [isOpen, dropdownElementId]);
 
     return (
         <div ref={ref} className="relative">
@@ -225,8 +229,8 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className={`
-          w-full min-h-[42px] flex items-center justify-between gap-2
-          px-3 py-2.5
+          w-full min-h-10 lg:min-h-11 flex items-center justify-between gap-2
+          px-3 py-2
           rounded-xl border-2
           text-sm lg:text-base
           transition-all duration-200
@@ -277,7 +281,7 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
             {/* Portal Dropdown */}
             {isOpen && createPortal(
                 <div
-                    id="tags-dropdown"
+                    id={dropdownElementId}
                     className={`
             fixed z-[99999]
 

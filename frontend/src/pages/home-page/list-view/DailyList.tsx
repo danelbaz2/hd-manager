@@ -66,23 +66,30 @@ const DailyList: React.FC<DailyListProps> = ({
       <div
         className={`flex items-center gap-2 lg:gap-4 lg:px-10 py-3 lg:py-5 rounded-t-xl border border-b-0
           text-xs lg:text-sm font-semibold
-          ${isDarkMode
-            ? "text-slate-400 bg-slate-800/80 border-slate-700"
-            : "text-slate-500 bg-slate-50 border-slate-200"
+          ${
+            isDarkMode
+              ? "text-slate-400 bg-slate-800/80 border-slate-700"
+              : "text-slate-500 bg-slate-50 border-slate-200"
           }`}
       >
         {/* Color spacer - w-1 lg:w-1.5 */}
         <div className="w-1 lg:w-1.5 shrink-0" />
         {/* ID - hidden md:block w-14 lg:w-20 */}
-        <div className="hidden md:block w-14 lg:w-20 shrink-0 text-center">ID</div>
+        <div className="hidden md:block w-14 lg:w-20 shrink-0 text-center">
+          ID
+        </div>
         {/* Title - flex-1 min-w-0 */}
         <div className="flex-1 min-w-0">תיאור משימה</div>
         {/* Tags - hidden lg:flex w-24 lg:w-32 */}
-        <div className="hidden lg:flex w-24 lg:w-32 shrink-0 justify-center">תגיות</div>
-        {/* Status - w-16 lg:w-24 */}
-        <div className="w-16 lg:w-24 shrink-0 text-center">סטטוס</div>
+        <div className="hidden lg:flex w-24 lg:w-32 shrink-0 justify-center">
+          תגיות
+        </div>
+        {/* Status - w-28 lg:w-32 */}
+        <div className="w-28 lg:w-32 shrink-0 text-center">סטטוס</div>
         {/* Days remaining - hidden md:flex w-20 lg:w-32 */}
-        <div className="hidden md:flex w-20 lg:w-32 shrink-0 justify-center">זמן נותר</div>
+        <div className="hidden md:flex w-20 lg:w-32 shrink-0 justify-center">
+          זמן נותר
+        </div>
         {/* Assigned - hidden sm:flex w-24 lg:w-40 */}
         <div className="hidden sm:flex w-24 lg:w-40 shrink-0">משויך ל...</div>
       </div>
@@ -92,9 +99,10 @@ const DailyList: React.FC<DailyListProps> = ({
         <div
           ref={scrollRef}
           className={`absolute inset-0 overflow-y-auto rounded-b-xl border border-t-0 space-y-2 lg:space-y-3 px-3 py-3
-            ${isDarkMode
-              ? "border-slate-700 dark-scrollbar"
-              : "border-slate-200 light-scrollbar"
+            ${
+              isDarkMode
+                ? "border-slate-700 dark-scrollbar"
+                : "border-slate-200 light-scrollbar"
             }`}
         >
           {/* Task Items - Sorted by status priority */}

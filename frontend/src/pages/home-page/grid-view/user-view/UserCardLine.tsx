@@ -1,5 +1,5 @@
 import React from "react";
-import { User, Circle, Clock, CheckCircle2 } from "lucide-react";
+import { User, Circle, Clock, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useTheme, useAuth } from "../../../../contexts";
 import { type UserData } from "../../../../schemas/userTypes";
 import { useTour } from "../../../../components/demos/tour-provider";
@@ -7,6 +7,7 @@ import { useTour } from "../../../../components/demos/tour-provider";
 interface TaskCounts {
   open: number;
   inProgress: number;
+  pendingApproval?: number;
   closed: number;
 }
 
@@ -172,6 +173,25 @@ const UserCardLine: React.FC<UserCardLineProps> = ({
               </span>
             </div>
           </div>
+
+          {/* Pending Approval */}
+          {(taskCounts.pendingApproval || 0) > 0 && (
+            <div className="flex items-center gap-2">
+              <ShieldCheck className="w-4 h-4 text-purple-500" />
+              <div className="flex flex-col items-start">
+                <span className="text-lg font-bold text-purple-500">
+                  {taskCounts.pendingApproval}
+                </span>
+                <span
+                  className={`text-[10px] ${
+                    isDarkMode ? "text-slate-500" : "text-slate-400"
+                  }`}
+                >
+                  ממתין
+                </span>
+              </div>
+            </div>
+          )}
 
           {/* Closed */}
           <div className="flex items-center gap-2">

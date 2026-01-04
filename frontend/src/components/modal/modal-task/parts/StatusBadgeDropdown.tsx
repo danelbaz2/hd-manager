@@ -13,6 +13,7 @@ interface StatusBadgeDropdownProps {
   onStatusSelect: (status: TaskStatus) => void;
   isDarkMode: boolean;
   disabled?: boolean;
+  excludeStatuses?: string[];
 }
 
 export const StatusBadgeDropdown: React.FC<StatusBadgeDropdownProps> = ({
@@ -20,6 +21,7 @@ export const StatusBadgeDropdown: React.FC<StatusBadgeDropdownProps> = ({
   onStatusSelect,
   isDarkMode,
   disabled = false,
+  excludeStatuses = [],
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -130,6 +132,7 @@ export const StatusBadgeDropdown: React.FC<StatusBadgeDropdownProps> = ({
             currentStatus={currentStatus}
             onStatusSelect={onStatusSelect}
             onClose={() => setIsOpen(false)}
+            excludeStatuses={excludeStatuses}
           />,
           document.body
         )}

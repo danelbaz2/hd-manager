@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { type TaskPriority, type TaskFormData } from "../../../../schemas/taskTypes";
+import { type TaskPriority, type TaskFormData, type TaskOptionals } from "../../../../schemas/taskTypes";
 import { createTask } from "../../../../api/tasksApi";
 import { useToast } from "../../../alert-feedback";
 
@@ -28,6 +28,8 @@ interface UseTaskFormReturn {
   setDeadline: (value: string) => void;
   selectedUserIds: string[];
   setSelectedUserIds: (value: string[]) => void;
+  optionals: TaskOptionals;
+  setOptionals: (value: TaskOptionals) => void;
   // Submission
   isSubmitting: boolean;
   handleSubmit: () => Promise<void>;
@@ -64,7 +66,7 @@ export const useTaskForm = ({
   onClose,
 }: UseTaskFormOptions): UseTaskFormReturn => {
   const { alerts, showSuccess, showError, showWarning, dismissAlert, clearAllAlerts } = useToast();
-  
+
   // Form state
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -74,8 +76,9 @@ export const useTaskForm = ({
   const [startDate, setStartDate] = useState<string>("");
   const [deadline, setDeadline] = useState<string>("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [optionals, setOptionals] = useState<TaskOptionals>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
+
   // Ref-based lock to prevent multiple rapid submissions
   const isSubmittingRef = useRef(false);
 
@@ -84,7 +87,7 @@ export const useTaskForm = ({
     if (isOpen) {
       // Clear any existing alerts when modal opens
       clearAllAlerts();
-      
+
       // Reset submission lock and state
       isSubmittingRef.current = false;
       setIsSubmitting(false);
@@ -96,6 +99,7 @@ export const useTaskForm = ({
       setSelectedSecondaryTagIds([]);
       setSelectedPrimaryTagIds([]);
       setSelectedUserIds([]);
+      setOptionals({});
 
       // Set default start date (today or initialDate)
       const startDateObj = initialDate ? new Date(initialDate) : new Date();
@@ -159,7 +163,7 @@ export const useTaskForm = ({
       console.log("Submission already in progress, ignoring click");
       return;
     }
-    
+
     if (!title.trim()) {
       showWarning("שדה חסר", "נא להזין כותרת משימה");
       return;
@@ -185,6 +189,7 @@ export const useTaskForm = ({
         responsibleUserIds: selectedUserIds.length > 0 ? selectedUserIds : [],
         primaryTagIds: selectedPrimaryTagIds.length > 0 ? selectedPrimaryTagIds : [],
         secondaryTagIds: selectedSecondaryTagIds.length > 0 ? selectedSecondaryTagIds : [],
+        optionals,
       };
 
       console.log("Creating task with data:", taskData);
@@ -212,7 +217,7 @@ export const useTaskForm = ({
     } catch (error) {
       console.error("Error creating task:", error);
       const errorMessage = error instanceof Error ? error.message : "";
-      
+
       // Check if it's a network error that may have still succeeded
       if (error instanceof Error && (error.name === "AbortError" || errorMessage.includes("Failed to fetch"))) {
         // The request might have succeeded - close modal silently
@@ -246,6 +251,8 @@ export const useTaskForm = ({
     setDeadline: handleSetDeadline,
     selectedUserIds,
     setSelectedUserIds,
+    optionals,
+    setOptionals,
     isSubmitting,
     handleSubmit,
     alerts,

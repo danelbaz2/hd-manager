@@ -4,8 +4,12 @@ import { User, Clock } from "lucide-react";
 import { useTheme, useSettings } from "../../../contexts";
 import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
-import { getLighterColor, getTextColor, TAG_COLORS } from "../../../schemas/tagTypes";
-
+import {
+  getLighterColor,
+  getTextColor,
+  TAG_COLORS,
+} from "../../../schemas/tagTypes";
+import { getStatusStyle } from "../../home-page/parts/taskItemUtils";
 
 export interface DropConfirmRequest {
   taskId: string;
@@ -23,6 +27,7 @@ interface KanbanTaskCardProps {
   columnStatus: string;
   onTaskStatusChange?: (taskId: string, newStatus: TaskStatus) => void;
   onDropConfirmRequest?: (request: DropConfirmRequest) => void;
+  showStatusBadge?: boolean;
 }
 
 // Minimum distance to consider it a drag (in pixels)
@@ -48,6 +53,7 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
   columnStatus,
   onTaskStatusChange,
   onDropConfirmRequest,
+  showStatusBadge,
 }) => {
   const { isDarkMode } = useTheme();
   const { primaryTags, secondaryTags } = useSettings();
@@ -93,7 +99,9 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
         return {
           id: secondaryTag.id,
           name: secondaryTag.name,
-          color: primaryTag ? getLighterColor(primaryTag.color) : TAG_COLORS[0].bg,
+          color: primaryTag
+            ? getLighterColor(primaryTag.color)
+            : TAG_COLORS[0].bg,
           primaryId: secondaryTag.primaryTagId,
         };
       })
@@ -132,8 +140,6 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
   // ... existing handlers
 
   // ... inside renderCardContent
-
-
 
   // Mouse down - prepare for potential drag
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
@@ -346,19 +352,20 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
   const overlayPosition = isAnimating
     ? animationTarget
     : {
-      x: dragPosition.x - offsetRef.current.x,
-      y: dragPosition.y - offsetRef.current.y,
-    };
+        x: dragPosition.x - offsetRef.current.x,
+        y: dragPosition.y - offsetRef.current.y,
+      };
 
   // Card styles based on state
   const getCardClasses = (isOverlay: boolean) => {
     const baseClasses = `
             p-4 rounded-xl border select-none kanban-card
             ${isOverlay ? "" : "mb-3"}
-            ${isDarkMode
-        ? "bg-slate-800 border-slate-700"
-        : "bg-white border-slate-100"
-      }
+            ${
+              isDarkMode
+                ? "bg-slate-800 border-slate-700"
+                : "bg-white border-slate-100"
+            }
         `;
 
     if (isOverlay) {
@@ -391,31 +398,42 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
         isOverlay
           ? { boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.35)" }
           : isCollapsing
-            ? {
+          ? {
               height: 0,
               padding: 0,
               margin: 0,
               opacity: 0,
               transition: `all ${ANIMATION_DURATION}ms ease-out`,
             }
-            : undefined
+          : undefined
       }
     >
       {/* Task Title */}
-      <div className="flex justify-between items-start mb-2">
+      <div className="flex justify-between items-start mb-2 gap-2">
         <h4
-          className={`font-bold text-sm leading-tight line-clamp-2 break-words whitespace-pre-line ${isDarkMode ? "text-white" : "text-slate-800"
-            }`}
+          className={`font-bold text-sm leading-tight line-clamp-2 break-words whitespace-pre-line ${
+            isDarkMode ? "text-white" : "text-slate-800"
+          }`}
         >
           {task.title || "ללא כותרת"}
         </h4>
+        {showStatusBadge && (
+          <span
+            className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap ${
+              getStatusStyle(task.status || "pending").bg
+            } ${getStatusStyle(task.status || "pending").text}`}
+          >
+            {getStatusStyle(task.status || "pending").label}
+          </span>
+        )}
       </div>
 
       {/* Task Description */}
       {task.description && (
         <p
-          className={`text-xs mb-3 line-clamp-2 break-words whitespace-pre-line ${isDarkMode ? "text-slate-400" : "text-slate-500"
-            }`}
+          className={`text-xs mb-3 line-clamp-2 break-words whitespace-pre-line ${
+            isDarkMode ? "text-slate-400" : "text-slate-500"
+          }`}
         >
           {task.description}
         </p>
@@ -440,10 +458,11 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
           })}
           {displayedTags.length > 3 && (
             <span
-              className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${isDarkMode
-                ? "bg-slate-700 text-slate-300"
-                : "bg-slate-100 text-slate-500"
-                }`}
+              className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${
+                isDarkMode
+                  ? "bg-slate-700 text-slate-300"
+                  : "bg-slate-100 text-slate-500"
+              }`}
             >
               +{displayedTags.length - 3}
             </span>
@@ -455,8 +474,9 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
       <div className="flex items-center justify-between mt-auto">
         {task.deadline && (
           <div
-            className={`flex items-center gap-1 text-xs ${isDarkMode ? "text-slate-400" : "text-slate-400"
-              }`}
+            className={`flex items-center gap-1 text-xs ${
+              isDarkMode ? "text-slate-400" : "text-slate-400"
+            }`}
           >
             <Clock size={12} />
             <span>{formatDate(task.deadline)}</span>

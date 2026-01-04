@@ -59,9 +59,10 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
       className={`
         flex items-center gap-2 lg:gap-4 p-3 lg:p-5 rounded-xl border
         transition-all duration-200 hover:shadow-md cursor-pointer
-        ${isDarkMode
-          ? "bg-slate-800 border-slate-700 hover:border-slate-600"
-          : "bg-white border-slate-200 hover:border-slate-300"
+        ${
+          isDarkMode
+            ? "bg-slate-800 border-slate-700 hover:border-slate-600"
+            : "bg-white border-slate-200 hover:border-slate-300"
         }
       `}
       dir="rtl"
@@ -107,8 +108,9 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
             ))}
             {allTags.length > 2 && (
               <span
-                className={`text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                  }`}
+                className={`text-xs ${
+                  isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
               >
                 +{allTags.length - 2}
               </span>
@@ -116,8 +118,9 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
           </>
         ) : (
           <span
-            className={`text-xs ${isDarkMode ? "text-slate-500" : "text-slate-400"
-              }`}
+            className={`text-xs ${
+              isDarkMode ? "text-slate-500" : "text-slate-400"
+            }`}
           >
             ---
           </span>
@@ -125,9 +128,9 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
       </div>
 
       {/* Status Badge */}
-      <div className="w-16 lg:w-24 shrink-0 flex justify-center">
+      <div className="w-28 lg:w-32 shrink-0 flex justify-center">
         <span
-          className={`px-2 lg:px-3 py-1 lg:py-1.5 rounded-full text-xs lg:text-sm font-semibold
+          className={`px-2 lg:px-3 py-1 lg:py-1.5 rounded-full text-xs lg:text-sm font-semibold whitespace-nowrap
             ${statusStyle.bg} ${statusStyle.text}`}
         >
           {statusStyle.label}
@@ -174,15 +177,17 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
             </div>
             <div className="hidden lg:block min-w-0">
               <p
-                className={`text-sm font-medium truncate ${isDarkMode ? "text-slate-200" : "text-slate-700"
-                  }`}
+                className={`text-sm font-medium truncate ${
+                  isDarkMode ? "text-slate-200" : "text-slate-700"
+                }`}
               >
                 {assignedUsers[0].fullName}
               </p>
               {assignedUsers.length > 1 && (
                 <p
-                  className={`text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                    }`}
+                  className={`text-xs ${
+                    isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
                 >
                   +{assignedUsers.length - 1} נוספים
                 </p>
@@ -191,8 +196,9 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
           </>
         ) : (
           <span
-            className={`text-xs ${isDarkMode ? "text-slate-500" : "text-slate-400"
-              }`}
+            className={`text-xs ${
+              isDarkMode ? "text-slate-500" : "text-slate-400"
+            }`}
           >
             לא משויך
           </span>

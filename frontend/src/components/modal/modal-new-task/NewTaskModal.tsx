@@ -57,6 +57,8 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
     handleSubmit,
     alerts,
     dismissAlert,
+    optionals,
+    setOptionals,
   } = useTaskForm({
     isOpen,
     initialDate,
@@ -129,6 +131,8 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
               setSelectedSecondaryTagIds={setSelectedSecondaryTagIds}
               selectedPrimaryTagIds={selectedPrimaryTagIds}
               setSelectedPrimaryTagIds={setSelectedPrimaryTagIds}
+              optionals={optionals}
+              setOptionals={setOptionals}
               primaryTags={primaryTags}
               secondaryTags={secondaryTags}
               users={users}

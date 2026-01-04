@@ -14,7 +14,8 @@ export const FIELD_LABELS: Record<string, string> = {
 export const STATUS_LABELS: Record<string, string> = {
   pending: "פתוח",
   in_progress: "בטיפול",
-  completed: "הושלם",
+  pending_approval: "ממתין לאישור",
+  completed: "סגור",
 };
 
 export const PRIORITY_LABELS: Record<string, string> = {

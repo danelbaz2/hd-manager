@@ -4,6 +4,7 @@ import {
   CheckCircle2,
   Clock,
   AlertCircle,
+  ShieldCheck,
   type LucideIcon,
 } from "lucide-react";
 import { useTheme } from "../../../contexts";
@@ -11,13 +12,20 @@ import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
 import KanbanTaskCard, { type DropConfirmRequest } from "./KanbanTaskCard";
 
-interface KanbanColumnProps {
+export interface KanbanColumnDef {
+  id: string; // The visual column ID (e.g. "pending", "done_merged")
   title: string;
-  status: TaskStatus;
-  tasks: Task[];
-  users: UserData[];
+  statuses: TaskStatus[]; // Which actual statuses show up here
+  targetStatus: TaskStatus; // Default status for drops
   icon: LucideIcon;
   colorClass: string;
+  showStatusBadge?: boolean;
+}
+
+interface KanbanColumnProps {
+  columnDef: KanbanColumnDef;
+  tasks: Task[];
+  users: UserData[];
   onDrop: (taskId: string, targetStatus: TaskStatus) => void;
   onTaskStatusChange?: (taskId: string, newStatus: TaskStatus) => void;
   onTaskClick?: (task: Task) => void;
@@ -25,12 +33,9 @@ interface KanbanColumnProps {
 }
 
 const KanbanColumn: React.FC<KanbanColumnProps> = ({
-  title,
-  status,
+  columnDef,
   tasks,
   users,
-  icon: Icon,
-  colorClass,
   onTaskStatusChange,
   onTaskClick,
   onDropConfirmRequest,
@@ -38,6 +43,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
   const { isDarkMode } = useTheme();
   const [isDropTarget, setIsDropTarget] = useState(false);
   const columnRef = useRef<HTMLDivElement>(null);
+  const Icon = columnDef.icon;
 
   // Detect when dragging over this column
   useEffect(() => {
@@ -74,7 +80,10 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
   return (
     <div
       ref={columnRef}
-      data-column-status={status}
+      // Use the targetStatus for drag detection so KanbanTaskCard sees a valid TaskStatus?
+      // No, KanbanTaskCard uses data-column-status to pass to onDrop.
+      // And we want the Status.
+      data-column-status={columnDef.targetStatus}
       className={`
                 flex-1 min-w-[300px] md:min-w-0
                 rounded-2xl p-4
@@ -130,16 +139,16 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
           </div>
           <h3
             className={`font-bold text-lg transition-colors duration-300 ${
-              isDropTarget ? "text-blue-500" : colorClass
+              isDropTarget ? "text-blue-500" : columnDef.colorClass
             }`}
           >
-            {title}
+            {columnDef.title}
           </h3>
         </div>
         <Icon
           size={18}
           className={`transition-colors duration-300 ${
-            isDropTarget ? "text-blue-500" : colorClass
+            isDropTarget ? "text-blue-500" : columnDef.colorClass
           }`}
         />
       </div>
@@ -176,7 +185,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
         )}
 
         {/* Task cards with layout animation for reordering */}
-        <LayoutGroup id={`column-${status}`}>
+        <LayoutGroup id={`column-${columnDef.id}`}>
           {tasks.map((task) => (
             <motion.div
               key={task.id}
@@ -184,7 +193,7 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
               transition={{
                 layout: {
                   type: "tween",
-                  ease: [0.25, 0.1, 0.25, 1], // Smooth cubic bezier
+                  ease: [0.25, 0.1, 0.25, 1],
                   duration: 0.4,
                 },
               }}
@@ -193,9 +202,10 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
                 task={task}
                 users={users}
                 onClick={onTaskClick}
-                columnStatus={status}
+                columnStatus={columnDef.id} // Used for "dragging-from" logic
                 onTaskStatusChange={onTaskStatusChange}
                 onDropConfirmRequest={onDropConfirmRequest}
+                showStatusBadge={columnDef.showStatusBadge}
               />
             </motion.div>
           ))}
@@ -205,73 +215,74 @@ const KanbanColumn: React.FC<KanbanColumnProps> = ({
   );
 };
 
-// Column configuration for reuse
-// For regular users: show pending_approval as their "close" target
-// For admins: show both pending_approval AND completed
-export const KANBAN_COLUMNS: Array<{
-  status: TaskStatus;
-  title: string;
-  icon: LucideIcon;
-  colorClass: string;
-}> = [
-  {
-    status: "pending",
-    title: "פתוח",
-    icon: AlertCircle,
-    colorClass: "text-emerald-500",
-  },
-  {
-    status: "in_progress",
-    title: "בטיפול",
-    icon: Clock,
-    colorClass: "text-amber-500",
-  },
-  {
-    status: "completed",
-    title: "סגור",
-    icon: CheckCircle2,
-    colorClass: "text-slate-400",
-  },
-];
-
-// Get columns based on user role
-// Regular users see pending_approval instead of completed (they can't close tasks directly)
-// Admins see completed column
-export const getKanbanColumns = (
-  isAdmin: boolean
-): Array<{
-  status: TaskStatus;
-  title: string;
-  icon: LucideIcon;
-  colorClass: string;
-}> => {
+// Column configurations
+export const getKanbanColumns = (isAdmin: boolean): KanbanColumnDef[] => {
   if (isAdmin) {
-    // Admins see all standard columns
-    return KANBAN_COLUMNS;
+    // Admin View: All 4 columns
+    return [
+      {
+        id: "pending",
+        title: "פתוח",
+        statuses: ["pending"],
+        targetStatus: "pending",
+        icon: AlertCircle,
+        colorClass: "text-emerald-500",
+      },
+      {
+        id: "in_progress",
+        title: "בטיפול",
+        statuses: ["in_progress"],
+        targetStatus: "in_progress",
+        icon: Clock,
+        colorClass: "text-amber-500",
+      },
+      {
+        id: "pending_approval",
+        title: "ממתין לאישור",
+        statuses: ["pending_approval"],
+        targetStatus: "pending_approval",
+        icon: ShieldCheck,
+        colorClass: "text-purple-500",
+      },
+      {
+        id: "completed",
+        title: "סגור",
+        statuses: ["completed"],
+        targetStatus: "completed",
+        icon: CheckCircle2,
+        colorClass: "text-slate-400",
+      },
+    ];
   }
 
-  // Regular users see pending_approval instead of completed
+  // Regular User View: Merged 'Done' Column using targetStatus=pending_approval logic
   return [
     {
-      status: "pending",
+      id: "pending",
       title: "פתוח",
+      statuses: ["pending"],
+      targetStatus: "pending",
       icon: AlertCircle,
       colorClass: "text-emerald-500",
     },
     {
-      status: "in_progress",
+      id: "in_progress",
       title: "בטיפול",
+      statuses: ["in_progress"],
+      targetStatus: "in_progress",
       icon: Clock,
       colorClass: "text-amber-500",
     },
     {
-      status: "pending_approval",
-      title: "ממתין לאישור",
+      id: "completed_merged",
+      title: "סגור", // Title for users
+      statuses: ["pending_approval", "completed"], // Includes both
+      targetStatus: "pending_approval", // Drops trigger pending approval!
       icon: CheckCircle2,
-      colorClass: "text-purple-500",
+      colorClass: "text-slate-400",
+      showStatusBadge: true, // Show badge inside card
     },
   ];
 };
 
 export default KanbanColumn;
-export type { TaskStatus };

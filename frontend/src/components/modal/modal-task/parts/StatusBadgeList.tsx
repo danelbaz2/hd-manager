@@ -13,6 +13,7 @@ interface StatusBadgeListProps {
   currentStatus: TaskStatus;
   onStatusSelect: (status: TaskStatus) => void;
   onClose: () => void;
+  excludeStatuses?: string[];
 }
 
 export const StatusBadgeList: React.FC<StatusBadgeListProps> = ({
@@ -22,8 +23,13 @@ export const StatusBadgeList: React.FC<StatusBadgeListProps> = ({
   currentStatus,
   onStatusSelect,
   onClose,
+  excludeStatuses = [],
 }) => {
   const [hoveredStatus, setHoveredStatus] = useState<TaskStatus | null>(null);
+
+  const visibleOptions = STATUS_OPTIONS.filter(
+    (option) => !excludeStatuses.includes(option.id)
+  );
 
   return (
     <div
@@ -44,7 +50,7 @@ export const StatusBadgeList: React.FC<StatusBadgeListProps> = ({
       }}
       dir="rtl"
     >
-      {STATUS_OPTIONS.map((option) => {
+      {visibleOptions.map((option) => {
         const isSelected = option.id === currentStatus;
         const optionColor = STATUS_COLORS[option.id];
         const isHovered = hoveredStatus === option.id;

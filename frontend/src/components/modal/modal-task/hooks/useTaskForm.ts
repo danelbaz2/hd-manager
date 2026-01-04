@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { updateTask, type TaskFormData, type Task, type TaskStatus } from "../../../../api/tasksApi";
+import { updateTask, type TaskFormData, type Task, type TaskStatus, type TaskOptionals } from "../../../../api/tasksApi";
 import type { TaskPriority } from "../../../../schemas/taskTypes";
 import { parseDateToTimestamp, timestampToDateStr, hasFormChanges, initFormFromTask } from "./formUtils";
 
@@ -28,6 +28,7 @@ export const useTaskForm = ({
   const [startDate, setStartDate] = useState("");
   const [deadline, setDeadline] = useState("");
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [optionals, setOptionals] = useState<TaskOptionals>({});
 
   useEffect(() => {
     if (isOpen && task) {
@@ -42,6 +43,7 @@ export const useTaskForm = ({
       setSelectedUserIds(init.selectedUserIds);
       setStartDate(init.startDate);
       setDeadline(init.deadline);
+      setOptionals(init.optionals);
     }
   }, [isOpen, task]);
 
@@ -73,6 +75,7 @@ export const useTaskForm = ({
     setSelectedUserIds(init.selectedUserIds);
     setStartDate(init.startDate);
     setDeadline(init.deadline);
+    setOptionals(init.optionals);
     setIsEditMode(false);
   }, [task]);
 
@@ -80,7 +83,7 @@ export const useTaskForm = ({
     if (!task) return;
     if (!title.trim()) { onWarning("שדה חסר", "יש להזין כותרת למשימה"); return; }
 
-    if (!hasFormChanges(task, title, description, priority, startDate, deadline, selectedUserIds, selectedPrimaryTagIds, selectedSecondaryTagIds)) {
+    if (!hasFormChanges(task, title, description, priority, startDate, deadline, selectedUserIds, selectedPrimaryTagIds, selectedSecondaryTagIds, optionals)) {
       onWarning("אין שינויים", "לא בוצעו שינויים במשימה");
       setIsEditMode(false);
       return;
@@ -93,6 +96,7 @@ export const useTaskForm = ({
       const taskData: Partial<TaskFormData> = {
         title: title.trim(), description: description.trim() || undefined, priority,
         responsibleUserIds: selectedUserIds, primaryTagIds: selectedPrimaryTagIds, secondaryTagIds: selectedSecondaryTagIds,
+        optionals,
       };
       if (startDate !== originalStartDate) taskData.date = startDate ? new Date(startDate).getTime() : undefined;
       if (deadline !== originalDeadline) taskData.deadline = deadline ? new Date(deadline).getTime() : undefined;
@@ -107,7 +111,7 @@ export const useTaskForm = ({
       } else { onError(response.error || "אירעה שגיאה"); }
     } catch { onError("אירעה שגיאה"); }
     finally { setIsSubmitting(false); }
-  }, [task, title, description, priority, startDate, deadline, selectedUserIds, selectedSecondaryTagIds, selectedPrimaryTagIds, onSuccess, onError, onWarning, refreshTasks, refreshTaskHistory, onTaskUpdated]);
+  }, [task, title, description, priority, startDate, deadline, selectedUserIds, selectedSecondaryTagIds, selectedPrimaryTagIds, optionals, onSuccess, onError, onWarning, refreshTasks, refreshTaskHistory, onTaskUpdated]);
 
   return {
     isEditMode, setIsEditMode, isSubmitting,
@@ -115,6 +119,6 @@ export const useTaskForm = ({
     status, setStatus,
     startDate, setStartDate: handleSetStartDate, deadline, setDeadline: handleSetDeadline,
     selectedUserIds, setSelectedUserIds, selectedSecondaryTagIds, setSelectedSecondaryTagIds,
-    selectedPrimaryTagIds, setSelectedPrimaryTagIds, handleCancelEdit, handleSave,
+    selectedPrimaryTagIds, setSelectedPrimaryTagIds, optionals, setOptionals, handleCancelEdit, handleSave,
   };
 };
