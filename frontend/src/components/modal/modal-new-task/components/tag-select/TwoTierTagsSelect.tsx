@@ -225,7 +225,7 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
                 type="button"
                 onClick={() => setIsOpen(!isOpen)}
                 className={`
-          w-full min-h-[42px] flex items-center justify-between gap-2
+          w-full min-h-10 lg:min-h-11 flex items-center justify-between gap-2
           px-3 py-2
           rounded-xl border-2
           text-sm lg:text-base

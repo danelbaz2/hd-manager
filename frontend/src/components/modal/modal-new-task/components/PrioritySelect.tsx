@@ -86,7 +86,7 @@ const PrioritySelect: React.FC<PrioritySelectProps> = ({ value, onChange }) => {
         onClick={() => setIsOpen(!isOpen)}
         className={`
           w-full flex items-center justify-between
-          px-3 py-2
+          px-3 py-2 h-10 lg:h-11
           rounded-xl border-2
           text-sm lg:text-base font-medium
           transition-all duration-200
