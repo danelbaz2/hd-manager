@@ -10,6 +10,7 @@ import {
   SocketProvider,
 } from "./contexts";
 import { TaskModalProvider, TaskModal } from "./components/modal/modal-task";
+import { TagsModalProvider, TagsModal } from "./components/modal/modal-tags";
 import { TourProvider } from "./components/demos/tour-provider";
 import { TourOverlay } from "./components/demos/tour-overlay";
 
@@ -20,14 +21,17 @@ createRoot(document.getElementById("root")!).render(
         <SocketProvider>
           <SettingsProvider>
             <ViewStateProvider>
-              <TaskModalProvider>
-                <TourProvider>
-                  <App />
-                  <TaskModal />
-                  {/* Guided Tour Overlay */}
-                  <TourOverlay />
-                </TourProvider>
-              </TaskModalProvider>
+              <TagsModalProvider>
+                <TaskModalProvider>
+                  <TourProvider>
+                    <App />
+                    <TaskModal />
+                    <TagsModal />
+                    {/* Guided Tour Overlay */}
+                    <TourOverlay />
+                  </TourProvider>
+                </TaskModalProvider>
+              </TagsModalProvider>
             </ViewStateProvider>
           </SettingsProvider>
         </SocketProvider>
