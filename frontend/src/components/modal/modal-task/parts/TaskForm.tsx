@@ -60,6 +60,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   isDarkMode,
   isLoading = false,
 }) => {
+  const titleRef = useRef<HTMLTextAreaElement>(null);
   const descRef = useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = (el: HTMLTextAreaElement | null, min: number, max: number) => {
@@ -69,15 +70,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   };
 
   useLayoutEffect(() => {
+    adjustHeight(titleRef.current, 40, 120);
     adjustHeight(descRef.current, 56, 112);
   }, []); // Run once on mount to set initial height based on content
 
   // Also run when loading finishes or content changes (mostly for loading)
   useLayoutEffect(() => {
     if (!isLoading) {
+      adjustHeight(titleRef.current, 40, 120);
       adjustHeight(descRef.current, 56, 112);
     }
-  }, [isLoading, description]);
+  }, [isLoading, title, description]);
 
   const inputClass = `
     w-full px-3 py-2 rounded-xl border-2 text-sm transition-all
@@ -99,14 +102,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           >
             כותרת המשימה
           </label>
-          <input
-            type="text"
+          <textarea
+            ref={titleRef}
             placeholder="לדוגמה: עדכון שרתי בסיס נתונים"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => {
+              setTitle(e.target.value);
+              adjustHeight(e.target, 40, 120);
+            }}
             maxLength={100}
+            rows={1}
             className={`
-              w-full px-3 py-2 rounded-xl border-2 text-sm lg:text-base font-medium transition-all h-10 lg:h-11
+              w-full px-3 py-2 rounded-xl border-2 text-sm lg:text-base font-medium transition-all resize-none overflow-y-auto scrollbar-hide
+              min-h-10 lg:min-h-11
               ${isDarkMode
                 ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
                 : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
