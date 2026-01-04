@@ -83,6 +83,12 @@ def log_history(entity_type, entity_id, action, user_id='system', old_val=None, 
             action_label = 'CLOSE'
         elif action == 'UPDATE' and 'responsibleUserIds' in change_data:
             action_label = 'ASSIGN'
+        elif action == 'UPDATE' and 'optionals' in change_data:
+            opt_changes = change_data.get('optionals', {})
+            if 'externalSystem' in opt_changes or 'externalId' in opt_changes:
+                action_label = 'UPDATE_EXTERNAL_SYSTEM'
+            else:
+                action_label = 'UPDATE_OPTIONALS'
         
         # Get the full task object for the frontend to update its state
         # Get the full task object for the frontend to update its state

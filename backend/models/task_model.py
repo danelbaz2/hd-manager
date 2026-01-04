@@ -17,6 +17,7 @@ class TaskOptionals(BaseModel):
     hativa: Optional[str] = None
     gdud: Optional[str] = None
     externalSystem: Optional[str] = None
+    externalId: Optional[str] = None
 
 # Base Model (Shared properties)
 class TaskModel(BaseModel):
