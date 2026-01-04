@@ -8,6 +8,16 @@ VALID_STATUSES = "^(pending|in_progress|completed)$"
 # Priority values: low, medium, high
 VALID_PRIORITIES = "^(low|medium|high)$"
 
+# Optional fields object nested in the task
+class TaskOptionals(BaseModel):
+    model_config = ConfigDict(extra='forbid')
+    
+    pikud: Optional[str] = None
+    ugda: Optional[str] = None
+    hativa: Optional[str] = None
+    gdud: Optional[str] = None
+    externalSystem: Optional[str] = None
+
 # Base Model (Shared properties)
 class TaskModel(BaseModel):
     model_config = ConfigDict(extra='forbid')
@@ -21,6 +31,7 @@ class TaskModel(BaseModel):
     participantIds: Optional[List[Union[int, str]]] = []  # Optional: Contact IDs participating
     primaryTagIds: List[Union[int, str]] = []  # Primary Tag IDs (categories)
     secondaryTagIds: List[Union[int, str]] = []  # Secondary Tag IDs (new two-tier tag system)
+    optionals: TaskOptionals = Field(default_factory=TaskOptionals)  # Nested optional fields
     date: int
     deadline: int
     base: Optional[BaseEntityMeta] = None
@@ -38,5 +49,6 @@ class TaskUpdateModel(BaseModel):
     participantIds: Optional[List[Union[int, str]]] = None  # Optional: Contact IDs
     primaryTagIds: Optional[List[Union[int, str]]] = None  # Primary Tag IDs (categories)
     secondaryTagIds: Optional[List[Union[int, str]]] = None  # Secondary Tag IDs
+    optionals: Optional[TaskOptionals] = None  # Optional nested object update
     date: Optional[int] = None
     deadline: Optional[int] = None
