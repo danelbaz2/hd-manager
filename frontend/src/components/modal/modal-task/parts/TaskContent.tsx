@@ -71,56 +71,62 @@ export const TaskContent: React.FC<TaskContentProps> = ({
 }) => {
   if (isEditMode) {
     return (
-      <TaskForm
-        title={form.title}
-        setTitle={form.setTitle}
-        description={form.description}
-        setDescription={form.setDescription}
-        priority={form.priority}
-        setPriority={form.setPriority}
-        startDate={form.startDate}
-        setStartDate={form.setStartDate}
-        deadline={form.deadline}
-        setDeadline={form.setDeadline}
-        selectedUserIds={form.selectedUserIds}
-        setSelectedUserIds={form.setSelectedUserIds}
-        selectedSecondaryTagIds={form.selectedSecondaryTagIds}
-        setSelectedSecondaryTagIds={form.setSelectedSecondaryTagIds}
-        selectedPrimaryTagIds={form.selectedPrimaryTagIds}
-        setSelectedPrimaryTagIds={form.setSelectedPrimaryTagIds}
-        optionals={form.optionals}
-        setOptionals={form.setOptionals}
-        primaryTags={primaryTags}
-        secondaryTags={secondaryTags}
-        users={users}
-        isDarkMode={isDarkMode}
-      />
+      <div className="animate-fade-in">
+        <TaskForm
+          title={form.title}
+          setTitle={form.setTitle}
+          description={form.description}
+          setDescription={form.setDescription}
+          priority={form.priority}
+          setPriority={form.setPriority}
+          startDate={form.startDate}
+          setStartDate={form.setStartDate}
+          deadline={form.deadline}
+          setDeadline={form.setDeadline}
+          selectedUserIds={form.selectedUserIds}
+          setSelectedUserIds={form.setSelectedUserIds}
+          selectedSecondaryTagIds={form.selectedSecondaryTagIds}
+          setSelectedSecondaryTagIds={form.setSelectedSecondaryTagIds}
+          selectedPrimaryTagIds={form.selectedPrimaryTagIds}
+          setSelectedPrimaryTagIds={form.setSelectedPrimaryTagIds}
+          optionals={form.optionals}
+          setOptionals={form.setOptionals}
+          primaryTags={primaryTags}
+          secondaryTags={secondaryTags}
+          users={users}
+          isDarkMode={isDarkMode}
+        />
+      </div>
     );
   }
 
   if (activeTab === "history") {
     return (
-      <HistoryTimeline
-        history={history}
-        users={users}
-        contacts={contacts}
-        isDarkMode={isDarkMode}
-        isLoading={isLoadingHistory}
-        onAddNote={onAddNote}
-        getActionDescription={getActionDescription}
-        onMentionClick={onMentionClick}
-      />
+      <div className="h-full animate-fade-in">
+        <HistoryTimeline
+          history={history}
+          users={users}
+          contacts={contacts}
+          isDarkMode={isDarkMode}
+          isLoading={isLoadingHistory}
+          onAddNote={onAddNote}
+          getActionDescription={getActionDescription}
+          onMentionClick={onMentionClick}
+        />
+      </div>
     );
   }
 
   return (
-    <TaskDetails
-      task={task}
-      isDarkMode={isDarkMode}
-      primaryTags={primaryTags}
-      secondaryTags={secondaryTags}
-      users={users}
-      onStatusChangeRequest={onStatusChangeRequest}
-    />
+    <div className="animate-fade-in">
+      <TaskDetails
+        task={task}
+        isDarkMode={isDarkMode}
+        primaryTags={primaryTags}
+        secondaryTags={secondaryTags}
+        users={users}
+        onStatusChangeRequest={onStatusChangeRequest}
+      />
+    </div>
   );
 };

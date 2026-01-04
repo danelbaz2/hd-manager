@@ -33,6 +33,8 @@ interface FormProps {
   handleCancelEdit: () => void;
   handleSave: () => void;
   setIsEditMode: (v: boolean) => void;
+  optionals: any;
+  setOptionals: (v: any) => void;
 }
 
 interface DeleteHook {
@@ -107,8 +109,8 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
         isDarkMode={isDarkMode}
       />
       <div
-        className={`px-6 py-4 flex-1 flex flex-col min-h-0 overflow-y-auto ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-          }`}
+        className={`px-6 py-4 flex-1 flex flex-col min-h-0 ${activeTab === "history" ? "overflow-visible" : "overflow-y-auto"
+          } ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}
       >
         <TaskContent
           isEditMode={form.isEditMode}

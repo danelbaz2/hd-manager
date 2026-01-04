@@ -1,7 +1,7 @@
 /**
  * History action configuration constants
  */
-import { Plus, Pencil, Clock, CheckCircle2, Trash2, MessageSquare, UserPlus, Calendar, CalendarClock, Flag, Tag } from "lucide-react";
+import { Plus, Pencil, Clock, CheckCircle2, Trash2, MessageSquare, UserPlus, UserMinus, Calendar, CalendarClock, Flag, Tag, FileText, Type, Circle } from "lucide-react";
 import type { TaskHistoryAction, TaskHistoryEntry } from "../../../../api/tasksApi";
 
 export interface ActionConfigItem {
@@ -11,6 +11,9 @@ export interface ActionConfigItem {
   label: string;
 }
 
+/**
+ * Base configuration for high-level task actions
+ */
 export const ACTION_CONFIG: Record<TaskHistoryAction, ActionConfigItem> = {
   CREATE: {
     icon: Plus,
@@ -56,32 +59,90 @@ export const ACTION_CONFIG: Record<TaskHistoryAction, ActionConfigItem> = {
   },
 };
 
-// Field-specific icons for UPDATE actions
+/**
+ * Status-specific styling for history entries
+ */
+const STATUS_STYLES: Record<string, Partial<ActionConfigItem>> = {
+  pending: {
+    icon: Circle,
+    color: "#0EA5E9", // Sky Blue for "Open"
+    bgColor: "#0EA5E920",
+  },
+  in_progress: {
+    icon: Clock,
+    color: "#F59E0B", // Amber for "In Progress"
+    bgColor: "#F59E0B20",
+  },
+  completed: {
+    icon: CheckCircle2,
+    color: "#10B981", // Emerald for "Completed"
+    bgColor: "#10B98120",
+  },
+};
+
+/**
+ * Field-specific icons and colors for single-field updates
+ */
 export const FIELD_ICONS: Record<string, ActionConfigItem> = {
-  date: { icon: Calendar, color: "#3B82F6", bgColor: "#3B82F620", label: "תאריך" },
+  date: { icon: Calendar, color: "#f99e16ff", bgColor: "#F9731620", label: "תאריך" },
   deadline: { icon: CalendarClock, color: "#F97316", bgColor: "#F9731620", label: "תאריך יעד" },
   priority: { icon: Flag, color: "#EC4899", bgColor: "#EC489920", label: "עדיפות" },
-  primaryTagIds: { icon: Tag, color: "#8B5CF6", bgColor: "#8B5CF620", label: "קטגוריות" },
-  secondaryTagIds: { icon: Tag, color: "#8B5CF6", bgColor: "#8B5CF620", label: "תגיות" },
+  status: { icon: CheckCircle2, color: "#10B981", bgColor: "#10B98120", label: "סטטוס" }, // Default status config
+  title: { icon: Type, color: "#A27B5C", bgColor: "#A27B5C20", label: "כותרת" },
+  description: { icon: FileText, color: "#64748B", bgColor: "#64748B20", label: "תיאור" },
+  responsibleUserIds: { icon: UserPlus, color: "#06B6D4", bgColor: "#06B6D420", label: "הקצאת משתמשים" },
+  primaryTagIds: { icon: Tag, color: "#6366F1", bgColor: "#6366F120", label: "קטגוריות" },
+  secondaryTagIds: { icon: Tag, color: "#6366F1", bgColor: "#6366F120", label: "תגיות" },
 };
 
 // Fields that represent data changes (not metadata)
-const DATA_FIELDS = ["title", "description", "priority", "status", "date", "deadline", "responsibleUserIds", "primaryTagIds", "secondaryTagIds"];
+const DATA_FIELDS = [
+  "title", "description", "priority", "status", "date", "deadline",
+  "responsibleUserIds", "primaryTagIds", "secondaryTagIds",
+  "tags", "category", "primary_tags", "secondary_tags", "primary_tag_ids", "secondary_tag_ids"
+];
 
-// Determine which icon config to use based on the entry's changed fields
+/**
+ * Helper to determine if a user change is Add or Remove
+ */
+const getUserChangeIcon = (entry: TaskHistoryEntry): typeof UserPlus => {
+  const oldIds = (entry.oldValues?.responsibleUserIds as string[] | undefined) || [];
+  const newIds = (entry.changes?.responsibleUserIds as string[] | undefined) || [];
+  return newIds.length < oldIds.length ? UserMinus : UserPlus;
+};
+
+/**
+ * Determine which icon config to use based on the entry's changed fields
+ */
 export const getIconConfig = (entry: TaskHistoryEntry): ActionConfigItem => {
   const baseConfig = ACTION_CONFIG[entry.action] || ACTION_CONFIG.UPDATE;
 
-  // For UPDATE actions, check if a single specific field was changed
-  if (entry.action === "UPDATE" && entry.changes) {
+  if ((entry.action === "UPDATE" || entry.action === "ASSIGN") && entry.changes) {
     const changedFields = Object.keys(entry.changes).filter((k) => DATA_FIELDS.includes(k));
 
-    // If only one field changed and it has a specific icon, use that
+    // Multi-field update: show Pencil
+    if (changedFields.length > 1) {
+      return ACTION_CONFIG.UPDATE;
+    }
+
+    // Single-field update: show specific icon
     if (changedFields.length === 1) {
-      const fieldIcon = FIELD_ICONS[changedFields[0]];
-      if (fieldIcon) {
-        return fieldIcon;
+      const field = changedFields[0];
+
+      // Assignment: Plus/Minus
+      if (field === "responsibleUserIds") {
+        return { ...FIELD_ICONS.responsibleUserIds, icon: getUserChangeIcon(entry) };
       }
+
+      // Status: Sky Blue (Pending) / Amber (In Progress) / Emerald (Completed)
+      if (field === "status") {
+        const newStatus = entry.changes.status as string;
+        const statusStyle = STATUS_STYLES[newStatus] || FIELD_ICONS.status;
+        return { ...FIELD_ICONS.status, ...statusStyle };
+      }
+
+      const fieldIcon = FIELD_ICONS[field];
+      if (fieldIcon) return fieldIcon;
     }
   }
 
