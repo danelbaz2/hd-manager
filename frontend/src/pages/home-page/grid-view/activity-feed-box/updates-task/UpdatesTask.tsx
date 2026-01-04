@@ -16,6 +16,8 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   onUpdateClick,
   onDataRefresh: _onDataRefresh,
   updatesOverride,
+  lastSeen = 0,
+  onLatestUpdate,
 }) => {
   // Use global taskHistory from SettingsContext
   const { getHistoryForDate, isLoadingHistory } = useSettings();
@@ -38,25 +40,38 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   // Ref for scroll to top button
   const scrollerRef = useRef<HTMLElement>(null);
 
-  // Initialize known IDs on first render
+  // Check for new updates (unseen or just arrived)
   useEffect(() => {
-    if (isInitialMount.current && updates.length > 0) {
-      updates.forEach((u) => knownIdsRef.current.add(u.id));
-      isInitialMount.current = false;
+    // Report latest timestamp
+    if (updates.length > 0 && onLatestUpdate) {
+      const maxTs = Math.max(...updates.map(u => u.timestamp));
+      onLatestUpdate(maxTs);
     }
-  }, [updates]);
-
-  // Detect new entries and animate them
-  useEffect(() => {
-    if (isInitialMount.current) return;
 
     const newEntryIds: string[] = [];
-    updates.forEach((entry) => {
-      if (!knownIdsRef.current.has(entry.id)) {
-        newEntryIds.push(entry.id);
-        knownIdsRef.current.add(entry.id);
+
+    // On initial mount, we check against lastSeen
+    // updates from the past that are unread should be highlighted
+    if (isInitialMount.current) {
+      if (updates.length > 0) {
+        updates.forEach((u) => {
+          knownIdsRef.current.add(u.id);
+          // Highlight if newer than lastSeen
+          if (u.timestamp > lastSeen) {
+            newEntryIds.push(u.id);
+          }
+        });
+        isInitialMount.current = false;
       }
-    });
+    } else {
+      // On subsequent updates, check for new IDs (incoming socket updates)
+      updates.forEach((entry) => {
+        if (!knownIdsRef.current.has(entry.id)) {
+          newEntryIds.push(entry.id);
+          knownIdsRef.current.add(entry.id);
+        }
+      });
+    }
 
     if (newEntryIds.length > 0) {
       setNewIds((prev) => {
@@ -65,16 +80,16 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
         return next;
       });
 
-      // Remove "new" status after animation
+      // Remove "new" status after animation (5 seconds)
       setTimeout(() => {
         setNewIds((prev) => {
           const next = new Set(prev);
           newEntryIds.forEach((id) => next.delete(id));
           return next;
         });
-      }, 3000);
+      }, 5000);
     }
-  }, [updates]);
+  }, [updates, lastSeen, onLatestUpdate]);
 
   // Check if an entry is new
   const isNew = useCallback((id: string) => newIds.has(id), [newIds]);

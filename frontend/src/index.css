@@ -385,3 +385,44 @@ html {
 .animate-fadeSlideIn {
   animation: fadeSlideIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
 }
+
+/* Enhanced slide in with highlight for unread items */
+@keyframes slideInHighlight {
+  0% {
+    opacity: 0;
+    transform: translateX(-20px) scale(0.98);
+  }
+
+  60% {
+    opacity: 1;
+    transform: translateX(2px) scale(1.01);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.animate-slideInHighlight {
+  animation: slideInHighlight 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+/* Pulse animation that fades out after 5 seconds */
+@keyframes pulseFadeOut {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulseFadeOut {
+  animation: pulseFadeOut 1.5s ease-in-out;
+  animation-iteration-count: 3;
+  /* Pulses 3 times over ~4.5 seconds */
+}

@@ -3,7 +3,6 @@ import { Virtuoso } from "react-virtuoso";
 import { MessageItem } from "./MessageItem";
 import { MessageInput } from "./MessageInput";
 import { useTeamMessages } from "./useTeamMessages";
-import { useChatUpdates } from "../../../../../contexts";
 import { useContacts } from "./mention";
 import { ContactDetailModal } from "../../../../../components/modal/modal-contact-detail";
 import { ScrollToLatestButton } from "../../../../../components/common/ScrollToLatestButton";
@@ -17,6 +16,7 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
   isDarkMode,
   currentUserId,
   messagesOverride,
+  lastSeen = 0,
 }) => {
   // ... hooks
   const {
@@ -24,7 +24,6 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
     isLoading: apiLoading,
     isSending,
     error: apiError,
-    fetchMessages,
     sendMessage,
   } = useTeamMessages();
 
@@ -42,20 +41,23 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
 
   const scrollerRef = useRef<HTMLElement>(null);
 
-  // Subscribe to real-time chat updates via WebSocket
-  useChatUpdates(fetchMessages, !messagesOverride);
-
   const getSender = useCallback(
     (senderId: string) => users.find((u) => u.id === senderId),
     [users]
   );
-  // ... handlers
 
   const handleSend = useCallback(
     async (content: string) => {
-      if (currentUserId) await sendMessage(content, currentUserId);
+      await sendMessage(content, currentUserId || "");
+      // Scroll to top (newest) after sending
+      if (scrollerRef.current) {
+        // give it a moment to render
+        setTimeout(() => {
+          scrollerRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+        }, 100);
+      }
     },
-    [currentUserId, sendMessage]
+    [sendMessage, currentUserId]
   );
 
   const handleMentionClick = useCallback(
@@ -81,9 +83,11 @@ export const UpdateTeam: React.FC<UpdateTeamProps> = ({
         isDarkMode={isDarkMode}
         onMentionClick={handleMentionClick}
         validContactNames={validContactNames}
+        lastSeen={lastSeen}
+        currentUserId={currentUserId}
       />
     ),
-    [getSender, isDarkMode, handleMentionClick, validContactNames]
+    [getSender, isDarkMode, handleMentionClick, validContactNames, lastSeen, currentUserId]
   );
 
   const inputProps = {

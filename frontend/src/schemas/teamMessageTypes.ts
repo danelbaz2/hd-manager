@@ -20,6 +20,8 @@ export interface UpdateTeamProps {
   isDarkMode: boolean;
   currentUserId?: string;
   messagesOverride?: TeamMessage[];
+  lastSeen?: number;
+  onLatestUpdate?: (ts: number) => void;
 }
 
 export interface MessageItemProps {
@@ -29,6 +31,9 @@ export interface MessageItemProps {
   onMentionClick?: (contactName: string) => void;
   /** Valid contact names for proper mention parsing */
   validContactNames?: string[];
+  isNew?: boolean;
+  lastSeen?: number;
+  currentUserId?: string;
 }
 
 export interface MessageInputProps {
