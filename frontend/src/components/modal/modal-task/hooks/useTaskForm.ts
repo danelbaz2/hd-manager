@@ -10,8 +10,8 @@ interface UseTaskFormProps {
   onSuccess: (task: Task) => void;
   onError: (message: string) => void;
   onWarning: (title: string, message: string) => void;
-  refreshTasks: () => void;
-  refreshTaskHistory: () => void;
+  refreshTasks: (silent?: boolean, useDelta?: boolean) => void;
+  refreshTaskHistory: (silent?: boolean) => void;
   onTaskUpdated?: () => void;
 }
 
@@ -19,7 +19,7 @@ export const useTaskForm = ({
   task, isOpen, onSuccess, onError, onWarning, refreshTasks, refreshTaskHistory, onTaskUpdated,
 }: UseTaskFormProps) => {
   const updateMutation = useUpdateTaskMutation();
-  
+
   const [isEditMode, setIsEditMode] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -106,8 +106,8 @@ export const useTaskForm = ({
       onSuccess(updatedTask);
       setIsEditMode(false);
       // React Query mutation handles invalidation, also trigger context refresh for compatibility
-      refreshTasks();
-      refreshTaskHistory();
+      refreshTasks(true);
+      refreshTaskHistory(true);
       invalidateTaskQueries();
       onTaskUpdated?.();
     } catch (error) {

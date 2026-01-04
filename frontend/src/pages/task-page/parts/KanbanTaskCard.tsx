@@ -441,6 +441,13 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
         </div>
       )}
 
+      {/* Completed Banner - Only shown to non-admin users */}
+      {isLockedForUser && isCompleted && !isOverlay && (
+        <div className="completed-task-banner">
+          בוצע
+        </div>
+      )}
+
       {/* Task Title */}
       <div className="flex justify-between items-start mb-2 gap-2">
         <h4

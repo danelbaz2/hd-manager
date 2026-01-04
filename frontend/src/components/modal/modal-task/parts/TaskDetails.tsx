@@ -209,7 +209,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
             onStatusSelect={onStatusChangeRequest}
             isDarkMode={isDarkMode}
             disabled={!canChangeStatus}
-            excludeStatuses={user?.role !== "admin" ? ["completed", "pending_approval"] : []}
+            excludeStatuses={user?.role !== "admin" ? ["pending_approval"] : []}
           />
         )}
         <span
