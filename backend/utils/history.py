@@ -85,8 +85,10 @@ def log_history(entity_type, entity_id, action, user_id='system', old_val=None, 
             action_label = 'ASSIGN'
         
         # Get the full task object for the frontend to update its state
+        # Get the full task object for the frontend to update its state
         full_task = None
-        if action in ['CREATE', 'UPDATE'] and new_val:
+        # Include full task for all modification actions (not DELETE)
+        if action != 'DELETE' and new_val:
             cleaned_new_val = clean_doc(new_val)
             if cleaned_new_val:
                 full_task = cleaned_new_val

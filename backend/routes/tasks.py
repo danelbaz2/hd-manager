@@ -20,6 +20,46 @@ def serialize_doc(doc):
 from utils.jwt_utils import jwt_required, admin_required
 from utils.logger import logger
 
+def determine_action_type(change_data, old_data, new_data):
+    """
+    Determine the specific action type based on the changes.
+    Returns: CREATE, UPDATE, IN_PROGRESS, CLOSE, NOTE, DELETE, ASSIGN, PENDING_APPROVAL, APPROVE, or REJECT
+    """
+    action = change_data.get('action', 'UPDATE')
+    
+    if action == 'CREATE':
+        return 'CREATE'
+    if action == 'DELETE':
+        return 'DELETE'
+    if action == 'NOTE':
+        return 'NOTE'
+    if action == 'APPROVE':
+        return 'APPROVE'
+    if action == 'REJECT':
+        return 'REJECT'
+    
+    # For UPDATE, check if status changed
+    if 'status' in change_data:
+        new_status = change_data.get('status') or new_data.get('status')
+        old_status = old_data.get('status')
+        
+        if new_status == 'in_progress':
+            if old_status == 'pending_approval':
+                return 'REJECT'
+            return 'IN_PROGRESS'
+        elif new_status == 'pending_approval':
+            return 'PENDING_APPROVAL'
+        elif new_status == 'completed':
+            if old_status == 'pending_approval':
+                return 'APPROVE'
+            return 'CLOSE'
+    
+    # Check if responsibleUserIds changed (assignment update)
+    if 'responsibleUserIds' in change_data:
+        return 'ASSIGN'
+    
+    return 'UPDATE'
+
 @bp.route('/', methods=['GET'])
 @jwt_required
 def get_tasks():
@@ -155,9 +195,12 @@ def update_task(id):
         'updatedBy': request.user_full_name
     }
     
+    # Calculate action type before logging
+    action_type = determine_action_type(history_changes, old_doc, updated)
+
     # Only log history if there are real changes or for tracking purposes
     # Even if only metadata changed, we log it, but 'c' will be minimal
-    log_history('task', id, 'UPDATE', request.user_full_name, old_doc, updated, history_changes)
+    log_history('task', id, action_type, request.user_full_name, old_doc, updated, history_changes)
     
     logger.action("Update", "Task", id, request.user_full_name, f"Changed: {list(changes.keys())}")
 
@@ -199,35 +242,95 @@ def delete_task(id):
     return jsonify({"message": "Deleted"}), 200
 
 
+# ============== Task Approval Workflow ==============
+
+@bp.route('/<id>/approve', methods=['POST'])
+@admin_required
+@handle_client_disconnect
+def approve_task(id):
+    """
+    Admin approves a pending_approval task, moving it to completed status.
+    """
+    try:
+        old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'task'})
+        if not old_doc:
+            return jsonify({"error": "Task not found"}), 404
+
+        if old_doc.get('status') != 'pending_approval':
+            return jsonify({"error": "Task is not pending approval"}), 400
+
+        now = int(datetime.now().timestamp() * 1000)
+        mongo.db.ents.update_one({'_id': id}, {'$set': {
+            'status': 'completed',
+            'base.updatedAt': now,
+            'base.updatedBy': request.user_full_name
+        }})
+        
+        updated = mongo.db.ents.find_one({'_id': id})
+        
+        # Log approval with APPROVE action
+        log_history('task', id, 'APPROVE', request.user_full_name, old_doc, updated, {
+            'action': 'APPROVE',
+            'status': 'completed',
+            'base': {
+                'updatedAt': now,
+                'updatedBy': request.user_full_name
+            }
+        })
+        
+        logger.action("Approve", "Task", id, request.user_full_name, "Status: pending_approval → completed")
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+            
+    return jsonify(serialize_doc(updated))
+
+
+@bp.route('/<id>/reject', methods=['POST'])
+@admin_required
+@handle_client_disconnect
+def reject_task(id):
+    """
+    Admin rejects a pending_approval task, moving it back to in_progress status.
+    """
+    try:
+        old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'task'})
+        if not old_doc:
+            return jsonify({"error": "Task not found"}), 404
+
+        if old_doc.get('status') != 'pending_approval':
+            return jsonify({"error": "Task is not pending approval"}), 400
+
+        now = int(datetime.now().timestamp() * 1000)
+        mongo.db.ents.update_one({'_id': id}, {'$set': {
+            'status': 'in_progress',
+            'base.updatedAt': now,
+            'base.updatedBy': request.user_full_name
+        }})
+        
+        updated = mongo.db.ents.find_one({'_id': id})
+        
+        # Log rejection with REJECT action
+        log_history('task', id, 'REJECT', request.user_full_name, old_doc, updated, {
+            'action': 'REJECT',
+            'status': 'in_progress',
+            'base': {
+                'updatedAt': now,
+                'updatedBy': request.user_full_name
+            }
+        })
+        
+        logger.action("Reject", "Task", id, request.user_full_name, "Status: pending_approval → in_progress")
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 400
+            
+    return jsonify(serialize_doc(updated))
+
+
 # ============== Task History Endpoints ==============
 
-def determine_action_type(change_data, old_data, new_data):
-    """
-    Determine the specific action type based on the changes.
-    Returns: CREATE, UPDATE, IN_PROGRESS, CLOSE, NOTE, DELETE, or ASSIGN
-    """
-    action = change_data.get('action', 'UPDATE')
-    
-    if action == 'CREATE':
-        return 'CREATE'
-    if action == 'DELETE':
-        return 'DELETE'
-    if action == 'NOTE':
-        return 'NOTE'
-    
-    # For UPDATE, check if status changed
-    if 'status' in change_data:
-        new_status = change_data.get('status') or new_data.get('status')
-        if new_status == 'in_progress':
-            return 'IN_PROGRESS'
-        elif new_status == 'completed':
-            return 'CLOSE'
-    
-    # Check if responsibleUserIds changed (assignment update)
-    if 'responsibleUserIds' in change_data:
-        return 'ASSIGN'
-    
-    return 'UPDATE'
+
 
 
 @bp.route('/<task_id>/history', methods=['GET'])
