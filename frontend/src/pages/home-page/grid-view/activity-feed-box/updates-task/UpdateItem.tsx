@@ -39,14 +39,36 @@ export const UpdateItem: React.FC<UpdateItemProps> = ({
     )
     : [];
 
+  const [showBadge, setShowBadge] = React.useState(isNew);
+
+  React.useEffect(() => {
+    if (isNew) {
+      setShowBadge(true);
+    } else {
+      const timer = setTimeout(() => setShowBadge(false), 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [isNew]);
+
   return (
     <div
-      className={`flex items-start gap-3 cursor-pointer transition-all py-3 px-2 overflow-hidden ${isDarkMode ? "hover:bg-slate-700/30" : "hover:bg-slate-50"
-        } ${isNew ? "animate-fadeSlideIn" : ""}`}
+      className={`relative flex items-start gap-3 cursor-pointer transition-all duration-[2000ms] ease-out py-3 px-2 overflow-hidden ${isNew
+        ? isDarkMode
+          ? "bg-blue-900/20 hover:bg-blue-900/30 animate-slideInHighlight"
+          : "bg-blue-50/80 hover:bg-blue-100/80 animate-slideInHighlight"
+        : isDarkMode
+          ? "hover:bg-slate-700/30"
+          : "hover:bg-slate-50"
+        }`}
       style={isNew ? {
-        animation: "fadeSlideIn 0.4s ease-out forwards",
-        backgroundColor: isDarkMode ? "rgba(59, 130, 246, 0.1)" : "rgba(59, 130, 246, 0.05)"
-      } : undefined}
+        borderRight: `4px solid ${isDarkMode ? '#60a5fa' : '#3b82f6'}`,
+        boxShadow: isDarkMode
+          ? '0 0 15px rgba(96, 165, 250, 0.15)'
+          : '0 0 15px rgba(59, 130, 246, 0.1)'
+      } : {
+        borderRight: '4px solid transparent',
+        boxShadow: 'none'
+      }}
       dir="rtl"
       onClick={onClick}
     >
@@ -60,7 +82,18 @@ export const UpdateItem: React.FC<UpdateItemProps> = ({
       />
 
       <div className="flex-1 min-w-0 overflow-hidden">
-        <div className="flex items-center gap-2 flex-wrap mb-0.5">
+        <div className="flex items-center flex-wrap mb-0.5">
+          {showBadge && (
+            <span
+              className={`text-[10px] font-bold rounded overflow-hidden whitespace-nowrap transition-all duration-[2000ms] ease-out ${isNew
+                  ? "opacity-100 animate-pulseFadeOut max-w-[50px] px-1.5 py-0.5 ml-2"
+                  : "opacity-0 max-w-0 px-0 py-0 ml-0 border-0"
+                } ${isDarkMode ? "bg-blue-500 text-white" : "bg-blue-600 text-white"}`}
+              style={isNew ? {} : { transform: "scale(0.8)" }}
+            >
+              חדש
+            </span>
+          )}
           <span
             className={`font-semibold text-sm ${isDarkMode ? "text-white" : "text-slate-800"
               }`}

@@ -1,12 +1,11 @@
 import React from "react";
 import type { UserData } from "./types";
-import type { LucideIcon } from "lucide-react";
 
 interface UserAvatarProps {
   user?: UserData;
   userName: string;
   userColor: string;
-  actionIcon: LucideIcon;
+  actionIcon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
   actionColor: string;
   isDarkMode: boolean;
 }
