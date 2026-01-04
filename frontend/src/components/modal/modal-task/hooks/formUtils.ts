@@ -1,4 +1,4 @@
-import type { Task } from "../../../../api/tasksApi";
+import type { Task, TaskOptionals } from "../../../../api/tasksApi";
 import type { TaskPriority } from "../../../../schemas/taskTypes";
 
 /**
@@ -26,6 +26,26 @@ export const arraysEqual = (a: string[], b: string[]): boolean => {
 };
 
 /**
+ * Compare optional fields equality
+ */
+export const isOptionalsEqual = (a: TaskOptionals | undefined, b: TaskOptionals | undefined): boolean => {
+  if (!a && !b) return true;
+  if (!a || !b) {
+    // Treat empty object same as undefined/none
+    const aEmpty = !a || Object.values(a).every(v => !v);
+    const bEmpty = !b || Object.values(b).every(v => !v);
+    return aEmpty === bEmpty;
+  }
+  return (
+    (a.pikud || "") === (b.pikud || "") &&
+    (a.ugda || "") === (b.ugda || "") &&
+    (a.hativa || "") === (b.hativa || "") &&
+    (a.gdud || "") === (b.gdud || "") &&
+    (a.externalSystem || "") === (b.externalSystem || "")
+  );
+};
+
+/**
  * Initialize form state from task
  */
 export const initFormFromTask = (task: Task) => ({
@@ -37,6 +57,7 @@ export const initFormFromTask = (task: Task) => ({
   selectedUserIds: task.responsibleUserIds || [],
   startDate: task.date ? timestampToDateStr(task.date) : "",
   deadline: task.deadline ? timestampToDateStr(task.deadline) : "",
+  optionals: task.optionals || {},
 });
 
 /**
@@ -51,7 +72,8 @@ export const hasFormChanges = (
   deadline: string,
   selectedUserIds: string[],
   selectedPrimaryTagIds: string[],
-  selectedSecondaryTagIds: string[]
+  selectedSecondaryTagIds: string[],
+  optionals: TaskOptionals
 ): boolean => {
   const originalStartDate = timestampToDateStr(task.date);
   const originalDeadline = timestampToDateStr(task.deadline);
@@ -64,6 +86,7 @@ export const hasFormChanges = (
     deadline !== originalDeadline ||
     !arraysEqual(selectedUserIds, task.responsibleUserIds || []) ||
     !arraysEqual(selectedPrimaryTagIds, task.primaryTagIds || []) ||
-    !arraysEqual(selectedSecondaryTagIds, task.secondaryTagIds || [])
+    !arraysEqual(selectedSecondaryTagIds, task.secondaryTagIds || []) ||
+    !isOptionalsEqual(optionals, task.optionals)
   );
 };

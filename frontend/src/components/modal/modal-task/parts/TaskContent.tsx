@@ -1,5 +1,5 @@
 import React from "react";
-import type { Task } from "../../../../api/tasksApi";
+import type { Task, TaskOptionals } from "../../../../api/tasksApi";
 import type { TaskHistoryEntry } from "../../../../api/tasksApi";
 import type { UserData } from "../../../../schemas/userTypes";
 import type {
@@ -30,6 +30,8 @@ interface FormState {
   setSelectedSecondaryTagIds: (value: string[]) => void;
   selectedPrimaryTagIds: string[];
   setSelectedPrimaryTagIds: (value: string[]) => void;
+  optionals: TaskOptionals;
+  setOptionals: (value: TaskOptionals) => void;
 }
 
 interface TaskContentProps {
@@ -86,6 +88,8 @@ export const TaskContent: React.FC<TaskContentProps> = ({
         setSelectedSecondaryTagIds={form.setSelectedSecondaryTagIds}
         selectedPrimaryTagIds={form.selectedPrimaryTagIds}
         setSelectedPrimaryTagIds={form.setSelectedPrimaryTagIds}
+        optionals={form.optionals}
+        setOptionals={form.setOptionals}
         primaryTags={primaryTags}
         secondaryTags={secondaryTags}
         users={users}

@@ -5,7 +5,7 @@ import {
   UserSelect,
   DatePicker,
 } from "../../modal-new-task/components";
-import type { TaskPriority } from "../../../../schemas/taskTypes";
+import type { TaskPriority, TaskOptionals } from "../../../../schemas/taskTypes";
 import type { UserData } from "../../../../schemas/userTypes";
 import type { PrimaryTagData, SecondaryTagData } from "../../../../schemas/tagTypes";
 
@@ -26,6 +26,8 @@ interface TaskFormProps {
   setSelectedSecondaryTagIds: (value: string[]) => void;
   selectedPrimaryTagIds: string[];
   setSelectedPrimaryTagIds: (value: string[]) => void;
+  optionals: TaskOptionals;
+  setOptionals: (value: TaskOptionals) => void;
   primaryTags: PrimaryTagData[];
   secondaryTags: SecondaryTagData[];
   users: UserData[];
@@ -50,6 +52,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   setSelectedSecondaryTagIds,
   selectedPrimaryTagIds,
   setSelectedPrimaryTagIds,
+  optionals,
+  setOptionals,
   primaryTags,
   secondaryTags,
   users,
@@ -77,6 +81,15 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       adjustHeight(descRef.current, 56, 112);
     }
   }, [isLoading, title, description]);
+
+  const inputClass = `
+    w-full px-3 py-2 rounded-xl border-2 text-sm transition-all
+    ${isDarkMode
+      ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
+      : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
+    }
+    focus:outline-none focus:ring-2 focus:ring-blue-500/20
+  `;
 
   return (
     <div className="space-y-3">
@@ -141,6 +154,60 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           `}
           style={{ minHeight: '56px', maxHeight: '112px' }}
         />
+      </div>
+
+      {/* Military Hierarchy & External System Row */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        <div>
+          <label className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>פיקוד</label>
+          <input
+            type="text"
+            placeholder="צפון"
+            value={optionals?.pikud || ""}
+            onChange={(e) => setOptionals({ ...optionals, pikud: e.target.value })}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>אוגדה</label>
+          <input
+            type="text"
+            placeholder="91"
+            value={optionals?.ugda || ""}
+            onChange={(e) => setOptionals({ ...optionals, ugda: e.target.value })}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>חטיבה</label>
+          <input
+            type="text"
+            placeholder="300"
+            value={optionals?.hativa || ""}
+            onChange={(e) => setOptionals({ ...optionals, hativa: e.target.value })}
+            className={inputClass}
+          />
+        </div>
+        <div>
+          <label className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>גדוד</label>
+          <input
+            type="text"
+            placeholder="299"
+            value={optionals?.gdud || ""}
+            onChange={(e) => setOptionals({ ...optionals, gdud: e.target.value })}
+            className={inputClass}
+          />
+        </div>
+        <div className="col-span-2 md:col-span-1">
+          <label className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>מערכת חיצונית</label>
+          <input
+            type="text"
+            placeholder="משואה"
+            value={optionals?.externalSystem || ""}
+            onChange={(e) => setOptionals({ ...optionals, externalSystem: e.target.value })}
+            className={inputClass}
+          />
+        </div>
       </div>
 
       {/* Tags & Dates Row - 12 col grid for better spacing */}
