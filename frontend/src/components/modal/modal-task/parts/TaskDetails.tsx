@@ -2,7 +2,7 @@ import React, { useMemo } from "react";
 import { StatusBadgeDropdown } from "./StatusBadgeDropdown";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { useSettings } from "../../../../contexts/SettingsContext";
-import { FileText, Calendar, Clock, Users } from "lucide-react";
+import { FileText, Calendar, Clock, Users, CheckCircle2, XCircle, ShieldCheck } from "lucide-react";
 import { Tooltip } from "../../../tags-tooltip";
 import { useTagsModal } from "../../modal-tags";
 import {
@@ -27,6 +27,8 @@ interface TaskDetailsProps {
   secondaryTags: SecondaryTagData[];
   users: UserData[];
   onStatusChangeRequest: (newStatus: any) => void;
+  onApprove?: () => void;
+  onReject?: () => void;
 }
 
 export const TaskDetails: React.FC<TaskDetailsProps> = ({
@@ -36,6 +38,8 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
   secondaryTags,
   users,
   onStatusChangeRequest,
+  onApprove,
+  onReject,
 }) => {
   const { user } = useAuth();
   const { contacts } = useSettings();
@@ -43,12 +47,15 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
 
   const canChangeStatus = useMemo(() => {
     if (!user) return false;
+    // Admin can always change status (uses approve/reject for pending_approval)
     if (user.role === "admin") return true;
-    if (task.status === "completed") return false;
+    // Non-admin: pending_approval and completed are locked
+    if (task.status === "pending_approval" || task.status === "completed") return false;
+    // Non-admin: can change if responsible
     if (task.responsibleUserIds && task.responsibleUserIds.includes(user.id))
       return true;
     return false;
-  }, [user, task.responsibleUserIds]);
+  }, [user, task.responsibleUserIds, task.status]);
 
   const currentPriority = (task.priority || "medium") as TaskPriority;
   const currentStatus = (task.status ||
@@ -110,11 +117,10 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       {/* Task ID & Tags */}
       <div className="flex items-center justify-between">
         <span
-          className={`text-xs font-mono px-2 py-1 rounded ${
-            isDarkMode
-              ? "bg-slate-700 text-slate-400"
-              : "bg-slate-100 text-slate-500"
-          }`}
+          className={`text-xs font-mono px-2 py-1 rounded ${isDarkMode
+            ? "bg-slate-700 text-slate-400"
+            : "bg-slate-100 text-slate-500"
+            }`}
         >
           ID-{task.id ? task.id.slice(-6).toLowerCase() : "???"}
         </span>
@@ -145,22 +151,67 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
 
       {/* Title */}
       <h2
-        className={`text-2xl font-bold break-words whitespace-pre-line ${
-          isDarkMode ? "text-white" : "text-slate-800"
-        }`}
+        className={`text-2xl font-bold break-words whitespace-pre-line ${isDarkMode ? "text-white" : "text-slate-800"
+          }`}
       >
         {task.title}
       </h2>
 
       {/* Status & Priority */}
-      <div className="flex items-center gap-3">
-        <StatusBadgeDropdown
-          currentStatus={currentStatus}
-          onStatusSelect={onStatusChangeRequest}
-          isDarkMode={isDarkMode}
-          disabled={!canChangeStatus}
-          excludeStatuses={user?.role !== "admin" ? ["completed"] : []}
-        />
+      <div className="flex items-center gap-3 flex-wrap">
+        {/* Pending Approval State - Show approve/reject for admin */}
+        {task.status === "pending_approval" && user?.role === "admin" ? (
+          <div className="flex items-center gap-2">
+            {/* Status indicator */}
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${isDarkMode ? "bg-purple-500/20" : "bg-purple-50"
+              }`}>
+              <ShieldCheck className="w-4 h-4 text-purple-500" />
+              <span className="text-xs font-semibold text-purple-500">
+                ממתין לאישור
+              </span>
+            </div>
+            {/* Approve button */}
+            <button
+              onClick={onApprove}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:scale-105 ${isDarkMode
+                ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+                : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+                }`}
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              אשר וסגור
+            </button>
+            {/* Reject button */}
+            <button
+              onClick={onReject}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:scale-105 ${isDarkMode
+                ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                : "bg-red-50 text-red-600 hover:bg-red-100"
+                }`}
+            >
+              <XCircle className="w-4 h-4" />
+              דחה והחזר
+            </button>
+          </div>
+        ) : task.status === "pending_approval" ? (
+          // Non-admin viewing pending_approval - show locked status
+          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${isDarkMode ? "bg-purple-500/20" : "bg-purple-50"
+            }`}>
+            <ShieldCheck className="w-4 h-4 text-purple-500" />
+            <span className="text-xs font-semibold text-purple-500">
+              ממתין לאישור מנהל
+            </span>
+          </div>
+        ) : (
+          // Normal status dropdown
+          <StatusBadgeDropdown
+            currentStatus={currentStatus}
+            onStatusSelect={onStatusChangeRequest}
+            isDarkMode={isDarkMode}
+            disabled={!canChangeStatus}
+            excludeStatuses={user?.role !== "admin" ? ["completed", "pending_approval"] : []}
+          />
+        )}
         <span
           className="px-3 py-1.5 rounded-lg text-xs font-semibold"
           style={{
@@ -175,28 +226,24 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       {/* Description */}
       {task.description && (
         <div
-          className={`p-4 rounded-xl ${
-            isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
-          }`}
+          className={`p-4 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+            }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <FileText
-              className={`w-4 h-4 ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`w-4 h-4 ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             />
             <span
-              className={`text-sm font-medium ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`text-sm font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               תיאור
             </span>
           </div>
           <p
-            className={`text-sm leading-relaxed break-words whitespace-pre-line ${
-              isDarkMode ? "text-slate-300" : "text-slate-600"
-            }`}
+            className={`text-sm leading-relaxed break-words whitespace-pre-line ${isDarkMode ? "text-slate-300" : "text-slate-600"
+              }`}
           >
             {task.description}
           </p>
@@ -207,28 +254,24 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       <div className="grid grid-cols-2 gap-4">
         {task.date && (
           <div
-            className={`p-3 rounded-xl ${
-              isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
-            }`}
+            className={`p-3 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+              }`}
           >
             <div className="flex items-center gap-2 mb-1">
               <Calendar
-                className={`w-4 h-4 ${
-                  isDarkMode ? "text-blue-400" : "text-blue-500"
-                }`}
+                className={`w-4 h-4 ${isDarkMode ? "text-blue-400" : "text-blue-500"
+                  }`}
               />
               <span
-                className={`text-xs font-medium ${
-                  isDarkMode ? "text-slate-400" : "text-slate-500"
-                }`}
+                className={`text-xs font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
               >
                 תאריך התחלה
               </span>
             </div>
             <p
-              className={`text-sm font-semibold ${
-                isDarkMode ? "text-white" : "text-slate-800"
-              }`}
+              className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-slate-800"
+                }`}
             >
               {new Date(task.date).toLocaleDateString("he-IL")}
             </p>
@@ -236,28 +279,24 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
         )}
         {task.deadline && (
           <div
-            className={`p-3 rounded-xl ${
-              isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
-            }`}
+            className={`p-3 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+              }`}
           >
             <div className="flex items-center gap-2 mb-1">
               <Clock
-                className={`w-4 h-4 ${
-                  isDarkMode ? "text-amber-400" : "text-amber-500"
-                }`}
+                className={`w-4 h-4 ${isDarkMode ? "text-amber-400" : "text-amber-500"
+                  }`}
               />
               <span
-                className={`text-xs font-medium ${
-                  isDarkMode ? "text-slate-400" : "text-slate-500"
-                }`}
+                className={`text-xs font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
               >
                 תאריך יעד
               </span>
             </div>
             <p
-              className={`text-sm font-semibold ${
-                isDarkMode ? "text-white" : "text-slate-800"
-              }`}
+              className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-slate-800"
+                }`}
             >
               {new Date(task.deadline).toLocaleDateString("he-IL")}
             </p>
@@ -268,20 +307,17 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       {/* Responsible Users */}
       {task.responsibleUserIds && task.responsibleUserIds.length > 0 && (
         <div
-          className={`p-4 rounded-xl ${
-            isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
-          }`}
+          className={`p-4 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+            }`}
         >
           <div className="flex items-center gap-2 mb-3">
             <Users
-              className={`w-4 h-4 ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`w-4 h-4 ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             />
             <span
-              className={`text-sm font-medium ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`text-sm font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               אחראים
             </span>
@@ -293,9 +329,8 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
               return (
                 <div
                   key={userId}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl ${
-                    isDarkMode ? "bg-slate-600/50" : "bg-white shadow-sm"
-                  }`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl ${isDarkMode ? "bg-slate-600/50" : "bg-white shadow-sm"
+                    }`}
                 >
                   {user.profileImage ? (
                     <img
@@ -314,9 +349,8 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                     </div>
                   )}
                   <span
-                    className={`text-sm font-medium ${
-                      isDarkMode ? "text-white" : "text-slate-700"
-                    }`}
+                    className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-slate-700"
+                      }`}
                   >
                     {user.fullName}
                   </span>

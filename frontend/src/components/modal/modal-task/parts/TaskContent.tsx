@@ -50,6 +50,8 @@ interface TaskContentProps {
   getActionDescription: (entry: any, config: any) => React.ReactNode;
   onMentionClick: (contactName: string) => void;
   onStatusChangeRequest: (newStatus: any) => void;
+  onApprove?: () => void;
+  onReject?: () => void;
 }
 
 export const TaskContent: React.FC<TaskContentProps> = ({
@@ -68,6 +70,8 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   getActionDescription,
   onMentionClick,
   onStatusChangeRequest,
+  onApprove,
+  onReject,
 }) => {
   if (isEditMode) {
     return (
@@ -126,6 +130,8 @@ export const TaskContent: React.FC<TaskContentProps> = ({
         secondaryTags={secondaryTags}
         users={users}
         onStatusChangeRequest={onStatusChangeRequest}
+        onApprove={onApprove}
+        onReject={onReject}
       />
     </div>
   );

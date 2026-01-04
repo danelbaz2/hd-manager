@@ -47,6 +47,25 @@ export const UpdateContent: React.FC<UpdateContentProps> = ({
     );
   }
 
+  // Approval workflow actions - show bold descriptive text
+
+
+  if (entry.action === "APPROVE") {
+    return (
+      <p className={`text-sm break-words ${textColor}`}>
+        <span className="font-bold text-emerald-500">אישר וסגר</span> את המשימה "<span className="font-medium">{title}</span>"
+      </p>
+    );
+  }
+
+  if (entry.action === "REJECT") {
+    return (
+      <p className={`text-sm break-words ${textColor}`}>
+        <span className="font-bold text-red-500">דחה והחזיר לטיפול</span> את המשימה "<span className="font-medium">{title}</span>"
+      </p>
+    );
+  }
+
   if (changedFields.length > 0) {
     return (
       <div className="space-y-1">

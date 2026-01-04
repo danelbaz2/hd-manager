@@ -1,7 +1,4 @@
-/**
- * History action configuration constants
- */
-import { Plus, Pencil, Clock, CheckCircle2, Trash2, MessageSquare, UserPlus, UserMinus, Calendar, CalendarClock, Flag, Tag, FileText, Type, Circle } from "lucide-react";
+import { Plus, Pencil, Clock, CheckCircle2, Trash2, MessageSquare, UserPlus, UserMinus, Calendar, CalendarClock, Flag, Tag, FileText, Type, Circle, ShieldCheck, XCircle } from "lucide-react";
 import type { TaskHistoryAction, TaskHistoryEntry } from "../../../../api/tasksApi";
 
 export interface ActionConfigItem {
@@ -57,6 +54,24 @@ export const ACTION_CONFIG: Record<TaskHistoryAction, ActionConfigItem> = {
     bgColor: "#06B6D420",
     label: "שינוי הקצאה",
   },
+  PENDING_APPROVAL: {
+    icon: ShieldCheck,
+    color: "#8B5CF6",
+    bgColor: "#8B5CF620",
+    label: "נשלח לאישור סגירה",
+  },
+  APPROVE: {
+    icon: CheckCircle2,
+    color: "#10B981",
+    bgColor: "#10B98120",
+    label: "אושר וסגור",
+  },
+  REJECT: {
+    icon: XCircle,
+    color: "#EF4444",
+    bgColor: "#EF444420",
+    label: "נדחה והוחזר לטיפול",
+  },
 };
 
 /**
@@ -72,6 +87,11 @@ const STATUS_STYLES: Record<string, Partial<ActionConfigItem>> = {
     icon: Clock,
     color: "#F59E0B", // Amber for "In Progress"
     bgColor: "#F59E0B20",
+  },
+  pending_approval: {
+    icon: ShieldCheck,
+    color: "#8B5CF6", // Purple for "Pending Approval"
+    bgColor: "#8B5CF620",
   },
   completed: {
     icon: CheckCircle2,

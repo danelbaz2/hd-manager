@@ -101,13 +101,13 @@ const defaultContextValue: SettingsContextState = {
   isLoadingContacts: false,
   isLoadingTasks: false,
   isLoadingHistory: false,
-  refreshUsers: async () => {},
-  refreshTags: async () => {},
-  refreshContacts: async () => {},
-  refreshTasks: async () => {},
-  refreshTaskHistory: async () => {},
-  refreshAll: async () => {},
-  addHistoryEntry: () => {},
+  refreshUsers: async () => { },
+  refreshTags: async () => { },
+  refreshContacts: async () => { },
+  refreshTasks: async () => { },
+  refreshTaskHistory: async () => { },
+  refreshAll: async () => { },
+  addHistoryEntry: () => { },
   getHistoryForTask: () => [],
   getHistoryForDate: () => [],
 };
@@ -395,7 +395,7 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
         // Remove task from the list
         setTasks((prev) => prev.filter((t) => t.id !== taskId));
       } else if (
-        ["UPDATE", "IN_PROGRESS", "CLOSE", "ASSIGN"].includes(action) &&
+        ["UPDATE", "IN_PROGRESS", "CLOSE", "ASSIGN", "PENDING_APPROVAL", "APPROVE", "REJECT"].includes(action) &&
         fullTask
       ) {
         // Update existing task

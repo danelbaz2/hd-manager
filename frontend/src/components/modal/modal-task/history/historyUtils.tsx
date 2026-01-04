@@ -139,6 +139,22 @@ export const getActionDescription = (
     return "המשימה נוצרה";
   }
 
+
+
+  // APPROVE action
+  if (entry.action === "APPROVE") {
+    return (
+      <span>
+        <span className="font-bold text-emerald-500">אישר וסגר</span> את המשימה
+      </span>
+    );
+  }
+
+  // REJECT action
+  if (entry.action === "REJECT") {
+    return <span className="font-bold">המשימה נדחתה והוחזרה לטיפול</span>;
+  }
+
   // For all other actions check for field changes
   const changedFields = Object.keys(changes).filter((k) =>
     [

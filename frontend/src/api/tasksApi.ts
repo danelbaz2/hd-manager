@@ -151,12 +151,50 @@ export const deleteTask = async (taskId: string): Promise<ApiResponse<null>> => 
   });
 };
 
+// ============== Task Approval Workflow ==============
+
+/**
+ * Approve a pending_approval task (admin only)
+ * Moves the task from pending_approval to completed
+ */
+export const approveTask = async (taskId: string): Promise<ApiResponse<Task>> => {
+  return safeMutationAuto(`approveTask:${taskId}`, async () => {
+    const response = await apiRequest<Task>(`${API_ENDPOINTS.tasks}/${taskId}/approve`, {
+      method: "POST",
+    });
+
+    if (response.success) {
+      response.message = "Task approved and closed successfully";
+    }
+
+    return response;
+  });
+};
+
+/**
+ * Reject a pending_approval task (admin only)
+ * Moves the task from pending_approval back to in_progress
+ */
+export const rejectTask = async (taskId: string): Promise<ApiResponse<Task>> => {
+  return safeMutationAuto(`rejectTask:${taskId}`, async () => {
+    const response = await apiRequest<Task>(`${API_ENDPOINTS.tasks}/${taskId}/reject`, {
+      method: "POST",
+    });
+
+    if (response.success) {
+      response.message = "Task rejected and returned to in progress";
+    }
+
+    return response;
+  });
+};
+
 // ============== Task History ==============
 
 /**
  * Action types for task history
  */
-export type TaskHistoryAction = "CREATE" | "UPDATE" | "IN_PROGRESS" | "CLOSE" | "DELETE" | "NOTE" | "ASSIGN";
+export type TaskHistoryAction = "CREATE" | "UPDATE" | "IN_PROGRESS" | "CLOSE" | "DELETE" | "NOTE" | "ASSIGN" | "PENDING_APPROVAL" | "APPROVE" | "REJECT";
 
 /**
  * Task history entry from ents_archive

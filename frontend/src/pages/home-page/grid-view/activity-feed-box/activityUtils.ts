@@ -36,6 +36,9 @@ export const getActionLabel = (action: TaskHistoryAction): string => {
         DELETE: "מחק משימה",
         NOTE: "הוסיף הערה ל",
         ASSIGN: "שייך משימה",
+        PENDING_APPROVAL: "שלח לאישור",
+        APPROVE: "אישר את",
+        REJECT: "דחה את",
     };
     return labels[action] || "עדכון";
 };
@@ -55,6 +58,9 @@ export const getActionColor = (
         DELETE: { dark: "text-red-400", light: "text-red-600" },
         NOTE: { dark: "text-purple-400", light: "text-purple-600" },
         ASSIGN: { dark: "text-cyan-400", light: "text-cyan-600" },
+        PENDING_APPROVAL: { dark: "text-purple-400", light: "text-purple-600" },
+        APPROVE: { dark: "text-emerald-400", light: "text-emerald-600" },
+        REJECT: { dark: "text-red-400", light: "text-red-600" },
     };
     return colors[action]?.[isDarkMode ? "dark" : "light"] || "text-slate-500";
 };
@@ -68,6 +74,17 @@ export const buildActivityMessage = (
 ): string => {
     const actionLabel = getActionLabel(entry.action);
     const title = taskTitle || "משימה";
+
+    // Special messages for approval workflow
+    if (entry.action === "PENDING_APPROVAL") {
+        return `שלח לאישור סגירה "${title}"`;
+    }
+    if (entry.action === "APPROVE") {
+        return `אישר וסגר את "${title}"`;
+    }
+    if (entry.action === "REJECT") {
+        return `דחה והחזיר לטיפול את "${title}"`;
+    }
 
     if (entry.action === "NOTE" && entry.note) {
         return `${actionLabel} "${title}": ${entry.note}`;

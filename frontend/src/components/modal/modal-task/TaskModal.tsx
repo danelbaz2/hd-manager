@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useTheme, useSettings, useAuth } from "../../../contexts";
 import { useTaskModal } from "./TaskModalContext";
-import { addTaskNote } from "../../../api/tasksApi";
+import { addTaskNote, approveTask, rejectTask } from "../../../api/tasksApi";
 import { useToast } from "../../alert-feedback";
 import { ConfirmModal } from "../modal-confirm";
 import { getActionDescription } from "./history/historyUtils";
@@ -119,6 +119,42 @@ const TaskModal: React.FC = () => {
     refreshTasks,
   });
 
+  // Handle task approval (admin only)
+  const handleApproveTask = useCallback(async () => {
+    if (!task) return;
+    try {
+      const response = await approveTask(task.id);
+      if (response.success && response.data) {
+        updateCurrentTask(response.data);
+        showSuccess("אושר בהצלחה", "המשימה אושרה ונסגרה");
+        refreshTasks();
+        refreshTaskHistory();
+      } else {
+        showError("שגיאה", "שגיאה באישור המשימה");
+      }
+    } catch {
+      showError("שגיאה", "שגיאה באישור המשימה");
+    }
+  }, [task, updateCurrentTask, showSuccess, showError, refreshTasks, refreshTaskHistory]);
+
+  // Handle task rejection (admin only)
+  const handleRejectTask = useCallback(async () => {
+    if (!task) return;
+    try {
+      const response = await rejectTask(task.id);
+      if (response.success && response.data) {
+        updateCurrentTask(response.data);
+        showSuccess("נדחה", "המשימה נדחתה והוחזרה לטיפול");
+        refreshTasks();
+        refreshTaskHistory();
+      } else {
+        showError("שגיאה", "שגיאה בדחיית המשימה");
+      }
+    } catch {
+      showError("שגיאה", "שגיאה בדחיית המשימה");
+    }
+  }, [task, updateCurrentTask, showSuccess, showError, refreshTasks, refreshTaskHistory]);
+
   useEffect(() => {
     if (!isOpen) {
       setActiveTab("details");
@@ -204,6 +240,8 @@ const TaskModal: React.FC = () => {
           getActionDescription={getDesc}
           onMentionClick={handleMentionClick}
           onStatusChangeRequest={handleStatusChangeRequest}
+          onApprove={handleApproveTask}
+          onReject={handleRejectTask}
           closeTaskModal={closeTaskModal}
           alerts={alerts}
           dismissAlert={dismissAlert}

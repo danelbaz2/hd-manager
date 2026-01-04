@@ -1,7 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import ReactDOM from "react-dom";
 import { User, Clock } from "lucide-react";
-import { useTheme, useSettings } from "../../../contexts";
+import { useTheme, useSettings, useAuth } from "../../../contexts";
 import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
 import {
@@ -137,13 +137,30 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
     return [...primaryList, ...secondaryList];
   }, [task.secondaryTagIds, task.primaryTagIds, secondaryTags, primaryTags]);
 
+  // Get current user to check admin status
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
+  // Check if task is in a restricted state for this user
+  // Admin: no restrictions
+  // Non-admin: pending_approval and completed are locked (view only)
+  const isPendingApproval = task.status === "pending_approval";
+  const isCompleted = task.status === "completed";
+  const isLockedForUser = !isAdmin && (isPendingApproval || isCompleted);
+
   // ... existing handlers
 
   // ... inside renderCardContent
 
-  // Mouse down - prepare for potential drag
+  // Mouse down - prepare for potential drag (disabled for locked tasks)
   const handleMouseDown = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     if (e.button !== 0) return; // Only left click
+
+    // Locked tasks for this user: only allow click (view), not drag
+    if (isLockedForUser) {
+      onClick?.(task);
+      return;
+    }
 
     const rect = cardRef.current?.getBoundingClientRect();
     if (rect) {
@@ -160,7 +177,7 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
     dropTargetRef.current = null;
 
     e.preventDefault();
-  }, []);
+  }, [isLockedForUser, onClick, task]);
 
   // Global mouse handlers
   React.useEffect(() => {
@@ -352,20 +369,19 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
   const overlayPosition = isAnimating
     ? animationTarget
     : {
-        x: dragPosition.x - offsetRef.current.x,
-        y: dragPosition.y - offsetRef.current.y,
-      };
+      x: dragPosition.x - offsetRef.current.x,
+      y: dragPosition.y - offsetRef.current.y,
+    };
 
   // Card styles based on state
   const getCardClasses = (isOverlay: boolean) => {
     const baseClasses = `
             p-4 rounded-xl border select-none kanban-card
             ${isOverlay ? "" : "mb-3"}
-            ${
-              isDarkMode
-                ? "bg-slate-800 border-slate-700"
-                : "bg-white border-slate-100"
-            }
+            ${isDarkMode
+        ? "bg-slate-800 border-slate-700"
+        : "bg-white border-slate-100"
+      }
         `;
 
     if (isOverlay) {
@@ -383,6 +399,16 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
       return `${baseClasses} opacity-30 pointer-events-none border-dashed`;
     }
 
+    // Locked state for non-admin users
+    if (isLockedForUser) {
+      // Pending approval - show with banner effect
+      if (isPendingApproval) {
+        return `${baseClasses} pending-approval-card clickable cursor-pointer shadow-sm transition-all duration-500 ease-out`;
+      }
+      // Completed - show locked card (grayed out)
+      return `${baseClasses} locked-task-card clickable cursor-pointer shadow-sm transition-all duration-500 ease-out`;
+    }
+
     // Normal state - has transition for smooth sibling sliding
     return `${baseClasses} cursor-grab hover:shadow-lg hover:-translate-y-0.5 shadow-sm transition-all duration-500 ease-out`;
   };
@@ -398,30 +424,35 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
         isOverlay
           ? { boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.35)" }
           : isCollapsing
-          ? {
+            ? {
               height: 0,
               padding: 0,
               margin: 0,
               opacity: 0,
               transition: `all ${ANIMATION_DURATION}ms ease-out`,
             }
-          : undefined
+            : undefined
       }
     >
+      {/* Pending Approval Banner - Only shown to non-admin users */}
+      {isLockedForUser && isPendingApproval && !isOverlay && (
+        <div className="pending-approval-banner">
+          ממתין לאישור
+        </div>
+      )}
+
       {/* Task Title */}
       <div className="flex justify-between items-start mb-2 gap-2">
         <h4
-          className={`font-bold text-sm leading-tight line-clamp-2 break-words whitespace-pre-line ${
-            isDarkMode ? "text-white" : "text-slate-800"
-          }`}
+          className={`font-bold text-sm leading-tight line-clamp-2 break-words whitespace-pre-line ${isDarkMode ? "text-white" : "text-slate-800"
+            }`}
         >
           {task.title || "ללא כותרת"}
         </h4>
         {showStatusBadge && (
           <span
-            className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap ${
-              getStatusStyle(task.status || "pending").bg
-            } ${getStatusStyle(task.status || "pending").text}`}
+            className={`text-[10px] px-1.5 py-0.5 rounded shrink-0 whitespace-nowrap ${getStatusStyle(task.status || "pending").bg
+              } ${getStatusStyle(task.status || "pending").text}`}
           >
             {getStatusStyle(task.status || "pending").label}
           </span>
@@ -431,9 +462,8 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
       {/* Task Description */}
       {task.description && (
         <p
-          className={`text-xs mb-3 line-clamp-2 break-words whitespace-pre-line ${
-            isDarkMode ? "text-slate-400" : "text-slate-500"
-          }`}
+          className={`text-xs mb-3 line-clamp-2 break-words whitespace-pre-line ${isDarkMode ? "text-slate-400" : "text-slate-500"
+            }`}
         >
           {task.description}
         </p>
@@ -458,11 +488,10 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
           })}
           {displayedTags.length > 3 && (
             <span
-              className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${
-                isDarkMode
-                  ? "bg-slate-700 text-slate-300"
-                  : "bg-slate-100 text-slate-500"
-              }`}
+              className={`px-2 py-0.5 rounded-md text-[10px] font-medium ${isDarkMode
+                ? "bg-slate-700 text-slate-300"
+                : "bg-slate-100 text-slate-500"
+                }`}
             >
               +{displayedTags.length - 3}
             </span>
@@ -474,9 +503,8 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
       <div className="flex items-center justify-between mt-auto">
         {task.deadline && (
           <div
-            className={`flex items-center gap-1 text-xs ${
-              isDarkMode ? "text-slate-400" : "text-slate-400"
-            }`}
+            className={`flex items-center gap-1 text-xs ${isDarkMode ? "text-slate-400" : "text-slate-400"
+              }`}
           >
             <Clock size={12} />
             <span>{formatDate(task.deadline)}</span>
