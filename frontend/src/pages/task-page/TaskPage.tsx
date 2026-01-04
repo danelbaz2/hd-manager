@@ -13,7 +13,10 @@ import { useTaskModal } from "../../components/modal/modal-task";
 import { useTour } from "../../components/demos/tour-provider";
 import { PageHelpButton } from "../../components/demos/page-help-button";
 import { DEMO_TASKS, DEMO_USERS } from "../../components/demos/shared/tourData";
-import { KanbanOnboardingDemo, shouldShowOnboarding } from "../../components/demos/kanban-onboarding";
+import {
+  KanbanOnboardingDemo,
+  shouldShowOnboarding,
+} from "../../components/demos/kanban-onboarding";
 import type { UserData } from "../../schemas/userTypes";
 
 interface LocationState {
@@ -111,17 +114,17 @@ const TaskPage: React.FC = () => {
       // Augment demo data to include current user with tasks
       const effectiveUsers = user
         ? [
-          user as any as UserData,
-          ...DEMO_USERS.filter((u) => u.id !== user.id),
-        ]
+            user as any as UserData,
+            ...DEMO_USERS.filter((u) => u.id !== user.id),
+          ]
         : DEMO_USERS;
 
       const myDemoTasks = user
         ? DEMO_TASKS.map((t) => ({
-          ...t,
-          id: `my-${t.id}`,
-          responsibleUserIds: [user.id],
-        }))
+            ...t,
+            id: `my-${t.id}`,
+            responsibleUserIds: [user.id],
+          }))
         : [];
 
       return {
@@ -233,13 +236,20 @@ const TaskPage: React.FC = () => {
         return;
       }
 
+      // APPROVAL WORKFLOW: Non-admin users cannot close tasks directly
+      // If they try to set status to "completed", redirect to "pending_approval"
+      let finalStatus = newStatus;
+      if (newStatus === "completed" && authUser?.role !== "admin") {
+        finalStatus = "pending_approval";
+      }
+
       // Optimistic update
       setOptimisticTasks((prev) =>
         prev.map((t) => {
           if (t.id !== taskId) return t;
           return {
             ...t,
-            status: newStatus,
+            status: finalStatus,
             base: {
               ...(t.base || {
                 isDeleted: false,
@@ -254,7 +264,7 @@ const TaskPage: React.FC = () => {
 
       try {
         // 2. API Call
-        const response = await updateTask(taskId, { status: newStatus });
+        const response = await updateTask(taskId, { status: finalStatus });
 
         // 3. Sync - delay refresh to let optimistic UI settle
         setTimeout(() => {
@@ -271,7 +281,7 @@ const TaskPage: React.FC = () => {
         refreshTasks(); // Revert to server state
       }
     },
-    [optimisticTasks, refreshTasks, refreshTaskHistory]
+    [optimisticTasks, refreshTasks, refreshTaskHistory, authUser?.role]
   );
 
   // Handle task click - open task modal
@@ -325,9 +335,10 @@ const TaskPage: React.FC = () => {
             className={`
               p-2 rounded-full
               transition-colors
-              ${isDarkMode
-                ? "hover:bg-slate-700 text-slate-300"
-                : "hover:bg-slate-100 text-slate-600"
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-700 text-slate-300"
+                  : "hover:bg-slate-100 text-slate-600"
               }
             `}
             aria-label="חזרה לדף הבית"
@@ -365,11 +376,12 @@ const TaskPage: React.FC = () => {
                   rounded-md
                   text-xs lg:text-sm font-medium
                   transition-all duration-200
-                  ${viewMode === mode.id
-                    ? isDarkMode
-                      ? "bg-slate-600 text-white shadow-sm"
-                      : "bg-white text-blue-600 shadow-sm"
-                    : isDarkMode
+                  ${
+                    viewMode === mode.id
+                      ? isDarkMode
+                        ? "bg-slate-600 text-white shadow-sm"
+                        : "bg-white text-blue-600 shadow-sm"
+                      : isDarkMode
                       ? "text-slate-400 hover:text-slate-200"
                       : "text-slate-500 hover:text-slate-700"
                   }

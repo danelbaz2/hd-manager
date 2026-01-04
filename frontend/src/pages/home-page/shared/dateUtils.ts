@@ -88,7 +88,7 @@ export const filterTasksBySearch = (
   if (!query.trim()) return tasks;
   const lowerQuery = query.toLowerCase();
   return tasks.filter((task) =>
-    task.title.toLowerCase().includes(lowerQuery) ||
+    task.title?.toLowerCase().includes(lowerQuery) ||
     task.description?.toLowerCase().includes(lowerQuery)
   );
 };
@@ -99,7 +99,7 @@ export const filterTasksByStatus = (
   statuses: string[]
 ): Task[] => {
   if (statuses.length === 0) return tasks;
-  return tasks.filter((task) => statuses.includes(task.status));
+  return tasks.filter((task) => task.status && statuses.includes(task.status));
 };
 
 // Filter tasks by tags

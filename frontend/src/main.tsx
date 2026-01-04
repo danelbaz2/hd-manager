@@ -11,6 +11,10 @@ import {
 } from "./contexts";
 import { TaskModalProvider, TaskModal } from "./components/modal/modal-task";
 import { TagsModalProvider, TagsModal } from "./components/modal/modal-tags";
+import {
+  CloseTaskModalProvider,
+  CloseTaskModal,
+} from "./components/modal/modal-close-task";
 import { TourProvider } from "./components/demos/tour-provider";
 import { TourOverlay } from "./components/demos/tour-overlay";
 
@@ -23,13 +27,16 @@ createRoot(document.getElementById("root")!).render(
             <ViewStateProvider>
               <TagsModalProvider>
                 <TaskModalProvider>
-                  <TourProvider>
-                    <App />
-                    <TaskModal />
-                    <TagsModal />
-                    {/* Guided Tour Overlay */}
-                    <TourOverlay />
-                  </TourProvider>
+                  <CloseTaskModalProvider>
+                    <TourProvider>
+                      <App />
+                      <TaskModal />
+                      <TagsModal />
+                      <CloseTaskModal />
+                      {/* Guided Tour Overlay */}
+                      <TourOverlay />
+                    </TourProvider>
+                  </CloseTaskModalProvider>
                 </TaskModalProvider>
               </TagsModalProvider>
             </ViewStateProvider>

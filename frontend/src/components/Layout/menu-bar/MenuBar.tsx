@@ -1,13 +1,6 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import {
-  Home,
-  List,
-  MessageCircle,
-  Layers,
-  LogOut,
-  Archive,
-} from "lucide-react";
+import { Home, List, Layers, LogOut, Archive } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
 
 interface MenuBarProps {

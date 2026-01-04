@@ -1,6 +1,6 @@
 // Contact Modal Content - displays contact details with tags
 import React, { useEffect, useState } from "react";
-import { Phone, Briefcase, Building2 } from "lucide-react";
+import { Phone, Building2 } from "lucide-react";
 import type { Contact } from "../../../api/contactsApi";
 import {
   getAllPrimaryTags,

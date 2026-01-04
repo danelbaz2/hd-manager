@@ -1,7 +1,7 @@
 // Task types and constants
 
 export type TaskPriority = "low" | "medium" | "high";
-export type TaskStatus = "pending" | "in_progress" | "completed";
+export type TaskStatus = "pending" | "in_progress" | "pending_approval" | "completed";
 
 export interface TaskData {
   id: string;
@@ -41,6 +41,7 @@ export const PRIORITY_OPTIONS: { id: TaskPriority; label: string }[] = [
 export const STATUS_OPTIONS: { id: TaskStatus; label: string }[] = [
   { id: "pending", label: "פתוח" },
   { id: "in_progress", label: "בטיפול" },
+  { id: "pending_approval", label: "ממתין לאישור" },
   { id: "completed", label: "סגור" },
 ];
 
@@ -55,6 +56,7 @@ export const PRIORITY_COLORS: Record<TaskPriority, { bg: string; text: string }>
 export const STATUS_COLORS: Record<TaskStatus, { bg: string; text: string }> = {
   pending: { bg: "#D1FAE5", text: "#059669" }, // Emerald (green)
   in_progress: { bg: "#FEF3C7", text: "#D97706" }, // Amber (orange)
+  pending_approval: { bg: "#E9D5FF", text: "#7C3AED" }, // Purple (waiting)
   completed: { bg: "#E2E8F0", text: "#64748B" }, // Slate (gray)
 };
 

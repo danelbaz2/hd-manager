@@ -2,20 +2,25 @@ import React from "react";
 import { useTheme } from "../../../contexts";
 import { type Task } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
-import { type SecondaryTagData } from "../../../schemas/tagTypes";
+import {
+  type SecondaryTagData,
+  type PrimaryTagData,
+} from "../../../schemas/tagTypes";
 import TaskListItem from "./TaskListItem";
 
 interface TaskListDailyProps {
   tasks: Task[];
   users: UserData[];
-  tags: SecondaryTagData[];
+  primaryTags: PrimaryTagData[];
+  secondaryTags: SecondaryTagData[];
   onTaskClick?: (task: Task) => void;
 }
 
 const TaskListDaily: React.FC<TaskListDailyProps> = ({
   tasks,
   users,
-  tags,
+  primaryTags,
+  secondaryTags,
   onTaskClick,
 }) => {
   const { isDarkMode } = useTheme();
@@ -61,7 +66,8 @@ const TaskListDaily: React.FC<TaskListDailyProps> = ({
           key={task.id}
           task={task}
           users={users}
-          tags={tags}
+          primaryTags={primaryTags}
+          secondaryTags={secondaryTags}
           onTaskClick={onTaskClick}
         />
       ))}

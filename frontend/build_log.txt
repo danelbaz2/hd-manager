@@ -1,0 +1,22 @@
+
+> frontend@0.0.0 build
+> tsc -b && vite build
+
+[36mvite v7.2.7 [32mbuilding client environment for production...[36m[39m
+transforming...
+[32m✓[39m 2405 modules transformed.
+[33m[plugin vite:reporter] 
+(!) D:/hd-manager/frontend/src/api/tasksApi.ts is dynamically imported by D:/hd-manager/frontend/src/components/modal/modal-task/TaskModal.tsx, D:/hd-manager/frontend/src/pages/home-page/grid-view/activity-feed-box/ActivityFeedBox.tsx but also statically imported by D:/hd-manager/frontend/src/components/demos/shared/tourData.ts, D:/hd-manager/frontend/src/components/modal/modal-close-task/usePendingTasks.ts, D:/hd-manager/frontend/src/components/modal/modal-new-task/hooks/useTaskForm.ts, D:/hd-manager/frontend/src/components/modal/modal-task/TaskModal.tsx, D:/hd-manager/frontend/src/components/modal/modal-task/hooks/useTaskDelete.ts, D:/hd-manager/frontend/src/components/modal/modal-task/hooks/useTaskForm.ts, D:/hd-manager/frontend/src/contexts/SettingsContext.tsx, D:/hd-manager/frontend/src/pages/archive-page/ArchivePage.tsx, D:/hd-manager/frontend/src/pages/archive-page/ArchiveTaskRow.tsx, D:/hd-manager/frontend/src/pages/archive-page/ListTaskArchive.tsx, D:/hd-manager/frontend/src/pages/home-page/HomePage.tsx, D:/hd-manager/frontend/src/pages/home-page/grid-view/GridView.tsx, D:/hd-manager/frontend/src/pages/home-page/grid-view/TaskStatusSummary.tsx, D:/hd-manager/frontend/src/pages/home-page/grid-view/UserCardGrid.tsx, D:/hd-manager/frontend/src/pages/home-page/grid-view/activity-feed-box/ActivityFeedBox.tsx, D:/hd-manager/frontend/src/pages/home-page/grid-view/activity-feed-box/updates-task/useUpdatesData.ts, D:/hd-manager/frontend/src/pages/home-page/grid-view/admin-view/AdminUserGrid.tsx, D:/hd-manager/frontend/src/pages/home-page/grid-view/admin-view/AdminView.tsx, D:/hd-manager/frontend/src/pages/home-page/grid-view/user-view/TaskBrief.tsx, D:/hd-manager/frontend/src/pages/home-page/grid-view/user-view/UserView.tsx, D:/hd-manager/frontend/src/pages/home-page/list-view/DailyList.tsx, D:/hd-manager/frontend/src/pages/home-page/list-view/DayCell.tsx, D:/hd-manager/frontend/src/pages/home-page/list-view/ListView.tsx, D:/hd-manager/frontend/src/pages/home-page/list-view/MonthlyCalendar.tsx, D:/hd-manager/frontend/src/pages/home-page/list-view/WeeklyList.tsx, D:/hd-manager/frontend/src/pages/home-page/parts/TaskListDaily.tsx, D:/hd-manager/frontend/src/pages/home-page/parts/TaskListItem.tsx, D:/hd-manager/frontend/src/pages/home-page/parts/TaskListWeekly.tsx, D:/hd-manager/frontend/src/pages/home-page/parts/UserCardGrid.tsx, D:/hd-manager/frontend/src/pages/home-page/parts/weeklyViewUtils.ts, D:/hd-manager/frontend/src/pages/home-page/shared/dateUtils.ts, D:/hd-manager/frontend/src/pages/home-page/tags-view/TagAccordion.tsx, D:/hd-manager/frontend/src/pages/home-page/tags-view/TagTaskCard.tsx, D:/hd-manager/frontend/src/pages/home-page/tags-view/TagsView.tsx, D:/hd-manager/frontend/src/pages/task-page/TaskPage.tsx, D:/hd-manager/frontend/src/pages/task-page/parts/KanbanBoard.tsx, D:/hd-manager/frontend/src/pages/task-page/parts/KanbanColumn.tsx, D:/hd-manager/frontend/src/pages/task-page/parts/KanbanTaskCard.tsx, dynamic import will not move module into another chunk.
+[39m
+rendering chunks...
+computing gzip size...
+[2mdist/[22m[32mindex.html                           [39m[1m[2m    0.48 kB[22m[1m[22m[2m │ gzip:   0.30 kB[22m
+[2mdist/[22m[32massets/default-profile-Dt0zEkbG.jpg  [39m[1m[2m   44.79 kB[22m[1m[22m
+[2mdist/[22m[35massets/index-BiqVqvPe.css            [39m[1m[2m  118.71 kB[22m[1m[22m[2m │ gzip:  16.63 kB[22m
+[2mdist/[22m[36massets/index-BA2ayelN.js             [39m[1m[33m1,110.62 kB[39m[22m[2m │ gzip: 336.79 kB[22m
+[33m
+(!) Some chunks are larger than 500 kB after minification. Consider:
+- Using dynamic import() to code-split the application
+- Use build.rollupOptions.output.manualChunks to improve chunking: https://rollupjs.org/configuration-options/#output-manualchunks
+- Adjust chunk size limit for this warning via build.chunkSizeWarningLimit.[39m
+[32m✓ built in 5.51s[39m

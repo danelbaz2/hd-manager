@@ -7,8 +7,9 @@ import {
   LayoutGrid,
   AlignJustify,
   Tags,
+  ShieldCheck,
 } from "lucide-react";
-import { useTheme, useAuth } from "../../contexts";
+import { useTheme, useAuth, useSettings } from "../../contexts";
 import {
   IconToggleButton,
   IconButtonToggle,
@@ -16,6 +17,7 @@ import {
   StatusFilterButtons,
   ResponsibleFilterButton,
 } from "./components";
+import { useCloseTaskModal } from "../../components/modal/modal-close-task";
 import type { TaskStatus } from "../../api/tasksApi";
 
 type ViewMode = "daily" | "weekly" | "monthly";
@@ -64,8 +66,15 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
 }) => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
+  const { tasks } = useSettings();
+  const { openModal } = useCloseTaskModal();
 
   const isAdmin = user?.role === "admin";
+
+  // Count pending approval tasks
+  const pendingApprovalCount = tasks.filter(
+    (task) => task.status === "pending_approval"
+  ).length;
 
   const [internalViewMode, setInternalViewMode] = useState<ViewMode>("daily");
   const [internalDisplayMode, setInternalDisplayMode] =
@@ -188,6 +197,46 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
             onChange={handleViewModeChange}
           />
         </div>
+
+        {/* Approval Button - Admin Only */}
+        {isAdmin && (
+          <button
+            onClick={openModal}
+            className={`
+              relative flex items-center gap-1.5 lg:gap-2
+              px-3 lg:px-4 py-2 lg:py-2.5
+              rounded-xl
+              transition-all duration-200
+              ${
+                pendingApprovalCount > 0
+                  ? "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                  : isDarkMode
+                  ? "bg-slate-700 hover:bg-slate-600 text-slate-300"
+                  : "bg-slate-200 hover:bg-slate-300 text-slate-600"
+              }
+            `}
+            title="אישור סגירת משימות"
+          >
+            <ShieldCheck className="w-4 h-4 lg:w-5 lg:h-5" />
+            <span className="hidden lg:inline text-sm font-medium">
+              אישורים
+            </span>
+            {pendingApprovalCount > 0 && (
+              <span
+                className="
+                  absolute -top-1 -right-1
+                  min-w-5 h-5 px-1
+                  flex items-center justify-center
+                  bg-red-500 text-white text-xs font-bold
+                  rounded-full
+                  animate-pulse
+                "
+              >
+                {pendingApprovalCount}
+              </span>
+            )}
+          </button>
+        )}
         {isAdmin && (
           <button
             onClick={onCreateTask}

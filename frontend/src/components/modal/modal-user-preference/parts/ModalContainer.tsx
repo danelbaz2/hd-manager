@@ -24,7 +24,7 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
 
   // Calculate card colors based on selected color
   const bgOpacity = isDarkMode ? 0.08 : 0.04;
-  const borderOpacity = isDarkMode ? 0.3 : 0.2;
+
   const hasColor = color && color !== "";
 
   return (
@@ -65,9 +65,10 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
             onClick={onClose}
             className={`
               p-2 rounded-lg transition-colors
-              ${isDarkMode
-                ? "hover:bg-slate-700 text-slate-400"
-                : "hover:bg-slate-100 text-slate-500"
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-700 text-slate-400"
+                  : "hover:bg-slate-100 text-slate-500"
               }
             `}
           >
@@ -76,8 +77,9 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
 
           <div className="flex items-center gap-2">
             <h2
-              className={`text-lg font-bold ${isDarkMode ? "text-white" : "text-slate-800"
-                }`}
+              className={`text-lg font-bold ${
+                isDarkMode ? "text-white" : "text-slate-800"
+              }`}
             >
               {title}
             </h2>
@@ -91,8 +93,8 @@ const ModalContainer: React.FC<ModalContainerProps> = ({
           style={
             hasColor
               ? {
-                backgroundColor: hexWithAlpha(color, bgOpacity),
-              }
+                  backgroundColor: hexWithAlpha(color, bgOpacity),
+                }
               : undefined
           }
         >

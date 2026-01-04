@@ -17,7 +17,7 @@ export const isSameDay = (timestamp: number, selectedDate: number): boolean => {
 /**
  * Format timestamp to time string (HH:MM)
  */
-export const formatTime = (timestamp: number): string => {
+export const formatActivityTime = (timestamp: number): string => {
     return new Date(timestamp).toLocaleTimeString("he-IL", {
         hour: "2-digit",
         minute: "2-digit",

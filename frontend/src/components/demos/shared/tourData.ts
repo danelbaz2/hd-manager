@@ -10,6 +10,7 @@ export const DEMO_USERS: UserData[] = [
         role: "admin",
         color: "#3B82F6",
         profileImage: null,
+        nickname: null,
     },
     {
         id: "demo-user-2",
@@ -18,6 +19,7 @@ export const DEMO_USERS: UserData[] = [
         role: "regular",
         color: "#EC4899",
         profileImage: null,
+        nickname: null,
     },
     {
         id: "demo-user-3",
@@ -26,6 +28,7 @@ export const DEMO_USERS: UserData[] = [
         role: "regular",
         color: "#10B981",
         profileImage: null,
+        nickname: null,
     },
 ];
 
@@ -106,7 +109,7 @@ export const DEMO_TASKS: Task[] = [
         id: "demo-task-3",
         title: "תיקון באג בלוגין",
         description: "משתמשים לא מצליחים להתחבר עם גוגל",
-        status: "done",
+        status: "completed",
         priority: "low",
         date: today - dayMs,
         responsibleUserIds: ["demo-user-1", "demo-user-2"],
@@ -216,7 +219,7 @@ export const DEMO_HISTORY: any[] = [
         action: "UPDATE",
         timestamp: today - 500000,
         updatedBy: "שרה כהן",
-        changes: { status: "done" },
+        changes: { status: "completed" },
         oldValues: { status: "in_progress" }
     },
     {

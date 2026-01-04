@@ -12,8 +12,8 @@ from database import mongo
 
 load_dotenv()
 
-# Initialize Flask with static files support
-app = Flask(__name__, static_folder='static', static_url_path='/static')
+# Initialize Flask to serve frontend build
+app = Flask(__name__, static_folder='../frontend/dist', static_url_path='/')
 
 # Hide basic request logs by default (clean terminal)
 logging.getLogger('werkzeug').setLevel(logging.ERROR)
@@ -46,9 +46,12 @@ app.register_blueprint(logs.bp)
 from websocket import register_socket_events
 register_socket_events(socketio)
 
-@app.route('/')
-def hello():
-    return "HD Manager API Running"
+@app.route('/', defaults={'path': ''})
+@app.route('/<path:path>')
+def serve(path):
+    if path != "" and os.path.exists(app.static_folder + '/' + path):
+        return app.send_static_file(path)
+    return app.send_static_file('index.html')
 
 if __name__ == '__main__':
     from utils.logging_utils import setup_access_logging

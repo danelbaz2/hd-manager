@@ -39,7 +39,6 @@ class SocketManager {
   // Activity tracking
   private idleTimer: ReturnType<typeof setTimeout> | null = null;
   private activityThrottleTimer: ReturnType<typeof setTimeout> | null = null;
-  private lastActivityTime: number = Date.now();
   private isIdle: boolean = false;
   
   // Subscribers
@@ -349,7 +348,6 @@ class SocketManager {
   }
   
   private handleActivity = (): void => {
-    this.lastActivityTime = Date.now();
     
     // If we were idle and disconnected, reconnect
     if (this.isIdle && !this.socket?.connected) {

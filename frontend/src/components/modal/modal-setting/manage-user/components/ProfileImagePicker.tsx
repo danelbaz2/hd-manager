@@ -3,7 +3,7 @@ import { Camera, Loader2 } from "lucide-react";
 import defaultProfileImage from "../../../../../assets/default-profile.jpg";
 
 interface ProfileImagePickerProps {
-  profileImage?: string;
+  profileImage?: string | null;
   isCompressing: boolean;
   isDisabled?: boolean;
   isDarkMode: boolean;

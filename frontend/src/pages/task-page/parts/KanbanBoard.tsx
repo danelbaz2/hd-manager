@@ -1,9 +1,9 @@
 import React, { useMemo, useState, useCallback } from "react";
 import { MoveLeft } from "lucide-react";
-import { useTheme } from "../../../contexts";
+import { useTheme, useAuth } from "../../../contexts";
 import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
-import KanbanColumn, { KANBAN_COLUMNS } from "./KanbanColumn";
+import KanbanColumn, { KANBAN_COLUMNS, getKanbanColumns } from "./KanbanColumn";
 import { type DropConfirmRequest } from "./KanbanTaskCard";
 import { ConfirmModal } from "../../../components/modal/modal-confirm";
 
@@ -28,6 +28,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
   onTaskClick,
 }) => {
   const { isDarkMode } = useTheme();
+  const { user } = useAuth();
+  const isAdmin = user?.role === "admin";
+
+  // Get columns based on user role
+  const columns = useMemo(() => getKanbanColumns(isAdmin), [isAdmin]);
 
   // Confirmation modal state
   const [confirmRequest, setConfirmRequest] =
@@ -38,6 +43,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     const grouped: Record<TaskStatus, Task[]> = {
       pending: [],
       in_progress: [],
+      pending_approval: [],
       completed: [],
     };
 
@@ -129,8 +135,11 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
         dir="rtl"
       >
         {/* Kanban Columns */}
-        <div data-tour="kanban-columns" className="flex h-full gap-4 lg:gap-6 p-4 lg:p-6">
-          {KANBAN_COLUMNS.map((column) => (
+        <div
+          data-tour="kanban-columns"
+          className="flex h-full gap-4 lg:gap-6 p-4 lg:p-6"
+        >
+          {columns.map((column) => (
             <KanbanColumn
               key={column.status}
               title={column.title}
@@ -166,29 +175,33 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
               </p>
               {/* Status change visualization */}
               <div
-                className={`flex items-center justify-center gap-3 py-3 px-4 rounded-xl ${isDarkMode ? "bg-slate-700/50" : "bg-slate-100/80"
-                  }`}
+                className={`flex items-center justify-center gap-3 py-3 px-4 rounded-xl ${
+                  isDarkMode ? "bg-slate-700/50" : "bg-slate-100/80"
+                }`}
                 dir="rtl"
               >
                 <span
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${isDarkMode
-                    ? "bg-slate-600 text-slate-200"
-                    : "bg-white text-slate-700 border border-slate-200"
-                    }`}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${
+                    isDarkMode
+                      ? "bg-slate-600 text-slate-200"
+                      : "bg-white text-slate-700 border border-slate-200"
+                  }`}
                 >
                   {getStatusLabel(confirmRequest.fromStatus)}
                 </span>
                 <div
-                  className={`flex items-center justify-center w-8 h-8 rounded-full ${isDarkMode ? "bg-blue-500/20" : "bg-blue-100"
-                    }`}
+                  className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                    isDarkMode ? "bg-blue-500/20" : "bg-blue-100"
+                  }`}
                 >
                   <MoveLeft size={16} className="text-blue-500" />
                 </div>
                 <span
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${isDarkMode
-                    ? "bg-blue-500/30 text-blue-300"
-                    : "bg-blue-500 text-white"
-                    }`}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${
+                    isDarkMode
+                      ? "bg-blue-500/30 text-blue-300"
+                      : "bg-blue-500 text-white"
+                  }`}
                 >
                   {getStatusLabel(confirmRequest.toStatus)}
                 </span>

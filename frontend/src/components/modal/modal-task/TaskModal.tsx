@@ -72,9 +72,15 @@ const TaskModal: React.FC = () => {
   const handleStatusChangeRequest = useCallback(
     (newStatus: TaskStatus) => {
       if (newStatus === task?.status) return;
-      setPendingStatus(newStatus);
+
+      // Approval Workflow: prevent non-admins from setting "completed"
+      if (newStatus === "completed" && !isAdmin) {
+        setPendingStatus("pending_approval");
+      } else {
+        setPendingStatus(newStatus);
+      }
     },
-    [task]
+    [task, isAdmin]
   );
 
   // Confirm status change

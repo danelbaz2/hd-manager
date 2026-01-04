@@ -4,7 +4,7 @@ from typing import List, Optional, Union
 from models.base_entity import BaseEntityMeta
 
 # Status values: pending (פתוח), in_progress (בטיפול), completed (סגור)
-VALID_STATUSES = "^(pending|in_progress|completed)$"
+VALID_STATUSES = "^(pending|in_progress|pending_approval|completed)$"
 # Priority values: low, medium, high
 VALID_PRIORITIES = "^(low|medium|high)$"
 
