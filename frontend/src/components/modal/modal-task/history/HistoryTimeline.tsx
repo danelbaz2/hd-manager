@@ -48,15 +48,27 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
 
 
 
-  // Initial scroll to bottom (instant, no animation)
+  // Scroll to bottom on mount (every time this component is rendered/tab is switched)
   useEffect(() => {
-    if (scrollRef.current && isInitialMount.current && history.length > 0) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-      // Mark all initial entries as known
+    if (scrollRef.current && history.length > 0) {
+      const scrollToBottom = () => {
+        if (scrollRef.current) {
+          scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+        }
+      };
+
+      // Use multiple attempts to ensure scroll happens after render
+      scrollToBottom();
+      requestAnimationFrame(scrollToBottom);
+      const timer = setTimeout(scrollToBottom, 100);
+
+      // Mark all entries as known on mount
       history.forEach((e) => knownIdsRef.current.add(e.id));
       isInitialMount.current = false;
+
+      return () => clearTimeout(timer);
     }
-  }, [history]);
+  }, []); // Empty deps = run once on mount
 
   // Handle history changes - detect new entries and animate them
   const prevHistoryLengthRef = useRef(history.length);
@@ -106,10 +118,12 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
     if (historyGrew && scrollRef.current) {
       // Use requestAnimationFrame for smoother scrolling after DOM update
       requestAnimationFrame(() => {
-        scrollRef.current?.scrollTo({
-          top: scrollRef.current.scrollHeight,
-          behavior: 'smooth'
-        });
+        if (scrollRef.current) {
+          scrollRef.current.scrollTo({
+            top: scrollRef.current.scrollHeight,
+            behavior: "smooth",
+          });
+        }
       });
     }
   }, [history]);
@@ -171,7 +185,7 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
       <ScrollToLatestButton
         containerRef={scrollRef}
         direction="down"
-        className="bottom-42"
+        className="bottom-20"
       />
 
       {/* Chat Input - Always visible */}

@@ -54,6 +54,8 @@ const TaskModal: React.FC = () => {
     onSuccess: (t) => {
       showSuccess("עודכן בהצלחה", "המשימה עודכנה");
       updateCurrentTask(t);
+      // Switch to history tab to show the new update
+      setActiveTab("history");
     },
     onError: (m) => showError("שגיאה", m),
     onWarning: showWarning,
