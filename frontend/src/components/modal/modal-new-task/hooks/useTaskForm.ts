@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { type TaskPriority, type TaskFormData, type TaskOptionals } from "../../../../schemas/taskTypes";
-import { createTask } from "../../../../api/tasksApi";
+import { useCreateTaskMutation, invalidateTaskQueries } from "../../../../api/queries";
 import { useToast } from "../../../alert-feedback";
 
 interface UseTaskFormOptions {
@@ -66,6 +66,7 @@ export const useTaskForm = ({
   onClose,
 }: UseTaskFormOptions): UseTaskFormReturn => {
   const { alerts, showSuccess, showError, showWarning, dismissAlert, clearAllAlerts } = useToast();
+  const createMutation = useCreateTaskMutation();
 
   // Form state
   const [title, setTitle] = useState("");
@@ -193,27 +194,15 @@ export const useTaskForm = ({
       };
 
       console.log("Creating task with data:", taskData);
-      const response = await createTask(taskData);
+      await createMutation.mutateAsync(taskData);
 
-      if (response.success) {
-        showSuccess("משימה נוצרה! 🎉", `המשימה "${title}" נוצרה בהצלחה`);
-        setTimeout(() => {
-          onSuccess?.();
-          onClose?.();
-        }, 1500);
-      } else if (response.aborted) {
-        // Request was aborted (usually due to WebSocket refresh) - task likely created
-        console.log("Task creation request was aborted, but task may have been created");
-        // Close modal silently - WebSocket will update UI if task was created
-        isSubmittingRef.current = false;
-        setIsSubmitting(false);
+      showSuccess("משימה נוצרה! 🎉", `המשימה "${title}" נוצרה בהצלחה`);
+      // Invalidate queries to refetch task lists
+      invalidateTaskQueries();
+      setTimeout(() => {
+        onSuccess?.();
         onClose?.();
-      } else {
-        showError("שגיאה ביצירת משימה", response.error || "אירעה שגיאה, נסה שוב");
-        // Reset lock on error to allow retry
-        isSubmittingRef.current = false;
-        setIsSubmitting(false);
-      }
+      }, 1500);
     } catch (error) {
       console.error("Error creating task:", error);
       const errorMessage = error instanceof Error ? error.message : "";
@@ -226,7 +215,7 @@ export const useTaskForm = ({
         setIsSubmitting(false);
         onClose?.();
       } else {
-        showError("שגיאה בלתי צפויה", "אירעה שגיאה בלתי צפויה");
+        showError("שגיאה בלתי צפויה", errorMessage || "אירעה שגיאה בלתי צפויה");
         // Reset lock on error to allow retry
         isSubmittingRef.current = false;
         setIsSubmitting(false);

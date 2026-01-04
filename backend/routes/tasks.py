@@ -68,6 +68,7 @@ def get_tasks():
     start_date = request.args.get('startDate')
     end_date = request.args.get('endDate')
     responsible_user_ids = request.args.get('responsibleUserIds')
+    since = request.args.get('since')  # Delta sync: fetch only tasks modified after this timestamp
     
     query = {'base.entityType': 'task', 'base.isDeleted': {'$ne': True}}
 
@@ -87,6 +88,13 @@ def get_tasks():
 
     if responsible_user_ids:
         query['responsibleUserIds'] = responsible_user_ids
+
+    # Delta sync: only fetch tasks modified after 'since' timestamp
+    if since:
+        try:
+            query['base.updatedAt'] = {'$gt': int(since)}
+        except ValueError:
+            pass
 
     tasks = list(mongo.db.ents.find(query))
     return jsonify([serialize_doc(t) for t in tasks])

@@ -1,6 +1,6 @@
 import { useMemo, useCallback } from "react";
 import { useSettings } from "../../../contexts";
-import { updateTask } from "../../../api/tasksApi";
+import { useUpdateTaskMutation, invalidateTaskQueries } from "../../../api/queries";
 import type { Task } from "../../../api/tasksApi";
 
 interface UsePendingTasksReturn {
@@ -13,9 +13,11 @@ interface UsePendingTasksReturn {
 
 /**
  * usePendingTasks - Hook to manage tasks pending approval
+ * Uses React Query mutation for updates while reading from SettingsContext
  */
 export const usePendingTasks = (): UsePendingTasksReturn => {
   const { tasks, refreshTasks } = useSettings();
+  const updateMutation = useUpdateTaskMutation();
 
   // Filter tasks with pending_approval status
   const pendingTasks = useMemo(() => {
@@ -25,38 +27,40 @@ export const usePendingTasks = (): UsePendingTasksReturn => {
   // Approve task - change status to completed
   const approveTask = useCallback(async (taskId: string): Promise<boolean> => {
     try {
-      const response = await updateTask(taskId, { status: "completed" });
-      if (response.success) {
-        refreshTasks();
-        return true;
-      }
-      return false;
+      await updateMutation.mutateAsync({ id: taskId, task: { status: "completed" } });
+      // Mutation handles invalidation, also trigger context refresh for compatibility
+      refreshTasks();
+      return true;
     } catch (error) {
       console.error("Failed to approve task:", error);
       return false;
     }
-  }, [refreshTasks]);
+  }, [updateMutation, refreshTasks]);
 
   // Reject task - change status back to in_progress
   const rejectTask = useCallback(async (taskId: string): Promise<boolean> => {
     try {
-      const response = await updateTask(taskId, { status: "in_progress" });
-      if (response.success) {
-        refreshTasks();
-        return true;
-      }
-      return false;
+      await updateMutation.mutateAsync({ id: taskId, task: { status: "in_progress" } });
+      // Mutation handles invalidation, also trigger context refresh for compatibility
+      refreshTasks();
+      return true;
     } catch (error) {
       console.error("Failed to reject task:", error);
       return false;
     }
+  }, [updateMutation, refreshTasks]);
+
+  // Refresh triggers both context and React Query cache
+  const handleRefresh = useCallback(() => {
+    refreshTasks();
+    invalidateTaskQueries();
   }, [refreshTasks]);
 
   return {
     pendingTasks,
     approveTask,
     rejectTask,
-    refreshTasks,
-    isLoading: false,
+    refreshTasks: handleRefresh,
+    isLoading: updateMutation.isPending,
   };
 };

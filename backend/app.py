@@ -62,7 +62,11 @@ if __name__ == '__main__':
     # Print startup banner (only in the reloader process to avoid double print)
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
         from utils.startup_banner import print_banner
+        from utils.db_indexes import ensure_indexes
         print_banner()
+        # Ensure database indexes exist for optimal performance
+        with app.app_context():
+            ensure_indexes(mongo.db)
     
     socketio.run(
         app, 
