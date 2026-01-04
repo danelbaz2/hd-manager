@@ -26,6 +26,13 @@ import {
 import { type ContactData } from "../schemas/contactTypes";
 import { useAuth } from "./AuthContext";
 import { useSocket } from "../socket";
+import { invalidateTaskQueries, invalidateUserQueries } from "../api/queries";
+import {
+  getLastSyncTimestamp,
+  updateLastSyncTimestamp,
+  shouldDoFullSync,
+  mergeItems,
+} from "../utils/deltaSync";
 
 // Helper function to convert API User to UserData
 const mapUserToUserData = (user: User): UserData => ({
@@ -229,14 +236,33 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
     }
   }, []);
 
-  // Fetch tasks - gets all tasks without date filtering
-  // Fetch tasks - gets all tasks without date filtering
-  const refreshTasks = useCallback(async (silent = false) => {
+  // Fetch tasks - supports both full fetch and delta sync
+  // @param silent - don't show loading indicator
+  // @param useDelta - if true, only fetch tasks modified since last sync
+  const refreshTasks = useCallback(async (silent = false, useDelta = false) => {
     if (!silent) setIsLoadingTasks(true);
     try {
-      const response = await getAllTasks();
+      // Determine if we should use delta sync
+      const lastSync = getLastSyncTimestamp();
+      const shouldDelta = useDelta && lastSync && !shouldDoFullSync();
+
+      const response = await getAllTasks(
+        shouldDelta ? { since: lastSync } : undefined
+      );
+
       if (response.success && response.data) {
-        setTasks(response.data);
+        if (shouldDelta && response.data.length > 0) {
+          // Delta sync: merge updated tasks with existing
+          setTasks((prev) => mergeItems(prev, response.data!));
+          console.log(
+            `[DeltaSync] Merged ${response.data.length} updated tasks`
+          );
+        } else if (!shouldDelta) {
+          // Full sync: replace all tasks
+          setTasks(response.data);
+        }
+        // Update sync timestamp on successful fetch
+        updateLastSyncTimestamp();
       } else {
         console.error("Failed to fetch tasks:", response.error);
       }
@@ -361,15 +387,35 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
   // Subscribe to WebSocket updates for real-time task sync across all clients
   const { subscribeToTasks, subscribeToUsers, isConnected } = useSocket();
 
-  // Refetch data when socket reconnects to ensure we have the latest state
+  // Delta sync on WebSocket reconnect - only fetch changed tasks instead of everything
   useEffect(() => {
     if (isAuthenticated && isConnected) {
-      console.log(
-        "[SettingsContext] Socket connected/reconnected, syncing data..."
-      );
-      refreshAll(true); // Silent refresh
+      // Use delta sync for tasks (only fetch tasks modified since last sync)
+      // This significantly reduces data transfer on reconnect
+      const lastSync = getLastSyncTimestamp();
+      if (lastSync && !shouldDoFullSync()) {
+        console.log(
+          `[SettingsContext] Socket reconnected, using delta sync (since ${new Date(
+            lastSync
+          ).toLocaleTimeString()})...`
+        );
+        // Delta sync: only fetch tasks, history modified since last sync
+        refreshTasks(true, true); // Silent + delta mode
+        refreshTaskHistory(true);
+      } else {
+        console.log(
+          "[SettingsContext] Socket connected, performing full sync..."
+        );
+        refreshAll(true); // Silent full refresh
+      }
     }
-  }, [isConnected, isAuthenticated, refreshAll]);
+  }, [
+    isConnected,
+    isAuthenticated,
+    refreshAll,
+    refreshTasks,
+    refreshTaskHistory,
+  ]);
 
   useEffect(() => {
     if (!isAuthenticated || !isConnected) return;
@@ -405,6 +451,9 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
           )
         );
       }
+
+      // Also invalidate React Query cache for components using useTasksQuery
+      invalidateTaskQueries();
     });
 
     return unsubscribe;
@@ -439,6 +488,9 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
             )
           );
         }
+
+        // Also invalidate React Query cache for components using useUsersQuery
+        invalidateUserQueries();
       }
     );
 
