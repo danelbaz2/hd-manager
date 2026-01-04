@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
-import { updateTask, type TaskFormData, type Task, type TaskStatus, type TaskOptionals } from "../../../../api/tasksApi";
+import { type TaskFormData, type Task, type TaskStatus, type TaskOptionals } from "../../../../api/tasksApi";
+import { useUpdateTaskMutation, invalidateTaskQueries } from "../../../../api/queries";
 import type { TaskPriority } from "../../../../schemas/taskTypes";
 import { parseDateToTimestamp, timestampToDateStr, hasFormChanges, initFormFromTask } from "./formUtils";
 
@@ -17,8 +18,9 @@ interface UseTaskFormProps {
 export const useTaskForm = ({
   task, isOpen, onSuccess, onError, onWarning, refreshTasks, refreshTaskHistory, onTaskUpdated,
 }: UseTaskFormProps) => {
+  const updateMutation = useUpdateTaskMutation();
+  
   const [isEditMode, setIsEditMode] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [priority, setPriority] = useState<TaskPriority>("medium");
@@ -89,7 +91,6 @@ export const useTaskForm = ({
       return;
     }
 
-    setIsSubmitting(true);
     try {
       const originalStartDate = timestampToDateStr(task.date);
       const originalDeadline = timestampToDateStr(task.deadline);
@@ -101,20 +102,21 @@ export const useTaskForm = ({
       if (startDate !== originalStartDate) taskData.date = startDate ? new Date(startDate).getTime() : undefined;
       if (deadline !== originalDeadline) taskData.deadline = deadline ? new Date(deadline).getTime() : undefined;
 
-      const response = await updateTask(task.id, taskData);
-      if (response.success && response.data) {
-        onSuccess(response.data);
-        setIsEditMode(false);
-        refreshTasks();
-        refreshTaskHistory();
-        onTaskUpdated?.();
-      } else { onError(response.error || "אירעה שגיאה"); }
-    } catch { onError("אירעה שגיאה"); }
-    finally { setIsSubmitting(false); }
-  }, [task, title, description, priority, startDate, deadline, selectedUserIds, selectedSecondaryTagIds, selectedPrimaryTagIds, optionals, onSuccess, onError, onWarning, refreshTasks, refreshTaskHistory, onTaskUpdated]);
+      const updatedTask = await updateMutation.mutateAsync({ id: task.id, task: taskData });
+      onSuccess(updatedTask);
+      setIsEditMode(false);
+      // React Query mutation handles invalidation, also trigger context refresh for compatibility
+      refreshTasks();
+      refreshTaskHistory();
+      invalidateTaskQueries();
+      onTaskUpdated?.();
+    } catch (error) {
+      onError(error instanceof Error ? error.message : "אירעה שגיאה");
+    }
+  }, [task, title, description, priority, startDate, deadline, selectedUserIds, selectedSecondaryTagIds, selectedPrimaryTagIds, optionals, onSuccess, onError, onWarning, refreshTasks, refreshTaskHistory, onTaskUpdated, updateMutation]);
 
   return {
-    isEditMode, setIsEditMode, isSubmitting,
+    isEditMode, setIsEditMode, isSubmitting: updateMutation.isPending,
     title, setTitle, description, setDescription, priority, setPriority,
     status, setStatus,
     startDate, setStartDate: handleSetStartDate, deadline, setDeadline: handleSetDeadline,
