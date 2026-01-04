@@ -61,10 +61,12 @@ export interface TaskQueryParams {
   startDate?: number;
   endDate?: number;
   responsibleUserIds?: string;
+  since?: number;  // Delta sync: fetch only tasks modified after this timestamp
 }
 
 /**
  * Get all tasks with optional filtering
+ * @param params.since - Delta sync: only fetch tasks modified after this timestamp (ms)
  */
 export const getAllTasks = async (params?: TaskQueryParams): Promise<ApiResponse<Task[]>> => {
   let url = `${API_ENDPOINTS.tasks}/`;
@@ -75,6 +77,7 @@ export const getAllTasks = async (params?: TaskQueryParams): Promise<ApiResponse
     if (params.startDate !== undefined) queryParams.append("startDate", params.startDate.toString());
     if (params.endDate !== undefined) queryParams.append("endDate", params.endDate.toString());
     if (params.responsibleUserIds) queryParams.append("responsibleUserIds", params.responsibleUserIds);
+    if (params.since !== undefined) queryParams.append("since", params.since.toString());
 
     const queryString = queryParams.toString();
     if (queryString) {
