@@ -111,7 +111,6 @@ export const ModalOverlay: React.FC<ModalOverlayProps> = ({
     <div
       className="fixed inset-0 z-[9999] flex items-center justify-center p-4 outline-none transition-all duration-300"
       onClick={handleOverlayClick}
-      onMouseDown={handleOverlayClick}
       style={{ paddingLeft: offsetLeft }}
     >
       {/* Backdrop - INSTANT blur, no animation */}
@@ -133,9 +132,8 @@ export const ModalOverlay: React.FC<ModalOverlayProps> = ({
           transitionDuration: `${animationDuration}ms`,
           transform:
             offsetLeft > 0
-              ? `translateX(${offsetLeft / 2}px) ${
-                  isContentVisible ? "scale(1)" : "scale(0.95)"
-                }`
+              ? `translateX(${offsetLeft / 2}px) ${isContentVisible ? "scale(1)" : "scale(0.95)"
+              }`
               : undefined,
         }}
       >

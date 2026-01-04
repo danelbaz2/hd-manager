@@ -38,6 +38,10 @@ const DatePicker: React.FC<DatePickerProps> = ({
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
 
+  // Unique ID for this DatePicker instance
+  const pickerId = React.useId();
+  const dropdownElementId = `datepicker-dropdown-${pickerId}`;
+
   // Convert string date to timestamp for Calendar
   const getTimestamp = (): number => {
     return parseDateStringToTimestamp(value);
@@ -64,7 +68,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
       const rect = buttonRef.current.getBoundingClientRect();
       setPosition({
         top: rect.bottom + 8, // 8px spacing
-        left: rect.left, // Align left (or right for RTL, handled by flex/calendar)
+        left: rect.left,
         width: rect.width,
       });
     }
@@ -89,15 +93,8 @@ const DatePicker: React.FC<DatePickerProps> = ({
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Node;
-      // Check if click is inside button (ref) 
-      // Note: Calendar portal content check is tricky, but Calendar component might handle valid clicks?
-      // Actually, standard check: if not in ref (button wrapper) AND not in portal content...
-      // Since portal is elsewhere, we need a ref for the portal content too?
-      // Wait, Calendar handles its own "onClose" usually? No, we pass onClose={() => setIsOpen(false)}.
-      // For clicking outside, we need to check if the click target is NOT in the button AND NOT in the dropdown.
 
-      // Simpler: Use a ref for the dropdown content div.
-      const dropdownEl = document.getElementById(`datepicker-dropdown-${label}`);
+      const dropdownEl = document.getElementById(dropdownElementId);
 
       if (
         ref.current &&
@@ -116,7 +113,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [isOpen, label]);
+  }, [isOpen, dropdownElementId]);
 
 
   return (
@@ -175,23 +172,11 @@ const DatePicker: React.FC<DatePickerProps> = ({
       {/* Portal Calendar Dropdown */}
       {isOpen && createPortal(
         <div
-          id={`datepicker-dropdown-${label}`}
+          id={dropdownElementId}
           className="fixed z-[99999]"
           style={{
             top: position.top,
-            // For RTL: align right edge of dropdown to right edge of button
-            // But getBoundingClientRect returns standard coords.
-            // If we center it? Or Align Right?
-            // Calendar width is standard. Let's align it to match button right side for RTL.
-            // right: window.innerWidth - (position.left + position.width),
-            // left: 'auto'
-            // Let's force it to center under the button or align correctly.
-            // Since it's RTL app, alignment should be Right (Start).
-            // position.left is the left edge.
-            // If I calculate right:
-            left: position.left + position.width - 320, // Approx calendar width 320px? 
-            // Better: use right style.
-            // right: document.documentElement.clientWidth - (position.left + position.width)
+            left: position.left + position.width - 320, // Approx calendar width 320px
           }}
         >
           {/* Wrapper to control width/alignment more precisely */}
