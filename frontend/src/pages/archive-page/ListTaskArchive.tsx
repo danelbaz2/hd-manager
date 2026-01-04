@@ -54,6 +54,17 @@ const ListTaskArchive: React.FC<Props> = ({
         endOfDay.setHours(23, 59, 59, 999);
         if (t.date > endOfDay.getTime()) return false;
       }
+      // Tag filtering - if any tags are selected, task must have at least one matching tag
+      if (filters.tagIds && filters.tagIds.length > 0) {
+        const taskTagIds = [
+          ...(t.primaryTagIds || []),
+          ...(t.secondaryTagIds || []),
+        ];
+        const hasMatchingTag = filters.tagIds.some((filterTagId) =>
+          taskTagIds.includes(filterTagId)
+        );
+        if (!hasMatchingTag) return false;
+      }
       return true;
     });
     // Sort by date, newest first
@@ -71,16 +82,18 @@ const ListTaskArchive: React.FC<Props> = ({
   if (filtered.length === 0) {
     return (
       <div
-        className={`p-12 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center transition-all ${isDarkMode
-          ? "border-slate-700 bg-slate-800/30"
-          : "border-slate-200 bg-white"
-          }`}
+        className={`p-12 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center text-center transition-all ${
+          isDarkMode
+            ? "border-slate-700 bg-slate-800/30"
+            : "border-slate-200 bg-white"
+        }`}
       >
         <div
-          className={`w-16 h-16 mb-4 rounded-2xl flex items-center justify-center ${isDarkMode
-            ? "bg-slate-800 text-slate-500"
-            : "bg-slate-100 text-slate-400"
-            }`}
+          className={`w-16 h-16 mb-4 rounded-2xl flex items-center justify-center ${
+            isDarkMode
+              ? "bg-slate-800 text-slate-500"
+              : "bg-slate-100 text-slate-400"
+          }`}
         >
           <Archive className="w-8 h-8" />
         </div>
@@ -94,10 +107,11 @@ const ListTaskArchive: React.FC<Props> = ({
     <div className="transition-all duration-300 relative">
       {/* Header */}
       <div
-        className={`flex items-center gap-4 px-4 lg:px-5 py-3 rounded-t-xl border-b text-xs font-semibold uppercase tracking-wide ${isDarkMode
-          ? "bg-slate-800/80 border-slate-700 text-slate-400"
-          : "bg-slate-50 border-slate-200 text-slate-500"
-          }`}
+        className={`flex items-center gap-4 px-4 lg:px-5 py-3 rounded-t-xl border-b text-xs font-semibold uppercase tracking-wide ${
+          isDarkMode
+            ? "bg-slate-800/80 border-slate-700 text-slate-400"
+            : "bg-slate-50 border-slate-200 text-slate-500"
+        }`}
         dir="rtl"
       >
         <div className="w-1" />
@@ -112,10 +126,11 @@ const ListTaskArchive: React.FC<Props> = ({
       {/* Virtualized List Container */}
       <div
         ref={parentRef}
-        className={`rounded-b-xl overflow-y-auto max-h-[calc(100vh-300px)] border border-t-0 ${isDarkMode
-          ? "border-slate-700 dark-scrollbar"
-          : "border-slate-200 light-scrollbar"
-          }`}
+        className={`rounded-b-xl overflow-y-auto max-h-[calc(100vh-300px)] border border-t-0 ${
+          isDarkMode
+            ? "border-slate-700 dark-scrollbar"
+            : "border-slate-200 light-scrollbar"
+        }`}
         style={{
           overflowY:
             virtualizer.getTotalSize() > window.innerHeight - 300
@@ -159,12 +174,17 @@ const ListTaskArchive: React.FC<Props> = ({
         </div>
       </div>
 
-      <ScrollToLatestButton containerRef={parentRef} direction="up" className="top-14" />
+      <ScrollToLatestButton
+        containerRef={parentRef}
+        direction="up"
+        className="top-14"
+      />
 
       {/* Footer with count */}
       <div
-        className={`mt-3 text-sm text-center ${isDarkMode ? "text-slate-500" : "text-slate-400"
-          }`}
+        className={`mt-3 text-sm text-center ${
+          isDarkMode ? "text-slate-500" : "text-slate-400"
+        }`}
       >
         מציג {filtered.length} מתוך {tasks.length} משימות
       </div>

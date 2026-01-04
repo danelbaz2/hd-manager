@@ -67,7 +67,12 @@ const ArchivePage: React.FC = () => {
       ${isDarkMode ? "bg-slate-900 text-white" : "bg-slate-50 text-slate-800"}`}
     >
       <div className="relative z-10">
-        <HeaderArchivePage filters={filters} onFiltersChange={setFilters} />
+        <HeaderArchivePage
+          filters={filters}
+          onFiltersChange={setFilters}
+          primaryTags={primaryTags}
+          secondaryTags={secondaryTags}
+        />
       </div>
 
       <div className="flex-1 p-4 w-full overflow-auto">

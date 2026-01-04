@@ -1,4 +1,10 @@
-import React, { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useMemo,
+  useCallback,
+  useEffect,
+  useRef,
+} from "react";
 import { useLocation } from "react-router-dom";
 import { useTheme, useSettings, useViewState, useAuth } from "../../contexts";
 import HeaderHomePage from "./HeaderHomePage";
@@ -55,17 +61,17 @@ const HomePage: React.FC = () => {
         // Augment demo data to include current user with tasks
         const effectiveUsers = user
           ? [
-            user as any as UserData,
-            ...DEMO_USERS.filter((u) => u.id !== user.id),
-          ]
+              user as any as UserData,
+              ...DEMO_USERS.filter((u) => u.id !== user.id),
+            ]
           : DEMO_USERS;
 
         const myDemoTasks = user
           ? DEMO_TASKS.map((t) => ({
-            ...t,
-            id: `my-${t.id}`,
-            responsibleUserIds: [user.id],
-          }))
+              ...t,
+              id: `my-${t.id}`,
+              responsibleUserIds: [user.id],
+            }))
           : [];
 
         const demoTeamUpdates = DEMO_TEAM_UPDATES.map((u) => ({
@@ -143,10 +149,24 @@ const HomePage: React.FC = () => {
   // Status filter state (empty Set = show all)
   const [statusFilter, setStatusFilter] = useState<Set<TaskStatus>>(new Set());
 
+  // Responsible filter state ("all" | "without")
+  const [responsibleFilter, setResponsibleFilter] = useState<"all" | "without">(
+    "all"
+  );
+
   // Filter tasks based on current view (date range only)
+  // Exception: In list mode with responsible filter, show ALL tasks matching the filter
   const filteredTasks = useMemo(() => {
+    if (displayMode === "list" && responsibleFilter === "without") {
+      // Show all unassigned tasks across all dates
+      return tasks.filter(
+        (task) =>
+          !task.responsibleUserIds || task.responsibleUserIds.length === 0
+      );
+    }
+    // Normal date-based filtering
     return filterTasksByDateRange(tasks, selectedDate, viewMode);
-  }, [tasks, selectedDate, viewMode]);
+  }, [tasks, selectedDate, viewMode, displayMode, responsibleFilter]);
 
   // Handlers
   const handleCreateTask = () => setIsNewTaskModalOpen(true);
@@ -159,11 +179,19 @@ const HomePage: React.FC = () => {
   const handleSearchChange = (query: string) => setSearchQuery(query);
   const handleStatusFilterChange = (statuses: Set<TaskStatus>) =>
     setStatusFilter(statuses);
+  const handleResponsibleFilterChange = (filter: "all" | "without") => {
+    setResponsibleFilter(filter);
+    // Clear status filter when changing responsible filter for cleaner UX
+    if (filter !== responsibleFilter) {
+      setStatusFilter(new Set());
+    }
+  };
 
   // Handle clicking on status summary in Grid View
   const handleStatusSummaryClick = (status: TaskStatus) => {
     setDisplayMode("list");
     setStatusFilter(new Set([status]));
+    setResponsibleFilter("all"); // Clear responsible filter when clicking status
   };
 
   // Handle task click - open task modal
@@ -245,9 +273,11 @@ const HomePage: React.FC = () => {
             onDisplayModeChange={setDisplayMode}
             onSearchChange={handleSearchChange}
             onStatusFilterChange={handleStatusFilterChange}
+            onResponsibleFilterChange={handleResponsibleFilterChange}
             viewMode={viewMode}
             displayMode={displayMode}
             statusFilter={statusFilter}
+            responsibleFilter={responsibleFilter}
           />
         </div>
       </div>
@@ -256,8 +286,11 @@ const HomePage: React.FC = () => {
       <div
         ref={mainScrollRef}
         data-tour="main-content-area"
-        className={`flex-1 min-h-0 overflow-y-auto p-2 md:p-3 lg:p-4 ${isDarkMode ? "bg-slate-900 dark-scrollbar" : "bg-slate-50 light-scrollbar"
-          }`}
+        className={`flex-1 min-h-0 overflow-y-auto p-2 md:p-3 lg:p-4 ${
+          isDarkMode
+            ? "bg-slate-900 dark-scrollbar"
+            : "bg-slate-50 light-scrollbar"
+        }`}
       >
         {renderContent()}
       </div>
