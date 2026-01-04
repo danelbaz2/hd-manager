@@ -87,7 +87,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
       >
         {/* Header */}
         <div
-          className={`flex items-center justify-between px-6 md:px-8 py-3 md:py-4 border-b shrink-0 ${isDarkMode ? "border-slate-800/50" : "border-slate-200/50"
+          className={`flex items-center justify-between px-6 md:px-8 py-2 md:py-3 border-b shrink-0 ${isDarkMode ? "border-slate-800/50" : "border-slate-200/50"
             }`}
         >
           <h2
@@ -110,7 +110,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
         {/* Content - Scrollable */}
         <DelayedLoader isLoading={isDataLoading} delay={200}>
           <div
-            className={`px-6 lg:px-8 py-4 flex-1 overflow-y-auto ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+            className={`px-6 lg:px-8 py-2 flex-1 overflow-y-auto ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
               }`}
           >
             {/* Shared TaskForm Component */}
@@ -144,7 +144,7 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
 
         {/* Footer */}
         <div
-          className={`flex items-center justify-end gap-10 px-6 lg:px-8 py-3 lg:py-4 border-t shrink-0 ${isDarkMode
+          className={`flex items-center justify-end gap-10 px-6 lg:px-8 py-2 lg:py-3 border-t shrink-0 ${isDarkMode
             ? "border-slate-700/50 bg-slate-800/50"
             : "border-slate-200/50 bg-slate-50/50"
             }`}

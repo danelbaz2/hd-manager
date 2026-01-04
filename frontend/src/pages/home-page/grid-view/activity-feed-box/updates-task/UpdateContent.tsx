@@ -66,6 +66,98 @@ export const UpdateContent: React.FC<UpdateContentProps> = ({
     );
   }
 
+  // Handle Optionals and External System
+  if (entry.action === "UPDATE_OPTIONALS" || entry.action === "UPDATE_EXTERNAL_SYSTEM") {
+    const opts = (entry.changes.optionals as Record<string, any>) || {};
+    const oldOpts = (entry.oldValues?.optionals as Record<string, any>) || {};
+
+    // Separate system fields
+    const systemKeys = ["externalSystem", "externalId"];
+    const otherKeys = Object.keys(opts).filter(k => !systemKeys.includes(k));
+    const hasSystemChanges = Object.keys(opts).some(k => systemKeys.includes(k));
+
+    const getSysName = (s: any) => s === 'SNOW' ? 'ServiceNow' : (s === 'MARS' ? 'MARS' : s);
+
+    // Helpers from historyUtils are not available here automatically, hardcoding or importing
+    // Importing getOptionalLabel might fail if path is complex, I'll define it here locally for safety or use switch
+    const getLabel = (k: string) => {
+      switch (k) {
+        case "pikud": return "פיקוד";
+        case "ugda": return "אוגדה";
+        case "hativa": return "חטיבה";
+        case "gdud": return "גדוד";
+        case "externalSystem": return "מערכת חיצונית";
+        case "externalId": return "מזהה אירוע";
+        default: return k;
+      }
+    };
+
+    const renderSystemChange = () => {
+      const newSys = opts.externalSystem;
+      const oldSys = oldOpts.externalSystem;
+      const newId = opts.externalId;
+      const effectiveId = newId || oldOpts.externalId;
+
+      if (newSys !== undefined) {
+        if (newSys && !oldSys) {
+          return (
+            <div className="text-sm flex items-center gap-1.5 flex-wrap">
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">קושר למערכת {getSysName(newSys)}</span>
+              {(newId || effectiveId) && <span className="text-slate-500 text-xs">(#{newId || effectiveId})</span>}
+            </div>
+          );
+        } else if (!newSys && oldSys) {
+          return (
+            <div className="text-sm flex items-center gap-1.5 flex-wrap">
+              <span className="font-semibold text-red-500 dark:text-red-400">הוסר קישור מ-{getSysName(oldSys)}</span>
+            </div>
+          );
+        } else {
+          return (
+            <div className="text-sm flex items-center gap-1.5 flex-wrap">
+              <span>שונה מ-{getSysName(oldSys)} ל-</span>
+              <span className="font-semibold text-blue-600 dark:text-blue-400">{getSysName(newSys)}</span>
+            </div>
+          );
+        }
+      } else if (newId !== undefined) {
+        return (
+          <div className="text-sm flex items-center gap-1.5 flex-wrap">
+            <span className="font-medium">שונה מזהה תקלה:</span>
+            <span className="opacity-60 line-through">{oldOpts.externalId || "ריק"}</span>
+            <ArrowLeft className="w-3 h-3 opacity-50 shrink-0" />
+            <span className="font-mono bg-slate-100 dark:bg-slate-700 px-1 rounded">{newId}</span>
+          </div>
+        );
+      }
+      return null;
+    };
+
+    return (
+      <div className="space-y-1">
+        <p className={`text-sm font-medium break-words ${textColor}`}>{title}</p>
+
+        {hasSystemChanges && renderSystemChange()}
+
+        {otherKeys.map(key => {
+          const label = getLabel(key);
+          const val = opts[key];
+          const old = oldOpts[key] || "ריק";
+          return (
+            <div key={key} className={`text-sm flex flex-wrap items-start gap-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
+              <span className="font-medium shrink-0">{label}:</span>
+              <span className="opacity-60 line-through break-words whitespace-pre-line">{old}</span>
+              <ArrowLeft className="w-3 h-3 opacity-50 shrink-0" />
+              <span className={`break-words whitespace-pre-line ${isDarkMode ? "text-blue-300" : "text-blue-600"}`}>
+                {val || "ריק"}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
   if (changedFields.length > 0) {
     return (
       <div className="space-y-1">

@@ -24,6 +24,7 @@ export interface TaskOptionals {
   hativa?: string;
   gdud?: string;
   externalSystem?: string;
+  externalId?: string;
 }
 
 export interface Task {
@@ -197,7 +198,7 @@ export const rejectTask = async (taskId: string): Promise<ApiResponse<Task>> => 
 /**
  * Action types for task history
  */
-export type TaskHistoryAction = "CREATE" | "UPDATE" | "IN_PROGRESS" | "CLOSE" | "DELETE" | "NOTE" | "ASSIGN" | "PENDING_APPROVAL" | "APPROVE" | "REJECT";
+export type TaskHistoryAction = "CREATE" | "UPDATE" | "IN_PROGRESS" | "CLOSE" | "DELETE" | "NOTE" | "ASSIGN" | "PENDING_APPROVAL" | "APPROVE" | "REJECT" | "UPDATE_OPTIONALS" | "UPDATE_EXTERNAL_SYSTEM";
 
 /**
  * Task history entry from ents_archive

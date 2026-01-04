@@ -85,6 +85,11 @@ export const useTaskForm = ({
     if (!task) return;
     if (!title.trim()) { onWarning("שדה חסר", "יש להזין כותרת למשימה"); return; }
 
+    if (optionals.externalSystem && !optionals.externalId?.trim()) {
+      onWarning("שדה חסר", "נא להזין מספר תקלה");
+      return;
+    }
+
     if (!hasFormChanges(task, title, description, priority, startDate, deadline, selectedUserIds, selectedPrimaryTagIds, selectedSecondaryTagIds, optionals)) {
       onWarning("אין שינויים", "לא בוצעו שינויים במשימה");
       setIsEditMode(false);

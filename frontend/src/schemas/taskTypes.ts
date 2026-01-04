@@ -9,6 +9,7 @@ export interface TaskOptionals {
   hativa?: string;
   gdud?: string;
   externalSystem?: string;
+  externalId?: string;
 }
 
 export interface TaskData {

@@ -170,6 +170,11 @@ export const useTaskForm = ({
       return;
     }
 
+    if (optionals.externalSystem && !optionals.externalId?.trim()) {
+      showWarning("שדה חסר", "נא להזין מספר תקלה");
+      return;
+    }
+
     // Set both ref and state
     isSubmittingRef.current = true;
     setIsSubmitting(true);

@@ -41,10 +41,27 @@ export const getPrimaryTagNames = (
     .filter((name): name is string => !!name);
 };
 
+export const getOptionalLabel = (key: string): string => {
+  switch (key) {
+    case "pikud": return "פיקוד";
+    case "ugda": return "אוגדה";
+    case "hativa": return "חטיבה";
+    case "gdud": return "גדוד";
+    case "externalSystem": return "מערכת חיצונית";
+    case "externalId": return "מזהה אירוע";
+    default: return key;
+  }
+};
+
 export const getFieldLabel = (field: string): string => {
   switch (field) {
     case "title":
       return "כותרת";
+    // ... (existing cases) ...
+
+
+
+    // For all other actions check for field changes
     case "description":
       return "תיאור";
     case "priority":
@@ -153,6 +170,85 @@ export const getActionDescription = (
   // REJECT action
   if (entry.action === "REJECT") {
     return <span className="font-bold">המשימה נדחתה והוחזרה לטיפול</span>;
+  }
+
+  // UPDATE_OPTIONALS or UPDATE_EXTERNAL_SYSTEM action
+  if (entry.action === "UPDATE_OPTIONALS" || entry.action === "UPDATE_EXTERNAL_SYSTEM") {
+    const opts = (entry.changes.optionals as Record<string, any>) || {};
+    const oldOpts = (entry.oldValues?.optionals as Record<string, any>) || {};
+
+    // Separate system fields from others
+    const systemKeys = ["externalSystem", "externalId"];
+    const otherKeys = Object.keys(opts).filter(k => !systemKeys.includes(k));
+    const hasSystemChanges = Object.keys(opts).some(k => systemKeys.includes(k));
+
+    const getSysName = (s: any) => s === 'SNOW' ? 'ServiceNow' : (s === 'MARS' ? 'MARS' : s);
+
+    const renderSystemChange = () => {
+      const newSys = opts.externalSystem;
+      const oldSys = oldOpts.externalSystem;
+      const newId = opts.externalId;
+      const effectiveId = newId || oldOpts.externalId;
+
+      if (newSys !== undefined) {
+        // System changed
+        if (newSys && !oldSys) {
+          return (
+            <div className="text-sm flex items-center gap-1.5 p-1 bg-emerald-50/50 dark:bg-emerald-900/10 rounded">
+              <span className="font-semibold text-emerald-600 dark:text-emerald-400">קושר למערכת {getSysName(newSys)}</span>
+              {(newId || effectiveId) && <span className="text-slate-500 text-xs">(#{newId || effectiveId})</span>}
+            </div>
+          );
+        } else if (!newSys && oldSys) {
+          return (
+            <div className="text-sm flex items-center gap-1.5 p-1 bg-red-50/50 dark:bg-red-900/10 rounded">
+              <span className="font-semibold text-red-500 dark:text-red-400">הוסר קישור מ-{getSysName(oldSys)}</span>
+            </div>
+          );
+        } else {
+          return (
+            <div className="text-sm flex items-center gap-1.5">
+              <span>שונה מ-{getSysName(oldSys)} ל-</span>
+              <span className="font-semibold text-blue-600 dark:text-blue-400">{getSysName(newSys)}</span>
+            </div>
+          );
+        }
+      } else if (newId !== undefined) {
+        // Only ID changed
+        return (
+          <div className="text-sm flex items-center gap-1.5">
+            <span className="font-semibold">שונה מזהה תקלה:</span>
+            <span className="opacity-75 line-through">{oldOpts.externalId || "ריק"}</span>
+            <span>←</span>
+            <span className="font-mono bg-slate-100 dark:bg-slate-700 px-1 rounded">{newId}</span>
+          </div>
+        );
+      }
+      return null;
+    };
+
+    return (
+      <div className="flex flex-col gap-1.5">
+        {hasSystemChanges && renderSystemChange()}
+
+        {otherKeys.map((key) => {
+          const label = getOptionalLabel(key);
+          const val = opts[key];
+          const old = oldOpts[key] || "ריק";
+
+          return (
+            <div key={key} className="text-sm flex items-center gap-1.5 flex-wrap">
+              <span className="font-semibold">{label}:</span>
+              <span className="opacity-75 line-through">{old}</span>
+              <span>←</span>
+              <span className={isDarkMode ? "text-blue-300" : "text-blue-600"}>
+                {val || "ריק"}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    );
   }
 
   // For all other actions check for field changes

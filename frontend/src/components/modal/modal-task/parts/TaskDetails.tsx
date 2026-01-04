@@ -304,6 +304,71 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
         )}
       </div>
 
+      {/* Optional Fields Display */}
+      {task.optionals && Object.values(task.optionals).some(v => v) && (
+        <div
+          className={`p-4 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+            }`}
+        >
+          <div className="flex items-center gap-2 mb-3">
+            <ShieldCheck
+              className={`w-4 h-4 ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
+            />
+            <span
+              className={`text-sm font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
+            >
+              פרטים נוספים
+            </span>
+          </div>
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {task.optionals.pikud && (
+              <div>
+                <span className={`text-xs block mb-1 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>פיקוד</span>
+                <span className={`text-sm font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>{task.optionals.pikud}</span>
+              </div>
+            )}
+            {task.optionals.ugda && (
+              <div>
+                <span className={`text-xs block mb-1 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>אוגדה</span>
+                <span className={`text-sm font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>{task.optionals.ugda}</span>
+              </div>
+            )}
+            {task.optionals.hativa && (
+              <div>
+                <span className={`text-xs block mb-1 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>חטיבה</span>
+                <span className={`text-sm font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>{task.optionals.hativa}</span>
+              </div>
+            )}
+            {task.optionals.gdud && (
+              <div>
+                <span className={`text-xs block mb-1 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>גדוד</span>
+                <span className={`text-sm font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>{task.optionals.gdud}</span>
+              </div>
+            )}
+            {task.optionals.externalSystem && (
+              <div className="col-span-2">
+                <span className={`text-xs block mb-1 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>מערכת חיצונית</span>
+                <div className="flex items-center gap-2">
+                  <span className={`text-sm font-medium px-2 py-0.5 rounded ${task.optionals.externalSystem === "SNOW"
+                    ? "bg-blue-500/10 text-blue-500"
+                    : "bg-emerald-500/10 text-emerald-500"
+                    }`}>
+                    {task.optionals.externalSystem === "SNOW" ? "SNOW" : "MARS"}
+                  </span>
+                  {task.optionals.externalId && (
+                    <span className={`text-sm ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>
+                      {task.optionals.externalId}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Responsible Users */}
       {task.responsibleUserIds && task.responsibleUserIds.length > 0 && (
         <div

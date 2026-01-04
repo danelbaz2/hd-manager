@@ -1,4 +1,4 @@
-import { Plus, Pencil, Clock, CheckCircle2, Trash2, MessageSquare, UserPlus, UserMinus, Calendar, CalendarClock, Flag, Tag, FileText, Type, Circle, ShieldCheck, XCircle } from "lucide-react";
+import { Plus, Pencil, Clock, CheckCircle2, Trash2, MessageSquare, UserPlus, UserMinus, Calendar, CalendarClock, Flag, Tag, FileText, Type, Circle, ShieldCheck, XCircle, Link } from "lucide-react";
 import type { TaskHistoryAction, TaskHistoryEntry } from "../../../../api/tasksApi";
 
 export interface ActionConfigItem {
@@ -71,6 +71,18 @@ export const ACTION_CONFIG: Record<TaskHistoryAction, ActionConfigItem> = {
     color: "#EF4444",
     bgColor: "#EF444420",
     label: "נדחה והוחזר לטיפול",
+  },
+  UPDATE_OPTIONALS: {
+    icon: FileText,
+    color: "#8B5CF6",
+    bgColor: "#8B5CF620",
+    label: "עדכון פרטים נוספים",
+  },
+  UPDATE_EXTERNAL_SYSTEM: {
+    icon: Link,
+    color: "#6366F1",
+    bgColor: "#6366F120",
+    label: "עדכון מערכת חיצונית",
   },
 };
 

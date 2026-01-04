@@ -113,7 +113,7 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
         isDarkMode={isDarkMode}
       />
       <div
-        className={`px-6 py-4 flex-1 flex flex-col min-h-0 ${activeTab === "history" ? "overflow-visible" : "overflow-y-auto"
+        className={`px-6 py-4 flex-1 flex flex-col min-h-0 ${activeTab === "history" && !form.isEditMode ? "overflow-visible" : "overflow-y-auto"
           } ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}
       >
         <TaskContent
