@@ -117,6 +117,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = (props) => {
           ${isDarkMode ? "bg-slate-800 border-slate-600" : "bg-white border-slate-200"}
         `}
         dir="rtl"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
         <div className="flex items-center justify-center gap-3 mb-4">
