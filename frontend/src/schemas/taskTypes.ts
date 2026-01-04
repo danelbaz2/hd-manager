@@ -3,6 +3,14 @@
 export type TaskPriority = "low" | "medium" | "high";
 export type TaskStatus = "pending" | "in_progress" | "completed";
 
+export interface TaskOptionals {
+  pikud?: string;
+  ugda?: string;
+  hativa?: string;
+  gdud?: string;
+  externalSystem?: string;
+}
+
 export interface TaskData {
   id: string;
   title: string;
@@ -14,6 +22,7 @@ export interface TaskData {
   responsibleUserIds: string[];
   primaryTagIds: string[];  // Primary Tag IDs (categories)
   secondaryTagIds: string[];  // Secondary Tag IDs (new two-tier tag system)
+  optionals?: TaskOptionals;
   createdAt: number;
   updatedAt: number;
 }
@@ -28,6 +37,7 @@ export interface TaskFormData {
   responsibleUserIds: string[];
   primaryTagIds: string[];  // Primary Tag IDs (categories)
   secondaryTagIds: string[];  // Secondary Tag IDs (new two-tier tag system)
+  optionals?: TaskOptionals;
 }
 
 // Priority options with Hebrew labels
@@ -69,4 +79,5 @@ export const DEFAULT_TASK_FORM: TaskFormData = {
   responsibleUserIds: [],
   primaryTagIds: [],
   secondaryTagIds: [],
+  optionals: {},
 };
