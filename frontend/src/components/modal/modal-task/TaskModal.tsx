@@ -9,9 +9,9 @@ import { ModalContainer } from "./parts/ModalContainer";
 import { useTaskDelete, useTaskForm } from "./hooks";
 import { useContacts } from "../../../pages/home-page/grid-view/activity-feed-box/update-team/mention/useContacts";
 import { ContactDetailModal } from "../modal-contact-detail";
+import { useTagsModal } from "../modal-tags";
 import { ModalOverlay } from "../../common/ModalOverlay";
 import type { TaskHistoryEntry, TaskStatus } from "../../../api/tasksApi";
-import { STATUS_OPTIONS, STATUS_COLORS } from "../../../schemas/taskTypes";
 import type { ActionConfigItem } from "./history/historyConfig";
 
 import { MoveLeft } from "lucide-react";
@@ -47,7 +47,8 @@ const TaskModal: React.FC = () => {
     dismissAlert,
     clearAllAlerts,
   } = useToast();
-  const { contacts, findContactByName, selectedContact, setSelectedContact } = useContacts();
+  const { contacts, findContactByName, selectedContact, setSelectedContact } =
+    useContacts();
   const [activeTab, setActiveTab] = useState<"details" | "history">("details");
   // Confirmation modal state split to allow animation with data
   const [pendingStatus, setPendingStatus] = useState<TaskStatus | null>(null);
@@ -68,10 +69,13 @@ const TaskModal: React.FC = () => {
   });
 
   // Handle status change request from the details view
-  const handleStatusChangeRequest = useCallback((newStatus: TaskStatus) => {
-    if (newStatus === task?.status) return;
-    setPendingStatus(newStatus);
-  }, [task]);
+  const handleStatusChangeRequest = useCallback(
+    (newStatus: TaskStatus) => {
+      if (newStatus === task?.status) return;
+      setPendingStatus(newStatus);
+    },
+    [task]
+  );
 
   // Confirm status change
   const handleConfirmStatusChange = async () => {
@@ -83,8 +87,8 @@ const TaskModal: React.FC = () => {
     }
 
     try {
-      // Use the form hook's logic/API or direct API update here. 
-      // Since useTaskForm handles "save" for the whole form, strictly for status change 
+      // Use the form hook's logic/API or direct API update here.
+      // Since useTaskForm handles "save" for the whole form, strictly for status change
       // in view mode we might want a direct update or leverage existing update logic.
       // For simplicity and to reuse history tracking:
       const { updateTask } = await import("../../../api/tasksApi");
@@ -150,18 +154,36 @@ const TaskModal: React.FC = () => {
   );
 
   const getDesc = useCallback(
-    (e: TaskHistoryEntry, c: ActionConfigItem, onMentionClick?: (contactName: string) => void) =>
-      getActionDescription(e, c, users, secondaryTags, primaryTags, isDarkMode, onMentionClick, contacts),
+    (
+      e: TaskHistoryEntry,
+      c: ActionConfigItem,
+      onMentionClick?: (contactName: string) => void
+    ) =>
+      getActionDescription(
+        e,
+        c,
+        users,
+        secondaryTags,
+        primaryTags,
+        isDarkMode,
+        onMentionClick,
+        contacts
+      ),
     [users, secondaryTags, primaryTags, isDarkMode, contacts]
   );
 
-
+  const { state: tagsModalState } = useTagsModal();
+  const tagsModalOffset = tagsModalState.isOpen ? 320 : 0;
 
   if (!task) return null;
 
   return (
     <>
-      <ModalOverlay isOpen={isOpen} onClose={closeTaskModal}>
+      <ModalOverlay
+        isOpen={isOpen}
+        onClose={closeTaskModal}
+        offsetLeft={tagsModalOffset}
+      >
         <ModalContainer
           task={task}
           isDarkMode={isDarkMode}
@@ -225,29 +247,33 @@ const TaskModal: React.FC = () => {
               </p>
               {/* Status change visualization */}
               <div
-                className={`flex items-center justify-center gap-3 py-3 px-4 rounded-xl ${isDarkMode ? "bg-slate-700/50" : "bg-slate-100/80"
-                  }`}
+                className={`flex items-center justify-center gap-3 py-3 px-4 rounded-xl ${
+                  isDarkMode ? "bg-slate-700/50" : "bg-slate-100/80"
+                }`}
                 dir="rtl"
               >
                 <span
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${isDarkMode
-                    ? "bg-slate-600 text-slate-200"
-                    : "bg-white text-slate-700 border border-slate-200"
-                    }`}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${
+                    isDarkMode
+                      ? "bg-slate-600 text-slate-200"
+                      : "bg-white text-slate-700 border border-slate-200"
+                  }`}
                 >
                   {getStatusLabel(task.status || "pending")}
                 </span>
                 <div
-                  className={`flex items-center justify-center w-8 h-8 rounded-full ${isDarkMode ? "bg-blue-500/20" : "bg-blue-100"
-                    }`}
+                  className={`flex items-center justify-center w-8 h-8 rounded-full ${
+                    isDarkMode ? "bg-blue-500/20" : "bg-blue-100"
+                  }`}
                 >
                   <MoveLeft size={16} className="text-blue-500" />
                 </div>
                 <span
-                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${isDarkMode
-                    ? "bg-blue-500/30 text-blue-300"
-                    : "bg-blue-500 text-white"
-                    }`}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-semibold shadow-sm ${
+                    isDarkMode
+                      ? "bg-blue-500/30 text-blue-300"
+                      : "bg-blue-500 text-white"
+                  }`}
                 >
                   {getStatusLabel(pendingStatus)}
                 </span>

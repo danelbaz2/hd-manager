@@ -1,8 +1,10 @@
 import React, { useMemo } from "react";
 import { StatusBadgeDropdown } from "./StatusBadgeDropdown";
 import { useAuth } from "../../../../contexts/AuthContext";
+import { useSettings } from "../../../../contexts/SettingsContext";
 import { FileText, Calendar, Clock, Users } from "lucide-react";
 import { Tooltip } from "../../../tags-tooltip";
+import { useTagsModal } from "../../modal-tags";
 import {
   PRIORITY_COLORS,
   PRIORITY_OPTIONS,
@@ -36,6 +38,8 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
   onStatusChangeRequest,
 }) => {
   const { user } = useAuth();
+  const { contacts } = useSettings();
+  const { openTagsModal } = useTagsModal();
 
   const canChangeStatus = useMemo(() => {
     if (!user) return false;
@@ -113,24 +117,25 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
         >
           ID-{task.id ? task.id.slice(-6).toLowerCase() : "???"}
         </span>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           {taskTags.map(
             (tag, idx) =>
               tag && (
                 <Tooltip
                   key={idx}
-                  content={tag.description || tag.name}
+                  content={`${tag.description || tag.name} (לחץ לפרטים)`}
                   position="bottom"
                 >
-                  <span
-                    className="px-3 py-1 rounded-full text-xs font-medium cursor-default"
+                  <button
+                    onClick={() => openTagsModal(tag, contacts, primaryTags)}
+                    className="px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-all hover:scale-105 hover:shadow-md"
                     style={{
                       backgroundColor: `${tag.color}20`,
                       color: tag.color,
                     }}
                   >
                     {tag.name}
-                  </span>
+                  </button>
                 </Tooltip>
               )
           )}
