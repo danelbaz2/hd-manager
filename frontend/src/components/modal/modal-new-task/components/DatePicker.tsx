@@ -123,7 +123,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
     <div ref={ref} className="relative">
       <label
         className={`
-          block text-sm lg:text-base font-medium mb-1.5
+          block text-sm lg:text-base font-medium mb-1
           ${isDarkMode ? "text-slate-300" : "text-slate-700"}
         `}
       >
@@ -137,7 +137,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
         onClick={() => setIsOpen(!isOpen)}
         className={`
           w-full flex items-center justify-between
-          px-3 py-2.5
+          px-3 py-2
           rounded-xl border-2
           text-sm lg:text-base
           transition-all duration-200

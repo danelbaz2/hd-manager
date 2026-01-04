@@ -60,7 +60,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   isDarkMode,
   isLoading = false,
 }) => {
-  const titleRef = useRef<HTMLTextAreaElement>(null);
   const descRef = useRef<HTMLTextAreaElement>(null);
 
   const adjustHeight = (el: HTMLTextAreaElement | null, min: number, max: number) => {
@@ -70,17 +69,15 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   };
 
   useLayoutEffect(() => {
-    adjustHeight(titleRef.current, 44, 96);
     adjustHeight(descRef.current, 56, 112);
   }, []); // Run once on mount to set initial height based on content
 
   // Also run when loading finishes or content changes (mostly for loading)
   useLayoutEffect(() => {
     if (!isLoading) {
-      adjustHeight(titleRef.current, 44, 96);
       adjustHeight(descRef.current, 56, 112);
     }
-  }, [isLoading, title, description]);
+  }, [isLoading, description]);
 
   const inputClass = `
     w-full px-3 py-2 rounded-xl border-2 text-sm transition-all
@@ -97,30 +94,25 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="md:col-span-2">
           <label
-            className={`block text-sm lg:text-base font-medium mb-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"
+            className={`block text-sm lg:text-base font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-700"
               }`}
           >
             כותרת המשימה
           </label>
-          <textarea
-            ref={titleRef}
+          <input
+            type="text"
             placeholder="לדוגמה: עדכון שרתי בסיס נתונים"
             value={title}
-            onChange={(e) => {
-              setTitle(e.target.value);
-              adjustHeight(e.target, 44, 96);
-            }}
+            onChange={(e) => setTitle(e.target.value)}
             maxLength={100}
-            rows={1}
             className={`
-              w-full px-3 py-2.5 rounded-xl border-2 text-sm lg:text-base font-medium transition-all resize-none overflow-y-auto scrollbar-hide
+              w-full px-3 py-2 rounded-xl border-2 text-sm lg:text-base font-medium transition-all h-10 lg:h-11
               ${isDarkMode
                 ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
                 : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
               }
               focus:outline-none focus:ring-2 focus:ring-blue-500/20
             `}
-            style={{ minHeight: '44px', maxHeight: '96px' }}
           />
         </div>
         <PrioritySelect value={priority} onChange={setPriority} />
