@@ -27,9 +27,10 @@ export const useTeamMessages = () => {
   const createMutation = useCreateChatMessageMutation();
 
   // Subscribe to WebSocket updates - invalidate query when new messages arrive
+  // Disable during mutation to prevent double-fetch (mutation already invalidates)
   useChatSync(() => {
     queryClient.invalidateQueries({ queryKey: chatKeys.messages });
-  });
+  }, { enabled: !createMutation.isPending });
 
   // Send a new message with optimistic update
   const sendMessage = useCallback(async (content: string, senderId: string) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, memo } from "react";
+import React, { useState, useCallback, memo } from "react";
 import { useTheme, useSettings, useTaskUpdates } from "../../contexts";
 import HeaderArchivePage from "./HeaderArchivePage";
 import ListTaskArchive from "./ListTaskArchive";
@@ -6,11 +6,8 @@ import {
   type ArchiveFilters,
   defaultFilters,
 } from "../../schemas/archiveTypes";
-import {
-  getAllTasks,
-  type Task,
-  type TaskHistoryEntry,
-} from "../../api/tasksApi";
+import { type Task, type TaskHistoryEntry } from "../../api/tasksApi";
+import { useTasksQuery } from "../../api/queries";
 import { Loader2 } from "lucide-react";
 import { useTaskModal } from "../../components/modal/modal-task";
 
@@ -22,9 +19,10 @@ const ArchivePage: React.FC = () => {
   // Use useSettings to get users and tags with computed colors (same as home page)
   const { users, primaryTags, secondaryTags } = useSettings();
   const [filters, setFilters] = useState<ArchiveFilters>(defaultFilters);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const { openTaskModal } = useTaskModal();
+
+  // Use React Query for fetching tasks - data is cached and won't refetch if fresh
+  const { data: tasks = [], isLoading } = useTasksQuery();
 
   const handleTaskClick = useCallback(
     (task: Task) => {
@@ -33,55 +31,11 @@ const ArchivePage: React.FC = () => {
     [openTaskModal]
   );
 
-  // Initial fetch
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setIsLoading(true);
-        // Only fetch tasks - users and tags come from useSettings context
-        const tasksRes = await getAllTasks();
-        if (tasksRes.success && tasksRes.data) setTasks(tasksRes.data);
-      } catch (error) {
-        console.error("Error fetching archive data:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-
   // Subscribe to real-time task updates via WebSocket
-  const handleTaskUpdate = useCallback((update: TaskHistoryEntry) => {
-    const { action, taskId, fullTask } = update;
-
-    if (action === "CREATE" && fullTask) {
-      // Add new task
-      setTasks((prev) => {
-        if (prev.some((t) => t.id === fullTask.id)) return prev;
-        return [...prev, fullTask as Task];
-      });
-    } else if (action === "DELETE") {
-      // Remove deleted task
-      setTasks((prev) => prev.filter((t) => t.id !== taskId));
-    } else if (
-      [
-        "UPDATE",
-        "IN_PROGRESS",
-        "CLOSE",
-        "ASSIGN",
-        "PENDING_APPROVAL",
-        "APPROVE",
-        "REJECT",
-        "UPDATE_OPTIONALS",
-        "UPDATE_EXTERNAL_SYSTEM",
-      ].includes(action) &&
-      fullTask
-    ) {
-      // Update existing task
-      setTasks((prev) =>
-        prev.map((t) => (t.id === taskId ? { ...t, ...(fullTask as Task) } : t))
-      );
-    }
+  // React Query will handle the cache updates
+  const handleTaskUpdate = useCallback((_update: TaskHistoryEntry) => {
+    // WebSocket updates are handled by SettingsContext which invalidates the tasks query
+    // No need to manually update - React Query cache will be refreshed
   }, []);
 
   // Use the WebSocket hook for real-time updates

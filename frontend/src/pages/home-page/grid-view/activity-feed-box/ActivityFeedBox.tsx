@@ -19,7 +19,6 @@ import { type TeamMessage } from "../../../../schemas/teamMessageTypes";
 import { useTeamMessages } from "./update-team/useTeamMessages";
 import { useActivityFeedPersistence } from "./hooks/useActivityFeedPersistence";
 import { ActivityFeedTabs } from "./components/ActivityFeedTabs";
-import { useChatUpdates } from "../../../../contexts";
 
 interface ActivityFeedBoxProps {
   tasksOverride?: Task[];
@@ -53,12 +52,8 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
   const users = usersOverride || globalUsers;
 
   // Team messages - need to fetch even when not on team tab for notification dot
-  const { messages: apiTeamMessages, fetchMessages: fetchTeamMessages } =
-    useTeamMessages();
+  const { messages: apiTeamMessages } = useTeamMessages();
   const teamMessages = teamUpdatesOverride || apiTeamMessages;
-
-  // Subscribe to chat updates even when not on team tab (for notification dot)
-  useChatUpdates(fetchTeamMessages, { enabled: !teamUpdatesOverride });
 
   // Demo updates for tour mode
   const demoUpdates = useMemo(() => {
