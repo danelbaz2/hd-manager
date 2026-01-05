@@ -41,8 +41,34 @@ export const isOptionalsEqual = (a: TaskOptionals | undefined, b: TaskOptionals 
     (a.ugda || "") === (b.ugda || "") &&
     (a.hativa || "") === (b.hativa || "") &&
     (a.gdud || "") === (b.gdud || "") &&
-    (a.externalSystem || "") === (b.externalSystem || "")
+    (a.externalSystem || "") === (b.externalSystem || "") &&
+    (a.externalId || "") === (b.externalId || "")
   );
+};
+
+/**
+ * Get only the changed optional fields (returns undefined if no changes)
+ */
+export const getChangedOptionals = (
+  newOptionals: TaskOptionals,
+  originalOptionals: TaskOptionals | undefined
+): TaskOptionals | undefined => {
+  const original = originalOptionals || {};
+  const changed: TaskOptionals = {};
+  let hasChanges = false;
+
+  const fields: (keyof TaskOptionals)[] = ['pikud', 'ugda', 'hativa', 'gdud', 'externalSystem', 'externalId'];
+
+  for (const field of fields) {
+    const newVal = newOptionals[field] || "";
+    const oldVal = original[field] || "";
+    if (newVal !== oldVal) {
+      changed[field] = newVal;
+      hasChanges = true;
+    }
+  }
+
+  return hasChanges ? changed : undefined;
 };
 
 /**

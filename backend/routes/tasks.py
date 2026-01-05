@@ -23,7 +23,7 @@ from utils.logger import logger
 def determine_action_type(change_data, old_data, new_data):
     """
     Determine the specific action type based on the changes.
-    Returns: CREATE, UPDATE, IN_PROGRESS, CLOSE, NOTE, DELETE, ASSIGN, PENDING_APPROVAL, APPROVE, or REJECT
+    Returns: CREATE, UPDATE, IN_PROGRESS, CLOSE, NOTE, DELETE, ASSIGN, PENDING_APPROVAL, APPROVE, REJECT, UPDATE_OPTIONALS, or UPDATE_EXTERNAL_SYSTEM
     """
     action = change_data.get('action', 'UPDATE')
     
@@ -186,6 +186,13 @@ def update_task(id):
     
     # Prepare update payload
     update_payload = changes.copy()
+    
+    # Handle optionals specifically to allow partial updates (dot notation)
+    if 'optionals' in update_payload:
+        opts = update_payload.pop('optionals')
+        for k, v in opts.items():
+            update_payload[f'optionals.{k}'] = v
+
     update_payload['base.updatedAt'] = now
     update_payload['base.updatedBy'] = request.user_full_name
 
@@ -381,6 +388,7 @@ def get_task_history(task_id):
                             new_data.get('base', {}).get('updatedBy') or
                             new_data.get('base', {}).get('createdBy') or 'מערכת',
                 'changes': {k: v for k, v in change_data.items() if k not in ['id', '_id', 'base', 'action', 'timestamp', 'note', 'file']},
+                'oldValues': {k: v for k, v in old_data.items() if k not in ['id', '_id', 'base']},
                 'note': change_data.get('note'),
                 'file': change_data.get('file')  # Include file metadata if present
             }
@@ -450,7 +458,7 @@ def get_all_tasks_history():
         
         # Fields that represent data changes (not metadata)
         DATA_FIELDS = ['title', 'description', 'priority', 'status', 'date', 'deadline', 
-                       'responsibleUserIds', 'primaryTagIds', 'secondaryTagIds']
+                       'responsibleUserIds', 'primaryTagIds', 'secondaryTagIds', 'optionals']
         
         # Transform entries for frontend
         history = []

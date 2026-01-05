@@ -204,10 +204,27 @@ export const useTaskForm = ({
       showSuccess("משימה נוצרה! 🎉", `המשימה "${title}" נוצרה בהצלחה`);
       // Invalidate queries to refetch task lists
       invalidateTaskQueries();
-      setTimeout(() => {
-        onSuccess?.();
-        onClose?.();
-      }, 1500);
+
+      // Notify parent of success (for refreshing task list)
+      onSuccess?.();
+
+      // Reset form fields to initial state (modal stays open for creating more tasks)
+      const resetStartDate = initialDate ? new Date(initialDate) : new Date();
+      const resetStartDateStr = formatDateLocal(resetStartDate);
+
+      setTitle("");
+      setDescription("");
+      setPriority("medium");
+      setSelectedSecondaryTagIds([]);
+      setSelectedPrimaryTagIds([]);
+      setSelectedUserIds([]);
+      setOptionals({});
+      setStartDate(resetStartDateStr);
+      setDeadline(resetStartDateStr);
+
+      // Reset submission state to allow creating another task
+      isSubmittingRef.current = false;
+      setIsSubmitting(false);
     } catch (error) {
       console.error("Error creating task:", error);
       const errorMessage = error instanceof Error ? error.message : "";
@@ -218,7 +235,6 @@ export const useTaskForm = ({
         console.log("Network error, but task may have been created");
         isSubmittingRef.current = false;
         setIsSubmitting(false);
-        onClose?.();
       } else {
         showError("שגיאה בלתי צפויה", errorMessage || "אירעה שגיאה בלתי צפויה");
         // Reset lock on error to allow retry

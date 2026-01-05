@@ -48,28 +48,24 @@ const ResponsibleFilterButton: React.FC<ResponsibleFilterButtonProps> = ({
                     text-xs font-semibold
                     border
                     transition-all duration-200
-                    ${
-                      isShowingUnassigned
-                        ? `text-orange-500 ${
-                            isDarkMode
-                              ? "bg-orange-500/15 border-orange-500/30"
-                              : "bg-orange-50 border-orange-200"
-                          } shadow-sm scale-[1.02]`
-                        : `${isDarkMode ? "text-slate-400" : "text-slate-500"} 
+                    ${isShowingUnassigned
+            ? `text-red-500 ${isDarkMode
+              ? "bg-red-500/15 border-red-500/30"
+              : "bg-red-50 border-red-200"
+            } shadow-sm scale-[1.02]`
+            : `${isDarkMode ? "text-slate-400" : "text-slate-500"} 
                            border-transparent
-                           ${
-                             isDarkMode
-                               ? "hover:bg-orange-500/10"
-                               : "hover:bg-orange-50/50"
-                           }
+                           ${isDarkMode
+              ? "hover:bg-red-500/10"
+              : "hover:bg-red-50/50"
+            }
                            hover:text-slate-${isDarkMode ? "200" : "700"}`
-                    }
+          }
                 `}
       >
         <Icon
-          className={`w-3.5 h-3.5 ${
-            isShowingUnassigned ? "text-orange-500" : ""
-          }`}
+          className={`w-3.5 h-3.5 ${isShowingUnassigned ? "text-red-500" : ""
+            }`}
         />
         <span>{isShowingUnassigned ? "משימות ללא הקצאה" : "כל המשימות"}</span>
       </button>

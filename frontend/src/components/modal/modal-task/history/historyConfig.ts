@@ -1,4 +1,4 @@
-import { Plus, Pencil, Clock, CheckCircle2, Trash2, MessageSquare, UserPlus, UserMinus, Calendar, CalendarClock, Flag, Tag, FileText, Type, Circle, ShieldCheck, XCircle, Link } from "lucide-react";
+import { Plus, Pencil, Clock, CheckCircle2, Trash2, MessageSquare, UserPlus, UserMinus, Calendar, CalendarClock, Flag, Tag, FileText, Type, Circle, ShieldCheck, XCircle, Link, Building2, Hash } from "lucide-react";
 import type { TaskHistoryAction, TaskHistoryEntry } from "../../../../api/tasksApi";
 
 export interface ActionConfigItem {
@@ -125,14 +125,25 @@ export const FIELD_ICONS: Record<string, ActionConfigItem> = {
   responsibleUserIds: { icon: UserPlus, color: "#06B6D4", bgColor: "#06B6D420", label: "הקצאת משתמשים" },
   primaryTagIds: { icon: Tag, color: "#6366F1", bgColor: "#6366F120", label: "קטגוריות" },
   secondaryTagIds: { icon: Tag, color: "#6366F1", bgColor: "#6366F120", label: "תגיות" },
+  // Optional fields - organizational units
+  pikud: { icon: Building2, color: "#059669", bgColor: "#05966920", label: "פיקוד" },
+  ugda: { icon: Building2, color: "#0891B2", bgColor: "#0891B220", label: "אוגדה" },
+  hativa: { icon: Building2, color: "#7C3AED", bgColor: "#7C3AED20", label: "חטיבה" },
+  gdud: { icon: Building2, color: "#DB2777", bgColor: "#DB277720", label: "גדוד" },
+  // Optional fields - external system
+  externalSystem: { icon: Link, color: "#6366F1", bgColor: "#6366F120", label: "מערכת חיצונית" },
+  externalId: { icon: Hash, color: "#6366F1", bgColor: "#6366F120", label: "מזהה אירוע" },
 };
 
 // Fields that represent data changes (not metadata)
 const DATA_FIELDS = [
   "title", "description", "priority", "status", "date", "deadline",
-  "responsibleUserIds", "primaryTagIds", "secondaryTagIds",
+  "responsibleUserIds", "primaryTagIds", "secondaryTagIds", "optionals",
   "tags", "category", "primary_tags", "secondary_tags", "primary_tag_ids", "secondary_tag_ids"
 ];
+
+// Optional fields (organizational units and external system)
+const OPTIONAL_FIELDS = ["pikud", "ugda", "hativa", "gdud", "externalSystem", "externalId"];
 
 /**
  * Helper to determine if a user change is Add or Remove
@@ -149,10 +160,31 @@ const getUserChangeIcon = (entry: TaskHistoryEntry): typeof UserPlus => {
 export const getIconConfig = (entry: TaskHistoryEntry): ActionConfigItem => {
   const baseConfig = ACTION_CONFIG[entry.action] || ACTION_CONFIG.UPDATE;
 
-  if ((entry.action === "UPDATE" || entry.action === "ASSIGN") && entry.changes) {
+  if ((entry.action === "UPDATE" || entry.action === "ASSIGN" || entry.action === "UPDATE_OPTIONALS" || entry.action === "UPDATE_EXTERNAL_SYSTEM") && entry.changes) {
     const changedFields = Object.keys(entry.changes).filter((k) => DATA_FIELDS.includes(k));
 
-    // Multi-field update: show Pencil
+    // Check if optionals is the only changed field
+    if (changedFields.length === 1 && changedFields[0] === "optionals" && entry.changes.optionals) {
+      const opts = entry.changes.optionals as Record<string, any>;
+      const oldOpts = (entry.oldValues?.optionals as Record<string, any>) || {};
+
+      // Filter to find fields that ACTUALLY changed compared to old values
+      const changedOptFields = Object.keys(opts).filter(k =>
+        OPTIONAL_FIELDS.includes(k) && opts[k] !== oldOpts[k]
+      );
+
+      // Single optional field update: show specific icon
+      if (changedOptFields.length === 1) {
+        const field = changedOptFields[0];
+        const fieldIcon = FIELD_ICONS[field];
+        if (fieldIcon) return fieldIcon;
+      }
+
+      // Multiple optional fields: show pencil
+      return ACTION_CONFIG.UPDATE;
+    }
+
+    // Multi-field update (including mixed optionals + other fields): show Pencil
     if (changedFields.length > 1) {
       return ACTION_CONFIG.UPDATE;
     }

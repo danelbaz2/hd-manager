@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { type TaskFormData, type Task, type TaskStatus, type TaskOptionals } from "../../../../api/tasksApi";
 import { useUpdateTaskMutation, invalidateTaskQueries } from "../../../../api/queries";
 import type { TaskPriority } from "../../../../schemas/taskTypes";
-import { parseDateToTimestamp, timestampToDateStr, hasFormChanges, initFormFromTask } from "./formUtils";
+import { parseDateToTimestamp, timestampToDateStr, hasFormChanges, initFormFromTask, getChangedOptionals, arraysEqual } from "./formUtils";
 
 interface UseTaskFormProps {
   task: Task | null;
@@ -99,13 +99,48 @@ export const useTaskForm = ({
     try {
       const originalStartDate = timestampToDateStr(task.date);
       const originalDeadline = timestampToDateStr(task.deadline);
-      const taskData: Partial<TaskFormData> = {
-        title: title.trim(), description: description.trim() || undefined, priority,
-        responsibleUserIds: selectedUserIds, primaryTagIds: selectedPrimaryTagIds, secondaryTagIds: selectedSecondaryTagIds,
-        optionals,
-      };
-      if (startDate !== originalStartDate) taskData.date = startDate ? new Date(startDate).getTime() : undefined;
-      if (deadline !== originalDeadline) taskData.deadline = deadline ? new Date(deadline).getTime() : undefined;
+
+      // Build taskData with only changed fields
+      const taskData: Partial<TaskFormData> = {};
+
+      // Check each field and only include if changed
+      if (title.trim() !== (task.title || "")) {
+        taskData.title = title.trim();
+      }
+      if ((description.trim() || "") !== (task.description || "")) {
+        taskData.description = description.trim() || undefined;
+      }
+      if (priority !== (task.priority || "medium")) {
+        taskData.priority = priority;
+      }
+      if (startDate !== originalStartDate) {
+        taskData.date = startDate ? new Date(startDate).getTime() : undefined;
+      }
+      if (deadline !== originalDeadline) {
+        taskData.deadline = deadline ? new Date(deadline).getTime() : undefined;
+      }
+      if (!arraysEqual(selectedUserIds, task.responsibleUserIds || [])) {
+        taskData.responsibleUserIds = selectedUserIds;
+      }
+      if (!arraysEqual(selectedPrimaryTagIds, task.primaryTagIds || [])) {
+        taskData.primaryTagIds = selectedPrimaryTagIds;
+      }
+      if (!arraysEqual(selectedSecondaryTagIds, task.secondaryTagIds || [])) {
+        taskData.secondaryTagIds = selectedSecondaryTagIds;
+      }
+
+      // Only include changed optional fields
+      // Ensure consistency: if externalSystem is cleared, externalId should also be cleared. 
+      // This enforces the rule: "If there is no externalSystem, there is no externalId"
+      const effectiveOptionals = { ...optionals };
+      if (!effectiveOptionals.externalSystem) {
+        effectiveOptionals.externalId = "";
+      }
+
+      const changedOptionals = getChangedOptionals(effectiveOptionals, task.optionals);
+      if (changedOptionals) {
+        taskData.optionals = changedOptionals;
+      }
 
       const updatedTask = await updateMutation.mutateAsync({ id: task.id, task: taskData });
       onSuccess(updatedTask);
