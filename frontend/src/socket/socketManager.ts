@@ -58,7 +58,12 @@ class SocketManager {
   ];
   
   constructor(config: Partial<SocketConfig> = {}) {
-    this.config = { ...DEFAULT_SOCKET_CONFIG, ...config };
+    const defaultIdleTimeout = Number(import.meta.env.VITE_IDLE_TIMEOUT) || 300000; // 5 mins
+    this.config = { 
+      ...DEFAULT_SOCKET_CONFIG, 
+      idleTimeoutMs: defaultIdleTimeout,
+      ...config 
+    };
     this.state = {
       status: 'disconnected',
       isConnected: false,
@@ -225,7 +230,7 @@ class SocketManager {
       transports: ['websocket', 'polling'],
       autoConnect: true,
       reconnection: false, // We handle reconnection manually based on activity
-      timeout: 10000,
+      timeout: Number(import.meta.env.VITE_SOCKET_TIMEOUT) || 10000,
     });
     
     this.setupSocketListeners();

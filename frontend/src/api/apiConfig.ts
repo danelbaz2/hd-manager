@@ -24,8 +24,9 @@ export interface ApiResponse<T> {
 }
 
 // Retry configuration
-const MAX_RETRIES = 2;
-const RETRY_DELAY_MS = 500;
+// Retry configuration
+const MAX_RETRIES = Number(import.meta.env.VITE_API_MAX_RETRIES) || 2;
+const RETRY_DELAY_MS = Number(import.meta.env.VITE_API_RETRY_DELAY) || 500;
 
 // Helper: delay function
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));

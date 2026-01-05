@@ -1,4 +1,10 @@
-import React, { useEffect, useCallback, useState, useRef, useMemo } from "react";
+import React, {
+  useEffect,
+  useCallback,
+  useState,
+  useRef,
+  useMemo,
+} from "react";
 import { Virtuoso } from "react-virtuoso";
 import { UpdateItem } from "./UpdateItem";
 import { useSettings } from "../../../../../contexts";
@@ -8,7 +14,6 @@ import { ScrollToLatestButton } from "../../../../../components/common/ScrollToL
 
 export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   taskTitleMap,
-  users,
   primaryTags,
   secondaryTags,
   isDarkMode,
@@ -44,7 +49,7 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   useEffect(() => {
     // Report latest timestamp
     if (updates.length > 0 && onLatestUpdate) {
-      const maxTs = Math.max(...updates.map(u => u.timestamp));
+      const maxTs = Math.max(...updates.map((u) => u.timestamp));
       onLatestUpdate(maxTs);
     }
 
@@ -102,30 +107,22 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
         entry={entry}
         taskTitle={taskTitleMap[entry.taskId]}
         isDarkMode={isDarkMode}
-        users={users}
         primaryTags={primaryTags}
         secondaryTags={secondaryTags}
         onClick={() => onUpdateClick(entry.taskId)}
         isNew={isNew(entry.id)}
       />
     ),
-    [
-      taskTitleMap,
-      isDarkMode,
-      users,
-      primaryTags,
-      secondaryTags,
-      onUpdateClick,
-      isNew,
-    ]
+    [taskTitleMap, isDarkMode, primaryTags, secondaryTags, onUpdateClick, isNew]
   );
 
   // Loading state
   if (isLoading && updates.length === 0) {
     return (
       <div
-        className={`h-full flex items-center justify-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
-          }`}
+        className={`h-full flex items-center justify-center text-sm ${
+          isDarkMode ? "text-slate-400" : "text-slate-500"
+        }`}
       >
         טוען עדכונים...
       </div>
@@ -136,8 +133,9 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   if (updates.length === 0) {
     return (
       <div
-        className={`h-full flex items-center justify-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
-          }`}
+        className={`h-full flex items-center justify-center text-sm ${
+          isDarkMode ? "text-slate-400" : "text-slate-500"
+        }`}
       >
         אין עדכונים למשימות ביום זה
       </div>
@@ -149,8 +147,9 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
       <Virtuoso
         data={updates}
         itemContent={renderItem}
-        className={`h-full ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-          }`}
+        className={`h-full ${
+          isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+        }`}
         style={{ height: "100%" }}
         overscan={200}
         scrollerRef={(ref) => {

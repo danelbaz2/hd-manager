@@ -8,8 +8,8 @@ from functools import wraps
 from flask import request, jsonify
 
 # Get JWT configuration from environment
-JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'default-secret-change-in-production')
-JWT_EXPIRATION_DAYS = int(os.getenv('JWT_EXPIRATION_DAYS', 7))
+JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'IA1DE2')
+JWT_EXPIRATION_DAYS = int(os.getenv('JWT_EXPIRATION_DAYS', 24))
 JWT_ALGORITHM = 'HS256'
 
 

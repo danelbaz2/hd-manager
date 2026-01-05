@@ -39,6 +39,8 @@ export const getActionLabel = (action: TaskHistoryAction): string => {
         PENDING_APPROVAL: "שלח לאישור",
         APPROVE: "אישר את",
         REJECT: "דחה את",
+        UPDATE_OPTIONALS: "עדכן פרטים",
+        UPDATE_EXTERNAL_SYSTEM: "עדכן מערכת חיצונית",
     };
     return labels[action] || "עדכון";
 };
@@ -61,6 +63,8 @@ export const getActionColor = (
         PENDING_APPROVAL: { dark: "text-purple-400", light: "text-purple-600" },
         APPROVE: { dark: "text-emerald-400", light: "text-emerald-600" },
         REJECT: { dark: "text-red-400", light: "text-red-600" },
+        UPDATE_OPTIONALS: { dark: "text-blue-400", light: "text-blue-600" },
+        UPDATE_EXTERNAL_SYSTEM: { dark: "text-blue-400", light: "text-blue-600" },
     };
     return colors[action]?.[isDarkMode ? "dark" : "light"] || "text-slate-500";
 };

@@ -16,16 +16,21 @@ load_dotenv()
 app = Flask(__name__, static_folder='../frontend/dist', static_url_path='/')
 
 # Hide basic request logs by default (clean terminal)
-logging.getLogger('werkzeug').setLevel(logging.ERROR)
+# Configure logging based on environment
+log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
+# Only show request logs (werkzeug) if specifically in DEBUG mode
+# Otherwise keep them quiet (ERROR) as per original design
+system_log_level = logging.INFO if log_level == 'DEBUG' else logging.ERROR
+logging.getLogger('werkzeug').setLevel(system_log_level)
 
-CORS(app, origins=["http://localhost:5173"])
+CORS(app, origins=os.getenv("CORS_ORIGINS", "http://localhost:5173").split(","))
 
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017/hd_manager")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "hd-manager-secret-key")
 mongo.init_app(app)
 
 # Initialize SocketIO
-socketio = SocketIO(app, cors_allowed_origins=["http://localhost:5173"])
+socketio = SocketIO(app, cors_allowed_origins=os.getenv("CORS_ORIGINS").split(","))
 
 # Import routes after app initialization to avoid circular imports
 # Import routes after app initialization to avoid circular imports
@@ -56,21 +61,36 @@ def serve(path):
 if __name__ == '__main__':
     from utils.logging_utils import setup_access_logging
     
-    # Get the adapter that pipes gevent logs to our controlled logger
-    access_log_adapter = setup_access_logging()
+    # Setup access logging (configures gevent.access logger)
+    setup_access_logging()
     
     # Print startup banner (only in the reloader process to avoid double print)
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true':
-        from utils.startup_banner import print_banner
         from utils.db_indexes import ensure_indexes
+        from utils.startup_banner import print_banner
         print_banner()
         # Ensure database indexes exist for optimal performance
         with app.app_context():
             ensure_indexes(mongo.db)
     
-    socketio.run(
-        app, 
-        debug=True, 
-        port=int(os.getenv("PORT", 5000)),
-        log=access_log_adapter
-    )
+    # Note: Don't pass 'log' parameter - it conflicts with newer gevent/Flask-SocketIO
+    # The logging is handled via the gevent.access logger configured above
+    # host='0.0.0.0' is required for Docker to accept external connections
+    ssl_cert_path = os.getenv("SSL_CERT_PATH")
+    ssl_key_path = os.getenv("SSL_KEY_PATH")
+    
+    run_kwargs = {
+        "host": '0.0.0.0',
+        "debug": os.getenv("DEBUG", "False").lower() == "true",
+        "port": int(os.getenv("PORT", 5000))
+    }
+    
+    if ssl_cert_path and ssl_key_path:
+        if os.path.exists(ssl_cert_path) and os.path.exists(ssl_key_path):
+            print(f" * Starting with SSL: {ssl_cert_path}")
+            run_kwargs["certfile"] = ssl_cert_path
+            run_kwargs["keyfile"] = ssl_key_path
+        else:
+            print(f" ! SSL certs not found at {ssl_cert_path} or {ssl_key_path}, starting HTTP only")
+    
+    socketio.run(app, **run_kwargs)

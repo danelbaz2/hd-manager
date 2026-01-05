@@ -6,9 +6,15 @@ import {
   UserSelect,
   DatePicker,
 } from "../../modal-new-task/components";
-import type { TaskPriority, TaskOptionals } from "../../../../schemas/taskTypes";
+import type {
+  TaskPriority,
+  TaskOptionals,
+} from "../../../../schemas/taskTypes";
 import type { UserData } from "../../../../schemas/userTypes";
-import type { PrimaryTagData, SecondaryTagData } from "../../../../schemas/tagTypes";
+import type {
+  PrimaryTagData,
+  SecondaryTagData,
+} from "../../../../schemas/tagTypes";
 
 interface TaskFormProps {
   title: string;
@@ -67,13 +73,23 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   // Auto-expand if optionals have content
   const [showOptionals, setShowOptionals] = useState(() => {
     if (!optionals) return false;
-    return !!(optionals.pikud || optionals.ugda || optionals.hativa || optionals.gdud || optionals.externalSystem);
+    return !!(
+      optionals.pikud ||
+      optionals.ugda ||
+      optionals.hativa ||
+      optionals.gdud ||
+      optionals.externalSystem
+    );
   });
 
-  const adjustHeight = (el: HTMLTextAreaElement | null, min: number, max: number) => {
+  const adjustHeight = (
+    el: HTMLTextAreaElement | null,
+    min: number,
+    max: number
+  ) => {
     if (!el) return;
-    el.style.height = 'auto';
-    el.style.height = Math.min(Math.max(el.scrollHeight, min), max) + 'px';
+    el.style.height = "auto";
+    el.style.height = Math.min(Math.max(el.scrollHeight, min), max) + "px";
   };
 
   useLayoutEffect(() => {
@@ -91,9 +107,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
   const inputClass = `
     w-full px-3 py-1.5 rounded-xl border-2 text-sm transition-all
-    ${isDarkMode
-      ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
-      : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
+    ${
+      isDarkMode
+        ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
+        : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
     }
     focus:outline-none focus:ring-2 focus:ring-blue-500/20
   `;
@@ -104,8 +121,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
         <div className="md:col-span-2">
           <label
-            className={`block text-sm lg:text-base font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-700"
-              }`}
+            className={`block text-sm lg:text-base font-medium mb-1 ${
+              isDarkMode ? "text-slate-300" : "text-slate-700"
+            }`}
           >
             כותרת המשימה
           </label>
@@ -122,9 +140,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             className={`
               w-full px-3 py-1.5 rounded-xl border-2 text-sm lg:text-base font-medium transition-all resize-none overflow-y-auto scrollbar-hide
               min-h-10 lg:min-h-11
-              ${isDarkMode
-                ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
-                : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
+              ${
+                isDarkMode
+                  ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
+                  : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
               }
               focus:outline-none focus:ring-2 focus:ring-blue-500/20
             `}
@@ -136,8 +155,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       {/* Description */}
       <div>
         <label
-          className={`block text-sm lg:text-base font-medium mb-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"
-            }`}
+          className={`block text-sm lg:text-base font-medium mb-1.5 ${
+            isDarkMode ? "text-slate-300" : "text-slate-700"
+          }`}
         >
           תיאור
         </label>
@@ -153,13 +173,14 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           maxLength={1000}
           className={`
             w-full px-3 py-1.5 rounded-xl border-2 resize-none text-sm lg:text-base transition-all overflow-y-auto scrollbar-hide
-            ${isDarkMode
-              ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
-              : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
+            ${
+              isDarkMode
+                ? "bg-slate-700/50 border-slate-600 text-white placeholder-slate-400 hover:border-slate-500 focus:border-blue-500"
+                : "bg-white border-slate-200 text-slate-800 placeholder-slate-400 hover:border-slate-300 focus:border-blue-500"
             }
             focus:outline-none focus:ring-2 focus:ring-blue-500/20
           `}
-          style={{ minHeight: '56px', maxHeight: '112px' }}
+          style={{ minHeight: "56px", maxHeight: "112px" }}
         />
       </div>
 
@@ -199,64 +220,102 @@ export const TaskForm: React.FC<TaskFormProps> = ({
         <button
           type="button"
           onClick={() => setShowOptionals(!showOptionals)}
-          className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${isDarkMode
-            ? "text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
-            : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
-            }`}
+          className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${
+            isDarkMode
+              ? "text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
+              : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+          }`}
         >
           <span>שדות אופציונליים</span>
-          {showOptionals ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+          {showOptionals ? (
+            <ChevronUp className="w-4 h-4" />
+          ) : (
+            <ChevronDown className="w-4 h-4" />
+          )}
         </button>
       </div>
 
       {/* Military Hierarchy & External System Row - Smooth Animation */}
       <div
-        className={`grid transition-all duration-500 ease-in-out ${showOptionals
-          ? "grid-rows-[1fr] opacity-100"
-          : "grid-rows-[0fr] opacity-0"
-          }`}
+        className={`grid transition-all duration-500 ease-in-out ${
+          showOptionals
+            ? "grid-rows-[1fr] opacity-100"
+            : "grid-rows-[0fr] opacity-0"
+        }`}
       >
         <div className="overflow-hidden">
-          <div className="space-y-3 p-3 rounded-2xl bg-slate-50/50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-700/50 mt-1">
+          <div className="space-y-4 pt-2">
             {/* Military Hierarchy */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div>
-                <label className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>פיקוד</label>
+                <label
+                  className={`block text-xs font-medium mb-1 ${
+                    isDarkMode ? "text-slate-300" : "text-slate-600"
+                  }`}
+                >
+                  פיקוד
+                </label>
                 <input
                   type="text"
                   placeholder="צפון"
                   value={optionals?.pikud || ""}
-                  onChange={(e) => setOptionals({ ...optionals, pikud: e.target.value })}
+                  onChange={(e) =>
+                    setOptionals({ ...optionals, pikud: e.target.value })
+                  }
                   className={inputClass}
                 />
               </div>
               <div>
-                <label className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>אוגדה</label>
+                <label
+                  className={`block text-xs font-medium mb-1 ${
+                    isDarkMode ? "text-slate-300" : "text-slate-600"
+                  }`}
+                >
+                  אוגדה
+                </label>
                 <input
                   type="text"
                   placeholder="91"
                   value={optionals?.ugda || ""}
-                  onChange={(e) => setOptionals({ ...optionals, ugda: e.target.value })}
+                  onChange={(e) =>
+                    setOptionals({ ...optionals, ugda: e.target.value })
+                  }
                   className={inputClass}
                 />
               </div>
               <div>
-                <label className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>חטיבה</label>
+                <label
+                  className={`block text-xs font-medium mb-1 ${
+                    isDarkMode ? "text-slate-300" : "text-slate-600"
+                  }`}
+                >
+                  חטיבה
+                </label>
                 <input
                   type="text"
                   placeholder="300"
                   value={optionals?.hativa || ""}
-                  onChange={(e) => setOptionals({ ...optionals, hativa: e.target.value })}
+                  onChange={(e) =>
+                    setOptionals({ ...optionals, hativa: e.target.value })
+                  }
                   className={inputClass}
                 />
               </div>
               <div>
-                <label className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>גדוד</label>
+                <label
+                  className={`block text-xs font-medium mb-1 ${
+                    isDarkMode ? "text-slate-300" : "text-slate-600"
+                  }`}
+                >
+                  גדוד
+                </label>
                 <input
                   type="text"
                   placeholder="299"
                   value={optionals?.gdud || ""}
-                  onChange={(e) => setOptionals({ ...optionals, gdud: e.target.value })}
+                  onChange={(e) =>
+                    setOptionals({ ...optionals, gdud: e.target.value })
+                  }
                   className={inputClass}
                 />
               </div>
@@ -265,7 +324,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             {/* External System Integration */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-slate-200/50 dark:border-slate-700/50 items-center">
               <div>
-                <label className={`block text-xs font-medium mb-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>מערכת חיצונית</label>
+                <label
+                  className={`block text-xs font-medium mb-1.5 ${
+                    isDarkMode ? "text-slate-300" : "text-slate-600"
+                  }`}
+                >
+                  מערכת חיצונית
+                </label>
                 <div className="flex gap-2">
                   <button
                     type="button"
@@ -278,9 +343,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                     }}
                     className={`
                       flex-1 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all
-                      ${optionals?.externalSystem === "SNOW"
-                        ? "bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/20"
-                        : isDarkMode
+                      ${
+                        optionals?.externalSystem === "SNOW"
+                          ? "bg-blue-500 border-blue-500 text-white shadow-md shadow-blue-500/20"
+                          : isDarkMode
                           ? "bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-700"
                           : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                       }
@@ -299,9 +365,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                     }}
                     className={`
                       flex-1 px-3 py-1.5 rounded-lg text-sm font-medium border transition-all
-                      ${optionals?.externalSystem === "MARS"
-                        ? "bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/20"
-                        : isDarkMode
+                      ${
+                        optionals?.externalSystem === "MARS"
+                          ? "bg-emerald-500 border-emerald-500 text-white shadow-md shadow-emerald-500/20"
+                          : isDarkMode
                           ? "bg-slate-700/50 border-slate-600 text-slate-300 hover:bg-slate-700"
                           : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
                       }
@@ -312,16 +379,25 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                 </div>
               </div>
 
-              {(optionals?.externalSystem === "SNOW" || optionals?.externalSystem === "MARS") && (
+              {(optionals?.externalSystem === "SNOW" ||
+                optionals?.externalSystem === "MARS") && (
                 <div className="animate-fadeSlideIn">
-                  <label className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>
+                  <label
+                    className={`block text-xs font-medium mb-1 ${
+                      isDarkMode ? "text-slate-300" : "text-slate-600"
+                    }`}
+                  >
                     מספר תקלה
                   </label>
                   <input
                     type="text"
-                    placeholder={optionals.externalSystem === "SNOW" ? "INC1234567" : "555"}
+                    placeholder={
+                      optionals.externalSystem === "SNOW" ? "INC1234567" : "555"
+                    }
                     value={optionals?.externalId || ""}
-                    onChange={(e) => setOptionals({ ...optionals, externalId: e.target.value })}
+                    onChange={(e) =>
+                      setOptionals({ ...optionals, externalId: e.target.value })
+                    }
                     className={inputClass}
                   />
                 </div>

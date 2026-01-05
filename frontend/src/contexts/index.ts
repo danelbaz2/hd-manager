@@ -1,9 +1,28 @@
-// Contexts barrel export
-export { ThemeProvider, useTheme } from "./ThemeContext";
-export { SettingsProvider, useSettings } from "./SettingsContext";
-export { ViewStateProvider, useViewState, type ViewMode, type DisplayMode } from "./ViewStateContext";
-export { AuthProvider, useAuth } from "./AuthContext";
-// Socket is now exported from the socket module
-export { SocketProvider, useSocket } from "../socket";
-export { useChatSync as useChatUpdates } from "../socket";
+/**
+ * Contexts barrel export
+ * Import from here for cleaner imports
+ */
 
+// Auth
+export { AuthProvider, useAuth } from "./AuthContext";
+
+// Theme
+export { ThemeProvider, useTheme } from "./ThemeContext";
+
+// View State
+export { ViewStateProvider, useViewState } from "./ViewStateContext";
+
+// Settings (modular)
+export { SettingsProvider, useSettings } from "./SettingsContext";
+
+// Individual context hooks (recommended for performance)
+export { useUsers } from "./UsersContext";
+export { useTags } from "./TagsContext";
+export { useContacts } from "./ContactsContext";
+export { useTasks } from "./TasksContext";
+export { useHistory } from "./HistoryContext";
+
+// Socket (re-export from socket module for convenience)
+export { SocketProvider, useSocket } from "../socket";
+export { useChatSync, useChatUpdates } from "../socket";
+export { useTaskUpdates, useUserUpdates } from "../socket";

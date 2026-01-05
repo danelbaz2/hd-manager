@@ -192,4 +192,4 @@ const ListTaskArchive: React.FC<Props> = ({
   );
 };
 
-export default ListTaskArchive;
+export default React.memo(ListTaskArchive);

@@ -49,11 +49,12 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
   const isTourActive = tourState.isActive && tourState.currentPageId === "home";
 
   // Use demo data in tour mode, otherwise use real/override data
-  const tasks = isTourActive ? DEMO_TASKS : (tasksOverride || globalTasks);
+  const tasks = isTourActive ? DEMO_TASKS : tasksOverride || globalTasks;
   const users = usersOverride || globalUsers;
 
   // Team messages - need to fetch even when not on team tab for notification dot
-  const { messages: apiTeamMessages, fetchMessages: fetchTeamMessages } = useTeamMessages();
+  const { messages: apiTeamMessages, fetchMessages: fetchTeamMessages } =
+    useTeamMessages();
   const teamMessages = teamUpdatesOverride || apiTeamMessages;
 
   // Subscribe to chat updates even when not on team tab (for notification dot)
@@ -107,7 +108,9 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
     if (!taskHistory || taskHistory.length === 0) return 0;
     const date = selectedDate ? new Date(selectedDate) : new Date();
     date.setHours(0, 0, 0, 0);
-    const todayUpdates = isTourActive ? demoUpdates : getHistoryForDate(date.getTime());
+    const todayUpdates = isTourActive
+      ? demoUpdates
+      : getHistoryForDate(date.getTime());
     if (!todayUpdates || todayUpdates.length === 0) return 0;
     return Math.max(...todayUpdates.map((t) => t.timestamp));
   }, [taskHistory, selectedDate, getHistoryForDate, isTourActive, demoUpdates]);
@@ -130,25 +133,29 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
   return (
     <div
       data-tour="activity-feed"
-      className={`h-full flex flex-col rounded-2xl border overflow-hidden ${isDarkMode
-        ? "bg-slate-800 border-slate-700"
-        : "bg-white border-slate-200"
-        }`}
+      className={`h-full flex flex-col rounded-2xl border overflow-hidden ${
+        isDarkMode
+          ? "bg-slate-800 border-slate-700"
+          : "bg-white border-slate-200"
+      }`}
     >
       {/* Header with "Hot Updates" title */}
       <div
-        className={`border-b ${isDarkMode ? "border-slate-700" : "border-slate-200"
-          }`}
+        className={`border-b ${
+          isDarkMode ? "border-slate-700" : "border-slate-200"
+        }`}
       >
         <div
-          className={`flex items-center justify-center gap-2 px-4 py-2 ${isDarkMode ? "bg-slate-700/50" : "bg-slate-50"
-            }`}
+          className={`flex items-center justify-center gap-2 px-4 py-2 ${
+            isDarkMode ? "bg-slate-700/50" : "bg-slate-50"
+          }`}
           dir="rtl"
         >
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           <h3
-            className={`font-bold text-sm ${isDarkMode ? "text-white" : "text-slate-800"
-              }`}
+            className={`font-bold text-sm ${
+              isDarkMode ? "text-white" : "text-slate-800"
+            }`}
           >
             עדכונים חמים
           </h3>
@@ -171,7 +178,6 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
         {activeTab === "tasks" ? (
           <UpdatesTask
             taskTitleMap={taskTitleMap}
-            users={users}
             primaryTags={primaryTags}
             secondaryTags={secondaryTags}
             isDarkMode={isDarkMode}

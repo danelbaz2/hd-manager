@@ -4,13 +4,16 @@ Implements clean connection lifecycle management.
 """
 
 import logging
+import os # Ensure os is imported for getenv
 from flask import request
 from flask_socketio import emit, join_room
 from .manager import socket_manager
 
 # Configure event logger with a safe formatter
+# Configure event logger with a safe formatter
 event_logger = logging.getLogger('socket.events')
-event_logger.setLevel(logging.INFO)
+log_level_str = os.getenv('LOG_LEVEL', 'INFO').upper()
+event_logger.setLevel(getattr(logging, log_level_str, logging.INFO))
 event_logger.propagate = False
 
 

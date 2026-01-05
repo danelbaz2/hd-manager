@@ -1,14 +1,21 @@
-import React, { useState, useEffect, useCallback } from "react";
-import { useTheme, useSettings } from "../../contexts";
+import React, { useState, useEffect, useCallback, memo } from "react";
+import { useTheme, useSettings, useTaskUpdates } from "../../contexts";
 import HeaderArchivePage from "./HeaderArchivePage";
 import ListTaskArchive from "./ListTaskArchive";
 import {
   type ArchiveFilters,
   defaultFilters,
 } from "../../schemas/archiveTypes";
-import { getAllTasks, type Task } from "../../api/tasksApi";
+import {
+  getAllTasks,
+  type Task,
+  type TaskHistoryEntry,
+} from "../../api/tasksApi";
 import { Loader2 } from "lucide-react";
 import { useTaskModal } from "../../components/modal/modal-task";
+
+// Memoized list component to prevent unnecessary re-renders
+const MemoizedListTaskArchive = memo(ListTaskArchive);
 
 const ArchivePage: React.FC = () => {
   const { isDarkMode } = useTheme();
@@ -26,6 +33,7 @@ const ArchivePage: React.FC = () => {
     [openTaskModal]
   );
 
+  // Initial fetch
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -41,6 +49,43 @@ const ArchivePage: React.FC = () => {
     };
     fetchData();
   }, []);
+
+  // Subscribe to real-time task updates via WebSocket
+  const handleTaskUpdate = useCallback((update: TaskHistoryEntry) => {
+    const { action, taskId, fullTask } = update;
+
+    if (action === "CREATE" && fullTask) {
+      // Add new task
+      setTasks((prev) => {
+        if (prev.some((t) => t.id === fullTask.id)) return prev;
+        return [...prev, fullTask as Task];
+      });
+    } else if (action === "DELETE") {
+      // Remove deleted task
+      setTasks((prev) => prev.filter((t) => t.id !== taskId));
+    } else if (
+      [
+        "UPDATE",
+        "IN_PROGRESS",
+        "CLOSE",
+        "ASSIGN",
+        "PENDING_APPROVAL",
+        "APPROVE",
+        "REJECT",
+        "UPDATE_OPTIONALS",
+        "UPDATE_EXTERNAL_SYSTEM",
+      ].includes(action) &&
+      fullTask
+    ) {
+      // Update existing task
+      setTasks((prev) =>
+        prev.map((t) => (t.id === taskId ? { ...t, ...(fullTask as Task) } : t))
+      );
+    }
+  }, []);
+
+  // Use the WebSocket hook for real-time updates
+  useTaskUpdates(handleTaskUpdate);
 
   if (isLoading) {
     return (
@@ -76,7 +121,7 @@ const ArchivePage: React.FC = () => {
       </div>
 
       <div className="flex-1 p-4 w-full overflow-auto">
-        <ListTaskArchive
+        <MemoizedListTaskArchive
           tasks={tasks}
           users={users}
           primaryTags={primaryTags}

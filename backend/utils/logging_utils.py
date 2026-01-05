@@ -1,5 +1,6 @@
 import logging
 import sys
+import os
 
 class GeventLogAdapter:
     """
@@ -31,8 +32,11 @@ def setup_access_logging():
         handler.setFormatter(logging.Formatter('%(message)s'))
         access_logger.addHandler(handler)
     
-    # Default to hidden/ERROR on startup
-    access_logger.setLevel(logging.ERROR)
+    # Default to environment level on startup
+    log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
+    # Only enable access logs if in DEBUG mode
+    system_log_level = logging.INFO if log_level == 'DEBUG' else logging.ERROR
+    access_logger.setLevel(system_log_level)
     
     # Prevent propagation to avoid double logging
     access_logger.propagate = False
