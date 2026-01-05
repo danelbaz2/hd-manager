@@ -182,7 +182,7 @@ export const getActionDescription = (
     const otherKeys = Object.keys(opts).filter(k => !systemKeys.includes(k));
     const hasSystemChanges = Object.keys(opts).some(k => systemKeys.includes(k));
 
-    const getSysName = (s: any) => s === 'SNOW' ? 'ServiceNow' : (s === 'MARS' ? 'MARS' : s);
+    const getSysName = (s: any) => s === 'SNOW' ? 'SNOW' : (s === 'MARS' ? 'MARS' : s);
 
     const renderSystemChange = () => {
       const newSys = opts.externalSystem;
@@ -263,13 +263,19 @@ export const getActionDescription = (
       "responsibleUserIds",
       "secondaryTagIds",
       "primaryTagIds",
+      "optionals",
     ].includes(k)
   );
 
   if (changedFields.length > 0) {
+    // Check if optionals is among the changed fields
+    const hasOptionals = changedFields.includes("optionals");
+    const regularFields = changedFields.filter(k => k !== "optionals");
+
     return (
       <div className="flex flex-col gap-1.5">
-        {changedFields.map((field) => {
+        {/* Render regular field changes */}
+        {regularFields.map((field): React.ReactNode => {
           const newValue = formatValue(
             field,
             changes[field],
@@ -300,6 +306,81 @@ export const getActionDescription = (
             </div>
           );
         })}
+
+        {/* Render optional field changes */}
+        {hasOptionals && changes.optionals && ((): React.ReactNode => {
+          const opts = (changes.optionals as Record<string, any>) || {};
+          const oldOpts = (oldValues?.optionals as Record<string, any>) || {};
+
+          // Separate system fields from others
+          const systemKeys = ["externalSystem", "externalId"];
+          // Filter keys to only show ones that actually changed
+          const otherKeys = Object.keys(opts).filter(k =>
+            !systemKeys.includes(k) && opts[k] !== oldOpts[k]
+          );
+          const hasSystemChanges = Object.keys(opts).some(k =>
+            systemKeys.includes(k) && opts[k] !== oldOpts[k]
+          );
+
+          const getSysName = (s: any) => s === 'SNOW' ? 'SNOW' : (s === 'MARS' ? 'MARS' : s);
+
+          const renderSystemChange = (): React.ReactNode => {
+            const newSys = opts.externalSystem;
+            const oldSys = oldOpts.externalSystem;
+            const newId = opts.externalId;
+            const oldId = oldOpts.externalId;
+
+            return (
+              <>
+                {/* External System Change */}
+                {newSys !== oldSys && newSys !== undefined && (
+                  <div className="text-sm flex items-center gap-1.5 flex-wrap">
+                    <span className="font-semibold">מערכת חיצונית:</span>
+                    <span className="opacity-75 line-through">{getSysName(oldSys || "ללא")}</span>
+                    <span>←</span>
+                    <span className={isDarkMode ? "text-blue-300" : "text-blue-600"}>
+                      {getSysName(newSys || "ללא")}
+                    </span>
+                  </div>
+                )}
+
+                {/* External ID Change */}
+                {newId !== oldId && newId !== undefined && (
+                  <div className="text-sm flex items-center gap-1.5 flex-wrap">
+                    <span className="font-semibold">מספר תקלה:</span>
+                    <span className="opacity-75 line-through">{oldId || "ללא"}</span>
+                    <span>←</span>
+                    <span className={isDarkMode ? "text-blue-300" : "text-blue-600"}>
+                      {newId || "ללא"}
+                    </span>
+                  </div>
+                )}
+              </>
+            );
+          };
+
+          return (
+            <>
+              {hasSystemChanges && renderSystemChange()}
+              {otherKeys.map((key) => {
+                const label = getOptionalLabel(key);
+                const val = opts[key];
+                const old = oldOpts[key] || "ריק";
+
+                return (
+                  <div key={key} className="text-sm flex items-center gap-1.5 flex-wrap">
+                    <span className="font-semibold">{label}:</span>
+                    <span className="opacity-75 line-through">{old}</span>
+                    <span>←</span>
+                    <span className={isDarkMode ? "text-blue-300" : "text-blue-600"}>
+                      {val || "ריק"}
+                    </span>
+                  </div>
+                );
+              })}
+            </>
+          );
+        })()}
       </div>
     );
   }

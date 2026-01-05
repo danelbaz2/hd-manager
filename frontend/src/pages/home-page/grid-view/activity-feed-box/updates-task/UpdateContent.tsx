@@ -76,7 +76,7 @@ export const UpdateContent: React.FC<UpdateContentProps> = ({
     const otherKeys = Object.keys(opts).filter(k => !systemKeys.includes(k));
     const hasSystemChanges = Object.keys(opts).some(k => systemKeys.includes(k));
 
-    const getSysName = (s: any) => s === 'SNOW' ? 'ServiceNow' : (s === 'MARS' ? 'MARS' : s);
+    const getSysName = (s: any) => s === 'SNOW' ? 'SNOW' : (s === 'MARS' ? 'MARS' : s);
 
     // Helpers from historyUtils are not available here automatically, hardcoding or importing
     // Importing getOptionalLabel might fail if path is complex, I'll define it here locally for safety or use switch
@@ -162,26 +162,99 @@ export const UpdateContent: React.FC<UpdateContentProps> = ({
     return (
       <div className="space-y-1">
         <p className={`text-sm font-medium break-words ${textColor}`}>{title}</p>
-        {changedFields.map((field) => (
-          <div
-            key={field}
-            className={`text-sm flex flex-wrap items-start gap-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"
-              }`}
-          >
-            <span className="font-medium shrink-0">{FIELD_LABELS[field]}:</span>
-            {entry.oldValues?.[field] !== undefined && (
-              <>
-                <span className="opacity-60 line-through break-words whitespace-pre-line">
-                  {formatValue(field, entry.oldValues[field], users, primaryTags, secondaryTags)}
-                </span>
-                <ArrowLeft className="w-3 h-3 opacity-50 shrink-0" />
-              </>
-            )}
-            <span className={`break-words whitespace-pre-line ${isDarkMode ? "text-blue-300" : "text-blue-600"}`}>
-              {formatValue(field, entry.changes?.[field], users, primaryTags, secondaryTags)}
-            </span>
-          </div>
-        ))}
+        {changedFields.map((field) => {
+          if (field === "optionals" && entry.changes?.optionals) {
+            const opts = (entry.changes.optionals as Record<string, any>) || {};
+            const oldOpts = (entry.oldValues?.optionals as Record<string, any>) || {};
+
+            // System fields
+            const systemKeys = ["externalSystem", "externalId"];
+            const otherKeys = Object.keys(opts).filter(k => !systemKeys.includes(k) && opts[k] !== oldOpts[k]);
+
+            // Helpers
+            const getSysName = (s: any) => s === 'SNOW' ? 'SNOW' : (s === 'MARS' ? 'MARS' : s);
+            const getLabel = (k: string) => {
+              switch (k) {
+                case "pikud": return "פיקוד";
+                case "ugda": return "אוגדה";
+                case "hativa": return "חטיבה";
+                case "gdud": return "גדוד";
+                case "externalSystem": return "מערכת חיצונית";
+                case "externalId": return "מספר תקלה";
+                default: return k;
+              }
+            };
+
+            const newSys = opts.externalSystem;
+            const oldSys = oldOpts.externalSystem;
+            const newId = opts.externalId;
+            const oldId = oldOpts.externalId;
+
+            return (
+              <React.Fragment key="optionals">
+                {/* System Changes */}
+                {newSys !== oldSys && newSys !== undefined && (
+                  <div className={`text-sm flex flex-wrap items-start gap-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
+                    <span className="font-medium shrink-0">מערכת חיצונית:</span>
+                    <span className="opacity-60 line-through break-words whitespace-pre-line">{getSysName(oldSys || "ללא")}</span>
+                    <ArrowLeft className="w-3 h-3 opacity-50 shrink-0" />
+                    <span className={`break-words whitespace-pre-line ${isDarkMode ? "text-blue-300" : "text-blue-600"}`}>
+                      {getSysName(newSys || "ללא")}
+                    </span>
+                  </div>
+                )}
+                {newId !== oldId && newId !== undefined && (
+                  <div className={`text-sm flex flex-wrap items-start gap-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
+                    <span className="font-medium shrink-0">מספר תקלה:</span>
+                    <span className="opacity-60 line-through break-words whitespace-pre-line">{oldId || "ללא"}</span>
+                    <ArrowLeft className="w-3 h-3 opacity-50 shrink-0" />
+                    <span className={`break-words whitespace-pre-line ${isDarkMode ? "text-blue-300" : "text-blue-600"}`}>
+                      {newId || "ללא"}
+                    </span>
+                  </div>
+                )}
+
+                {/* Other Optionals */}
+                {otherKeys.map(key => {
+                  const label = getLabel(key);
+                  const val = opts[key];
+                  const old = oldOpts[key] || "ריק";
+                  return (
+                    <div key={key} className={`text-sm flex flex-wrap items-start gap-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>
+                      <span className="font-medium shrink-0">{label}:</span>
+                      <span className="opacity-60 line-through break-words whitespace-pre-line">{old}</span>
+                      <ArrowLeft className="w-3 h-3 opacity-50 shrink-0" />
+                      <span className={`break-words whitespace-pre-line ${isDarkMode ? "text-blue-300" : "text-blue-600"}`}>
+                        {val || "ריק"}
+                      </span>
+                    </div>
+                  );
+                })}
+              </React.Fragment>
+            );
+          }
+
+          return (
+            <div
+              key={field}
+              className={`text-sm flex flex-wrap items-start gap-1.5 ${isDarkMode ? "text-slate-300" : "text-slate-700"
+                }`}
+            >
+              <span className="font-medium shrink-0">{FIELD_LABELS[field]}:</span>
+              {entry.oldValues?.[field] !== undefined && (
+                <>
+                  <span className="opacity-60 line-through break-words whitespace-pre-line">
+                    {formatValue(field, entry.oldValues[field], users, primaryTags, secondaryTags)}
+                  </span>
+                  <ArrowLeft className="w-3 h-3 opacity-50 shrink-0" />
+                </>
+              )}
+              <span className={`break-words whitespace-pre-line ${isDarkMode ? "text-blue-300" : "text-blue-600"}`}>
+                {formatValue(field, entry.changes?.[field], users, primaryTags, secondaryTags)}
+              </span>
+            </div>
+          )
+        })}
       </div>
     );
   }
