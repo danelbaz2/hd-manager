@@ -99,8 +99,21 @@ export interface SocketConfig {
   reconnectDelayMs: number;
 }
 
+// Get socket URL from API URL
+const getSocketUrl = (): string => {
+  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  
+  // If it's a relative URL like '/api', use empty string (same origin)
+  if (apiUrl.startsWith('/')) {
+    return '';  // Socket.IO will connect to the same origin
+  }
+  
+  // Otherwise, strip /api from absolute URL
+  return apiUrl.replace('/api', '');
+};
+
 export const DEFAULT_SOCKET_CONFIG: SocketConfig = {
-  url: import.meta.env.VITE_API_URL?.replace('/api', '') || 'http://localhost:5000',
+  url: getSocketUrl(),
   idleTimeoutMs: 300 * 1000, // disconnect after 5 minutes of inactivity
   activityDebounceMs: 1000,
   autoReconnectOnActivity: true,

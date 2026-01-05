@@ -23,14 +23,21 @@ log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
 system_log_level = logging.INFO if log_level == 'DEBUG' else logging.ERROR
 logging.getLogger('werkzeug').setLevel(system_log_level)
 
-CORS(app, origins=os.getenv("CORS_ORIGINS", "http://localhost:5173").split(","))
+# Parse CORS origins - handle wildcard specially
+cors_origins_env = os.getenv("CORS_ORIGINS", "http://localhost:5173")
+if cors_origins_env == "*":
+    cors_origins = "*"  # Wildcard - allow all origins
+else:
+    cors_origins = cors_origins_env.split(",")  # List of specific origins
+
+CORS(app, origins=cors_origins)
 
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017/hd_manager")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "hd-manager-secret-key")
 mongo.init_app(app)
 
-# Initialize SocketIO
-socketio = SocketIO(app, cors_allowed_origins=os.getenv("CORS_ORIGINS").split(","))
+# Initialize SocketIO with proper CORS
+socketio = SocketIO(app, cors_allowed_origins=cors_origins)
 
 # Import routes after app initialization to avoid circular imports
 # Import routes after app initialization to avoid circular imports

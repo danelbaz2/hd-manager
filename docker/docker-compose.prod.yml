@@ -1,23 +1,27 @@
+# ==============================================
+# HD-Manager Production Docker Compose
+# ==============================================
+# Use this file on the Linux VM after loading images
+
 services:
   # ============================================
   # Backend Server - Python/Flask Application
   # ============================================
   backend-server:
-    build:
-      context: ../backend
-      dockerfile: ../docker/backend.Dockerfile
+    image: hd-manager-backend:latest
     container_name: hd-backend-server
     restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
       - PORT=5000
-      - DEBUG=True
-      - CORS_ORIGINS=http://localhost,https://localhost
+      - DEBUG=False
+      - CORS_ORIGINS=https://192.168.80.5,https://flow-task
       - MAX_FILE_SIZE_MB=10
       - LOG_LEVEL=INFO
       - UPLOAD_ALLOWED_EXTENSIONS=pdf,doc,docx,xls,xlsx,txt,png,jpg,jpeg,gif
       - MONGO_URI=mongodb://mongodb:27017/hd-manager
+      - SECRET_KEY=8f3b2c9d1e4a5f6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b
       - JWT_SECRET_KEY=8f3b2c9d1e4a5f6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b
     volumes:
       - backend_uploads:/app/uploads
@@ -30,21 +34,16 @@ services:
   # Nginx Frontend - Static Files Server (HTTPS)
   # ============================================
   nginx-front:
-    build:
-      context: ../frontend
-      dockerfile: ../docker/frontend.Dockerfile
-      args:
-        - VITE_SYSTEM_NAME=Flow Task
-        - VITE_API_URL=/api
-        - VITE_SOCKET_TIMEOUT=10000
-        - VITE_IDLE_TIMEOUT=300000
+    image: hd-manager-frontend:latest
     container_name: hd-nginx-front
     restart: unless-stopped
     ports:
       - "443:443"
     environment:
-      # These are injected at runtime by docker-entrypoint.sh
-      - VITE_SYSTEM_NAME=Flow Task11
+      # =============================================
+      # CHANGE THESE VALUES FOR YOUR PRODUCTION ENV!
+      # =============================================
+      - VITE_SYSTEM_NAME=Flow Task1123
       - VITE_API_URL=/api
       - VITE_API_MAX_RETRIES=2
       - VITE_API_RETRY_DELAY=500
