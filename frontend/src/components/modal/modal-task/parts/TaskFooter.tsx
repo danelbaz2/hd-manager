@@ -63,8 +63,8 @@ export const TaskFooter: React.FC<TaskFooterProps> = ({
             <button
               onClick={handleCancelEdit}
               className={`font-medium text-sm transition-colors ${isDarkMode
-                  ? "text-slate-300 hover:text-white"
-                  : "text-slate-600 hover:text-slate-800"
+                ? "text-slate-300 hover:text-white"
+                : "text-slate-600 hover:text-slate-800"
                 }`}
             >
               ביטול
@@ -86,22 +86,31 @@ export const TaskFooter: React.FC<TaskFooterProps> = ({
           </>
         ) : (
           <>
-            <button
-              onClick={closeTaskModal}
-              className={`font-medium text-sm transition-colors ${isDarkMode
+            {isAdmin && (
+              <button
+                onClick={closeTaskModal}
+                className={`font-medium text-sm transition-colors ${isDarkMode
                   ? "text-slate-300 hover:text-white"
                   : "text-slate-600 hover:text-slate-800"
-                }`}
-            >
-              סגור
-            </button>
-            {isAdmin && (
+                  }`}
+              >
+                סגור
+              </button>
+            )}
+            {isAdmin ? (
               <button
                 onClick={handleEditClick}
                 className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white font-semibold text-sm transition-all shadow-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-blue-500/30"
               >
                 <Pencil className="w-4 h-4" />
                 עריכה
+              </button>
+            ) : (
+              <button
+                onClick={closeTaskModal}
+                className="flex items-center gap-2 px-6 py-2.5 rounded-xl text-white font-semibold text-sm transition-all shadow-lg bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 shadow-blue-500/30"
+              >
+                סגור
               </button>
             )}
           </>
