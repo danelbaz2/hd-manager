@@ -113,7 +113,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
   }, [task.secondaryTagIds, task.primaryTagIds, secondaryTags, primaryTags]);
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-5 h-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
       {/* Task ID & Tags */}
       <div className="flex items-center justify-between">
         <span
@@ -307,60 +307,122 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       {/* Optional Fields Display */}
       {task.optionals && Object.values(task.optionals).some(v => v) && (
         <div
-          className={`p-4 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+          className={`p-5 rounded-2xl border ${isDarkMode ? "bg-slate-800/50 border-slate-700" : "bg-white border-slate-100 shadow-sm"
             }`}
         >
-          <div className="flex items-center gap-2 mb-3">
+          <div className="flex items-center gap-2 mb-4">
             <ShieldCheck
-              className={`w-4 h-4 ${isDarkMode ? "text-slate-400" : "text-slate-500"
+              className={`w-4 h-4 ${isDarkMode ? "text-indigo-400" : "text-indigo-500"
                 }`}
             />
             <span
-              className={`text-sm font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
+              className={`text-sm font-semibold tracking-wide ${isDarkMode ? "text-slate-200" : "text-slate-700"
                 }`}
             >
               פרטים נוספים
             </span>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {task.optionals.pikud && (
-              <div>
-                <span className={`text-xs block mb-1 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>פיקוד</span>
-                <span className={`text-sm font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>{task.optionals.pikud}</span>
-              </div>
-            )}
-            {task.optionals.ugda && (
-              <div>
-                <span className={`text-xs block mb-1 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>אוגדה</span>
-                <span className={`text-sm font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>{task.optionals.ugda}</span>
-              </div>
-            )}
-            {task.optionals.hativa && (
-              <div>
-                <span className={`text-xs block mb-1 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>חטיבה</span>
-                <span className={`text-sm font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>{task.optionals.hativa}</span>
-              </div>
-            )}
-            {task.optionals.gdud && (
-              <div>
-                <span className={`text-xs block mb-1 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>גדוד</span>
-                <span className={`text-sm font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"}`}>{task.optionals.gdud}</span>
-              </div>
-            )}
-            {task.optionals.externalSystem && (
-              <div className="col-span-2">
-                <span className={`text-xs block mb-1 ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>מערכת חיצונית</span>
-                <div className="flex items-center gap-2">
-                  <span className={`text-sm font-medium px-2 py-0.5 rounded ${task.optionals.externalSystem === "SNOW"
-                    ? "bg-blue-500/10 text-blue-500"
-                    : "bg-emerald-500/10 text-emerald-500"
+
+          <div className="flex flex-col gap-4">
+            {/* Organizational Units */}
+            {(task.optionals.pikud || task.optionals.ugda || task.optionals.hativa || task.optionals.gdud) && (
+              <div className="flex flex-wrap gap-2 items-center">
+                {[
+                  { label: "פיקוד", value: task.optionals.pikud },
+                  { label: "אוגדה", value: task.optionals.ugda },
+                  { label: "חטיבה", value: task.optionals.hativa },
+                  { label: "גדוד", value: task.optionals.gdud },
+                ].map((item) => item.value && (
+                  <div key={item.label} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${isDarkMode ? "bg-slate-800 border-slate-700" : "bg-slate-50/50 border-slate-200"
                     }`}>
-                    {task.optionals.externalSystem === "SNOW" ? "SNOW" : "MARS"}
+                    <span className={`text-xs ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>{item.label}</span>
+                    <div className={`w-px h-3 ${isDarkMode ? "bg-slate-700" : "bg-slate-300"}`} />
+                    <span className={`text-sm font-medium ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>{item.value}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* External System */}
+            {/* External System */}
+            {task.optionals.externalSystem && (
+              <div
+                className={`flex items-center gap-2 p-2 rounded-lg border transition-all w-fit ${task.optionals.externalSystem === 'SNOW'
+                  ? isDarkMode
+                    ? "bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20"
+                    : "bg-blue-50 border-blue-100 hover:bg-blue-100/50"
+                  : isDarkMode
+                    ? "bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20"
+                    : "bg-emerald-50 border-emerald-100 hover:bg-emerald-100/50"
+                  }`}
+              >
+                {/* System Icon */}
+                <div
+                  className={`p-1.5 rounded-md shadow-sm shrink-0 ${task.optionals.externalSystem === 'SNOW'
+                    ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white"
+                    : "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white"
+                    }`}
+                >
+                  <span className="text-[10px] font-bold leading-none block px-0.5">
+                    {task.optionals.externalSystem === 'SNOW' ? 'SNOW' : 'MARS'}
                   </span>
-                  {task.optionals.externalId && (
-                    <span className={`text-sm ${isDarkMode ? "text-slate-300" : "text-slate-600"}`}>
-                      {task.optionals.externalId}
-                    </span>
+                </div>
+
+                {/* ID Display */}
+                {/* ID Display */}
+                <div className="flex items-center" dir="ltr">
+                  {task.optionals.externalSystem === 'SNOW' ? (
+                    <div className={`flex items-stretch rounded-lg overflow-hidden border ml-1 ${isDarkMode ? "border-slate-600 shadow-sm" : "border-slate-300 shadow-sm"
+                      }`}>
+                      {/* Prefix Block */}
+                      <div className={`flex items-center px-2 py-1 text-xs font-bold border-r tracking-wider ${isDarkMode ? "bg-blue-900/40 text-blue-100 border-slate-600" : "bg-blue-100 text-blue-700 border-slate-300"
+                        }`}>
+                        INC
+                      </div>
+                      {/* ID Number Link */}
+                      {(() => {
+                        const idDigits = task.optionals.externalId ? task.optionals.externalId.replace(/^INC/, '') : '';
+                        const url = `https://servicenow.com/nav_to.do?uri=incident.do?sysparm_query=number=${task.optionals.externalId}`;
+
+                        return idDigits ? (
+                          <Tooltip content="תלחץ עליי אני מת כל גיל פלג" position="top">
+                            <a
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className={`block px-2 py-1 text-sm font-mono font-bold hover:underline transition-colors ${isDarkMode ? "text-blue-300 bg-slate-800/30 hover:bg-slate-700/50" : "text-blue-700 bg-white hover:bg-blue-50"
+                                }`}
+                            >
+                              {idDigits}
+                            </a>
+                          </Tooltip>
+                        ) : (
+                          <span className="px-2 py-1 text-sm italic text-slate-400 bg-transparent">---</span>
+                        );
+                      })()}
+                    </div>
+                  ) : (
+                    /* MARS Display - Standard Badge */
+                    (() => {
+                      const url = `https://mars-system.com/item?id=${task.optionals.externalId}`;
+                      const hasId = !!task.optionals.externalId;
+
+                      return hasId ? (
+                        <Tooltip content="פתח ב-MARS" position="top">
+                          <a
+                            href={url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`text-sm font-mono font-bold hover:underline ml-1 ${isDarkMode ? "text-emerald-400" : "text-emerald-700"
+                              }`}
+                          >
+                            {task.optionals.externalId}
+                          </a>
+                        </Tooltip>
+                      ) : (
+                        <span className="text-sm italic text-slate-500">ללא מזהה</span>
+                      );
+                    })()
                   )}
                 </div>
               </div>

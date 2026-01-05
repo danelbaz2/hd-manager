@@ -63,7 +63,6 @@ export const useTaskForm = ({
   isOpen,
   initialDate,
   onSuccess,
-  onClose,
 }: UseTaskFormOptions): UseTaskFormReturn => {
   const { alerts, showSuccess, showError, showWarning, dismissAlert, clearAllAlerts } = useToast();
   const createMutation = useCreateTaskMutation();
@@ -172,6 +171,16 @@ export const useTaskForm = ({
 
     if (optionals.externalSystem && !optionals.externalId?.trim()) {
       showWarning("שדה חסר", "נא להזין מספר תקלה");
+      return;
+    }
+
+    if (optionals.externalSystem === "SNOW" && optionals.externalId && !/^INC\d{7}$/.test(optionals.externalId)) {
+      showWarning("פורמט לא תקין", "יש להזין 7 ספרות לאחר ה-INC");
+      return;
+    }
+
+    if (optionals.externalSystem === "MARS" && optionals.externalId && !/^\d+$/.test(optionals.externalId)) {
+      showWarning("פורמט לא תקין", "מזהה MARS חייב להכיל ספרות בלבד");
       return;
     }
 

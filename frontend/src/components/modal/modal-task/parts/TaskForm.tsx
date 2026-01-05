@@ -217,8 +217,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           type="button"
           onClick={() => setShowOptionals(!showOptionals)}
           className={`flex items-center gap-2 px-4 py-1.5 rounded-lg text-sm font-medium transition-all ${isDarkMode
-              ? "text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
-              : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
+            ? "text-slate-400 hover:text-slate-200 hover:bg-slate-700/50"
+            : "text-slate-500 hover:text-slate-700 hover:bg-slate-100"
             }`}
         >
           <span>שדות אופציונליים</span>
@@ -233,8 +233,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       {/* Military Hierarchy & External System Row - Smooth Animation */}
       <div
         className={`grid transition-all duration-500 ease-in-out ${showOptionals
-            ? "grid-rows-[1fr] opacity-100"
-            : "grid-rows-[0fr] opacity-0"
+          ? "grid-rows-[1fr] opacity-100"
+          : "grid-rows-[0fr] opacity-0"
           }`}
       >
         <div className="overflow-hidden">
@@ -327,7 +327,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                       const current = optionals?.externalSystem;
                       const newSys = current === "SNOW" ? undefined : "SNOW";
                       const newOpts = { ...optionals, externalSystem: newSys };
-                      if (!newSys) delete newOpts.externalId;
+                      if (newSys === "SNOW") {
+                        newOpts.externalId = "INC";
+                      } else {
+                        // Clear ID if deselected or changed to something else that doesn't need pre-fill
+                        delete newOpts.externalId;
+                      }
                       setOptionals(newOpts);
                     }}
                     className={`
@@ -348,7 +353,15 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                       const current = optionals?.externalSystem;
                       const newSys = current === "MARS" ? undefined : "MARS";
                       const newOpts = { ...optionals, externalSystem: newSys };
-                      if (!newSys) delete newOpts.externalId;
+                      // If switching to MARS, we might want to clear old ID if it was SNOW format, or just keep it blank
+                      if (newSys === "MARS") {
+                        // Check if old ID was INC... formatted, if so clear it or reset
+                        if (newOpts.externalId?.startsWith("INC")) {
+                          newOpts.externalId = "";
+                        }
+                      } else {
+                        if (!newSys) delete newOpts.externalId;
+                      }
                       setOptionals(newOpts);
                     }}
                     className={`
@@ -375,17 +388,46 @@ export const TaskForm: React.FC<TaskFormProps> = ({
                     >
                       מספר תקלה
                     </label>
-                    <input
-                      type="text"
-                      placeholder={
-                        optionals.externalSystem === "SNOW" ? "INC1234567" : "555"
-                      }
-                      value={optionals?.externalId || ""}
-                      onChange={(e) =>
-                        setOptionals({ ...optionals, externalId: e.target.value })
-                      }
-                      className={inputClass}
-                    />
+
+                    {optionals.externalSystem === "SNOW" ? (
+                      <div
+                        className={`flex items-stretch w-fit rounded-xl border-2 transition-all overflow-hidden ${isDarkMode
+                            ? "border-slate-600 bg-slate-700/50 hover:border-slate-500 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20"
+                            : "border-slate-200 bg-white hover:border-slate-300 focus-within:border-blue-500 focus-within:ring-2 focus-within:ring-blue-500/20"
+                          }`}
+                        dir="ltr"
+                      >
+                        <div className={`px-3 py-1.5 flex items-center text-sm font-bold font-mono border-r ${isDarkMode ? "bg-slate-700/50 text-slate-400 border-slate-600" : "bg-slate-100 text-slate-500 border-slate-200"
+                          }`}>
+                          INC
+                        </div>
+                        <input
+                          type="text"
+                          placeholder="5378214"
+                          value={optionals.externalId ? optionals.externalId.replace(/^INC/, "") : ""}
+                          onChange={(e) => {
+                            const raw = e.target.value.replace(/[^0-9]/g, "");
+                            setOptionals({ ...optionals, externalId: "INC" + raw });
+                          }}
+                          className={`bg-transparent border-none outline-none px-3 py-1.5 text-sm font-mono w-32 ${isDarkMode ? "text-white placeholder-slate-500" : "text-slate-800 placeholder-slate-400"
+                            }`}
+                          maxLength={7}
+                        />
+                      </div>
+                    ) : (
+                      <input
+                        type="text"
+                        placeholder="555"
+                        value={optionals?.externalId || ""}
+                        onChange={(e) => {
+                          const val = e.target.value.replace(/[^0-9]/g, "");
+                          setOptionals({ ...optionals, externalId: val });
+                        }}
+                        className={inputClass.replace("w-full", "w-36")}
+                        dir="ltr"
+                        maxLength={20}
+                      />
+                    )}
                   </div>
                 )}
             </div>

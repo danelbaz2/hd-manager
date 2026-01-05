@@ -308,7 +308,7 @@ export const getActionDescription = (
         })}
 
         {/* Render optional field changes */}
-        {hasOptionals && changes.optionals && ((): React.ReactNode => {
+        {hasOptionals && !!changes.optionals && ((): React.ReactNode => {
           const opts = (changes.optionals as Record<string, any>) || {};
           const oldOpts = (oldValues?.optionals as Record<string, any>) || {};
 

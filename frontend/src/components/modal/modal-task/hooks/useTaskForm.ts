@@ -90,6 +90,16 @@ export const useTaskForm = ({
       return;
     }
 
+    if (optionals.externalSystem === "SNOW" && optionals.externalId && !/^INC\d{7}$/.test(optionals.externalId)) {
+      onWarning("פורמט לא תקין", "INC יש להזין 7 ספרות לאחר");
+      return;
+    }
+
+    if (optionals.externalSystem === "MARS" && optionals.externalId && !/^\d+$/.test(optionals.externalId)) {
+      onWarning("פורמט לא תקין", "MARS חייב להכיל ספרות בלבד");
+      return;
+    }
+
     if (!hasFormChanges(task, title, description, priority, startDate, deadline, selectedUserIds, selectedPrimaryTagIds, selectedSecondaryTagIds, optionals)) {
       onWarning("אין שינויים", "לא בוצעו שינויים במשימה");
       setIsEditMode(false);
