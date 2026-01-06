@@ -19,10 +19,13 @@ const chatKeys = {
   }
 };
 
+import { useAuth } from "../../contexts/AuthContext";
+
 /**
  * Hook to fetch all chat messages
  */
 export const useChatMessagesQuery = () => {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: chatKeys.messages,
     queryFn: async () => {
@@ -36,6 +39,7 @@ export const useChatMessagesQuery = () => {
     staleTime: 60 * 1000,
     // Ensure we fetch if data is stale/invalidated when component mounts
     refetchOnMount: true,
+    enabled: !!isAuthenticated,
   });
 };
 

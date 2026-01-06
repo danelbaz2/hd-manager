@@ -13,10 +13,13 @@ import {
 } from "../contactsApi";
 import { queryKeys } from "../queryClient";
 
+import { useAuth } from "../../contexts/AuthContext";
+
 /**
  * Hook to fetch all contacts
  */
 export const useContactsQuery = () => {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: queryKeys.contacts.all,
     queryFn: async () => {
@@ -28,6 +31,7 @@ export const useContactsQuery = () => {
     },
     // Contacts change infrequently
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!isAuthenticated,
   });
 };
 

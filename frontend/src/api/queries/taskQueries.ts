@@ -17,10 +17,13 @@ import {
 } from "../tasksApi";
 import { queryKeys } from "../queryClient";
 
+import { useAuth } from "../../contexts/AuthContext";
+
 /**
  * Hook to fetch all tasks
  */
 export const useTasksQuery = (params?: TaskQueryParams) => {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: params ? [...queryKeys.tasks.all, params] : queryKeys.tasks.all,
     queryFn: async () => {
@@ -30,6 +33,7 @@ export const useTasksQuery = (params?: TaskQueryParams) => {
       }
       throw new Error(response.error || "Failed to fetch tasks");
     },
+    enabled: !!isAuthenticated,
   });
 };
 
@@ -37,6 +41,7 @@ export const useTasksQuery = (params?: TaskQueryParams) => {
  * Hook to fetch tasks by date range (uses params)
  */
 export const useTasksByDateRangeQuery = (startDate: number, endDate: number) => {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: queryKeys.tasks.byDateRange(startDate, endDate),
     queryFn: async () => {
@@ -46,7 +51,7 @@ export const useTasksByDateRangeQuery = (startDate: number, endDate: number) => 
       }
       throw new Error(response.error || "Failed to fetch tasks");
     },
-    enabled: !!startDate && !!endDate,
+    enabled: !!isAuthenticated && !!startDate && !!endDate,
   });
 };
 
@@ -54,6 +59,7 @@ export const useTasksByDateRangeQuery = (startDate: number, endDate: number) => 
  * Hook to fetch a single task by ID
  */
 export const useTaskQuery = (taskId: string) => {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: queryKeys.tasks.single(taskId),
     queryFn: async () => {
@@ -63,7 +69,7 @@ export const useTaskQuery = (taskId: string) => {
       }
       throw new Error(response.error || "Failed to fetch task");
     },
-    enabled: !!taskId,
+    enabled: !!isAuthenticated && !!taskId,
   });
 };
 
@@ -71,6 +77,7 @@ export const useTaskQuery = (taskId: string) => {
  * Hook to fetch all task history
  */
 export const useAllTasksHistoryQuery = () => {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: ["tasks", "history", "all"],
     queryFn: async () => {
@@ -80,6 +87,7 @@ export const useAllTasksHistoryQuery = () => {
       }
       throw new Error(response.error || "Failed to fetch task history");
     },
+    enabled: !!isAuthenticated,
   });
 };
 
@@ -87,6 +95,7 @@ export const useAllTasksHistoryQuery = () => {
  * Hook to fetch task history for a specific task
  */
 export const useTaskHistoryQuery = (taskId: string) => {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: queryKeys.tasks.history(taskId),
     queryFn: async () => {
@@ -96,7 +105,7 @@ export const useTaskHistoryQuery = (taskId: string) => {
       }
       throw new Error(response.error || "Failed to fetch task history");
     },
-    enabled: !!taskId,
+    enabled: !!isAuthenticated && !!taskId,
   });
 };
 

@@ -36,7 +36,7 @@ interface UsersContextState {
 const defaultValue: UsersContextState = {
   users: [],
   isLoadingUsers: false,
-  refreshUsers: async () => {},
+  refreshUsers: async () => { },
 };
 
 const UsersContext = createContext<UsersContextState>(defaultValue);

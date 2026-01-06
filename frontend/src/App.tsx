@@ -1,5 +1,5 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Layout from "./components/layout/Layout";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import Layout from "./components/Layout/Layout";
 import { ProtectedRoute } from "./auth";
 import HomePage from "./pages/home-page/HomePage";
 import TaskPage from "./pages/task-page/TaskPage";
@@ -27,6 +27,7 @@ function App() {
           <Route path="/tasks" element={<TaskPage />} />
           <Route path="/archive" element={<ArchivePage />} />
           <Route path="/settings" element={<SettingPage />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </Router>

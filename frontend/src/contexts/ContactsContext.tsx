@@ -32,7 +32,7 @@ interface ContactsContextState {
 const defaultValue: ContactsContextState = {
   contacts: [],
   isLoadingContacts: false,
-  refreshContacts: async () => {},
+  refreshContacts: async () => { },
 };
 
 const ContactsContext = createContext<ContactsContextState>(defaultValue);

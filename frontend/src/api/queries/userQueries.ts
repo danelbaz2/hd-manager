@@ -13,10 +13,13 @@ import {
 import { type UserFormData } from "../../schemas/userTypes";
 import { queryKeys } from "../queryClient";
 
+import { useAuth } from "../../contexts/AuthContext";
+
 /**
  * Hook to fetch all users
  */
 export const useUsersQuery = () => {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: queryKeys.users.all,
     queryFn: async () => {
@@ -28,6 +31,7 @@ export const useUsersQuery = () => {
     },
     // Users change infrequently, cache for longer
     staleTime: 5 * 60 * 1000, // 5 minutes
+    enabled: !!isAuthenticated,
   });
 };
 

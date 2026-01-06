@@ -21,12 +21,15 @@ import {
 } from "../secondaryTagsApi";
 import { queryKeys } from "../queryClient";
 
+import { useAuth } from "../../contexts/AuthContext";
+
 // ============== Primary Tags ==============
 
 /**
  * Hook to fetch all primary tags
  */
 export const usePrimaryTagsQuery = () => {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: queryKeys.primaryTags.all,
     queryFn: async () => {
@@ -38,6 +41,7 @@ export const usePrimaryTagsQuery = () => {
     },
     // Tags rarely change, cache for longer
     staleTime: 10 * 60 * 1000, // 10 minutes
+    enabled: !!isAuthenticated,
   });
 };
 
@@ -107,6 +111,7 @@ export const useDeletePrimaryTagMutation = () => {
  * Hook to fetch all secondary tags
  */
 export const useSecondaryTagsQuery = () => {
+  const { isAuthenticated } = useAuth();
   return useQuery({
     queryKey: queryKeys.secondaryTags.all,
     queryFn: async () => {
@@ -118,6 +123,7 @@ export const useSecondaryTagsQuery = () => {
     },
     // Tags rarely change, cache for longer
     staleTime: 10 * 60 * 1000, // 10 minutes
+    enabled: !!isAuthenticated,
   });
 };
 

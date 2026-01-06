@@ -39,7 +39,7 @@ const defaultValue: TagsContextState = {
   primaryTags: [],
   secondaryTags: [],
   isLoadingTags: false,
-  refreshTags: async () => {},
+  refreshTags: async () => { },
 };
 
 const TagsContext = createContext<TagsContextState>(defaultValue);
