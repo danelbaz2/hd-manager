@@ -133,8 +133,28 @@ export const useActivityFeedPersistence = ({
 
     // Handle tab switching with highlight snapshot
     const handleTabChange = useCallback((tab: TabType) => {
+        // First, mark the CURRENT tab as fully viewed before switching away
+        // This prevents the dot from appearing on the tab we're leaving
+        if (activeTab === "tasks" && tab !== "tasks") {
+            const now = Date.now();
+            const freshGlobalTime = parseInt(localStorage.getItem(LATEST_TASK_UPDATE_KEY) || "0", 10);
+            const effectiveTime = Math.max(latestTaskTime, freshGlobalTime);
+            const newTime = Math.max(effectiveTime, now);
+            setLastViewedTasks(newTime);
+            localStorage.setItem("activity_feed_last_viewed_tasks", newTime.toString());
+        } else if (activeTab === "team" && tab !== "team") {
+            const now = Date.now();
+            const freshGlobalTime = parseInt(localStorage.getItem(LATEST_TEAM_MESSAGE_KEY) || "0", 10);
+            const effectiveTime = Math.max(latestTeamTime, freshGlobalTime);
+            const newTime = Math.max(effectiveTime, now);
+            setLastViewedTeam(newTime);
+            localStorage.setItem("activity_feed_last_viewed_team", newTime.toString());
+        }
+
+        // Now switch to the new tab
         setActiveTab(tab);
 
+        // Handle the NEW tab: set highlight snapshot and delayed viewed update
         if (tab === "tasks") {
             // Snapshot the current lastViewedTasks for highlighting items newer than this
             setHighlightTasksTime(lastViewedTasks);
@@ -164,7 +184,7 @@ export const useActivityFeedPersistence = ({
                 localStorage.setItem("activity_feed_last_viewed_team", newTime.toString());
             }, VIEW_DELAY_MS);
         }
-    }, [lastViewedTasks, lastViewedTeam, latestTaskTime, latestTeamTime]);
+    }, [activeTab, lastViewedTasks, lastViewedTeam, latestTaskTime, latestTeamTime]);
 
     return {
         activeTab,
