@@ -7,6 +7,7 @@ import React, {
   useRef,
 } from "react";
 import { getCurrentUser, type AuthUser } from "../api/authApi";
+import { clearUserActivityFeedStorage } from "../utils/activityFeedStorage";
 
 const AUTH_TOKEN_KEY = "auth_token";
 const MAX_RETRIES = 3;
@@ -179,10 +180,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   }, []);
 
   const logout = useCallback(() => {
+    // Get user ID before clearing state for localStorage cleanup
+    const userId = user?.id;
+
+    // Clear auth state
     setUser(null);
     setToken(null);
     sessionStorage.removeItem(AUTH_TOKEN_KEY);
-  }, []);
+
+    // Clear user-specific localStorage data (but keep tour progress)
+    if (userId) {
+      // Clear activity feed timestamps
+      clearUserActivityFeedStorage(userId);
+    }
+  }, [user?.id]);
 
   const getToken = useCallback(() => {
     return token || sessionStorage.getItem(AUTH_TOKEN_KEY);

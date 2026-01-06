@@ -1,7 +1,6 @@
 import React, {
   useEffect,
   useCallback,
-  useState,
   useRef,
   useMemo,
 } from "react";
@@ -23,6 +22,7 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   updatesOverride,
   lastSeen = 0,
   onLatestUpdate,
+  currentUserId,
 }) => {
   // React Query - History (cached)
   const { data: taskHistory = [], isLoading: isLoadingHistory } = useAllTasksHistoryQuery();
@@ -51,67 +51,16 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   }, [rawUpdates]);
   const isLoading = updatesOverride ? false : isLoadingHistory;
 
-  // Track new entries for animation
-  const [newIds, setNewIds] = useState<Set<string>>(new Set());
-  const knownIdsRef = useRef<Set<string>>(new Set());
-  const isInitialMount = useRef(true);
-
   // Ref for scroll to top button
   const scrollerRef = useRef<HTMLElement>(null);
 
-  // Check for new updates (unseen or just arrived)
+  // Report latest timestamp for parent notifications
   useEffect(() => {
-    // Report latest timestamp
     if (updates.length > 0 && onLatestUpdate) {
       const maxTs = Math.max(...updates.map((u) => u.timestamp));
       onLatestUpdate(maxTs);
     }
-
-    const newEntryIds: string[] = [];
-
-    // On initial mount, we check against lastSeen
-    // updates from the past that are unread should be highlighted
-    if (isInitialMount.current) {
-      if (updates.length > 0) {
-        updates.forEach((u) => {
-          knownIdsRef.current.add(u.id);
-          // Highlight if newer than lastSeen
-          if (u.timestamp > lastSeen) {
-            newEntryIds.push(u.id);
-          }
-        });
-        isInitialMount.current = false;
-      }
-    } else {
-      // On subsequent updates, check for new IDs (incoming socket updates)
-      updates.forEach((entry) => {
-        if (!knownIdsRef.current.has(entry.id)) {
-          newEntryIds.push(entry.id);
-          knownIdsRef.current.add(entry.id);
-        }
-      });
-    }
-
-    if (newEntryIds.length > 0) {
-      setNewIds((prev) => {
-        const next = new Set(prev);
-        newEntryIds.forEach((id) => next.add(id));
-        return next;
-      });
-
-      // Remove "new" status after animation (5 seconds)
-      setTimeout(() => {
-        setNewIds((prev) => {
-          const next = new Set(prev);
-          newEntryIds.forEach((id) => next.delete(id));
-          return next;
-        });
-      }, 5000);
-    }
-  }, [updates, lastSeen, onLatestUpdate]);
-
-  // Check if an entry is new
-  const isNew = useCallback((id: string) => newIds.has(id), [newIds]);
+  }, [updates, onLatestUpdate]);
 
   // Render single item for virtuoso
   const renderItem = useCallback(
@@ -124,10 +73,11 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
         primaryTags={primaryTags}
         secondaryTags={secondaryTags}
         onClick={() => onUpdateClick(entry.taskId)}
-        isNew={isNew(entry.id)}
+        lastSeen={lastSeen}
+        currentUserId={currentUserId}
       />
     ),
-    [taskTitleMap, isDarkMode, primaryTags, secondaryTags, onUpdateClick, isNew]
+    [taskTitleMap, isDarkMode, primaryTags, secondaryTags, onUpdateClick, lastSeen, currentUserId]
   );
 
   // Loading state

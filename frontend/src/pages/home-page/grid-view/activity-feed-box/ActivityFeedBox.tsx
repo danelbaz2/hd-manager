@@ -206,6 +206,7 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
             onDataRefresh={invalidateTaskQueries}
             updatesOverride={demoUpdates}
             lastSeen={highlightTasksTime}
+            currentUserId={user?.id}
           />
         ) : (
           <UpdateTeam

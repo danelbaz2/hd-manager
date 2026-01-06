@@ -16,6 +16,7 @@ export interface UpdatesTaskProps {
   updatesOverride?: TaskHistoryEntry[];
   lastSeen?: number;
   onLatestUpdate?: (timestamp: number) => void;
+  currentUserId?: string;
 }
 
 // Re-export types from other modules
