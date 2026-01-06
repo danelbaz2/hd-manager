@@ -30,16 +30,15 @@ const DatePickerField: React.FC<Props> = ({
   const fmt = (ts: number | null) =>
     ts
       ? new Date(ts).toLocaleDateString("he-IL", {
-          day: "2-digit",
-          month: "2-digit",
-          year: "numeric",
-        })
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+      })
       : "";
-  const box = `relative flex items-center h-10 rounded-lg border transition-all ${
-    isDarkMode
+  const box = `relative flex items-center h-10 rounded-lg border transition-all ${isDarkMode
       ? "bg-slate-800/60 border-slate-600/50 hover:border-slate-500"
       : "bg-slate-50 border-slate-200 hover:border-slate-300"
-  }`;
+    }`;
   const ico =
     "absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 pointer-events-none text-slate-400";
   const ring = show
@@ -57,13 +56,12 @@ const DatePickerField: React.FC<Props> = ({
       >
         <CalendarIcon className={ico} />
         <span
-          className={`w-full text-right text-sm pr-10 pl-3 ${
-            value
+          className={`w-full text-right text-sm pr-10 pl-3 ${value
               ? isDarkMode
                 ? "text-white"
                 : "text-slate-700"
               : "text-slate-400"
-          }`}
+            }`}
         >
           {value ? fmt(value) : placeholder}
         </span>
