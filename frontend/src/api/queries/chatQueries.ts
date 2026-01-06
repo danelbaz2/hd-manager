@@ -14,6 +14,9 @@ import {
 const chatKeys = {
   all: ["chat"] as const,
   messages: ["chat", "messages"] as const,
+  mutations: {
+    create: ["chat", "create"] as const,
+  }
 };
 
 /**
@@ -29,8 +32,10 @@ export const useChatMessagesQuery = () => {
       }
       throw new Error(response.error || "Failed to fetch chat messages");
     },
-    // Chat messages should refresh more frequently
-    staleTime: 30 * 1000, // 30 seconds
+    // Data is fresh for 1 minute (server is source of truth, invalidate on socket event)
+    staleTime: 60 * 1000,
+    // Ensure we fetch if data is stale/invalidated when component mounts
+    refetchOnMount: true,
   });
 };
 
@@ -41,6 +46,7 @@ export const useCreateChatMessageMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
+    mutationKey: chatKeys.mutations.create,
     mutationFn: async (messageData: ChatMessageFormData) => {
       const response = await createChatMessage(messageData);
       if (response.success && response.data) {

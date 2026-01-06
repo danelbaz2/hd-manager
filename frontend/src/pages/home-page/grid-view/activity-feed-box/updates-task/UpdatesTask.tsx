@@ -45,7 +45,10 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   );
 
   // Use override if provided (for demo/tour), otherwise use context data
-  const updates = updatesOverride || contextUpdates;
+  const rawUpdates = updatesOverride || contextUpdates;
+  const updates = useMemo(() => {
+    return [...rawUpdates].sort((a, b) => b.timestamp - a.timestamp);
+  }, [rawUpdates]);
   const isLoading = updatesOverride ? false : isLoadingHistory;
 
   // Track new entries for animation

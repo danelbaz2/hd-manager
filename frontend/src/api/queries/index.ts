@@ -69,6 +69,7 @@ export {
   invalidateUserQueries,
   invalidateTagQueries,
   invalidateContactQueries,
+  invalidateChatQueries,
   invalidateAllQueries,
   handleSocketEvent,
   updateReactQueryCache,

@@ -21,6 +21,7 @@ export { useTags } from "./TagsContext";
 export { useContacts } from "./ContactsContext";
 export { useTasks } from "./TasksContext";
 export { useHistory } from "./HistoryContext";
+export { ChatProvider } from "./ChatContext";
 
 // Socket (re-export from socket module for convenience)
 export { SocketProvider, useSocket } from "../socket";

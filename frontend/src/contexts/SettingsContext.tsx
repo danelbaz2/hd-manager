@@ -17,6 +17,7 @@ import { TagsProvider, useTags } from "./TagsContext";
 import { ContactsProvider, useContacts } from "./ContactsContext";
 import { TasksProvider, useTasks } from "./TasksContext";
 import { HistoryProvider, useHistory } from "./HistoryContext";
+import { ChatProvider } from "./ChatContext";
 
 // Re-export individual hooks for direct usage
 export { useUsers } from "./UsersContext";
@@ -41,7 +42,9 @@ export const SettingsProvider: React.FC<SettingsProviderProps> = ({
       <TagsProvider>
         <ContactsProvider>
           <TasksProvider>
-            <HistoryProvider>{children}</HistoryProvider>
+            <HistoryProvider>
+              <ChatProvider>{children}</ChatProvider>
+            </HistoryProvider>
           </TasksProvider>
         </ContactsProvider>
       </TagsProvider>

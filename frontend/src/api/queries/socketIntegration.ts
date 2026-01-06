@@ -3,6 +3,7 @@
  * Provides both invalidation and direct cache update functions
  */
 import { queryClient, queryKeys } from "../queryClient";
+import { chatKeys } from "./chatQueries";
 import type { Task, TaskHistoryEntry } from "../tasksApi";
 
 /**
@@ -90,6 +91,14 @@ export const invalidateTagQueries = () => {
  */
 export const invalidateContactQueries = () => {
   queryClient.invalidateQueries({ queryKey: queryKeys.contacts.all });
+};
+
+/**
+ * Invalidate chat queries
+ * Call this when receiving chat_update socket event
+ */
+export const invalidateChatQueries = () => {
+  queryClient.invalidateQueries({ queryKey: chatKeys.messages });
 };
 
 /**
