@@ -1,6 +1,8 @@
 /**
  * TasksContext - Manages tasks state
  * Split from SettingsContext for better performance
+ * 
+ * Also tracks the latest task update timestamp for unread notification purposes
  */
 import React, {
   createContext,
@@ -20,6 +22,18 @@ import {
   shouldDoFullSync,
   mergeItems,
 } from "../utils/deltaSync";
+
+// Storage key for latest task update timestamp
+const LATEST_TASK_UPDATE_KEY = "activity_feed_latest_task_update";
+
+/**
+ * Update the latest task update timestamp in localStorage
+ * Called when new task updates arrive via WebSocket
+ */
+const updateLatestTaskUpdateTime = () => {
+  const now = Date.now();
+  localStorage.setItem(LATEST_TASK_UPDATE_KEY, now.toString());
+};
 
 interface TasksContextState {
   tasks: Task[];
@@ -134,6 +148,10 @@ export const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
         updateReactQueryCache("UPDATE", fullTask as Task);
       }
 
+      // Update the latest task update timestamp BEFORE updating history cache
+      // This ensures the unread indicator will show up when returning to home page
+      updateLatestTaskUpdateTime();
+
       // Always update history cache for real-time activity feed updates
       updateHistoryCache(update);
     });
@@ -172,5 +190,8 @@ export const useTasks = (): TasksContextState => {
   }
   return context;
 };
+
+// Export the storage key for use in useActivityFeedPersistence
+export { LATEST_TASK_UPDATE_KEY };
 
 export default TasksContext;
