@@ -12,6 +12,7 @@ import {
   AuthProvider,
   SocketProvider,
 } from "./contexts";
+import { RealtimeSyncProvider } from "./socket";
 import { TaskModalProvider, TaskModal } from "./components/modal/modal-task";
 import { TagsModalProvider, TagsModal } from "./components/modal/modal-tags";
 import {
@@ -27,24 +28,27 @@ createRoot(document.getElementById("root")!).render(
       <AuthProvider>
         <ThemeProvider>
           <SocketProvider>
-            <SettingsProvider>
-              <ViewStateProvider>
-                <TagsModalProvider>
-                  <TaskModalProvider>
-                    <CloseTaskModalProvider>
-                      <TourProvider>
-                        <App />
-                        <TaskModal />
-                        <TagsModal />
-                        <CloseTaskModal />
-                        {/* Guided Tour Overlay */}
-                        <TourOverlay />
-                      </TourProvider>
-                    </CloseTaskModalProvider>
-                  </TaskModalProvider>
-                </TagsModalProvider>
-              </ViewStateProvider>
-            </SettingsProvider>
+            {/* RealtimeSyncProvider bridges WebSocket events to React Query cache */}
+            <RealtimeSyncProvider>
+              <SettingsProvider>
+                <ViewStateProvider>
+                  <TagsModalProvider>
+                    <TaskModalProvider>
+                      <CloseTaskModalProvider>
+                        <TourProvider>
+                          <App />
+                          <TaskModal />
+                          <TagsModal />
+                          <CloseTaskModal />
+                          {/* Guided Tour Overlay */}
+                          <TourOverlay />
+                        </TourProvider>
+                      </CloseTaskModalProvider>
+                    </TaskModalProvider>
+                  </TagsModalProvider>
+                </ViewStateProvider>
+              </SettingsProvider>
+            </RealtimeSyncProvider>
           </SocketProvider>
         </ThemeProvider>
       </AuthProvider>

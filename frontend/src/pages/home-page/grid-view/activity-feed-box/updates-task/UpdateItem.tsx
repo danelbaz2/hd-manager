@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useMemo } from "react";
 import type {
   TaskHistoryEntry,
   PrimaryTagData,
@@ -8,7 +8,8 @@ import { getIconConfig } from "../../../../../components/modal/modal-task/histor
 import { FIELD_LABELS, formatTime } from "./updateFormatters";
 import { UserAvatar } from "./UserAvatar";
 import { UpdateContent } from "./UpdateContent";
-import { useUsers } from "../../../../../contexts";
+import { useUsersQuery } from "../../../../../api/queries";
+import { mapUsersToUserData } from "../../../../../api/typeMappers";
 
 interface UpdateItemProps {
   entry: TaskHistoryEntry;
@@ -29,8 +30,9 @@ const UpdateItemComponent: React.FC<UpdateItemProps> = ({
   onClick,
   isNew = false,
 }) => {
-  // Use useUsers hook directly to always get latest user data
-  const { users } = useUsers();
+  // Use React Query hook directly to always get latest user data
+  const { data: usersData = [] } = useUsersQuery();
+  const users = useMemo(() => mapUsersToUserData(usersData), [usersData]);
 
   const config = getIconConfig(entry);
   const title =
@@ -46,9 +48,9 @@ const UpdateItemComponent: React.FC<UpdateItemProps> = ({
   );
   const userColor = user?.color || "#94a3b8";
   const changedFields = entry.changes
-    ? Object.keys(entry.changes).filter((k) =>
-      Object.keys(FIELD_LABELS).includes(k) || k === 'optionals'
-    )
+    ? Object.keys(entry.changes).filter(
+        (k) => Object.keys(FIELD_LABELS).includes(k) || k === "optionals"
+      )
     : [];
 
   const [showBadge, setShowBadge] = React.useState(isNew);
@@ -64,26 +66,27 @@ const UpdateItemComponent: React.FC<UpdateItemProps> = ({
 
   return (
     <div
-      className={`relative flex items-start gap-3 cursor-pointer transition-all duration-[2000ms] ease-out py-3 px-2 overflow-hidden ${isNew
-        ? isDarkMode
-          ? "bg-blue-900/20 hover:bg-blue-900/30 animate-slideInHighlight"
-          : "bg-blue-50/80 hover:bg-blue-100/80 animate-slideInHighlight"
-        : isDarkMode
+      className={`relative flex items-start gap-3 cursor-pointer transition-all duration-[2000ms] ease-out py-3 px-2 overflow-hidden ${
+        isNew
+          ? isDarkMode
+            ? "bg-blue-900/20 hover:bg-blue-900/30 animate-slideInHighlight"
+            : "bg-blue-50/80 hover:bg-blue-100/80 animate-slideInHighlight"
+          : isDarkMode
           ? "hover:bg-slate-700/30"
           : "hover:bg-slate-50"
-        }`}
+      }`}
       style={
         isNew
           ? {
-            borderRight: `4px solid ${isDarkMode ? "#60a5fa" : "#3b82f6"}`,
-            boxShadow: isDarkMode
-              ? "0 0 15px rgba(96, 165, 250, 0.15)"
-              : "0 0 15px rgba(59, 130, 246, 0.1)",
-          }
+              borderRight: `4px solid ${isDarkMode ? "#60a5fa" : "#3b82f6"}`,
+              boxShadow: isDarkMode
+                ? "0 0 15px rgba(96, 165, 250, 0.15)"
+                : "0 0 15px rgba(59, 130, 246, 0.1)",
+            }
           : {
-            borderRight: "4px solid transparent",
-            boxShadow: "none",
-          }
+              borderRight: "4px solid transparent",
+              boxShadow: "none",
+            }
       }
       dir="rtl"
       onClick={onClick}
@@ -101,19 +104,22 @@ const UpdateItemComponent: React.FC<UpdateItemProps> = ({
         <div className="flex items-center flex-wrap gap-2 mb-0.5">
           {showBadge && (
             <span
-              className={`text-[10px] font-bold rounded overflow-hidden whitespace-nowrap transition-all duration-[2000ms] ease-out ${isNew
-                ? "opacity-100 animate-pulseFadeOut max-w-[50px] px-1.5 py-0.5"
-                : "opacity-0 max-w-0 px-0 py-0 border-0"
-                } ${isDarkMode ? "bg-blue-500 text-white" : "bg-blue-600 text-white"
-                }`}
+              className={`text-[10px] font-bold rounded overflow-hidden whitespace-nowrap transition-all duration-[2000ms] ease-out ${
+                isNew
+                  ? "opacity-100 animate-pulseFadeOut max-w-[50px] px-1.5 py-0.5"
+                  : "opacity-0 max-w-0 px-0 py-0 border-0"
+              } ${
+                isDarkMode ? "bg-blue-500 text-white" : "bg-blue-600 text-white"
+              }`}
               style={isNew ? {} : { transform: "scale(0.8)" }}
             >
               חדש
             </span>
           )}
           <span
-            className={`font-semibold text-sm ${isDarkMode ? "text-white" : "text-slate-800"
-              }`}
+            className={`font-semibold text-sm ${
+              isDarkMode ? "text-white" : "text-slate-800"
+            }`}
           >
             {entry.updatedBy}
           </span>
@@ -137,8 +143,9 @@ const UpdateItemComponent: React.FC<UpdateItemProps> = ({
       </div>
 
       <div
-        className={`shrink-0 text-xs font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
-          }`}
+        className={`shrink-0 text-xs font-medium ${
+          isDarkMode ? "text-slate-400" : "text-slate-500"
+        }`}
       >
         {formatTime(entry.timestamp)}
       </div>
