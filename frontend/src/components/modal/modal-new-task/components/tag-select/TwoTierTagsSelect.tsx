@@ -39,6 +39,17 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
     const buttonRef = useRef<HTMLButtonElement>(null);
     const [position, setPosition] = useState({ top: 0, right: 0, width: 0 });
 
+    // Sync local state when prop changes (handles external resets like clearing form)
+    useEffect(() => {
+        setSelectedPrimaryIds(prev => {
+            const isDifferent =
+                prev.length !== selectedPrimaryTagIds.length ||
+                !prev.every(id => selectedPrimaryTagIds.includes(id));
+
+            return isDifferent ? selectedPrimaryTagIds : prev;
+        });
+    }, [selectedPrimaryTagIds]);
+
     // Unique ID for this dropdown instance to prevent collisions
     const dropdownId = React.useId();
     const dropdownElementId = `tags-dropdown-${dropdownId}`;
