@@ -8,5 +8,5 @@ export { useSocketConnection } from './hooks/useSocketConnection';
 export { useRealtimeSync, useTaskUpdates, useUserUpdates } from './hooks/useRealtimeSync';
 export { useChatSync, useChatUpdates } from './hooks/useChatSync';
 export { SocketProvider, useSocket } from './SocketProvider';
+export { RealtimeSyncProvider } from './RealtimeSyncProvider';
 export * from './types';
-

@@ -63,29 +63,34 @@ class TaskGenerator:
         self.secondary_tag_ids = secondary_tag_ids
         self.contact_ids = contact_ids or []
     
-    def generate_tasks(self, count=20, date_range_days=7):
+    def generate_tasks(self, count=20, date_range_days=7, date_range_before=0):
         """
         Generate random tasks within a date range.
         
         Args:
             count: Number of tasks to generate
-            date_range_days: Days from today for task dates (0 = today)
+            date_range_days: Days after today for task dates (0 = today only)
+            date_range_before: Days before today for task dates (0 = no past dates)
         
         Returns:
             List of task dicts ready for insertion
         """
         tasks = []
         
+        # Total range includes both before and after
+        total_range = date_range_before + date_range_days + 1  # +1 for today
+        
         for i in range(count):
-            task = self._create_task(i, date_range_days)
+            task = self._create_task(i, date_range_days, date_range_before, total_range)
             tasks.append(task)
         
         return tasks
     
-    def _create_task(self, index, date_range_days):
+    def _create_task(self, index, date_range_days, date_range_before, total_range):
         """Create a single task with random properties."""
-        # Spread tasks across the date range
-        day_offset = index % date_range_days
+        # Spread tasks across the full date range (before and after today)
+        # Range is from -date_range_before to +date_range_days
+        day_offset = (index % total_range) - date_range_before
         task_date = get_relative_date(day_offset)
         deadline = get_relative_date(day_offset + random.randint(1, 3))
         

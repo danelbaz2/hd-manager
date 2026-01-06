@@ -5,6 +5,7 @@ Usage:
     python seed.py --init     # Initialize with users, tags, contacts (fresh start)
     python seed.py            # Seed tasks using existing users (default: 20 tasks)
     python seed.py --bulk     # Seed many tasks for testing (default: 100)
+    python seed.py --massive  # Seed 20,000 tasks across 2 months before/after
     python seed.py --clean    # Clear tasks/tags/contacts, keep users
     python seed.py --help     # Show help
 """
@@ -198,7 +199,7 @@ def seed_contacts(primary_tag_ids):
     return contact_ids
 
 
-def seed_tasks(users_data, secondary_tag_ids, contact_ids, count=20, date_range_days=7):
+def seed_tasks(users_data, secondary_tag_ids, contact_ids, count=20, date_range_days=7, date_range_before=0):
     """
     Seed tasks with coherent history.
     
@@ -207,13 +208,16 @@ def seed_tasks(users_data, secondary_tag_ids, contact_ids, count=20, date_range_
         secondary_tag_ids: List of secondary tag IDs
         contact_ids: List of contact IDs
         count: Number of tasks to generate
-        date_range_days: Days from today for task date spread
+        date_range_days: Days after today for task date spread
+        date_range_before: Days before today for task date spread
     """
     print(f"📋 Seeding {count} Tasks...")
+    if date_range_before > 0:
+        print(f"   📅 Date range: {date_range_before} days before → {date_range_days} days after today")
     
     # Generate tasks
     generator = TaskGenerator(users_data, secondary_tag_ids, contact_ids)
-    tasks = generator.generate_tasks(count=count, date_range_days=date_range_days)
+    tasks = generator.generate_tasks(count=count, date_range_days=date_range_days, date_range_before=date_range_before)
     
     # Insert tasks and create initial history
     for task in tasks:
@@ -339,6 +343,84 @@ def seed_bulk(task_count=100):
     seed_default(task_count=task_count)
 
 
+def seed_massive(task_count=20000, months_before=2, months_after=2):
+    """
+    Seed massive amount of tasks across a wide date range.
+    
+    Args:
+        task_count: Number of tasks to generate (default: 20,000)
+        months_before: Months before today to include (default: 2)
+        months_after: Months after today to include (default: 2)
+    """
+    # Calculate days (approximate: 30 days per month)
+    date_range_before = months_before * 30  # ~60 days before
+    date_range_days = months_after * 30     # ~60 days after
+    
+    with app.app_context():
+        # Check for existing users
+        users_data = get_existing_users()
+        
+        if not users_data:
+            print("\n❌ ERROR: No users found in database!")
+            print("   Run 'python seed.py --init' first to create users.")
+            print()
+            sys.exit(1)
+        
+        clear_non_users()
+        
+        print("\n" + "="*50)
+        print(f"🚀 MASSIVE MODE: Seeding {task_count:,} tasks")
+        print(f"   Date range: {date_range_before} days before → {date_range_days} days after")
+        print("="*50 + "\n")
+        
+        print(f"📍 Using {len(users_data)} existing users from database")
+        
+        # Create tags and contacts
+        primary_tag_ids = seed_primary_tags()
+        secondary_tag_ids = seed_secondary_tags(primary_tag_ids)
+        contact_ids = seed_contacts(primary_tag_ids)
+        
+        # Create tasks with history (but skip history generation for massive mode)
+        user_ids = [u['_id'] for u in users_data]
+        
+        print(f"📋 Seeding {task_count:,} Tasks (this may take a while)...")
+        
+        # Generate tasks in batches for better performance
+        generator = TaskGenerator(users_data, secondary_tag_ids, contact_ids)
+        tasks = generator.generate_tasks(
+            count=task_count, 
+            date_range_days=date_range_days, 
+            date_range_before=date_range_before
+        )
+        
+        # Batch insert for better performance
+        batch_size = 1000
+        for i in range(0, len(tasks), batch_size):
+            batch = tasks[i:i + batch_size]
+            mongo.db.ents.insert_many(batch)
+            print(f"   ✓ Inserted {min(i + batch_size, len(tasks)):,}/{task_count:,} tasks")
+        
+        print(f"   ✓ {task_count:,} tasks created")
+        
+        # Skip history for massive mode (too many records)
+        print("   ℹ️  Skipping history generation for performance")
+        
+        # Create chat messages
+        chat_data = seed_chat(user_ids)
+        
+        # Summary
+        print("\n" + "="*50)
+        print("✅ Massive seeding completed successfully!")
+        print("="*50)
+        print(f"   • {len(users_data)} users (existing)")
+        print(f"   • {len(primary_tag_ids)} primary tags")
+        print(f"   • {len(secondary_tag_ids)} secondary tags")
+        print(f"   • {len(contact_ids)} contacts")
+        print(f"   • {task_count:,} tasks (no history for performance)")
+        print(f"   • {len(chat_data)} chat messages")
+        print()
+
+
 def seed_clean():
     """Clear all non-user data (keep users)."""
     with app.app_context():
@@ -373,6 +455,9 @@ Options:
   --bulk     Seed 100 tasks for performance testing.
              Same as default but with more tasks.
 
+  --massive  Seed 20,000 tasks across 4 months (2 before, 2 after).
+             Optimized for large data sets, skips history generation.
+
   --clean    Clear all except users.
              Removes tasks, tags, contacts, and history.
 
@@ -382,12 +467,14 @@ Examples:
   python seed.py --init    # Fresh start: create users, tags, contacts
   python seed.py           # Add 20 tasks (requires --init first)
   python seed.py --bulk    # Add 100 tasks for testing
+  python seed.py --massive # Add 20,000 tasks for stress testing
   python seed.py --clean   # Clear tasks, keep users
 
 Notes:
   - Running without --init on a fresh database will fail.
   - Users are ONLY created with --init flag.
   - Task history is coherent: CREATE first, then updates by responsible users.
+  - Massive mode skips history for performance reasons.
 """)
 
 
@@ -404,5 +491,7 @@ if __name__ == '__main__':
         seed_clean()
     elif '--bulk' in sys.argv:
         seed_bulk(task_count=100)
+    elif '--massive' in sys.argv:
+        seed_massive(task_count=20000, months_before=2, months_after=2)
     else:
         seed_default(task_count=20)
