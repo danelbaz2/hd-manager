@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { UserPlus, Loader2 } from "lucide-react";
 import { useTheme } from "../../../../contexts/ThemeContext";
-import { useSettings } from "../../../../contexts/SettingsContext";
+import { usePrimaryTagsQuery } from "../../../../api/queries";
+import { mapPrimaryTagsToData } from "../../../../api/typeMappers";
 import {
   type ContactFormData,
   DEFAULT_CONTACT_FORM,
@@ -23,7 +24,8 @@ interface AddContactFormProps {
  */
 const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
   const { isDarkMode } = useTheme();
-  const { primaryTags, isLoadingTags } = useSettings();
+  const { data: primaryTagsData = [], isLoading: isLoadingTags } = usePrimaryTagsQuery();
+  const primaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
   const [formData, setFormData] =
     useState<ContactFormData>(DEFAULT_CONTACT_FORM);
   const [isSaving, setIsSaving] = useState(false);
@@ -95,10 +97,9 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
 
   const inputStyles = `
     px-4 py-2.5 rounded-lg border text-right transition-colors
-    ${
-      isDarkMode
-        ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
-        : "bg-white border-slate-200 text-slate-800 placeholder-slate-400"
+    ${isDarkMode
+      ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
+      : "bg-white border-slate-200 text-slate-800 placeholder-slate-400"
     }
     focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
   `;
@@ -112,17 +113,15 @@ const AddContactForm: React.FC<AddContactFormProps> = ({ onAdd }) => {
       />
 
       <div
-        className={`rounded-xl border p-6 mb-6 ${
-          isDarkMode
+        className={`rounded-xl border p-6 mb-6 ${isDarkMode
             ? "bg-slate-700/50 border-slate-600"
             : "bg-slate-50 border-slate-200"
-        }`}
+          }`}
       >
         <div className="flex items-center justify-end gap-2 mb-4">
           <span
-            className={`font-medium ${
-              isDarkMode ? "text-slate-200" : "text-slate-700"
-            }`}
+            className={`font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"
+              }`}
           >
             הוספת איש קשר
           </span>

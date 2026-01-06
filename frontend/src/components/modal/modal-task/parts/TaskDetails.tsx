@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
 import { StatusBadgeDropdown } from "./StatusBadgeDropdown";
 import { useAuth } from "../../../../contexts/AuthContext";
-import { useSettings } from "../../../../contexts/SettingsContext";
+import { useContactsQuery } from "../../../../api/queries";
+import { mapContactsToData } from "../../../../api/typeMappers";
 import { FileText, Calendar, Clock, Users, CheckCircle2, XCircle, ShieldCheck } from "lucide-react";
 import { Tooltip } from "../../../tags-tooltip";
 import { useTagsModal } from "../../modal-tags";
@@ -42,7 +43,8 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
   onReject,
 }) => {
   const { user } = useAuth();
-  const { contacts } = useSettings();
+  const { data: contactsData = [] } = useContactsQuery();
+  const contacts = useMemo(() => mapContactsToData(contactsData), [contactsData]);
   const { openTagsModal } = useTagsModal();
 
   const canChangeStatus = useMemo(() => {
@@ -385,7 +387,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                         const url = `https://servicenow.com/nav_to.do?uri=incident.do?sysparm_query=number=${task.optionals.externalId}`;
 
                         return idDigits ? (
-                          <Tooltip content="תלחץ עליי אני מת כל גיל פלג" position="top">
+                          <Tooltip content="תלחץ עליי אני מת על גיל פלג" position="top">
                             <a
                               href={url}
                               target="_blank"

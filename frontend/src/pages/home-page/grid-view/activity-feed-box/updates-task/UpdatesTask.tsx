@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { Virtuoso } from "react-virtuoso";
 import { UpdateItem } from "./UpdateItem";
-import { useSettings } from "../../../../../contexts";
+import { useAllTasksHistoryQuery } from "../../../../../api/queries";
 import type { UpdatesTaskProps } from "./types";
 import type { TaskHistoryEntry } from "../../../../../api/tasksApi";
 import { ScrollToLatestButton } from "../../../../../components/common/ScrollToLatestButton";
@@ -24,8 +24,19 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   lastSeen = 0,
   onLatestUpdate,
 }) => {
-  // Use global taskHistory from SettingsContext
-  const { getHistoryForDate, isLoadingHistory } = useSettings();
+  // React Query - History (cached)
+  const { data: taskHistory = [], isLoading: isLoadingHistory } = useAllTasksHistoryQuery();
+
+  // Helper: Filter history by date
+  const getHistoryForDate = useCallback((dateTimestamp: number) => {
+    const start = new Date(dateTimestamp);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(dateTimestamp);
+    end.setHours(23, 59, 59, 999);
+    return taskHistory.filter((entry) =>
+      entry.timestamp >= start.getTime() && entry.timestamp <= end.getTime()
+    );
+  }, [taskHistory]);
 
   // Get updates for this date from the global source
   const contextUpdates = useMemo(
@@ -120,9 +131,8 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   if (isLoading && updates.length === 0) {
     return (
       <div
-        className={`h-full flex items-center justify-center text-sm ${
-          isDarkMode ? "text-slate-400" : "text-slate-500"
-        }`}
+        className={`h-full flex items-center justify-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
+          }`}
       >
         טוען עדכונים...
       </div>
@@ -133,9 +143,8 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
   if (updates.length === 0) {
     return (
       <div
-        className={`h-full flex items-center justify-center text-sm ${
-          isDarkMode ? "text-slate-400" : "text-slate-500"
-        }`}
+        className={`h-full flex items-center justify-center text-sm ${isDarkMode ? "text-slate-400" : "text-slate-500"
+          }`}
       >
         אין עדכונים למשימות ביום זה
       </div>
@@ -147,9 +156,8 @@ export const UpdatesTask: React.FC<UpdatesTaskProps> = ({
       <Virtuoso
         data={updates}
         itemContent={renderItem}
-        className={`h-full ${
-          isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-        }`}
+        className={`h-full ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+          }`}
         style={{ height: "100%" }}
         overscan={200}
         scrollerRef={(ref) => {

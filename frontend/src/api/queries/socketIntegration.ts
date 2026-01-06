@@ -1,8 +1,9 @@
 /**
  * WebSocket + React Query Integration
- * Automatically invalidates React Query cache when WebSocket events arrive
+ * Provides both invalidation and direct cache update functions
  */
 import { queryClient, queryKeys } from "../queryClient";
+import type { Task, TaskHistoryEntry } from "../tasksApi";
 
 /**
  * Invalidate task-related queries
@@ -10,6 +11,60 @@ import { queryClient, queryKeys } from "../queryClient";
  */
 export const invalidateTaskQueries = () => {
   queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+};
+
+/**
+ * Directly update React Query cache with WebSocket data
+ * More efficient than invalidation - no refetch needed
+ */
+export const updateReactQueryCache = (action: "CREATE" | "UPDATE" | "DELETE", task: Task) => {
+  queryClient.setQueryData<Task[]>(queryKeys.tasks.all, (oldTasks) => {
+    if (!oldTasks) return action === "DELETE" ? [] : [task];
+
+    switch (action) {
+      case "CREATE":
+        // Add new task if not already exists
+        if (oldTasks.some(t => t.id === task.id)) return oldTasks;
+        return [...oldTasks, task];
+
+      case "UPDATE":
+        // Update existing task
+        return oldTasks.map(t => t.id === task.id ? { ...t, ...task } : t);
+
+      case "DELETE":
+        // Remove task
+        return oldTasks.filter(t => t.id !== task.id);
+
+      default:
+        return oldTasks;
+    }
+  });
+};
+
+/**
+ * Directly update history cache with WebSocket data
+ * Adds the new history entry to the cache for real-time activity feed updates
+ */
+export const updateHistoryCache = (historyEntry: TaskHistoryEntry) => {
+  queryClient.setQueryData<TaskHistoryEntry[]>(queryKeys.history.all, (oldHistory) => {
+    if (!oldHistory) return [historyEntry];
+
+    // Check if entry already exists (avoid duplicates)
+    if (oldHistory.some(h => h.id === historyEntry.id)) return oldHistory;
+
+    // Add new entry at the end (history is typically sorted by timestamp)
+    return [...oldHistory, historyEntry];
+  });
+
+  // Also update the specific task's history cache if it exists
+  queryClient.setQueryData<TaskHistoryEntry[]>(
+    queryKeys.history.byTask(historyEntry.taskId),
+    (oldHistory) => {
+      if (!oldHistory) return undefined; // Don't create if doesn't exist
+      if (oldHistory.some(h => h.id === historyEntry.id)) return oldHistory;
+      return [...oldHistory, historyEntry];
+    }
+  );
 };
 
 /**

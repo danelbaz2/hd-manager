@@ -6,7 +6,19 @@ import React, {
   useRef,
 } from "react";
 import { useLocation } from "react-router-dom";
-import { useTheme, useSettings, useViewState, useAuth } from "../../contexts";
+import { useTheme, useViewState, useAuth } from "../../contexts";
+import {
+  useTasksQuery,
+  useUsersQuery,
+  usePrimaryTagsQuery,
+  useSecondaryTagsQuery,
+  useAllTasksHistoryQuery,
+} from "../../api/queries";
+import {
+  mapUsersToUserData,
+  mapPrimaryTagsToData,
+  mapSecondaryTagsToData,
+} from "../../api/typeMappers";
 import HeaderHomePage from "./HeaderHomePage";
 import NewTaskModal from "../../components/modal/modal-new-task";
 import { GridView } from "./grid-view";
@@ -43,16 +55,19 @@ const HomePage: React.FC = () => {
   // Check if this is a first-time user - show demo data immediately
   const showDemoData = isTourActive || isFirstTimeUser();
 
-  // Real Data
-  const {
-    tasks: realTasks,
-    users: realUsers,
-    primaryTags: realPrimaryTags,
-    secondaryTags: realSecondaryTags,
-    refreshTasks,
-    refreshTaskHistory,
-    taskHistory: realHistory,
-  } = useSettings();
+  // React Query - Real Data (cached, deduplicated)
+  const { data: tasksData = [] } = useTasksQuery();
+  const { data: usersData = [] } = useUsersQuery();
+  const { data: primaryTagsData = [] } = usePrimaryTagsQuery();
+  const { data: secondaryTagsData = [] } = useSecondaryTagsQuery();
+  const { data: historyData = [] } = useAllTasksHistoryQuery();
+
+  // Map API types to frontend schema types (memoized for performance)
+  const realTasks = tasksData; // Tasks already match the expected type
+  const realUsers = useMemo(() => mapUsersToUserData(usersData), [usersData]);
+  const realPrimaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
+  const realSecondaryTags = useMemo(() => mapSecondaryTagsToData(secondaryTagsData), [secondaryTagsData]);
+  const realHistory = historyData;
 
   // Merge real and demo data for the tour OR first-time users
   const { tasks, users, primaryTags, secondaryTags, teamUpdates } =
@@ -171,12 +186,12 @@ const HomePage: React.FC = () => {
   // Handlers
   const handleCreateTask = () => setIsNewTaskModalOpen(true);
 
-  const handleTaskCreated = () => {
-    // Use silent=true to prevent triggering the global loader
-    // which would unmount HomePage and reset modal state
-    refreshTasks(true);
-    refreshTaskHistory(true);
-  };
+  // Task created callback - React Query auto-invalidates via mutation onSuccess
+  // No manual refresh needed; WebSocket integration also triggers invalidation
+  const handleTaskCreated = useCallback(() => {
+    // React Query handles cache invalidation automatically
+    // This callback is kept for any future side effects if needed
+  }, []);
 
   const handleSearchChange = (query: string) => setSearchQuery(query);
   const handleStatusFilterChange = (statuses: Set<TaskStatus>) =>
@@ -289,8 +304,8 @@ const HomePage: React.FC = () => {
         ref={mainScrollRef}
         data-tour="main-content-area"
         className={`flex-1 min-h-0 overflow-y-auto p-2 md:p-3 lg:p-4 ${isDarkMode
-            ? "bg-slate-900 dark-scrollbar"
-            : "bg-slate-50 light-scrollbar"
+          ? "bg-slate-900 dark-scrollbar"
+          : "bg-slate-50 light-scrollbar"
           }`}
       >
         {renderContent()}

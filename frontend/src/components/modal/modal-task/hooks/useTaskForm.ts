@@ -10,13 +10,11 @@ interface UseTaskFormProps {
   onSuccess: (task: Task) => void;
   onError: (message: string) => void;
   onWarning: (title: string, message: string) => void;
-  refreshTasks: (silent?: boolean, useDelta?: boolean) => void;
-  refreshTaskHistory: (silent?: boolean) => void;
   onTaskUpdated?: () => void;
 }
 
 export const useTaskForm = ({
-  task, isOpen, onSuccess, onError, onWarning, refreshTasks, refreshTaskHistory, onTaskUpdated,
+  task, isOpen, onSuccess, onError, onWarning, onTaskUpdated,
 }: UseTaskFormProps) => {
   const updateMutation = useUpdateTaskMutation();
 
@@ -155,15 +153,13 @@ export const useTaskForm = ({
       const updatedTask = await updateMutation.mutateAsync({ id: task.id, task: taskData });
       onSuccess(updatedTask);
       setIsEditMode(false);
-      // React Query mutation handles invalidation, also trigger context refresh for compatibility
-      refreshTasks(true);
-      refreshTaskHistory(true);
+      // React Query mutation handles cache invalidation
       invalidateTaskQueries();
       onTaskUpdated?.();
     } catch (error) {
       onError(error instanceof Error ? error.message : "אירעה שגיאה");
     }
-  }, [task, title, description, priority, startDate, deadline, selectedUserIds, selectedSecondaryTagIds, selectedPrimaryTagIds, optionals, onSuccess, onError, onWarning, refreshTasks, refreshTaskHistory, onTaskUpdated, updateMutation]);
+  }, [task, title, description, priority, startDate, deadline, selectedUserIds, selectedSecondaryTagIds, selectedPrimaryTagIds, optionals, onSuccess, onError, onWarning, onTaskUpdated, updateMutation]);
 
   return {
     isEditMode, setIsEditMode, isSubmitting: updateMutation.isPending,

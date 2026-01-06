@@ -1,6 +1,16 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { X, Plus } from "lucide-react";
-import { useTheme, useSettings } from "../../../contexts";
+import { useTheme } from "../../../contexts";
+import {
+  useUsersQuery,
+  usePrimaryTagsQuery,
+  useSecondaryTagsQuery,
+} from "../../../api/queries";
+import {
+  mapUsersToUserData,
+  mapPrimaryTagsToData,
+  mapSecondaryTagsToData,
+} from "../../../api/typeMappers";
 import { ToastContainer } from "../../alert-feedback";
 import DelayedLoader from "../../loaders/DelayedLoader";
 import { ModalOverlay } from "../../common/ModalOverlay";
@@ -25,16 +35,19 @@ const NewTaskModal: React.FC<NewTaskModalProps> = ({
   initialDate,
 }) => {
   const { isDarkMode } = useTheme();
-  const {
-    users,
-    primaryTags,
-    secondaryTags,
-    isLoading: isLoadingData,
-    isLoadingUsers,
-    isLoadingTags,
-  } = useSettings();
 
-  const isDataLoading = isLoadingData || isLoadingUsers || isLoadingTags;
+  // React Query - Data (cached, deduplicated)
+  const { data: usersData = [], isLoading: isLoadingUsers } = useUsersQuery();
+  const { data: primaryTagsData = [], isLoading: isLoadingPrimaryTags } = usePrimaryTagsQuery();
+  const { data: secondaryTagsData = [], isLoading: isLoadingSecondaryTags } = useSecondaryTagsQuery();
+
+  // Map API types to frontend schema types
+  const users = useMemo(() => mapUsersToUserData(usersData), [usersData]);
+  const primaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
+  const secondaryTags = useMemo(() => mapSecondaryTagsToData(secondaryTagsData), [secondaryTagsData]);
+
+  const isLoadingTags = isLoadingPrimaryTags || isLoadingSecondaryTags;
+  const isDataLoading = isLoadingUsers || isLoadingTags;
 
   const {
     title,

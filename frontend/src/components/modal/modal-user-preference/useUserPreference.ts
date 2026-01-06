@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { useAuth, useSettings } from "../../../contexts";
+import { useAuth } from "../../../contexts";
+import { invalidateUserQueries } from "../../../api/queries";
 import { updateUser } from "../../../api/usersApi";
 
 interface ProfileFormData {
@@ -32,7 +33,6 @@ export const useUserPreference = (
   onSuccess?: () => void
 ): UseUserPreferenceReturn => {
   const { user, refreshUser } = useAuth();
-  const { refreshUsers } = useSettings();
   const [isSaving, setIsSaving] = useState(false);
   const [originalData, setOriginalData] = useState<ProfileFormData | null>(null);
 
@@ -124,8 +124,8 @@ export const useUserPreference = (
       if (response.success) {
         // Refresh user data in auth context
         await refreshUser?.();
-        // Refresh all users in settings context (for admin view)
-        await refreshUsers();
+        // Refresh all users in React Query cache (for admin view)
+        invalidateUserQueries();
         setFormData((prev) => ({ ...prev, password: "" }));
         setOriginalData({ ...formData, password: "" });
         onSuccess?.();

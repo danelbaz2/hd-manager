@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { type TaskPriority, type TaskFormData, type TaskOptionals } from "../../../../schemas/taskTypes";
-import { useCreateTaskMutation, invalidateTaskQueries } from "../../../../api/queries";
+import { useCreateTaskMutation } from "../../../../api/queries";
 import { useToast } from "../../../alert-feedback";
 
 interface UseTaskFormOptions {
@@ -211,10 +211,9 @@ export const useTaskForm = ({
       await createMutation.mutateAsync(taskData);
 
       showSuccess("משימה נוצרה! 🎉", `המשימה "${title}" נוצרה בהצלחה`);
-      // Invalidate queries to refetch task lists
-      invalidateTaskQueries();
+      // NOTE: Mutation onSuccess already invalidates queries - no manual call needed
 
-      // Notify parent of success (for refreshing task list)
+      // Notify parent of success (if any additional side effects needed)
       onSuccess?.();
 
       // Reset form fields to initial state (modal stays open for creating more tasks)

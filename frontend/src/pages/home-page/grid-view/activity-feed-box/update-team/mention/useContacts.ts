@@ -1,39 +1,16 @@
 // Custom hook for fetching and managing contacts
-import { useState, useEffect, useCallback } from "react";
-import { getAllContacts, type Contact } from "../../../../../../api/contactsApi";
+// Uses React Query for caching - multiple components share the same cached data
+import { useState, useCallback } from "react";
+import { useContactsQuery } from "../../../../../../api/queries";
+import type { Contact } from "../../../../../../api/contactsApi";
 import type { UseContactsReturn } from "../../../../../../schemas/mentionTypes";
 
-import { useAuth } from "../../../../../../contexts/AuthContext";
-
 export const useContacts = (): UseContactsReturn => {
-  const { isAuthenticated } = useAuth();
-  const [contacts, setContacts] = useState<Contact[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  // React Query handles fetching and caching - no duplicate requests
+  const { data: contacts = [], isLoading, error: queryError } = useContactsQuery();
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
 
-  // Fetch contacts on mount or when authenticated
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const loadContacts = async () => {
-      setIsLoading(true);
-      setError(null);
-      try {
-        const response = await getAllContacts();
-        if (response.success && response.data) {
-          setContacts(response.data);
-        } else {
-          setError("Failed to load contacts");
-        }
-      } catch (err) {
-        setError("Error loading contacts");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    loadContacts();
-  }, [isAuthenticated]);
+  const error = queryError ? "Failed to load contacts" : null;
 
   // Find contact by name (flexible matching - exact, contains, or trimmed)
   const findContactByName = useCallback(

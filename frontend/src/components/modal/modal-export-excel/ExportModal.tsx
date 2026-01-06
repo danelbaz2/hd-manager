@@ -2,9 +2,20 @@
  * ExportModal - Modal for Excel export with blue theme
  * Uses ModalOverlay for consistent backdrop behavior
  */
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { X, FileSpreadsheet, Tag, Calendar, FileText } from "lucide-react";
-import { useTheme, useSettings } from "../../../contexts";
+import { useTheme } from "../../../contexts";
+import {
+  useTasksQuery,
+  useUsersQuery,
+  usePrimaryTagsQuery,
+  useSecondaryTagsQuery,
+} from "../../../api/queries";
+import {
+  mapUsersToUserData,
+  mapPrimaryTagsToData,
+  mapSecondaryTagsToData,
+} from "../../../api/typeMappers";
 import { exportTasksToExcel } from "../../../utils/excelExport";
 import { ModalOverlay } from "../../common/ModalOverlay";
 import TagsFilter from "./TagsFilter";
@@ -22,7 +33,19 @@ interface ExportModalProps {
 
 const ExportModal: React.FC<ExportModalProps> = ({ isOpen, onClose }) => {
   const { isDarkMode } = useTheme();
-  const { tasks, primaryTags, secondaryTags, users } = useSettings();
+
+  // React Query - Data (cached, deduplicated)
+  const { data: tasksData = [] } = useTasksQuery();
+  const { data: usersData = [] } = useUsersQuery();
+  const { data: primaryTagsData = [] } = usePrimaryTagsQuery();
+  const { data: secondaryTagsData = [] } = useSecondaryTagsQuery();
+
+  // Map API types to frontend schema types
+  const tasks = tasksData;
+  const users = useMemo(() => mapUsersToUserData(usersData), [usersData]);
+  const primaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
+  const secondaryTags = useMemo(() => mapSecondaryTagsToData(secondaryTagsData), [secondaryTagsData]);
+
   const [isExporting, setIsExporting] = useState(false);
 
   const {

@@ -9,7 +9,8 @@ import {
   Tags,
   ShieldCheck,
 } from "lucide-react";
-import { useTheme, useAuth, useSettings } from "../../contexts";
+import { useTheme, useAuth } from "../../contexts";
+import { useTasksQuery } from "../../api/queries";
 import {
   IconToggleButton,
   IconButtonToggle,
@@ -66,7 +67,7 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
 }) => {
   const { isDarkMode } = useTheme();
   const { user } = useAuth();
-  const { tasks } = useSettings();
+  const { data: tasks = [] } = useTasksQuery();
   const { openModal } = useCloseTaskModal();
 
   const isAdmin = user?.role === "admin";
@@ -138,10 +139,9 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
       className={`
         flex items-center justify-between
         px-4 lg:px-6 xl:px-8 py-3 lg:py-4 
-        ${
-          isDarkMode
-            ? "bg-slate-900 border-slate-800"
-            : "bg-slate-50 border-slate-200"
+        ${isDarkMode
+          ? "bg-slate-900 border-slate-800"
+          : "bg-slate-50 border-slate-200"
         }
       `}
       dir="rtl"
@@ -207,10 +207,9 @@ const HeaderHomePage: React.FC<HeaderHomePageProps> = ({
               px-3 lg:px-4 py-2 lg:py-2.5
               rounded-xl
               transition-all duration-200
-              ${
-                pendingApprovalCount > 0
-                  ? "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
-                  : isDarkMode
+              ${pendingApprovalCount > 0
+                ? "bg-gradient-to-r from-purple-500 to-purple-600 hover:from-purple-600 hover:to-purple-700 text-white shadow-lg hover:shadow-xl hover:scale-[1.02]"
+                : isDarkMode
                   ? "bg-slate-700 hover:bg-slate-600 text-slate-300"
                   : "bg-slate-200 hover:bg-slate-300 text-slate-600"
               }

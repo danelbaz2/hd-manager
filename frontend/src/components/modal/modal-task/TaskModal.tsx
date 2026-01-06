@@ -1,5 +1,17 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useTheme, useSettings, useAuth } from "../../../contexts";
+import { useTheme, useAuth } from "../../../contexts";
+import {
+  useUsersQuery,
+  usePrimaryTagsQuery,
+  useSecondaryTagsQuery,
+  useAllTasksHistoryQuery,
+  invalidateTaskQueries,
+} from "../../../api/queries";
+import {
+  mapUsersToUserData,
+  mapPrimaryTagsToData,
+  mapSecondaryTagsToData,
+} from "../../../api/typeMappers";
 import { useTaskModal } from "./TaskModalContext";
 import { addTaskNote, approveTask, rejectTask } from "../../../api/tasksApi";
 import { useToast } from "../../alert-feedback";
@@ -20,16 +32,17 @@ import { StatusChangeContent } from "../modal-confirm/StatusChangeContent";
 const TaskModal: React.FC = () => {
   const { isDarkMode } = useTheme();
   const { user: authUser } = useAuth();
-  const {
-    primaryTags,
-    secondaryTags,
-    users,
-    taskHistory,
-    addHistoryEntry,
-    isLoadingHistory,
-    refreshTasks,
-    refreshTaskHistory,
-  } = useSettings();
+  // React Query - Data (cached, deduplicated)
+  const { data: usersData = [] } = useUsersQuery();
+  const { data: primaryTagsData = [] } = usePrimaryTagsQuery();
+  const { data: secondaryTagsData = [] } = useSecondaryTagsQuery();
+  const { data: historyData = [], isLoading: isLoadingHistory } = useAllTasksHistoryQuery();
+
+  // Map API types to frontend schema types
+  const users = useMemo(() => mapUsersToUserData(usersData), [usersData]);
+  const primaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
+  const secondaryTags = useMemo(() => mapSecondaryTagsToData(secondaryTagsData), [secondaryTagsData]);
+  const taskHistory = historyData;
 
   const { isOpen, task, closeTaskModal, onTaskUpdated, updateCurrentTask } =
     useTaskModal();
@@ -57,8 +70,6 @@ const TaskModal: React.FC = () => {
     },
     onError: (m) => showError("שגיאה", m),
     onWarning: showWarning,
-    refreshTasks,
-    refreshTaskHistory,
     onTaskUpdated,
   });
 
@@ -97,8 +108,7 @@ const TaskModal: React.FC = () => {
       if (response.success && response.data) {
         updateCurrentTask(response.data);
         showSuccess("סטטוס עודכן", "סטטוס המשימה עודכן בהצלחה");
-        refreshTasks();
-        refreshTaskHistory();
+        invalidateTaskQueries();
       } else {
         showError("שגיאה", "שגיאה בעדכון הסטטוס");
       }
@@ -114,7 +124,6 @@ const TaskModal: React.FC = () => {
     onSuccess: () => showSuccess("נמחק בהצלחה", "המשימה נמחקה"),
     onError: (m) => showError("שגיאה", m),
     closeModal: closeTaskModal,
-    refreshTasks,
   });
 
   // Handle task approval (admin only)
@@ -125,15 +134,14 @@ const TaskModal: React.FC = () => {
       if (response.success && response.data) {
         updateCurrentTask(response.data);
         showSuccess("אושר בהצלחה", "המשימה אושרה ונסגרה");
-        refreshTasks();
-        refreshTaskHistory();
+        invalidateTaskQueries();
       } else {
         showError("שגיאה", "שגיאה באישור המשימה");
       }
     } catch {
       showError("שגיאה", "שגיאה באישור המשימה");
     }
-  }, [task, updateCurrentTask, showSuccess, showError, refreshTasks, refreshTaskHistory]);
+  }, [task, updateCurrentTask, showSuccess, showError]);
 
   // Handle task rejection (admin only)
   const handleRejectTask = useCallback(async () => {
@@ -143,15 +151,14 @@ const TaskModal: React.FC = () => {
       if (response.success && response.data) {
         updateCurrentTask(response.data);
         showSuccess("נדחה", "המשימה נדחתה והוחזרה לטיפול");
-        refreshTasks();
-        refreshTaskHistory();
+        invalidateTaskQueries();
       } else {
         showError("שגיאה", "שגיאה בדחיית המשימה");
       }
     } catch {
       showError("שגיאה", "שגיאה בדחיית המשימה");
     }
-  }, [task, updateCurrentTask, showSuccess, showError, refreshTasks, refreshTaskHistory]);
+  }, [task, updateCurrentTask, showSuccess, showError]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -166,14 +173,16 @@ const TaskModal: React.FC = () => {
       if (!task) return;
       try {
         const r = await addTaskNote(task.id, text);
-        r.success && r.data
-          ? addHistoryEntry(r.data)
-          : showError("שגיאה", "שגיאה בהוספת הערה");
+        if (r.success && r.data) {
+          invalidateTaskQueries(); // Refresh history
+        } else {
+          showError("שגיאה", "שגיאה בהוספת הערה");
+        }
       } catch {
         showError("שגיאה", "שגיאה בהוספת הערה");
       }
     },
-    [task, addHistoryEntry, showError]
+    [task, showError]
   );
 
   const handleMentionClick = useCallback(

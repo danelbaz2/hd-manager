@@ -6,7 +6,13 @@ import {
   CalendarDays,
   CalendarRange,
 } from "lucide-react";
-import { useTheme, useSettings, useViewState, useAuth } from "../../contexts";
+import { useTheme, useViewState, useAuth } from "../../contexts";
+import {
+  useTasksQuery,
+  useUsersQuery,
+  invalidateTaskQueries,
+} from "../../api/queries";
+import { mapUsersToUserData } from "../../api/typeMappers";
 import { KanbanBoard } from "./parts";
 import { updateTask, type Task, type TaskStatus } from "../../api/tasksApi";
 import { useTaskModal } from "../../components/modal/modal-task";
@@ -100,13 +106,13 @@ const TaskPage: React.FC = () => {
   const isTourActive =
     tourState.isActive && tourState.currentPageId === "kanban";
 
-  // Real Data
-  const {
-    tasks: dbTasks,
-    users: dbUsers,
-    refreshTasks,
-    refreshTaskHistory,
-  } = useSettings();
+  // React Query - Real Data (cached, deduplicated)
+  const { data: tasksData = [] } = useTasksQuery();
+  const { data: usersData = [] } = useUsersQuery();
+
+  // Map API types to frontend schema types
+  const dbTasks = tasksData;
+  const dbUsers = useMemo(() => mapUsersToUserData(usersData), [usersData]);
 
   // Merge real and demo data
   const { tasks, users } = useMemo(() => {
@@ -114,17 +120,17 @@ const TaskPage: React.FC = () => {
       // Augment demo data to include current user with tasks
       const effectiveUsers = user
         ? [
-            user as any as UserData,
-            ...DEMO_USERS.filter((u) => u.id !== user.id),
-          ]
+          user as any as UserData,
+          ...DEMO_USERS.filter((u) => u.id !== user.id),
+        ]
         : DEMO_USERS;
 
       const myDemoTasks = user
         ? DEMO_TASKS.map((t) => ({
-            ...t,
-            id: `my-${t.id}`,
-            responsibleUserIds: [user.id],
-          }))
+          ...t,
+          id: `my-${t.id}`,
+          responsibleUserIds: [user.id],
+        }))
         : [];
 
       return {
@@ -267,33 +273,33 @@ const TaskPage: React.FC = () => {
         const response = await updateTask(taskId, { status: finalStatus });
 
         // 3. Sync - delay refresh to let optimistic UI settle
+        // NOTE: This is a candidate for optimistic updates with React Query in the future
         setTimeout(() => {
           if (response.success) {
-            refreshTasks();
-            refreshTaskHistory();
+            invalidateTaskQueries();
           } else {
             console.error("Failed to update task status:", response.error);
-            refreshTasks(); // Revert to server state
+            invalidateTaskQueries(); // Revert to server state
           }
         }, 300);
       } catch (error) {
         console.error("Error updating task status:", error);
-        refreshTasks(); // Revert to server state
+        invalidateTaskQueries(); // Revert to server state
       }
     },
-    [optimisticTasks, refreshTasks, refreshTaskHistory, authUser?.role]
+    [optimisticTasks, authUser?.role]
   );
 
   // Handle task click - open task modal
+  // NOTE: onTaskUpdated callback is no longer needed as React Query auto-invalidates
   const handleTaskClick = useCallback(
     (task: Task) => {
       setOnTaskUpdated(() => () => {
-        refreshTasks();
-        refreshTaskHistory();
+        invalidateTaskQueries();
       });
       openTaskModal(task, { enableFileHandle: false });
     },
-    [openTaskModal, setOnTaskUpdated, refreshTasks, refreshTaskHistory]
+    [openTaskModal, setOnTaskUpdated]
   );
 
   // If no user is selected, redirect to home
@@ -335,10 +341,9 @@ const TaskPage: React.FC = () => {
             className={`
               p-2 rounded-full
               transition-colors
-              ${
-                isDarkMode
-                  ? "hover:bg-slate-700 text-slate-300"
-                  : "hover:bg-slate-100 text-slate-600"
+              ${isDarkMode
+                ? "hover:bg-slate-700 text-slate-300"
+                : "hover:bg-slate-100 text-slate-600"
               }
             `}
             aria-label="חזרה לדף הבית"
@@ -376,12 +381,11 @@ const TaskPage: React.FC = () => {
                   rounded-md
                   text-xs lg:text-sm font-medium
                   transition-all duration-200
-                  ${
-                    viewMode === mode.id
-                      ? isDarkMode
-                        ? "bg-slate-600 text-white shadow-sm"
-                        : "bg-white text-blue-600 shadow-sm"
-                      : isDarkMode
+                  ${viewMode === mode.id
+                    ? isDarkMode
+                      ? "bg-slate-600 text-white shadow-sm"
+                      : "bg-white text-blue-600 shadow-sm"
+                    : isDarkMode
                       ? "text-slate-400 hover:text-slate-200"
                       : "text-slate-500 hover:text-slate-700"
                   }

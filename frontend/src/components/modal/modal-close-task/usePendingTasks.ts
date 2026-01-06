@@ -1,6 +1,5 @@
 import { useMemo, useCallback } from "react";
-import { useSettings } from "../../../contexts";
-import { useUpdateTaskMutation, invalidateTaskQueries } from "../../../api/queries";
+import { useTasksQuery, useUpdateTaskMutation, invalidateTaskQueries } from "../../../api/queries";
 import type { Task } from "../../../api/tasksApi";
 
 interface UsePendingTasksReturn {
@@ -16,7 +15,7 @@ interface UsePendingTasksReturn {
  * Uses React Query mutation for updates while reading from SettingsContext
  */
 export const usePendingTasks = (): UsePendingTasksReturn => {
-  const { tasks, refreshTasks } = useSettings();
+  const { data: tasks = [] } = useTasksQuery();
   const updateMutation = useUpdateTaskMutation();
 
   // Filter tasks with pending_approval status
@@ -28,33 +27,30 @@ export const usePendingTasks = (): UsePendingTasksReturn => {
   const approveTask = useCallback(async (taskId: string): Promise<boolean> => {
     try {
       await updateMutation.mutateAsync({ id: taskId, task: { status: "completed" } });
-      // Mutation handles invalidation, also trigger context refresh for compatibility
-      refreshTasks();
+      // Mutation's onSuccess handles cache invalidation
       return true;
     } catch (error) {
       console.error("Failed to approve task:", error);
       return false;
     }
-  }, [updateMutation, refreshTasks]);
+  }, [updateMutation]);
 
   // Reject task - change status back to in_progress
   const rejectTask = useCallback(async (taskId: string): Promise<boolean> => {
     try {
       await updateMutation.mutateAsync({ id: taskId, task: { status: "in_progress" } });
-      // Mutation handles invalidation, also trigger context refresh for compatibility
-      refreshTasks();
+      // Mutation's onSuccess handles cache invalidation
       return true;
     } catch (error) {
       console.error("Failed to reject task:", error);
       return false;
     }
-  }, [updateMutation, refreshTasks]);
+  }, [updateMutation]);
 
-  // Refresh triggers both context and React Query cache
+  // Refresh triggers React Query cache invalidation
   const handleRefresh = useCallback(() => {
-    refreshTasks();
     invalidateTaskQueries();
-  }, [refreshTasks]);
+  }, []);
 
   return {
     pendingTasks,

@@ -1,5 +1,7 @@
-import React from "react";
-import { useTheme, useSettings } from "../../../contexts";
+import React, { useMemo } from "react";
+import { useTheme } from "../../../contexts";
+import { usePrimaryTagsQuery, useSecondaryTagsQuery } from "../../../api/queries";
+import { mapPrimaryTagsToData, mapSecondaryTagsToData } from "../../../api/typeMappers";
 import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
 import {
@@ -60,7 +62,11 @@ export const TagsView: React.FC<TagsViewProps> = ({
   primaryTags: propsPrimaryTags,
   secondaryTags: propsSecondaryTags,
 }) => {
-  const { primaryTags: globalPrimaryTags, secondaryTags: globalSecondaryTags } = useSettings();
+  // React Query - Tags (cached, deduplicated)
+  const { data: primaryTagsData = [] } = usePrimaryTagsQuery();
+  const { data: secondaryTagsData = [] } = useSecondaryTagsQuery();
+  const globalPrimaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
+  const globalSecondaryTags = useMemo(() => mapSecondaryTagsToData(secondaryTagsData), [secondaryTagsData]);
 
   const primaryTags = propsPrimaryTags || globalPrimaryTags;
   const secondaryTags = propsSecondaryTags || globalSecondaryTags;

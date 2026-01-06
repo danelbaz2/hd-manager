@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useMemo } from "react";
 import { User, Flag, CalendarRange } from "lucide-react";
-import { useTheme, useSettings } from "../../../contexts";
+import { useTheme } from "../../../contexts";
+import { usePrimaryTagsQuery, useSecondaryTagsQuery } from "../../../api/queries";
+import { mapPrimaryTagsToData, mapSecondaryTagsToData } from "../../../api/typeMappers";
 import { type Task } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
 import { getLighterColor, getTextColor } from "../../../schemas/tagTypes";
@@ -33,7 +35,12 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
   onTaskClick,
 }) => {
   const { isDarkMode } = useTheme();
-  const { primaryTags, secondaryTags } = useSettings();
+
+  // React Query - Tags (cached, deduplicated)
+  const { data: primaryTagsData = [] } = usePrimaryTagsQuery();
+  const { data: secondaryTagsData = [] } = useSecondaryTagsQuery();
+  const primaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
+  const secondaryTags = useMemo(() => mapSecondaryTagsToData(secondaryTagsData), [secondaryTagsData]);
 
   // Helper to get secondary tags with primary color
   const getTaskSecondaryTags = (task: Task) => {
@@ -78,10 +85,9 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
     <div
       className={`
         h-full flex flex-col rounded-2xl border overflow-hidden shadow-sm
-        ${
-          isDarkMode
-            ? "bg-slate-800 border-slate-700"
-            : "bg-white border-slate-200"
+        ${isDarkMode
+          ? "bg-slate-800 border-slate-700"
+          : "bg-white border-slate-200"
         }
       `}
       dir="rtl"
@@ -90,10 +96,9 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
       <div
         className={`
           grid grid-cols-7 border-b divide-x divide-x-reverse sticky top-0 z-20
-          ${
-            isDarkMode
-              ? "border-slate-700 divide-slate-700 bg-slate-800"
-              : "border-slate-100 divide-slate-100 bg-white"
+          ${isDarkMode
+            ? "border-slate-700 divide-slate-700 bg-slate-800"
+            : "border-slate-100 divide-slate-100 bg-white"
           }
         `}
       >
@@ -102,25 +107,22 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
           return (
             <div
               key={i}
-              className={`p-3 text-center transition-colors ${
-                isToday ? (isDarkMode ? "bg-blue-900/20" : "bg-blue-50/50") : ""
-              }`}
+              className={`p-3 text-center transition-colors ${isToday ? (isDarkMode ? "bg-blue-900/20" : "bg-blue-50/50") : ""
+                }`}
             >
               <div
-                className={`text-xs font-bold mb-1 ${
-                  isDarkMode ? "text-slate-400" : "text-slate-500"
-                }`}
+                className={`text-xs font-bold mb-1 ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                  }`}
               >
                 {HEBREW_DAYS_FULL[date.getDay()]}
               </div>
               <div
-                className={`text-sm font-bold ${
-                  isToday
+                className={`text-sm font-bold ${isToday
                     ? "text-blue-600 scale-110 transform"
                     : isDarkMode
-                    ? "text-white"
-                    : "text-slate-900"
-                }`}
+                      ? "text-white"
+                      : "text-slate-900"
+                  }`}
               >
                 {date.getDate()}/{date.getMonth() + 1}
               </div>
@@ -131,9 +133,8 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
 
       {/* Calendar Body */}
       <div
-        className={`flex-1 relative overflow-y-auto p-2 ${
-          isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-        }`}
+        className={`flex-1 relative overflow-y-auto p-2 ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+          }`}
       >
         {/* Background Grid Lines */}
         <div className="absolute inset-0 grid grid-cols-7 pointer-events-none">
@@ -169,10 +170,9 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
                   mx-1 p-2 rounded-lg border shadow-sm cursor-pointer
                   hover:shadow-md hover:translate-y-[-1px] transition-all
                   flex flex-col justify-center relative group overflow-hidden
-                  ${
-                    isDarkMode
-                      ? "bg-slate-700 border-slate-600"
-                      : "bg-white border-slate-200"
+                  ${isDarkMode
+                    ? "bg-slate-700 border-slate-600"
+                    : "bg-white border-slate-200"
                   }
                 `}
                 style={{
@@ -190,9 +190,8 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
 
                 <div className="pr-3 flex items-center justify-between">
                   <span
-                    className={`text-xs font-bold truncate ${
-                      isDarkMode ? "text-white" : "text-slate-800"
-                    }`}
+                    className={`text-xs font-bold truncate ${isDarkMode ? "text-white" : "text-slate-800"
+                      }`}
                   >
                     {task.title || "ללא כותרת"}
                   </span>
@@ -216,18 +215,16 @@ const TaskListWeekly: React.FC<TaskListWeeklyProps> = ({
                   })}
                   {taskTags.length > 2 && (
                     <span
-                      className={`text-[8px] ${
-                        isDarkMode ? "text-slate-400" : "text-slate-500"
-                      }`}
+                      className={`text-[8px] ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                        }`}
                     >
                       +{taskTags.length - 2}
                     </span>
                   )}
                   {responsible && (
                     <div
-                      className={`flex items-center gap-1 text-[10px] mr-auto ${
-                        isDarkMode ? "text-slate-400" : "text-slate-500"
-                      }`}
+                      className={`flex items-center gap-1 text-[10px] mr-auto ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                        }`}
                     >
                       <User size={10} />
                       <span className="truncate max-w-[60px]">

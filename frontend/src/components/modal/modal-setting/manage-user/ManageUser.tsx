@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useTheme } from "../../../../contexts/ThemeContext";
-import { useSettings } from "../../../../contexts/SettingsContext";
+import { invalidateUserQueries } from "../../../../api/queries";
 import {
   type UserData,
   type UserFormData,
@@ -14,7 +14,6 @@ import UsersList from "./UsersList";
 
 const ManageUser: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { refreshUsers } = useSettings();
   const [formData, setFormData] = useState<UserFormData>(DEFAULT_FORM_DATA);
   const [originalData, setOriginalData] =
     useState<UserFormData>(DEFAULT_FORM_DATA);
@@ -45,7 +44,7 @@ const ManageUser: React.FC = () => {
     setEditingUserId(null);
     setFormData(DEFAULT_FORM_DATA);
     setOriginalData(DEFAULT_FORM_DATA);
-    refreshUsers();
+    invalidateUserQueries();
   };
 
   const handleCancelEdit = () => {
@@ -63,7 +62,7 @@ const ManageUser: React.FC = () => {
         if (editingUserId === id) {
           handleCancelEdit();
         }
-        refreshUsers();
+        invalidateUserQueries();
       } else {
         showError("שגיאה", response.error || "שגיאה במחיקת המשתמש");
       }

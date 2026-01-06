@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useTheme } from "../../../../contexts/ThemeContext";
-import { useSettings } from "../../../../contexts/SettingsContext";
+import { useUsersQuery } from "../../../../api/queries";
+import { mapUsersToUserData } from "../../../../api/typeMappers";
 import { type UserData } from "../../../../schemas/userTypes";
 import DelayedLoader from "../../../loaders/DelayedLoader";
 import { ConfirmModal } from "../../modal-confirm";
@@ -23,7 +24,8 @@ const UsersList: React.FC<UsersListProps> = ({
   onDelete,
 }) => {
   const { isDarkMode } = useTheme();
-  const { users, isLoadingUsers } = useSettings();
+  const { data: usersData = [], isLoading: isLoadingUsers } = useUsersQuery();
+  const users = useMemo(() => mapUsersToUserData(usersData), [usersData]);
   const [deleteTarget, setDeleteTarget] = useState<UserData | null>(null);
 
   const handleDeleteRequest = (user: UserData) => {
@@ -64,18 +66,16 @@ const UsersList: React.FC<UsersListProps> = ({
         {users.length === 0 ? (
           <div className="flex-1 flex items-center justify-center py-12">
             <p
-              className={`text-center ${
-                isDarkMode ? "text-slate-400" : "text-slate-500"
-              }`}
+              className={`text-center ${isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
             >
               אין משתמשים להצגה
             </p>
           </div>
         ) : (
           <div
-            className={`flex-1 overflow-y-auto space-y-3 ${
-              isDarkMode ? "dark-scrollbar" : "light-scrollbar"
-            }`}
+            className={`flex-1 overflow-y-auto space-y-3 ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"
+              }`}
           >
             {users.map((user) => (
               <UserCard

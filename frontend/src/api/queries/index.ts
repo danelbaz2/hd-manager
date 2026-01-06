@@ -71,6 +71,8 @@ export {
   invalidateContactQueries,
   invalidateAllQueries,
   handleSocketEvent,
+  updateReactQueryCache,
+  updateHistoryCache,
 } from "./socketIntegration";
 
 // Query client and keys

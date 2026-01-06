@@ -1,6 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useTheme } from "../../../../contexts/ThemeContext";
-import { useSettings } from "../../../../contexts/SettingsContext";
+import {
+  useContactsQuery,
+  usePrimaryTagsQuery,
+  invalidateContactQueries,
+} from "../../../../api/queries";
+import {
+  mapContactsToData,
+  mapPrimaryTagsToData,
+} from "../../../../api/typeMappers";
 import {
   type ContactData,
   type ContactFormData,
@@ -14,7 +22,14 @@ import ContactsList from "./ContactsList";
 
 const ManageContact: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { contacts, primaryTags, isLoadingContacts, refreshContacts } = useSettings();
+
+  // React Query - Data (cached, deduplicated)
+  const { data: contactsData = [], isLoading: isLoadingContacts } = useContactsQuery();
+  const { data: primaryTagsData = [] } = usePrimaryTagsQuery();
+
+  const contacts = useMemo(() => mapContactsToData(contactsData), [contactsData]);
+  const primaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
+
   const [formData, setFormData] = useState<ContactFormData>(DEFAULT_CONTACT_FORM);
   const [originalData, setOriginalData] = useState<ContactFormData>(DEFAULT_CONTACT_FORM);
   const [editingContactId, setEditingContactId] = useState<string | null>(null);
@@ -22,8 +37,8 @@ const ManageContact: React.FC = () => {
 
   const handleAddContact = () => {
     // API call is handled by AddContactForm
-    // Refresh from context
-    refreshContacts();
+    // Invalidate React Query cache
+    invalidateContactQueries();
   };
 
   const handleEditContact = (contact: ContactData) => {
@@ -43,7 +58,7 @@ const ManageContact: React.FC = () => {
     setEditingContactId(null);
     setFormData(DEFAULT_CONTACT_FORM);
     setOriginalData(DEFAULT_CONTACT_FORM);
-    refreshContacts();
+    invalidateContactQueries();
   };
 
   const handleCancelEdit = () => {
@@ -61,7 +76,7 @@ const ManageContact: React.FC = () => {
         if (editingContactId === id) {
           handleCancelEdit();
         }
-        refreshContacts();
+        invalidateContactQueries();
       } else {
         showError("שגיאה", response.error || "שגיאה במחיקת איש הקשר");
       }

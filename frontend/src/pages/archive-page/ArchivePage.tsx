@@ -1,5 +1,7 @@
-import React, { useState, useCallback, memo } from "react";
-import { useTheme, useSettings, useTaskUpdates } from "../../contexts";
+import React, { useState, useCallback, memo, useMemo } from "react";
+import { useTheme, useTaskUpdates } from "../../contexts";
+import { useUsersQuery, usePrimaryTagsQuery, useSecondaryTagsQuery } from "../../api/queries";
+import { mapUsersToUserData, mapPrimaryTagsToData, mapSecondaryTagsToData } from "../../api/typeMappers";
 import HeaderArchivePage from "./HeaderArchivePage";
 import ListTaskArchive from "./ListTaskArchive";
 import {
@@ -16,8 +18,17 @@ const MemoizedListTaskArchive = memo(ListTaskArchive);
 
 const ArchivePage: React.FC = () => {
   const { isDarkMode } = useTheme();
-  // Use useSettings to get users and tags with computed colors (same as home page)
-  const { users, primaryTags, secondaryTags } = useSettings();
+
+  // React Query - Data (cached, deduplicated)
+  const { data: usersData = [] } = useUsersQuery();
+  const { data: primaryTagsData = [] } = usePrimaryTagsQuery();
+  const { data: secondaryTagsData = [] } = useSecondaryTagsQuery();
+
+  // Map API types to frontend schema types
+  const users = useMemo(() => mapUsersToUserData(usersData), [usersData]);
+  const primaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
+  const secondaryTags = useMemo(() => mapSecondaryTagsToData(secondaryTagsData), [secondaryTagsData]);
+
   const [filters, setFilters] = useState<ArchiveFilters>(defaultFilters);
   const { openTaskModal } = useTaskModal();
 

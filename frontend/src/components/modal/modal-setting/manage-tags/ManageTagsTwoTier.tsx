@@ -1,6 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { useTheme } from "../../../../contexts/ThemeContext";
-import { useSettings } from "../../../../contexts/SettingsContext";
+import {
+  usePrimaryTagsQuery,
+  useSecondaryTagsQuery,
+  invalidateTagQueries,
+} from "../../../../api/queries";
+import { mapPrimaryTagsToData, mapSecondaryTagsToData } from "../../../../api/typeMappers";
 import { ToastContainer, useToast } from "../../../alert-feedback";
 
 // Sub-components
@@ -23,8 +28,13 @@ import { useSecondaryTagHandlers } from "./secondary-tags";
  */
 const ManageTagsTwoTier: React.FC = () => {
   const { isDarkMode } = useTheme();
-  const { primaryTags, secondaryTags, isLoadingTags, refreshTags } =
-    useSettings();
+
+  // React Query - Tags (cached, deduplicated)
+  const { data: primaryTagsData = [], isLoading: isLoadingTags } = usePrimaryTagsQuery();
+  const { data: secondaryTagsData = [] } = useSecondaryTagsQuery();
+  const primaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
+  const secondaryTags = useMemo(() => mapSecondaryTagsToData(secondaryTagsData), [secondaryTagsData]);
+
   const { alerts, showSuccess, showError, showWarning, dismissAlert } =
     useToast();
 
@@ -39,7 +49,7 @@ const ManageTagsTwoTier: React.FC = () => {
     showSuccess,
     showError,
     showWarning,
-    refreshTags,
+    refreshTags: invalidateTagQueries,
   });
 
   // Secondary tag handlers
@@ -47,7 +57,7 @@ const ManageTagsTwoTier: React.FC = () => {
     showSuccess,
     showError,
     showWarning,
-    refreshTags,
+    refreshTags: invalidateTagQueries,
   });
 
   // Mode change handler
@@ -93,9 +103,8 @@ const ManageTagsTwoTier: React.FC = () => {
 
       {/* Header */}
       <h1
-        className={`text-2xl font-bold text-center mb-6 ${
-          isDarkMode ? "text-white" : "text-slate-800"
-        }`}
+        className={`text-2xl font-bold text-center mb-6 ${isDarkMode ? "text-white" : "text-slate-800"
+          }`}
       >
         ניהול תגיות משימה
       </h1>

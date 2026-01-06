@@ -102,6 +102,7 @@ export const useTaskHistoryQuery = (taskId: string) => {
 
 /**
  * Hook for creating a task
+ * Uses direct cache update instead of invalidation for better performance
  */
 export const useCreateTaskMutation = () => {
   const queryClient = useQueryClient();
@@ -114,9 +115,16 @@ export const useCreateTaskMutation = () => {
       }
       throw new Error(response.error || "Failed to create task");
     },
-    onSuccess: () => {
-      // Invalidate all task-related queries to refetch
-      queryClient.invalidateQueries({ queryKey: queryKeys.tasks.all });
+    onSuccess: (newTask) => {
+      // Direct cache update: add new task to existing cache instead of refetching
+      queryClient.setQueryData<Task[]>(queryKeys.tasks.all, (oldTasks) => {
+        if (!oldTasks) return [newTask];
+        // Check if task already exists (defensive)
+        if (oldTasks.some(t => t.id === newTask.id)) return oldTasks;
+        return [...oldTasks, newTask];
+      });
+      // Also invalidate history since a CREATE action was logged
+      queryClient.invalidateQueries({ queryKey: ["tasks", "history", "all"] });
     },
   });
 };

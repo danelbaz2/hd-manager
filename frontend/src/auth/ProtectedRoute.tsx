@@ -1,6 +1,7 @@
 import React from "react";
 import { Navigate, useLocation } from "react-router-dom";
-import { useAuth, useSettings } from "../contexts";
+import { useAuth } from "../contexts";
+import { useTasksQuery, useUsersQuery, usePrimaryTagsQuery } from "../api/queries";
 import { GlobalLoader } from "../components/loaders";
 
 interface ProtectedRouteProps {
@@ -14,7 +15,13 @@ interface ProtectedRouteProps {
  */
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
-  const { isLoading: isDataLoading } = useSettings();
+
+  // Check if essential data is still loading via React Query
+  const { isLoading: isTasksLoading } = useTasksQuery();
+  const { isLoading: isUsersLoading } = useUsersQuery();
+  const { isLoading: isTagsLoading } = usePrimaryTagsQuery();
+  const isDataLoading = isTasksLoading || isUsersLoading || isTagsLoading;
+
   const location = useLocation();
 
   // Show loading while checking auth state OR while initial data is being fetched

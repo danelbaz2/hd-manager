@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Save, X, Loader2 } from "lucide-react";
 import { useTheme } from "../../../../contexts/ThemeContext";
-import { useSettings } from "../../../../contexts/SettingsContext";
+import { usePrimaryTagsQuery } from "../../../../api/queries";
+import { mapPrimaryTagsToData } from "../../../../api/typeMappers";
 import { type ContactFormData } from "../../../../schemas/contactTypes";
 import {
   updateContact,
@@ -30,7 +31,8 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
   onCancel,
 }) => {
   const { isDarkMode } = useTheme();
-  const { primaryTags, isLoadingTags } = useSettings();
+  const { data: primaryTagsData = [], isLoading: isLoadingTags } = usePrimaryTagsQuery();
+  const primaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
   const [isSaving, setIsSaving] = useState(false);
   const { alerts, showSuccess, showError, showWarning, dismissAlert } =
     useToast();
@@ -122,10 +124,9 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
 
   const inputStyles = `
     px-4 py-2.5 rounded-lg border text-right transition-colors
-    ${
-      isDarkMode
-        ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
-        : "bg-white border-slate-200 text-slate-800 placeholder-slate-400"
+    ${isDarkMode
+      ? "bg-slate-800 border-slate-600 text-white placeholder-slate-400"
+      : "bg-white border-slate-200 text-slate-800 placeholder-slate-400"
     }
     focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500
   `;
@@ -139,17 +140,15 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
       />
 
       <div
-        className={`rounded-xl border p-6 mb-6 ${
-          isDarkMode
+        className={`rounded-xl border p-6 mb-6 ${isDarkMode
             ? "bg-blue-900/20 border-blue-500/50"
             : "bg-blue-50 border-blue-200"
-        }`}
+          }`}
       >
         <div className="flex items-center justify-end gap-2 mb-4">
           <span
-            className={`font-medium ${
-              isDarkMode ? "text-slate-200" : "text-slate-700"
-            }`}
+            className={`font-medium ${isDarkMode ? "text-slate-200" : "text-slate-700"
+              }`}
           >
             עריכת איש קשר
           </span>
@@ -222,10 +221,9 @@ const EditContactForm: React.FC<EditContactFormProps> = ({
               disabled={isSaving}
               className={`
                 flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium transition-colors
-                ${
-                  isDarkMode
-                    ? "bg-slate-600 hover:bg-slate-500 text-slate-200"
-                    : "bg-slate-200 hover:bg-slate-300 text-slate-700"
+                ${isDarkMode
+                  ? "bg-slate-600 hover:bg-slate-500 text-slate-200"
+                  : "bg-slate-200 hover:bg-slate-300 text-slate-700"
                 }
                 disabled:opacity-50 disabled:cursor-not-allowed
               `}

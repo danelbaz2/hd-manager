@@ -53,4 +53,9 @@ export const queryKeys = {
   contacts: {
     all: ["contacts"] as const,
   },
+  // History
+  history: {
+    all: ["tasks", "history", "all"] as const,
+    byTask: (taskId: string) => ["tasks", taskId, "history"] as const,
+  },
 };

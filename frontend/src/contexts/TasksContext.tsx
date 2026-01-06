@@ -13,7 +13,7 @@ import React, {
 import { getAllTasks, type Task, type TaskHistoryEntry } from "../api/tasksApi";
 import { useAuth } from "./AuthContext";
 import { useSocket } from "../socket";
-import { invalidateTaskQueries } from "../api/queries";
+import { updateReactQueryCache, updateHistoryCache } from "../api/queries";
 import {
   getLastSyncTimestamp,
   updateLastSyncTimestamp,
@@ -30,7 +30,7 @@ interface TasksContextState {
 const defaultValue: TasksContextState = {
   tasks: [],
   isLoadingTasks: false,
-  refreshTasks: async () => {},
+  refreshTasks: async () => { },
 };
 
 const TasksContext = createContext<TasksContextState>(defaultValue);
@@ -101,13 +101,17 @@ export const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
     const unsubscribe = subscribeToTasks((update: TaskHistoryEntry) => {
       const { action, taskId, fullTask } = update;
 
+      // Update Context state (for backward compatibility)
       if (action === "CREATE" && fullTask) {
         setTasks((prev) => {
           if (prev.some((t) => t.id === fullTask.id)) return prev;
           return [...prev, fullTask as Task];
         });
+        // Also update React Query cache directly (no refetch needed)
+        updateReactQueryCache("CREATE", fullTask as Task);
       } else if (action === "DELETE") {
         setTasks((prev) => prev.filter((t) => t.id !== taskId));
+        updateReactQueryCache("DELETE", { id: taskId } as Task);
       } else if (
         [
           "UPDATE",
@@ -127,10 +131,11 @@ export const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
             t.id === taskId ? { ...t, ...(fullTask as Task) } : t
           )
         );
+        updateReactQueryCache("UPDATE", fullTask as Task);
       }
 
-      // Also invalidate React Query cache
-      invalidateTaskQueries();
+      // Always update history cache for real-time activity feed updates
+      updateHistoryCache(update);
     });
 
     return unsubscribe;

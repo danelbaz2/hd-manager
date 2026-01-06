@@ -1,7 +1,9 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback, useMemo } from "react";
 import ReactDOM from "react-dom";
 import { User, Clock } from "lucide-react";
-import { useTheme, useSettings, useAuth } from "../../../contexts";
+import { useTheme, useAuth } from "../../../contexts";
+import { usePrimaryTagsQuery, useSecondaryTagsQuery } from "../../../api/queries";
+import { mapPrimaryTagsToData, mapSecondaryTagsToData } from "../../../api/typeMappers";
 import { type Task, type TaskStatus } from "../../../api/tasksApi";
 import { type UserData } from "../../../schemas/userTypes";
 import {
@@ -56,7 +58,12 @@ const KanbanTaskCard: React.FC<KanbanTaskCardProps> = ({
   showStatusBadge,
 }) => {
   const { isDarkMode } = useTheme();
-  const { primaryTags, secondaryTags } = useSettings();
+
+  // React Query - Tags (cached, deduplicated)
+  const { data: primaryTagsData = [] } = usePrimaryTagsQuery();
+  const { data: secondaryTagsData = [] } = useSecondaryTagsQuery();
+  const primaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
+  const secondaryTags = useMemo(() => mapSecondaryTagsToData(secondaryTagsData), [secondaryTagsData]);
 
   // Drag state
   const [isDragging, setIsDragging] = useState(false);

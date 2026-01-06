@@ -1,12 +1,12 @@
 import { useState, useCallback } from "react";
 import { deleteTask } from "../../../../api/tasksApi";
+import { invalidateTaskQueries } from "../../../../api/queries";
 
 interface UseTaskDeleteProps {
   taskId: string | undefined;
   onSuccess?: () => void;
   onError?: (message: string) => void;
   closeModal: () => void;
-  refreshTasks: () => void;
 }
 
 interface UseTaskDeleteResult {
@@ -22,7 +22,6 @@ export const useTaskDelete = ({
   onSuccess,
   onError,
   closeModal,
-  refreshTasks,
 }: UseTaskDeleteProps): UseTaskDeleteResult => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
@@ -45,7 +44,7 @@ export const useTaskDelete = ({
         onSuccess?.();
         closeDeleteConfirm();
         closeModal();
-        refreshTasks();
+        invalidateTaskQueries(); // Refresh task list via React Query
       } else {
         onError?.(response.error || "אירעה שגיאה במחיקה");
       }
@@ -54,7 +53,7 @@ export const useTaskDelete = ({
     } finally {
       setIsDeleting(false);
     }
-  }, [taskId, onSuccess, onError, closeModal, refreshTasks, closeDeleteConfirm]);
+  }, [taskId, onSuccess, onError, closeModal, closeDeleteConfirm]);
 
   return {
     isDeleting,

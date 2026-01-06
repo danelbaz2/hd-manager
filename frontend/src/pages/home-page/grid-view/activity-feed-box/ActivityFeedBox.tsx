@@ -1,10 +1,22 @@
 import React, { useMemo, useCallback } from "react";
 import {
   useTheme,
-  useSettings,
   useViewState,
   useAuth,
 } from "../../../../contexts";
+import {
+  useTasksQuery,
+  useUsersQuery,
+  usePrimaryTagsQuery,
+  useSecondaryTagsQuery,
+  useAllTasksHistoryQuery,
+  invalidateTaskQueries,
+} from "../../../../api/queries";
+import {
+  mapUsersToUserData,
+  mapPrimaryTagsToData,
+  mapSecondaryTagsToData,
+} from "../../../../api/typeMappers";
 import { useTaskModal } from "../../../../components/modal/modal-task";
 import { type Task } from "../../../../api/tasksApi";
 import { type UserData } from "../../../../schemas/userTypes";
@@ -32,15 +44,32 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
   teamUpdatesOverride,
 }) => {
   const { isDarkMode } = useTheme();
-  const {
-    tasks: globalTasks,
-    users: globalUsers,
-    primaryTags,
-    secondaryTags,
-    refreshTasks,
-    taskHistory,
-    getHistoryForDate,
-  } = useSettings();
+
+  // React Query - Data (cached, deduplicated)
+  const { data: tasksData = [] } = useTasksQuery();
+  const { data: usersData = [] } = useUsersQuery();
+  const { data: primaryTagsData = [] } = usePrimaryTagsQuery();
+  const { data: secondaryTagsData = [] } = useSecondaryTagsQuery();
+  const { data: historyData = [] } = useAllTasksHistoryQuery();
+
+  // Map API types to frontend schema types
+  const globalTasks = tasksData;
+  const globalUsers = useMemo(() => mapUsersToUserData(usersData), [usersData]);
+  const primaryTags = useMemo(() => mapPrimaryTagsToData(primaryTagsData), [primaryTagsData]);
+  const secondaryTags = useMemo(() => mapSecondaryTagsToData(secondaryTagsData), [secondaryTagsData]);
+  const taskHistory = historyData;
+
+  // Helper: Filter history by date
+  const getHistoryForDate = useCallback((dateTimestamp: number) => {
+    const start = new Date(dateTimestamp);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(dateTimestamp);
+    end.setHours(23, 59, 59, 999);
+    return taskHistory.filter((entry) =>
+      entry.timestamp >= start.getTime() && entry.timestamp <= end.getTime()
+    );
+  }, [taskHistory]);
+
   const { selectedDate } = useViewState();
   const { user } = useAuth();
   const { openTaskModal } = useTaskModal();
@@ -107,7 +136,7 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
       ? demoUpdates
       : getHistoryForDate(date.getTime());
     if (!todayUpdates || todayUpdates.length === 0) return 0;
-    return Math.max(...todayUpdates.map((t) => t.timestamp));
+    return Math.max(...todayUpdates.map((t: { timestamp: number }) => t.timestamp));
   }, [taskHistory, selectedDate, getHistoryForDate, isTourActive, demoUpdates]);
 
   const latestTeamTime = useMemo(() => {
@@ -128,29 +157,25 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
   return (
     <div
       data-tour="activity-feed"
-      className={`h-full flex flex-col rounded-2xl border overflow-hidden ${
-        isDarkMode
-          ? "bg-slate-800 border-slate-700"
-          : "bg-white border-slate-200"
-      }`}
+      className={`h-full flex flex-col rounded-2xl border overflow-hidden ${isDarkMode
+        ? "bg-slate-800 border-slate-700"
+        : "bg-white border-slate-200"
+        }`}
     >
       {/* Header with "Hot Updates" title */}
       <div
-        className={`border-b ${
-          isDarkMode ? "border-slate-700" : "border-slate-200"
-        }`}
+        className={`border-b ${isDarkMode ? "border-slate-700" : "border-slate-200"
+          }`}
       >
         <div
-          className={`flex items-center justify-center gap-2 px-4 py-2 ${
-            isDarkMode ? "bg-slate-700/50" : "bg-slate-50"
-          }`}
+          className={`flex items-center justify-center gap-2 px-4 py-2 ${isDarkMode ? "bg-slate-700/50" : "bg-slate-50"
+            }`}
           dir="rtl"
         >
           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           <h3
-            className={`font-bold text-sm ${
-              isDarkMode ? "text-white" : "text-slate-800"
-            }`}
+            className={`font-bold text-sm ${isDarkMode ? "text-white" : "text-slate-800"
+              }`}
           >
             עדכונים חמים
           </h3>
@@ -178,7 +203,7 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
             isDarkMode={isDarkMode}
             selectedDate={selectedDate}
             onUpdateClick={handleActivityClick}
-            onDataRefresh={refreshTasks}
+            onDataRefresh={invalidateTaskQueries}
             updatesOverride={demoUpdates}
             lastSeen={highlightTasksTime}
           />
