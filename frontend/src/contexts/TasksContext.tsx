@@ -22,18 +22,7 @@ import {
   shouldDoFullSync,
   mergeItems,
 } from "../utils/deltaSync";
-
-// Storage key for latest task update timestamp
-const LATEST_TASK_UPDATE_KEY = "activity_feed_latest_task_update";
-
-/**
- * Update the latest task update timestamp in localStorage
- * Called when new task updates arrive via WebSocket
- */
-const updateLatestTaskUpdateTime = () => {
-  const now = Date.now();
-  localStorage.setItem(LATEST_TASK_UPDATE_KEY, now.toString());
-};
+import { setUserTimestamp } from "../utils/activityFeedStorage";
 
 interface TasksContextState {
   tasks: Task[];
@@ -54,7 +43,7 @@ interface TasksProviderProps {
 }
 
 export const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
-  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
 
@@ -150,7 +139,9 @@ export const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
 
       // Update the latest task update timestamp BEFORE updating history cache
       // This ensures the unread indicator will show up when returning to home page
-      updateLatestTaskUpdateTime();
+      if (user?.id) {
+        setUserTimestamp(user.id, "latest_task_update", Date.now());
+      }
 
       // Always update history cache for real-time activity feed updates
       updateHistoryCache(update);
@@ -191,7 +182,5 @@ export const useTasks = (): TasksContextState => {
   return context;
 };
 
-// Export the storage key for use in useActivityFeedPersistence
-export { LATEST_TASK_UPDATE_KEY };
 
 export default TasksContext;

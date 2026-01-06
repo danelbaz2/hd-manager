@@ -1,10 +1,10 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { LATEST_TEAM_MESSAGE_KEY } from "../../../../../contexts/ChatContext";
-import { LATEST_TASK_UPDATE_KEY } from "../../../../../contexts/TasksContext";
+import { getUserTimestamp, setUserTimestamp } from "../../../../../utils/activityFeedStorage";
 
 type TabType = "tasks" | "team";
 
 interface UseActivityFeedPersistenceProps {
+    userId: string | undefined;
     latestTaskTime: number;
     latestTeamTime: number;
 }
@@ -26,12 +26,14 @@ const VIEW_DELAY_MS = 1500;
 
 /**
  * Custom hook to manage activity feed tab state and persistence logic
+ * - Uses user-specific localStorage keys for multi-user support
  * - Manages localStorage for last viewed timestamps
  * - Handles tab switching and highlight snapshots
  * - Calculates unread indicators
  * - Reads global latest task/team message timestamps for cross-page notifications
  */
 export const useActivityFeedPersistence = ({
+    userId,
     latestTaskTime,
     latestTeamTime,
 }: UseActivityFeedPersistenceProps): UseActivityFeedPersistenceReturn => {
@@ -42,34 +44,34 @@ export const useActivityFeedPersistence = ({
     const hasMountedRef = useRef(false);
     const [initialHighlightDone, setInitialHighlightDone] = useState(false);
 
-    // Persistent storage for "last viewed" timestamps
+    // Persistent storage for "last viewed" timestamps (user-specific)
     const [lastViewedTasks, setLastViewedTasks] = useState<number>(() => {
-        const saved = localStorage.getItem("activity_feed_last_viewed_tasks");
-        return saved ? parseInt(saved, 10) : 0; // Default to 0 to show all as unread initially
+        return getUserTimestamp(userId, "last_viewed_tasks", 0);
     });
 
     const [lastViewedTeam, setLastViewedTeam] = useState<number>(() => {
-        const saved = localStorage.getItem("activity_feed_last_viewed_team");
-        return saved ? parseInt(saved, 10) : 0; // Default to 0 to show all as unread initially
+        return getUserTimestamp(userId, "last_viewed_team", 0);
     });
+
+    // Re-initialize when userId changes (e.g., after login)
+    useEffect(() => {
+        if (userId) {
+            setLastViewedTasks(getUserTimestamp(userId, "last_viewed_tasks", 0));
+            setLastViewedTeam(getUserTimestamp(userId, "last_viewed_team", 0));
+        }
+    }, [userId]);
 
     // Snapshot timestamps for highlighting "new" items when viewing
     const [highlightTasksTime, setHighlightTasksTime] = useState<number>(lastViewedTasks);
     const [highlightTeamTime, setHighlightTeamTime] = useState<number>(lastViewedTeam);
 
-    // Read the global latest task update timestamp from localStorage
+    // Read the global latest task update timestamp from user-specific storage
     // This is set by TasksContext when WebSocket updates arrive (even when not on home page)
-    const globalLatestTaskTime = (() => {
-        const saved = localStorage.getItem(LATEST_TASK_UPDATE_KEY);
-        return saved ? parseInt(saved, 10) : 0;
-    })();
+    const globalLatestTaskTime = getUserTimestamp(userId, "latest_task_update", 0);
 
-    // Read the global latest team message timestamp from localStorage
+    // Read the global latest team message timestamp from user-specific storage
     // This is set by ChatContext when WebSocket messages arrive (even when not on home page)
-    const globalLatestTeamTime = (() => {
-        const saved = localStorage.getItem(LATEST_TEAM_MESSAGE_KEY);
-        return saved ? parseInt(saved, 10) : 0;
-    })();
+    const globalLatestTeamTime = getUserTimestamp(userId, "latest_team_message", 0);
 
     // Use the maximum of prop time and global timestamp
     // This ensures we catch updates that arrived while on another page
@@ -99,7 +101,7 @@ export const useActivityFeedPersistence = ({
                     const now = Date.now();
                     const newTime = Math.max(effectiveLatestTaskTime, now);
                     setLastViewedTasks(newTime);
-                    localStorage.setItem("activity_feed_last_viewed_tasks", newTime.toString());
+                    setUserTimestamp(userId, "last_viewed_tasks", newTime);
                 }
             }, VIEW_DELAY_MS);
 
@@ -119,17 +121,17 @@ export const useActivityFeedPersistence = ({
                 const now = Date.now();
                 const newTime = Math.max(effectiveLatestTaskTime, now);
                 setLastViewedTasks(newTime);
-                localStorage.setItem("activity_feed_last_viewed_tasks", newTime.toString());
+                setUserTimestamp(userId, "last_viewed_tasks", newTime);
             }
         } else if (activeTab === "team") {
             if (effectiveLatestTeamTime > lastViewedTeam) {
                 const now = Date.now();
                 const newTime = Math.max(effectiveLatestTeamTime, now);
                 setLastViewedTeam(newTime);
-                localStorage.setItem("activity_feed_last_viewed_team", newTime.toString());
+                setUserTimestamp(userId, "last_viewed_team", newTime);
             }
         }
-    }, [activeTab, effectiveLatestTaskTime, effectiveLatestTeamTime, lastViewedTasks, lastViewedTeam, initialHighlightDone]);
+    }, [userId, activeTab, effectiveLatestTaskTime, effectiveLatestTeamTime, lastViewedTasks, lastViewedTeam, initialHighlightDone]);
 
     // Handle tab switching with highlight snapshot
     const handleTabChange = useCallback((tab: TabType) => {
@@ -137,18 +139,18 @@ export const useActivityFeedPersistence = ({
         // This prevents the dot from appearing on the tab we're leaving
         if (activeTab === "tasks" && tab !== "tasks") {
             const now = Date.now();
-            const freshGlobalTime = parseInt(localStorage.getItem(LATEST_TASK_UPDATE_KEY) || "0", 10);
+            const freshGlobalTime = getUserTimestamp(userId, "latest_task_update", 0);
             const effectiveTime = Math.max(latestTaskTime, freshGlobalTime);
             const newTime = Math.max(effectiveTime, now);
             setLastViewedTasks(newTime);
-            localStorage.setItem("activity_feed_last_viewed_tasks", newTime.toString());
+            setUserTimestamp(userId, "last_viewed_tasks", newTime);
         } else if (activeTab === "team" && tab !== "team") {
             const now = Date.now();
-            const freshGlobalTime = parseInt(localStorage.getItem(LATEST_TEAM_MESSAGE_KEY) || "0", 10);
+            const freshGlobalTime = getUserTimestamp(userId, "latest_team_message", 0);
             const effectiveTime = Math.max(latestTeamTime, freshGlobalTime);
             const newTime = Math.max(effectiveTime, now);
             setLastViewedTeam(newTime);
-            localStorage.setItem("activity_feed_last_viewed_team", newTime.toString());
+            setUserTimestamp(userId, "last_viewed_team", newTime);
         }
 
         // Now switch to the new tab
@@ -163,11 +165,11 @@ export const useActivityFeedPersistence = ({
             setTimeout(() => {
                 const now = Date.now();
                 // Read fresh global timestamp when updating
-                const freshGlobalTime = parseInt(localStorage.getItem(LATEST_TASK_UPDATE_KEY) || "0", 10);
+                const freshGlobalTime = getUserTimestamp(userId, "latest_task_update", 0);
                 const effectiveTime = Math.max(latestTaskTime, freshGlobalTime);
                 const newTime = Math.max(effectiveTime, now);
                 setLastViewedTasks(newTime);
-                localStorage.setItem("activity_feed_last_viewed_tasks", newTime.toString());
+                setUserTimestamp(userId, "last_viewed_tasks", newTime);
             }, VIEW_DELAY_MS);
         } else if (tab === "team") {
             // Snapshot the current lastViewedTeam for highlighting items newer than this
@@ -177,14 +179,14 @@ export const useActivityFeedPersistence = ({
             setTimeout(() => {
                 const now = Date.now();
                 // Read fresh global timestamp when updating
-                const freshGlobalTime = parseInt(localStorage.getItem(LATEST_TEAM_MESSAGE_KEY) || "0", 10);
+                const freshGlobalTime = getUserTimestamp(userId, "latest_team_message", 0);
                 const effectiveTime = Math.max(latestTeamTime, freshGlobalTime);
                 const newTime = Math.max(effectiveTime, now);
                 setLastViewedTeam(newTime);
-                localStorage.setItem("activity_feed_last_viewed_team", newTime.toString());
+                setUserTimestamp(userId, "last_viewed_team", newTime);
             }, VIEW_DELAY_MS);
         }
-    }, [activeTab, lastViewedTasks, lastViewedTeam, latestTaskTime, latestTeamTime]);
+    }, [userId, activeTab, lastViewedTasks, lastViewedTeam, latestTaskTime, latestTeamTime]);
 
     return {
         activeTab,
@@ -197,4 +199,3 @@ export const useActivityFeedPersistence = ({
         handleTabChange,
     };
 };
-

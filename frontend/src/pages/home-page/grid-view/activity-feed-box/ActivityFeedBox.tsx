@@ -152,7 +152,7 @@ const ActivityFeedBox: React.FC<ActivityFeedBoxProps> = ({
     hasUnreadTasks,
     hasUnreadTeam,
     handleTabChange,
-  } = useActivityFeedPersistence({ latestTaskTime, latestTeamTime });
+  } = useActivityFeedPersistence({ userId: user?.id, latestTaskTime, latestTeamTime });
 
   return (
     <div
