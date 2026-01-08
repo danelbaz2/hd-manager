@@ -1,13 +1,19 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 from database import mongo
 from models.auth_model import LoginModel
-from utils.jwt_utils import generate_token, jwt_required
+from utils.jwt_utils import generate_token, jwt_required, JWT_COOKIE_NAME
 from utils.profile_image import get_full_profile_url
+import os
 
 import bcrypt
 from utils.logger import logger
 
 bp = Blueprint('auth', __name__, url_prefix='/api/auth')
+
+# Cookie configuration
+COOKIE_SECURE = os.getenv('COOKIE_SECURE', 'false').lower() == 'true'  # Set True in production (HTTPS)
+COOKIE_SAMESITE = os.getenv('COOKIE_SAMESITE', 'Lax')  # 'Strict', 'Lax', or 'None'
+COOKIE_MAX_AGE = int(os.getenv('JWT_EXPIRATION_DAYS', 24)) * 24 * 60 * 60  # Convert days to seconds
 
 def serialize_user(doc):
     """Serialize user document, removing sensitive fields"""
@@ -34,7 +40,7 @@ def serialize_user(doc):
 @bp.route('/login', methods=['POST'])
 def login():
     """
-    Login endpoint - validates user credentials and returns JWT token
+    Login endpoint - validates user credentials and sets JWT as HttpOnly cookie
     
     Request body:
     {
@@ -43,7 +49,7 @@ def login():
     }
     
     Returns:
-    - 200: User data + JWT token
+    - 200: User data (token is set as HttpOnly cookie)
     - 401: Invalid credentials
     - 400: Missing fields
     """
@@ -75,13 +81,25 @@ def login():
             role=user.get('role', 'regular')
         )
         
-        # Return user data with token
+        # Create response with user data (no token in body)
         logger.action("Login", "User", user['_id'], user['_id'])
-        return jsonify({
+        response = make_response(jsonify({
             "message": "Login successful",
-            "user": serialize_user(user),
-            "token": token
-        }), 200
+            "user": serialize_user(user)
+        }), 200)
+        
+        # Set JWT as HttpOnly cookie
+        response.set_cookie(
+            JWT_COOKIE_NAME,
+            token,
+            httponly=True,           # JavaScript cannot access
+            secure=COOKIE_SECURE,    # Only send over HTTPS (set True in production)
+            samesite=COOKIE_SAMESITE,# CSRF protection
+            max_age=COOKIE_MAX_AGE,  # Cookie expiration
+            path='/'                 # Available for all routes
+        )
+        
+        return response
         
     except Exception as e:
         return jsonify({"error": str(e)}), 500
@@ -90,10 +108,7 @@ def login():
 @jwt_required
 def get_current_user():
     """
-    Get current user - requires JWT token in Authorization header
-    
-    Headers:
-    - Authorization: Bearer <token>
+    Get current user - requires valid JWT cookie
     
     Returns user data if token is valid
     """
@@ -113,11 +128,22 @@ def get_current_user():
 @bp.route('/logout', methods=['POST'])
 def logout():
     """
-    Logout endpoint
-    For JWT, the client simply discards the token
-    This endpoint exists for API consistency
+    Logout endpoint - clears the JWT cookie
     """
-    return jsonify({"message": "Logout successful"}), 200
+    response = make_response(jsonify({"message": "Logout successful"}), 200)
+    
+    # Clear the JWT cookie by setting it to empty with immediate expiration
+    response.set_cookie(
+        JWT_COOKIE_NAME,
+        '',
+        httponly=True,
+        secure=COOKIE_SECURE,
+        samesite=COOKIE_SAMESITE,
+        max_age=0,  # Expire immediately
+        path='/'
+    )
+    
+    return response
 
 @bp.route('/verify', methods=['GET'])
 @jwt_required

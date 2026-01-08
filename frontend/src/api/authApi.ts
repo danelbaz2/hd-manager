@@ -17,9 +17,10 @@ export interface LoginRequest {
   password: string;
 }
 
+// Login response - token is now set as HttpOnly cookie, not in body
 export interface LoginResponse {
   user: AuthUser;
-  token: string;
+  message: string;
 }
 
 export interface MeResponse {
@@ -28,6 +29,7 @@ export interface MeResponse {
 
 /**
  * Login user with credentials
+ * On success, JWT is set as HttpOnly cookie by the server
  */
 export const loginUser = async (credentials: LoginRequest): Promise<ApiResponse<LoginResponse>> => {
   const response = await apiRequest<LoginResponse>(`${API_BASE_URL}/auth/login`, {
@@ -43,16 +45,25 @@ export const loginUser = async (credentials: LoginRequest): Promise<ApiResponse<
 };
 
 /**
- * Get current user data using JWT token
- * This verifies the token is valid and returns fresh user data
+ * Get current user data using JWT cookie (sent automatically)
+ * This verifies the session is valid and returns fresh user data
  */
-export const getCurrentUser = async (token: string): Promise<ApiResponse<MeResponse>> => {
+export const getCurrentUser = async (): Promise<ApiResponse<MeResponse>> => {
   const response = await apiRequest<MeResponse>(`${API_BASE_URL}/auth/me`, {
     method: "GET",
-    headers: {
-      "Authorization": `Bearer ${token}`,
-    },
   });
 
   return response;
 };
+
+/**
+ * Logout user - clears the HttpOnly JWT cookie on the server
+ */
+export const logoutUser = async (): Promise<ApiResponse<{ message: string }>> => {
+  const response = await apiRequest<{ message: string }>(`${API_BASE_URL}/auth/logout`, {
+    method: "POST",
+  });
+
+  return response;
+};
+

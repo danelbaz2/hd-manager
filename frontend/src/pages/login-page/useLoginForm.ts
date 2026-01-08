@@ -12,12 +12,12 @@ interface UseLoginFormReturn {
   loginState: LoginState;
   loggedInUserName: string;
   isLoading: boolean;
-  
+
   // Form handlers
   setUsername: (value: string) => void;
   setPassword: (value: string) => void;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
-  
+
   // Toast state and handlers
   alerts: ReturnType<typeof useToast>["alerts"];
   dismissAlert: ReturnType<typeof useToast>["dismissAlert"];
@@ -49,9 +49,9 @@ const useLoginForm = (): UseLoginFormReturn => {
         password: password.trim(),
       });
 
-      if (response.success && response.data && response.data.token) {
-        // Store user data and JWT token in AuthContext
-        login(response.data.user, response.data.token);
+      if (response.success && response.data) {
+        // Store user data in AuthContext (JWT cookie is already set by server)
+        login(response.data.user);
 
         // Set user name for success message
         setLoggedInUserName(response.data.user.fullName || username);
@@ -66,7 +66,7 @@ const useLoginForm = (): UseLoginFormReturn => {
         setLoginState("error");
         showError(
           "שגיאת התחברות",
-         "שם משתמש או סיסמה שגויים" 
+          "שם משתמש או סיסמה שגויים"
         );
       }
     } catch (error) {

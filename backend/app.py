@@ -30,7 +30,7 @@ if cors_origins_env == "*":
 else:
     cors_origins = cors_origins_env.split(",")  # List of specific origins
 
-CORS(app, origins=cors_origins)
+CORS(app, origins=cors_origins, supports_credentials=True)
 
 app.config["MONGO_URI"] = os.getenv("MONGO_URI", "mongodb://127.0.0.1:27017/hd_manager")
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "hd-manager-secret-key")

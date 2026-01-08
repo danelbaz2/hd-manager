@@ -6,20 +6,17 @@ import React, {
   useEffect,
   useRef,
 } from "react";
-import { getCurrentUser, type AuthUser } from "../api/authApi";
+import { getCurrentUser, logoutUser, type AuthUser } from "../api/authApi";
 import { clearUserActivityFeedStorage } from "../utils/activityFeedStorage";
 
-const AUTH_TOKEN_KEY = "auth_token";
 const MAX_RETRIES = 3;
 
 interface AuthContextType {
   user: AuthUser | null;
-  token: string | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (user: AuthUser, token: string) => void;
-  logout: () => void;
-  getToken: () => string | null;
+  login: (user: AuthUser) => void;
+  logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -29,7 +26,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [user, setUser] = useState<AuthUser | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Track if the component is still mounted to prevent state updates after unmount
@@ -59,21 +55,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     return transientPatterns.some((pattern) => lowerError.includes(pattern));
   }, []);
 
-  // Auth initialization function - can be called for retries
+  // Auth initialization function - validates session via cookie
   const initAuth = useCallback(async () => {
-    const storedToken = sessionStorage.getItem(AUTH_TOKEN_KEY);
-
-    // No token stored, user is not logged in
-    if (!storedToken) {
-      if (isMountedRef.current) {
-        setIsLoading(false);
-      }
-      return;
-    }
-
     try {
-      // Fetch user data from /me endpoint to verify token
-      const response = await getCurrentUser(storedToken);
+      // Attempt to fetch user data - cookie is sent automatically
+      const response = await getCurrentUser();
 
       // Check if component is still mounted before updating state
       if (!isMountedRef.current) {
@@ -81,9 +67,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       }
 
       if (response.success && response.data) {
-        // Token is valid, set user and token
+        // Session is valid, set user
         setUser(response.data.user);
-        setToken(storedToken);
         retryCountRef.current = 0; // Reset retry count on success
         setIsLoading(false);
       } else {
@@ -93,7 +78,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         if (isTransientError(errorMessage)) {
           // This is a network/abort error (likely from rapid refresh)
           console.warn(
-            "Transient error during auth check, keeping session:",
+            "Transient error during auth check, retrying:",
             errorMessage
           );
 
@@ -109,16 +94,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
               }
             }, 1000); // Wait 1 second before retrying
           } else {
-            // Max retries exceeded, but still keep the token - user can try refreshing
-            console.log(
-              "Max retries exceeded, but keeping token for user to retry"
-            );
+            // Max retries exceeded
+            console.log("Max retries exceeded");
             setIsLoading(false);
           }
         } else {
-          // This is an actual auth failure (token invalid, expired, etc.)
-          console.log("Token invalid or expired, clearing session");
-          sessionStorage.removeItem(AUTH_TOKEN_KEY);
+          // This is an actual auth failure (no valid cookie/session)
+          console.log("No valid session, user not authenticated");
           setIsLoading(false);
         }
       }
@@ -133,7 +115,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
       if (isTransientError(errorMessage)) {
         console.warn(
-          "Transient error during auth check, keeping session:",
+          "Transient error during auth check, retrying:",
           errorMessage
         );
         // Retry after a short delay
@@ -152,13 +134,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
         }
       } else {
         console.error("Error loading auth state:", error);
-        sessionStorage.removeItem(AUTH_TOKEN_KEY);
         setIsLoading(false);
       }
     }
   }, [isTransientError]);
 
-  // Load token from sessionStorage and fetch user from API on mount
+  // Validate session on mount
   useEffect(() => {
     // Reset mounted ref on each mount
     isMountedRef.current = true;
@@ -172,21 +153,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     };
   }, [initAuth]);
 
-  const login = useCallback((userData: AuthUser, authToken: string) => {
+  // Called after successful login - just sets user state (cookie is set by backend)
+  const login = useCallback((userData: AuthUser) => {
     setUser(userData);
-    setToken(authToken);
-    // Only store the JWT token (not user data)
-    sessionStorage.setItem(AUTH_TOKEN_KEY, authToken);
   }, []);
 
-  const logout = useCallback(() => {
+  // Logout - calls backend to clear cookie
+  const logout = useCallback(async () => {
     // Get user ID before clearing state for localStorage cleanup
     const userId = user?.id;
 
+    // Call backend to clear the HttpOnly cookie
+    try {
+      await logoutUser();
+    } catch (error) {
+      console.error("Error during logout:", error);
+    }
+
     // Clear auth state
     setUser(null);
-    setToken(null);
-    sessionStorage.removeItem(AUTH_TOKEN_KEY);
 
     // Clear user-specific localStorage data (but keep tour progress)
     if (userId) {
@@ -195,36 +180,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   }, [user?.id]);
 
-  const getToken = useCallback(() => {
-    return token || sessionStorage.getItem(AUTH_TOKEN_KEY);
-  }, [token]);
-
   const refreshUser = useCallback(async () => {
-    const currentToken = token || sessionStorage.getItem(AUTH_TOKEN_KEY);
-    if (!currentToken) return;
-
     try {
-      const response = await getCurrentUser(currentToken);
+      const response = await getCurrentUser();
       if (response.success && response.data) {
         setUser(response.data.user);
       }
     } catch (error) {
       console.error("Error refreshing user data:", error);
     }
-  }, [token]);
+  }, []);
 
-  const isAuthenticated = user !== null && token !== null;
+  const isAuthenticated = user !== null;
 
   return (
     <AuthContext.Provider
       value={{
         user,
-        token,
         isAuthenticated,
         isLoading,
         login,
         logout,
-        getToken,
         refreshUser,
       }}
     >
@@ -240,3 +216,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

@@ -11,6 +11,7 @@ from flask import request, jsonify
 JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'IA1DE2')
 JWT_EXPIRATION_DAYS = int(os.getenv('JWT_EXPIRATION_DAYS', 24))
 JWT_ALGORITHM = 'HS256'
+JWT_COOKIE_NAME = 'jwt_token'  # Name of the HttpOnly cookie
 
 
 from database import mongo
@@ -82,6 +83,29 @@ def get_token_from_header() -> str | None:
     return parts[1]
 
 
+def get_token_from_cookie() -> str | None:
+    """
+    Extract token from HttpOnly cookie
+    
+    Returns:
+        Token string or None
+    """
+    return request.cookies.get(JWT_COOKIE_NAME)
+
+
+def get_token() -> str | None:
+    """
+    Get JWT token from HttpOnly cookie.
+    
+    This is the secure method for browser-based applications.
+    Authorization header is NOT accepted to prevent token theft/reuse.
+    
+    Returns:
+        Token string or None
+    """
+    return request.cookies.get(JWT_COOKIE_NAME)
+
+
 def jwt_required(f):
     """
     Decorator to protect routes with JWT authentication
@@ -95,7 +119,7 @@ def jwt_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        token = get_token_from_header()
+        token = get_token()  # Uses cookie or header
         
         if not token:
             return jsonify({'error': 'Authentication required'}), 401
@@ -147,7 +171,7 @@ def admin_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        token = get_token_from_header()
+        token = get_token()  # Uses cookie or header
         
         if not token:
             return jsonify({'error': 'Authentication required'}), 401
@@ -206,7 +230,7 @@ def self_or_admin_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        token = get_token_from_header()
+        token = get_token()  # Uses cookie or header
         
         if not token:
             return jsonify({'error': 'Authentication required'}), 401

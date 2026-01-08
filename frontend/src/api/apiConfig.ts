@@ -40,14 +40,12 @@ export async function apiRequest<T>(
     "Content-Type": "application/json",
   };
 
-  // Add Authorization header if token exists
-  const token = sessionStorage.getItem("auth_token");
-  if (token) {
-    defaultHeaders["Authorization"] = `Bearer ${token}`;
-  }
+  // Note: JWT is now sent automatically via HttpOnly cookie
+  // No need to manually add Authorization header
 
-  const requestOptions = {
+  const requestOptions: RequestInit = {
     ...options,
+    credentials: 'include', // Required for cookies to be sent cross-origin
     headers: {
       ...defaultHeaders,
       ...options.headers,
@@ -56,7 +54,7 @@ export async function apiRequest<T>(
 
   // Retry logic for network errors
   let lastError: Error | null = null;
-  
+
   for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
     try {
       const response = await fetch(url, requestOptions);
@@ -85,18 +83,18 @@ export async function apiRequest<T>(
       }
 
       lastError = error instanceof Error ? error : new Error("Unknown error");
-      
+
       // Check if it's a network error (Failed to fetch) - retry these
-      const isNetworkError = lastError.message.includes("Failed to fetch") || 
-                             lastError.message.includes("NetworkError") ||
-                             lastError.message.includes("Network request failed");
-      
+      const isNetworkError = lastError.message.includes("Failed to fetch") ||
+        lastError.message.includes("NetworkError") ||
+        lastError.message.includes("Network request failed");
+
       if (isNetworkError && attempt < MAX_RETRIES) {
         console.log(`API request failed (attempt ${attempt + 1}/${MAX_RETRIES + 1}), retrying in ${RETRY_DELAY_MS}ms...`, url);
         await delay(RETRY_DELAY_MS * (attempt + 1)); // Exponential backoff
         continue; // Retry
       }
-      
+
       // Don't retry for non-network errors
       break;
     }
