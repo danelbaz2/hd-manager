@@ -86,7 +86,7 @@ def create_user():
     # History logging and broadcast are best-effort
     try:
         log_history('user', data['_id'], 'CREATE', getattr(request, 'user_full_name', 'system'), None, data, data)
-        logger.action("Create", "User", data['_id'], getattr(request, 'user_full_name', 'system'), f"Username: {data.get('username')}")
+        logger.action("Create", "User", data['_id'], getattr(request, 'user_id', 'system'), f"Username: {data.get('username')}")
     except:
         pass  # Don't fail request if logging fails
     
@@ -160,7 +160,7 @@ def update_user(id):
     # History logging is best-effort
     try:
         log_history('user', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, data)
-        logger.action("Update", "User", id, getattr(request, 'user_full_name', 'system'), f"Changed: {list(data.keys())}")
+        logger.action("Update", "User", id, getattr(request, 'user_id', 'system'), f"Changed: {list(data.keys())}")
     except:
         pass  # Don't fail request if logging fails
     
@@ -195,7 +195,7 @@ def delete_user(id):
     try:
         # Pass deleted_state as 'new' value so 'n' field shows isDeleted=True
         log_history('user', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, deleted_state, {'action': 'HARD_DELETE', 'base': {'isDeleted': True}})
-        logger.action("Delete", "User", id, getattr(request, 'user_full_name', 'system'))
+        logger.action("Delete", "User", id, getattr(request, 'user_id', 'system'))
     except:
         pass  # Don't fail request if logging fails
     

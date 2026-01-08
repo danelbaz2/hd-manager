@@ -61,7 +61,7 @@ def create_contact():
     # History logging is best-effort
     try:
         log_history('contact', data['_id'], 'CREATE', request.user_full_name, None, data, data)
-        logger.action("Create", "Contact", data['_id'], request.user_full_name, f"Name: {data.get('name', 'Unknown')}")
+        logger.action("Create", "Contact", data['_id'], request.user_id, f"Name: {data.get('name', 'Unknown')}")
     except:
         pass  # Don't fail request if logging fails
     
@@ -104,7 +104,7 @@ def update_contact(id):
     # History logging is best-effort
     try:
         log_history('contact', id, 'UPDATE', request.user_full_name, old_doc, updated, data)
-        logger.action("Update", "Contact", id, request.user_full_name, f"Changed: {list(data.keys())}")
+        logger.action("Update", "Contact", id, request.user_id, f"Changed: {list(data.keys())}")
     except:
         pass  # Don't fail request if logging fails
              
@@ -131,7 +131,7 @@ def delete_contact(id):
     # Log history BEFORE deletion (save full entity snapshot to archive)
     try:
         log_history('contact', id, 'DELETE', request.user_full_name, old_doc, deleted_state, {'action': 'HARD_DELETE', 'base': {'isDeleted': True}})
-        logger.action("Delete", "Contact", id, request.user_full_name)
+        logger.action("Delete", "Contact", id, request.user_id)
     except:
         pass  # Don't fail request if logging fails
     

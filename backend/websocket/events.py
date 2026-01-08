@@ -10,37 +10,8 @@ from flask_socketio import emit, join_room
 from .manager import socket_manager
 
 # Configure event logger with a safe formatter
-# Configure event logger with a safe formatter
+# Configure event logger - rely on root logger
 event_logger = logging.getLogger('socket.events')
-log_level_str = os.getenv('LOG_LEVEL', 'INFO').upper()
-event_logger.setLevel(getattr(logging, log_level_str, logging.INFO))
-event_logger.propagate = False
-
-
-class SafeFormatter(logging.Formatter):
-    """Formatter that provides default values for missing fields"""
-    def format(self, record):
-        # Provide defaults for custom fields
-        if not hasattr(record, 'action'):
-            record.action = 'INFO'
-        if not hasattr(record, 'station'):
-            record.station = 'System'
-        return super().format(record)
-
-
-if not event_logger.handlers:
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    formatter = SafeFormatter(
-        '\033[36m[%(asctime)s]\033[0m \033[35m[%(action)s]\033[0m \033[33m[%(station)s]\033[0m %(message)s',
-        datefmt='%H:%M:%S'
-    )
-    console_handler.setFormatter(formatter)
-    event_logger.addHandler(console_handler)
-
-# Suppress noisy connection errors from gevent
-logging.getLogger('gevent').setLevel(logging.ERROR)
-
 
 def _get_client_info():
     """Get client IP and session ID for logging"""
@@ -55,12 +26,14 @@ def _get_client_info():
 def _log_event(action, message, extra_info=None):
     """Log a socket event with consistent formatting"""
     station = _get_client_info()
-    extra = {'action': action, 'station': station}
+    
+    # Construct message: [ACTION] [Station] - Message
+    full_msg = f"[{action}] [{station}] - {message}"
     
     if extra_info:
-        event_logger.info(f"- {message} | {extra_info}", extra=extra)
-    else:
-        event_logger.info(f"- {message}", extra=extra)
+        full_msg += f" | {extra_info}"
+        
+    event_logger.info(full_msg)
 
 
 def register_socket_events(socketio):

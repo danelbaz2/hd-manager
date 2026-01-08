@@ -76,7 +76,7 @@ def login():
         )
         
         # Return user data with token
-        logger.action("Login", "User", user['_id'], username)
+        logger.action("Login", "User", user['_id'], user['_id'])
         return jsonify({
             "message": "Login successful",
             "user": serialize_user(user),

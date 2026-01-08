@@ -14,20 +14,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 import threading
 
-# Configure socket logger
+# Configure socket logger - rely on root logger for formatting
 socket_logger = logging.getLogger('socket.manager')
-socket_logger.setLevel(logging.INFO)
-socket_logger.propagate = False
-
-if not socket_logger.handlers:
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    formatter = logging.Formatter(
-        '\033[36m[%(asctime)s]\033[0m \033[33m[SOCKET]\033[0m %(message)s',
-        datefmt='%H:%M:%S'
-    )
-    console_handler.setFormatter(formatter)
-    socket_logger.addHandler(console_handler)
 
 
 @dataclass

@@ -100,4 +100,15 @@ if __name__ == '__main__':
         else:
             print(f" ! SSL certs not found at {ssl_cert_path} or {ssl_key_path}, starting HTTP only")
     
+    # Handle graceful shutdown for faster dev loop (Ctrl+C)
+    import signal
+    import os
+    
+    def signal_handler(sig, frame):
+        print('\n🛑 Stopping server immediately (forced)...', flush=True)
+        os._exit(0)
+        
+    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
+    
     socketio.run(app, **run_kwargs)

@@ -6,20 +6,8 @@ Provides typed broadcast functions for different entity updates.
 import logging
 from typing import Optional, Dict, Any
 
-# Configure broadcaster logger
+# Configure broadcaster logger - rely on root logger
 broadcast_logger = logging.getLogger('socket.broadcast')
-broadcast_logger.setLevel(logging.INFO)
-broadcast_logger.propagate = False
-
-if not broadcast_logger.handlers:
-    console_handler = logging.StreamHandler()
-    console_handler.setLevel(logging.INFO)
-    formatter = logging.Formatter(
-        '\033[36m[%(asctime)s]\033[0m \033[32m[BROADCAST]\033[0m %(message)s',
-        datefmt='%H:%M:%S'
-    )
-    console_handler.setFormatter(formatter)
-    broadcast_logger.addHandler(console_handler)
 
 
 # Reference to socketio instance (set during event registration)
@@ -69,7 +57,7 @@ def broadcast_task_update(update_data: Dict[str, Any]):
     }, room='updates')
     
     if success:
-        broadcast_logger.info(f"Task update sent | task={task_id} | action={action_type}")
+        broadcast_logger.debug(f"Task update sent | task={task_id} | action={action_type}")
 
 
 def broadcast_task_created(task_data: Dict[str, Any], history_entry: Dict[str, Any]):
@@ -89,7 +77,7 @@ def broadcast_task_created(task_data: Dict[str, Any], history_entry: Dict[str, A
     }, room='updates')
     
     if success:
-        broadcast_logger.info(f"Task created | task={task_id} | title={task_title}")
+        broadcast_logger.debug(f"Task created | task={task_id} | title={task_title}")
 
 
 def broadcast_task_deleted(task_id: str, history_entry: Dict[str, Any]):
@@ -106,7 +94,7 @@ def broadcast_task_deleted(task_id: str, history_entry: Dict[str, Any]):
     }, room='updates')
     
     if success:
-        broadcast_logger.info(f"Task deleted | task={task_id}")
+        broadcast_logger.debug(f"Task deleted | task={task_id}")
 
 
 def broadcast_chat_update(message_data: Optional[Dict[str, Any]] = None):
@@ -124,7 +112,7 @@ def broadcast_chat_update(message_data: Optional[Dict[str, Any]] = None):
     }, room='updates')
     
     if success:
-        broadcast_logger.info(f"Chat update sent | message={msg_id}")
+        broadcast_logger.debug(f"Chat update sent | message={msg_id}")
 
 
 def broadcast_user_update(
@@ -150,7 +138,7 @@ def broadcast_user_update(
     }, room='updates')
     
     if success:
-        broadcast_logger.info(f"User update sent | user={uid[:8] if uid else 'unknown'}... | action={action}")
+        broadcast_logger.debug(f"User update sent | user={uid[:8] if uid else 'unknown'}... | action={action}")
 
 
 def broadcast_to_user(user_id: str, event: str, data: Dict[str, Any]):
@@ -166,4 +154,4 @@ def broadcast_to_user(user_id: str, event: str, data: Dict[str, Any]):
     success = _safe_emit(event, data, room=room)
     
     if success:
-        broadcast_logger.info(f"Targeted broadcast | user={user_id[:8]}... | event={event}")
+        broadcast_logger.debug(f"Targeted broadcast | user={user_id[:8]}... | event={event}")

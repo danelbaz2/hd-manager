@@ -120,7 +120,7 @@ def create_secondary_tag():
     # History logging is best-effort
     try:
         log_history('secondary_tag', data['_id'], 'CREATE', getattr(request, 'user_full_name', 'system'), None, data, data)
-        logger.action("Create", "SecondaryTag", data['_id'], getattr(request, 'user_full_name', 'system'), f"Name: {data.get('name', 'Unknown')}")
+        logger.action("Create", "SecondaryTag", data['_id'], getattr(request, 'user_id', 'system'), f"Name: {data.get('name', 'Unknown')}")
     except:
         pass  # Don't fail request if logging fails
     
@@ -185,7 +185,7 @@ def update_secondary_tag(id):
     # History logging is best-effort
     try:
         log_history('secondary_tag', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, data)
-        logger.action("Update", "SecondaryTag", id, getattr(request, 'user_full_name', 'system'), f"Changed: {list(data.keys())}")
+        logger.action("Update", "SecondaryTag", id, getattr(request, 'user_id', 'system'), f"Changed: {list(data.keys())}")
     except:
         pass  # Don't fail request if logging fails
              
@@ -214,7 +214,7 @@ def delete_secondary_tag(id):
     # Log history BEFORE deletion (save full entity snapshot to archive)
     try:
         log_history('secondary_tag', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, deleted_state, {'action': 'HARD_DELETE', 'base': {'isDeleted': True}})
-        logger.action("Delete", "SecondaryTag", id, getattr(request, 'user_full_name', 'system'))
+        logger.action("Delete", "SecondaryTag", id, getattr(request, 'user_id', 'system'))
     except:
         pass  # Don't fail request if logging fails
     

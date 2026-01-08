@@ -1,4 +1,4 @@
-from flask import Blueprint
+from flask import Blueprint, jsonify
 import logging
 import os
 from utils.logger import logger
@@ -16,7 +16,7 @@ def set_log_level(level, api_key):
     
     if api_key != admin_key:
         print(f"Unauthorized attempt to change log level with key: {api_key}", flush=True)
-        return "", 401
+        return "Command is not valid", 401
     
     # Map string levels to logging constants
     level_map = {
@@ -29,15 +29,39 @@ def set_log_level(level, api_key):
     target_level_str = level.upper()
     if target_level_str not in level_map:
         print(f"Failed to change log level: Invalid level '{level}'", flush=True)
-        return "", 400
+        return "Command is not valid", 400
         
-    # Change the logger level
-    # We update both 'werkzeug' (Flask default) and 'gevent.access' (Gevent WSGI)
-    loggers_to_update = ['werkzeug', 'gevent.access']
+    # Get current level (from werkzeug as reference)
+    current_level_int = logging.getLogger('werkzeug').getEffectiveLevel()
+    current_level_str = logging.getLevelName(current_level_int)
     
+    # Change the logger level
+    # We update 'werkzeug' (Flask), 'gevent.access' (WSGI), and the root logger (app logs)
+    # Note: logging.getLogger() returns the root logger
+    root_logger = logging.getLogger()
+    
+    # Update specific loggers
+    loggers_to_update = ['werkzeug', 'gevent.access']
     for logger_name in loggers_to_update:
         logging.getLogger(logger_name).setLevel(level_map[target_level_str])
+        
+    # Update root logger
+    root_logger.setLevel(level_map[target_level_str])
     
     # Log change using logger (yellow)
-    logger.warning(f"Log level changed to {target_level_str}")
-    return "", 204
+    msg = f"Log level change from {current_level_str} to {target_level_str}"
+    logger.warning(msg)
+
+    return msg, 200
+
+@bp.route('/test', methods=['GET'])
+def test_logs():
+    """
+    Generate test logs of all levels to verify configuration.
+    """
+    logger.error("This is a PROJECT SIMULATED ERROR log (Something went wrong!)")
+    logger.warning("This is a PROJECT SIMULATED WARNING log")
+    logger.info("This is a PROJECT SIMULATED INFO log")
+    logger.debug({"type": "debug_test", "message": "This is a simulated DEBUG log with valid JSON"})
+    
+    return "Logs generated. Check your backend console.", 200

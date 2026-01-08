@@ -155,7 +155,7 @@ def create_task():
     # History logging is best-effort
     try:
         log_history('task', data['_id'], 'CREATE', request.user_full_name, None, data, data)
-        logger.action("Create", "Task", data['_id'], request.user_full_name, f"Title: {data.get('title', 'Untitled')}")
+        logger.action("Create", "Task", data['_id'], request.user_id, f"Title: {data.get('title', 'Untitled')}")
     except:
         pass # Don't fail request if logging fails
 
@@ -217,7 +217,7 @@ def update_task(id):
     # Even if only metadata changed, we log it, but 'c' will be minimal
     log_history('task', id, action_type, request.user_full_name, old_doc, updated, history_changes)
     
-    logger.action("Update", "Task", id, request.user_full_name, f"Changed: {list(changes.keys())}")
+    logger.action("Update", "Task", id, request.user_id, f"Changed: {list(changes.keys())}")
 
     return jsonify(serialize_doc(updated))
 
@@ -243,7 +243,7 @@ def delete_task(id):
         # Log history BEFORE deletion (save full entity snapshot to archive)
         # Pass deleted_state as 'new' value so 'n' field has the final state (isDeleted=True)
         log_history('task', id, 'DELETE', request.user_full_name, old_doc, deleted_state, {'action': 'HARD_DELETE', 'base': {'isDeleted': True}})
-        logger.action("Delete", "Task", id, request.user_full_name)
+        logger.action("Delete", "Task", id, request.user_id)
         
         # Hard delete - actually remove the document
         result = mongo.db.ents.delete_one({'_id': id, 'base.entityType': 'task'})
@@ -292,7 +292,7 @@ def approve_task(id):
             }
         })
         
-        logger.action("Approve", "Task", id, request.user_full_name, "Status: pending_approval → completed")
+        logger.action("Approve", "Task", id, request.user_id, "Status: pending_approval → completed")
         
     except Exception as e:
         return jsonify({"error": str(e)}), 400
@@ -334,7 +334,7 @@ def reject_task(id):
             }
         })
         
-        logger.action("Reject", "Task", id, request.user_full_name, "Status: pending_approval → in_progress")
+        logger.action("Reject", "Task", id, request.user_id, "Status: pending_approval → in_progress")
         
     except Exception as e:
         return jsonify({"error": str(e)}), 400
