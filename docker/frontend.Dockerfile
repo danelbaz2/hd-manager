@@ -40,8 +40,18 @@ FROM nginx:alpine
 # Copy built assets from builder stage
 COPY --from=builder /app/dist /usr/share/nginx/html
 
+# Copy source code for debugging/access (preserved at /source)
+COPY --from=builder /app/src /source/src
+COPY --from=builder /app/package.json /source/package.json
+
+# Copy entrypoint script for runtime configuration
+COPY frontend-entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+
 # Expose port 80
 EXPOSE 80
 
-# Start nginx
-CMD ["nginx", "-g", "daemon off;"]
+# Use entrypoint script to inject config then start nginx
+ENTRYPOINT ["/entrypoint.sh"]
+
+

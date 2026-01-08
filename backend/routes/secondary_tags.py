@@ -196,38 +196,43 @@ def update_secondary_tag(id):
 @admin_required
 @handle_client_disconnect
 def delete_secondary_tag(id):
-    """Soft delete a secondary tag (sets isDeleted to true)"""
+    """Hard delete a secondary tag (removes from collection, saves to archive)"""
     old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'secondary_tag'})
     if not old_doc:
         return jsonify({"error": "Secondary tag not found"}), 404
     
     now = int(datetime.now().timestamp() * 1000)
     
+    # Create deleted state snapshot
+    deleted_state = old_doc.copy()
+    if 'base' not in deleted_state:
+        deleted_state['base'] = {}
+    deleted_state['base']['isDeleted'] = True
+    deleted_state['base']['updatedAt'] = now
+    deleted_state['base']['updatedBy'] = getattr(request, 'user_full_name', 'system')
+
+    # Log history BEFORE deletion (save full entity snapshot to archive)
     try:
-        mongo.db.ents.update_one({'_id': id}, {'$set': {
-            'base.isDeleted': True,
-            'base.updatedAt': now,
-            'base.updatedBy': getattr(request, 'user_full_name', 'system')
-        }})
+        log_history('secondary_tag', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, deleted_state, {'action': 'HARD_DELETE', 'base': {'isDeleted': True}})
+        logger.action("Delete", "SecondaryTag", id, getattr(request, 'user_full_name', 'system'))
+    except:
+        pass  # Don't fail request if logging fails
+    
+    # Hard delete - actually remove the document
+    try:
+        result = mongo.db.ents.delete_one({'_id': id, 'base.entityType': 'secondary_tag'})
+        if result.deleted_count == 0:
+            return jsonify({"error": "Failed to delete secondary tag"}), 500
     except _OperationCancelled:
         # Check if the delete was applied despite the cancellation
-        check_doc = mongo.db.ents.find_one({'_id': id})
-        if check_doc and check_doc.get('base', {}).get('isDeleted') == True:
+        if not mongo.db.ents.find_one({'_id': id}):
             logger.warning(f"Secondary tag {id} deleted despite client disconnect")
             pass  # Proceed normally
         else:
             raise  # Re-raise if delete didn't apply
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-    
-    updated = mongo.db.ents.find_one({'_id': id})
-    
-    # History logging is best-effort
-    try:
-        log_history('secondary_tag', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, updated, {'base': {'isDeleted': True}})
-        logger.action("Delete", "SecondaryTag", id, getattr(request, 'user_full_name', 'system'))
-    except:
-        pass  # Don't fail request if logging fails
         
     return jsonify({"message": "Secondary tag deleted"}), 200
+
 

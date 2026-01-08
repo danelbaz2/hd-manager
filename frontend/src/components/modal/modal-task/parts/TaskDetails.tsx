@@ -20,6 +20,7 @@ import {
   getLighterColor,
   TAG_COLORS,
 } from "../../../../schemas/tagTypes";
+import { getServiceNowIncidentUrl, getMarsItemUrl } from "../../../../config/externalUrls";
 
 interface TaskDetailsProps {
   task: Task;
@@ -384,7 +385,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                       {/* ID Number Link */}
                       {(() => {
                         const idDigits = task.optionals.externalId ? task.optionals.externalId.replace(/^INC/, '') : '';
-                        const url = `https://servicenow.com/nav_to.do?uri=incident.do?sysparm_query=number=${task.optionals.externalId}`;
+                        const url = getServiceNowIncidentUrl(task.optionals.externalId || '');
 
                         return idDigits ? (
                           <Tooltip content="תלחץ עליי אני מת על גיל פלג" position="top">
@@ -406,7 +407,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                   ) : (
                     /* MARS Display - Standard Badge */
                     (() => {
-                      const url = `https://mars-system.com/item?id=${task.optionals.externalId}`;
+                      const url = getMarsItemUrl(task.optionals.externalId || '');
                       const hasId = !!task.optionals.externalId;
 
                       return hasId ? (

@@ -60,6 +60,8 @@ def create_user():
 
     data['_id'] = str(ObjectId())
     
+    # profileImage is stored as base64 directly - no conversion needed
+    
     try:
         mongo.db.users.insert_one(data)
     except _OperationCancelled:
@@ -114,6 +116,8 @@ def update_user(id):
         # Empty password provided - remove from update to keep existing
         del data['password']
     
+    # profileImage is stored as base64 directly - no conversion needed
+    
     try:
         mongo.db.users.update_one({'_id': id}, {'$set': data})
     except _OperationCancelled:
@@ -155,31 +159,36 @@ def delete_user(id):
     
     now = int(datetime.now().timestamp() * 1000)
     
+    # Create a snapshot of the document as it would look after deletion (marked deleted)
+    deleted_state = old_doc.copy()
+    if 'base' not in deleted_state:
+        deleted_state['base'] = {}
+    deleted_state['base']['isDeleted'] = True
+    deleted_state['base']['updatedAt'] = now
+    deleted_state['base']['updatedBy'] = getattr(request, 'user_full_name', 'system')
+    
+    # Log history BEFORE deletion (save full entity snapshot to archive)
     try:
-        mongo.db.users.update_one({'_id': id}, {'$set': {
-            'base.isDeleted': True,
-            'base.updatedAt': now,
-            'base.updatedBy': getattr(request, 'user_full_name', 'system')
-        }})
+        # Pass deleted_state as 'new' value so 'n' field shows isDeleted=True
+        log_history('user', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, deleted_state, {'action': 'HARD_DELETE', 'base': {'isDeleted': True}})
+        logger.action("Delete", "User", id, getattr(request, 'user_full_name', 'system'))
+    except:
+        pass  # Don't fail request if logging fails
+    
+    # Hard delete - actually remove the document
+    try:
+        result = mongo.db.users.delete_one({'_id': id})
+        if result.deleted_count == 0:
+            return jsonify({"error": "Failed to delete user"}), 500
     except _OperationCancelled:
         # Check if the delete was applied despite the cancellation
-        check_doc = mongo.db.users.find_one({'_id': id})
-        if check_doc and check_doc.get('base', {}).get('isDeleted') == True:
+        if not mongo.db.users.find_one({'_id': id}):
             logger.warning(f"User {id} deleted despite client disconnect")
             pass  # Proceed normally
         else:
             raise  # Re-raise if delete didn't apply
     except Exception as e:
         return jsonify({"error": str(e)}), 400
-    
-    updated = mongo.db.users.find_one({'_id': id})
-    
-    # History logging is best-effort
-    try:
-        log_history('user', id, 'DELETE', getattr(request, 'user_full_name', 'system'), old_doc, updated, {'base': {'isDeleted': True}})
-        logger.action("Delete", "User", id, getattr(request, 'user_full_name', 'system'))
-    except:
-        pass  # Don't fail request if logging fails
     
     # Broadcast user deletion to all clients (best-effort)
     try:

@@ -56,6 +56,16 @@ def log_history(entity_type, entity_id, action, user_id='system', old_val=None, 
     change_data['action'] = action
     change_data['timestamp'] = now
     
+    # Ensure base fields are populated in the change record
+    if 'base' not in change_data:
+        change_data['base'] = {}
+    
+    # Always record who performed the action and when
+    if 'updatedBy' not in change_data['base']:
+        change_data['base']['updatedBy'] = user_id
+    if 'updatedAt' not in change_data['base']:
+        change_data['base']['updatedAt'] = now
+    
     entry = {
         "o": clean_doc(old_val),      # Old: entity before changes
         "c": change_data,              # Change: what changed + who performed it

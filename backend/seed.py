@@ -72,8 +72,48 @@ def create_base(entity_type, days_offset=-30):
     }
 
 
+def load_profile_image_as_file(username, user_id=None):
+    """
+    Copy a profile image to the uploads folder and return the relative path.
+    
+    Args:
+        username: Username to find the source image
+        user_id: User ID for the filename (if None, uses username)
+        
+    Returns:
+        Relative path like "profiles/abc123.png" or None if no image
+    """
+    profiles_source_dir = os.path.join(os.path.dirname(__file__), 'static', 'profiles')
+    source_path = os.path.join(profiles_source_dir, f'{username}.png')
+    
+    if not os.path.exists(source_path):
+        return None
+    
+    # Get or create the uploads profiles folder
+    upload_folder = os.environ.get('UPLOAD_FOLDER', '/app/uploads')
+    # For local development, use a local uploads folder if /app/uploads doesn't exist
+    if not os.path.exists(upload_folder):
+        upload_folder = os.path.join(os.path.dirname(__file__), 'uploads')
+    
+    profiles_dest_dir = os.path.join(upload_folder, 'profiles')
+    if not os.path.exists(profiles_dest_dir):
+        os.makedirs(profiles_dest_dir)
+    
+    # Use user_id if provided, otherwise use username
+    file_id = user_id or username
+    dest_filename = f"{file_id}.png"
+    dest_path = os.path.join(profiles_dest_dir, dest_filename)
+    
+    # Copy the file
+    import shutil
+    shutil.copy2(source_path, dest_path)
+    
+    return f"profiles/{dest_filename}"
+
+
+# Keep the base64 function for backward compatibility if needed
 def load_profile_image_base64(username):
-    """Load a profile image and convert to base64 data URI."""
+    """Load a profile image and convert to base64 data URI (legacy)."""
     profiles_dir = os.path.join(os.path.dirname(__file__), 'static', 'profiles')
     image_path = os.path.join(profiles_dir, f'{username}.png')
     
@@ -130,12 +170,14 @@ def seed_users():
     print("👥 Seeding Users...")
     print("   Loading profile images as base64...")
     
+    # Load users with base64 profile images
     users_data = get_users_data(load_profile_image_base64, create_base)
     
     user_ids = []
     for u in users_data:
         u['_id'] = str(ObjectId())
         u['passwordHash'] = hash_password(u['passwordHash'])
+        
         mongo.db.users.insert_one(u)
         uid = u['_id']
         user_ids.append(uid)

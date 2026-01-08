@@ -133,3 +133,39 @@ def get_task_file(task_id, filename):
         return send_from_directory(upload_folder, filename)
     except Exception as e:
         return jsonify({'error': str(e)}), 404
+
+
+# ============================================
+# General Uploads Serving (Profile Images, etc.)
+# ============================================
+
+def get_uploads_base_folder():
+    """Get the base uploads folder (from environment or default)."""
+    # Check environment variable first
+    upload_folder = os.environ.get('UPLOAD_FOLDER')
+    if upload_folder and os.path.exists(upload_folder):
+        return upload_folder
+    
+    # For Docker: /app/uploads
+    if os.path.exists('/app/uploads'):
+        return '/app/uploads'
+    
+    # For local development: backend/uploads (relative to this file)
+    local_uploads = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'uploads')
+    if not os.path.exists(local_uploads):
+        os.makedirs(local_uploads)
+    return local_uploads
+
+
+@bp.route('/profiles/<filename>', methods=['GET'])
+def get_profile_image(filename):
+    """
+    Serve a profile image.
+    Profile images are public - no auth required for display.
+    """
+    try:
+        upload_folder = os.path.join(get_uploads_base_folder(), 'profiles')
+        return send_from_directory(upload_folder, filename)
+    except Exception as e:
+        return jsonify({'error': 'Image not found'}), 404
+

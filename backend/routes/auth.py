@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from database import mongo
 from models.auth_model import LoginModel
 from utils.jwt_utils import generate_token, jwt_required
+
 import bcrypt
 from utils.logger import logger
 
@@ -11,6 +12,7 @@ def serialize_user(doc):
     """Serialize user document, removing sensitive fields"""
     if not doc:
         return None
+    
     user = {
         'id': doc['_id'],
         'fullName': doc.get('fullName'),

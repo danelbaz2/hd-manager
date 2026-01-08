@@ -231,25 +231,24 @@ def delete_task(id):
             return jsonify({"error": "Task not found"}), 404
 
         now = int(datetime.now().timestamp() * 1000)
-        mongo.db.ents.update_one({'_id': id}, {'$set': {
-            'base.isDeleted': True,
-            'base.updatedAt': now,
-
-            'base.updatedBy': request.user_full_name
-        }})
         
-        updated = mongo.db.ents.find_one({'_id': id})
+        # Create a snapshot of the document as it would look after deletion
+        deleted_state = old_doc.copy()
+        if 'base' not in deleted_state:
+            deleted_state['base'] = {}
+        deleted_state['base']['isDeleted'] = True
+        deleted_state['base']['updatedAt'] = now
+        deleted_state['base']['updatedBy'] = request.user_full_name
         
-        # Log deletion - title will be retrieved from old_doc (o field) in frontend via oldValues
-        log_history('task', id, 'DELETE', request.user_full_name, old_doc, updated, {
-            'base': {
-                'isDeleted': True,
-                'updatedAt': now,
-                'updatedBy': request.user_full_name
-            }
-        })
-        
+        # Log history BEFORE deletion (save full entity snapshot to archive)
+        # Pass deleted_state as 'new' value so 'n' field has the final state (isDeleted=True)
+        log_history('task', id, 'DELETE', request.user_full_name, old_doc, deleted_state, {'action': 'HARD_DELETE', 'base': {'isDeleted': True}})
         logger.action("Delete", "Task", id, request.user_full_name)
+        
+        # Hard delete - actually remove the document
+        result = mongo.db.ents.delete_one({'_id': id, 'base.entityType': 'task'})
+        if result.deleted_count == 0:
+            return jsonify({"error": "Failed to delete task"}), 500
         
     except Exception as e:
         return jsonify({"error": str(e)}), 400

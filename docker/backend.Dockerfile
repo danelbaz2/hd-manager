@@ -31,7 +31,7 @@ COPY --from=builder /root/.local /root/.local
 # Make sure scripts in .local are usable
 ENV PATH=/root/.local/bin:$PATH
 
-# Copy application code
+# Copy application code (source available at /app for debugging)
 COPY . .
 
 # Create uploads directory

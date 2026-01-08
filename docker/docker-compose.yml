@@ -1,3 +1,15 @@
+# ==============================================
+# HD-Manager Development Docker Compose
+# ==============================================
+# Use this file for local development with Docker
+#
+# IMPORTANT: Before first run, create external volumes:
+#   docker volume create mongodb_data
+#   docker volume create mongodb_config
+#   docker volume create uploads
+#
+# These volumes will persist even after 'docker-compose down'
+
 services:
   # ============================================
   # Backend Server - Python/Flask Application
@@ -6,7 +18,7 @@ services:
     build:
       context: ../backend
       dockerfile: ../docker/backend.Dockerfile
-    container_name: hd-backend-server
+    container_name: backend
     restart: unless-stopped
     ports:
       - "5000:5000"
@@ -17,10 +29,10 @@ services:
       - MAX_FILE_SIZE_MB=10
       - LOG_LEVEL=INFO
       - UPLOAD_ALLOWED_EXTENSIONS=pdf,doc,docx,xls,xlsx,txt,png,jpg,jpeg,gif
-      - MONGO_URI=mongodb://mongodb:27017/hd-manager
+      - MONGO_URI=mongodb://mongodb-server:27017/hd-manager
       - JWT_SECRET_KEY=8f3b2c9d1e4a5f6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b
     volumes:
-      - backend_uploads:/app/uploads
+      - uploads:/app/uploads
     depends_on:
       - mongodb
     networks:
@@ -38,18 +50,21 @@ services:
         - VITE_API_URL=/api
         - VITE_SOCKET_TIMEOUT=10000
         - VITE_IDLE_TIMEOUT=300000
-    container_name: hd-nginx-front
+    container_name: frontend
     restart: unless-stopped
     ports:
       - "443:443"
     environment:
-      # These are injected at runtime by docker-entrypoint.sh
+      # These are injected at runtime by frontend-entrypoint.sh
       - VITE_SYSTEM_NAME=Flow Task11
       - VITE_API_URL=/api
       - VITE_API_MAX_RETRIES=2
       - VITE_API_RETRY_DELAY=500
       - VITE_SOCKET_TIMEOUT=10000
       - VITE_IDLE_TIMEOUT=300000
+      # External System URLs - default values for local development
+      - SERVICENOW_URL=https://servicenow.com
+      - MARS_URL=https://mars-system.com
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ca:/etc/nginx/ssl:ro
@@ -63,7 +78,7 @@ services:
   # ============================================
   mongodb:
     image: mongo:7.0
-    container_name: hd-mongodb
+    container_name: mongodb-server
     restart: unless-stopped
     ports:
       - "27017:27017"
@@ -81,12 +96,17 @@ networks:
     driver: bridge
 
 # ============================================
-# Volumes
+# Volumes - External (persist after docker-compose down)
+# ============================================
+# Create these volumes before first run:
+#   docker volume create mongodb_data
+#   docker volume create mongodb_config
+#   docker volume create uploads
 # ============================================
 volumes:
   mongodb_data:
-    driver: local
+    external: true
   mongodb_config:
-    driver: local
-  backend_uploads:
-    driver: local
+    external: true
+  uploads:
+    external: true
