@@ -111,18 +111,6 @@ def load_profile_image_as_file(username, user_id=None):
     return f"profiles/{dest_filename}"
 
 
-# Keep the base64 function for backward compatibility if needed
-def load_profile_image_base64(username):
-    """Load a profile image and convert to base64 data URI (legacy)."""
-    profiles_dir = os.path.join(os.path.dirname(__file__), 'static', 'profiles')
-    image_path = os.path.join(profiles_dir, f'{username}.png')
-    
-    if os.path.exists(image_path):
-        with open(image_path, 'rb') as img_file:
-            image_data = img_file.read()
-            base64_data = base64.b64encode(image_data).decode('utf-8')
-            return f'data:image/png;base64,{base64_data}'
-    return None
 
 
 # =============================================================================
@@ -168,7 +156,7 @@ def get_existing_users():
 def seed_users():
     """Seed users into the database."""
     print("👥 Seeding Users...")
-    print("   Loading profile images as base64...")
+    print("   Saving profile images to disk...")
     
     # First create users without profile images to get their IDs
     users_data = get_users_data(lambda x: None, create_base)  # Pass None for profileImage initially

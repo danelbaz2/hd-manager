@@ -6,14 +6,14 @@ import path from 'path'
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
   // Load env from root directory (parent of frontend) AND current directory
-  const env = { 
+  const env = {
     ...loadEnv(mode, path.resolve(__dirname, '..'), 'VITE_'),
-    ...loadEnv(mode, process.cwd(), '') 
+    ...loadEnv(mode, process.cwd(), '')
   }
-  
+
   return {
     plugins: [
-      react(), 
+      react(),
       tailwindcss(),
       {
         name: 'html-env-transform',
@@ -28,6 +28,15 @@ export default defineConfig(({ mode }) => {
     define: {
       // Make root .env variables available
       'import.meta.env.VITE_SYSTEM_NAME': JSON.stringify(env.VITE_SYSTEM_NAME || 'Flow Task'),
+    },
+    server: {
+      proxy: {
+        '/api': {
+          target: 'http://localhost:5000',
+          changeOrigin: true,
+          secure: false,
+        },
+      },
     },
   }
 })
