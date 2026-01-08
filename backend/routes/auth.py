@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from database import mongo
 from models.auth_model import LoginModel
 from utils.jwt_utils import generate_token, jwt_required
+from utils.profile_image import get_full_profile_url
 
 import bcrypt
 from utils.logger import logger
@@ -13,13 +14,18 @@ def serialize_user(doc):
     if not doc:
         return None
     
+    # Convert relative profile image path to full URL
+    profile_image = doc.get('profileImage')
+    if profile_image:
+        profile_image = get_full_profile_url(profile_image)
+    
     user = {
         'id': doc['_id'],
         'fullName': doc.get('fullName'),
         'username': doc.get('username'),
         'role': doc.get('role'),
         'color': doc.get('color'),
-        'profileImage': doc.get('profileImage'),
+        'profileImage': profile_image,
         'nickname': doc.get('nickname'),  # Optional display nickname
         'base': doc.get('base')
     }

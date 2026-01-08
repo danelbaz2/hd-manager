@@ -5,6 +5,7 @@ from bson.objectid import ObjectId
 from models.user_model import UserModel, UserUpdateModel
 from utils.history import log_history
 from utils.jwt_utils import jwt_required, admin_required, self_or_admin_required
+from utils.profile_image import save_profile_image_from_base64, delete_profile_image, is_base64_image, get_full_profile_url
 from websocket import broadcast_user_update
 import bcrypt
 from utils.logger import logger
@@ -20,6 +21,9 @@ bp = Blueprint('users', __name__, url_prefix='/api/users')
 def serialize_doc(doc):
     doc['id'] = doc.pop('_id')
     doc.pop('passwordHash', None)  # Remove password hash from response
+    # Convert relative profile image path to full URL
+    if doc.get('profileImage'):
+        doc['profileImage'] = get_full_profile_url(doc['profileImage'])
     return doc
 
 @bp.route('/', methods=['GET'])
@@ -60,7 +64,14 @@ def create_user():
 
     data['_id'] = str(ObjectId())
     
-    # profileImage is stored as base64 directly - no conversion needed
+    # Handle profile image - convert base64 to file
+    if data.get('profileImage') and is_base64_image(data['profileImage']):
+        try:
+            relative_path = save_profile_image_from_base64(data['profileImage'], data['_id'])
+            data['profileImage'] = relative_path
+        except Exception as e:
+            logger.warning(f"Failed to save profile image: {e}")
+            data['profileImage'] = None
     
     try:
         mongo.db.users.insert_one(data)
@@ -116,7 +127,20 @@ def update_user(id):
         # Empty password provided - remove from update to keep existing
         del data['password']
     
-    # profileImage is stored as base64 directly - no conversion needed
+    # Handle profile image - convert base64 to file
+    if data.get('profileImage') and is_base64_image(data['profileImage']):
+        try:
+            # Delete old profile image if exists
+            old_profile = old_doc.get('profileImage')
+            if old_profile and not old_profile.startswith('data:'):
+                delete_profile_image(old_profile)
+            
+            # Save new profile image
+            relative_path = save_profile_image_from_base64(data['profileImage'], id)
+            data['profileImage'] = relative_path
+        except Exception as e:
+            logger.warning(f"Failed to save profile image: {e}")
+            del data['profileImage']  # Don't update if save failed
     
     try:
         mongo.db.users.update_one({'_id': id}, {'$set': data})

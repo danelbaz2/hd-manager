@@ -170,20 +170,26 @@ def seed_users():
     print("👥 Seeding Users...")
     print("   Loading profile images as base64...")
     
-    # Load users with base64 profile images
-    users_data = get_users_data(load_profile_image_base64, create_base)
+    # First create users without profile images to get their IDs
+    users_data = get_users_data(lambda x: None, create_base)  # Pass None for profileImage initially
     
     user_ids = []
     for u in users_data:
         u['_id'] = str(ObjectId())
         u['passwordHash'] = hash_password(u['passwordHash'])
         
+        # Now save the profile image with the user's ID
+        username = u.get('username', '')
+        profile_path = load_profile_image_as_file(username, u['_id'])
+        if profile_path:
+            u['profileImage'] = profile_path
+        
         mongo.db.users.insert_one(u)
         uid = u['_id']
         user_ids.append(uid)
         log_history('user', uid, 'CREATE', 'system', None, u, u)
     
-    print(f"   ✓ {len(users_data)} users created")
+    print(f"   ✓ {len(users_data)} users created with file-based profile images")
     return users_data
 
 
