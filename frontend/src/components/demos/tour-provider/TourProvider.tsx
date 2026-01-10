@@ -3,12 +3,13 @@
  * 
  * Manages:
  * - Current tour state (active, page, step)
- * - localStorage persistence for seen tours
+ * - localStorage persistence for seen tours (using centralized user storage)
  * - Navigation between steps
  */
 import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
 import type { TourContextValue, TourState, TourPageId, TourStep } from "../shared/types";
 import { TOUR_CONFIGS } from "../shared/constants";
+import { hasSeenTour as checkHasSeenTour, markTourSeen, migrateOldStorage } from "../../../utils/userStorage";
 
 import { useAuth } from "../../../contexts";
 
@@ -26,19 +27,19 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
         currentStepIndex: 0,
     });
 
-    // Helper to get storage key with user ID
-    const getStorageKey = useCallback((configKey: string) => {
-        if (!user?.id) return configKey;
-        return `${configKey}_${user.id}`;
+    // Migrate old storage format on user change
+    useEffect(() => {
+        if (user?.id) {
+            migrateOldStorage(user.id);
+        }
     }, [user?.id]);
 
     // Check if user has seen a specific tour
     const hasSeenTour = useCallback((pageId: TourPageId): boolean => {
         const config = TOUR_CONFIGS[pageId];
         if (!config) return true;
-        const key = getStorageKey(config.storageKey);
-        return localStorage.getItem(key) === "true";
-    }, [getStorageKey]);
+        return checkHasSeenTour(user?.id, pageId);
+    }, [user?.id]);
 
     // Check if this is a first-time user (hasn't seen the home tour)
     const isFirstTimeUser = useCallback((): boolean => {
@@ -84,8 +85,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
 
             // If we've completed all steps, mark as complete
             if (nextIndex >= config.steps.length) {
-                const key = getStorageKey(config.storageKey);
-                localStorage.setItem(key, "true");
+                markTourSeen(user?.id, prev.currentPageId);
                 return {
                     isActive: false,
                     currentPageId: null,
@@ -98,7 +98,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
                 currentStepIndex: nextIndex,
             };
         });
-    }, [getStorageKey]);
+    }, [user?.id]);
 
     // Go to previous step
     const prevStep = useCallback(() => {
@@ -112,11 +112,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
     const skipTour = useCallback(() => {
         setState((prev) => {
             if (prev.currentPageId) {
-                const config = TOUR_CONFIGS[prev.currentPageId];
-                if (config) {
-                    const key = getStorageKey(config.storageKey);
-                    localStorage.setItem(key, "true");
-                }
+                markTourSeen(user?.id, prev.currentPageId);
             }
             return {
                 isActive: false,
@@ -124,7 +120,7 @@ export const TourProvider: React.FC<TourProviderProps> = ({ children }) => {
                 currentStepIndex: 0,
             };
         });
-    }, [getStorageKey]);
+    }, [user?.id]);
 
     // Complete the tour (same as skip but called on last step)
     const completeTour = useCallback(() => {

@@ -1,6 +1,5 @@
 import { AlertCircle, CheckCircle2, Clock } from "lucide-react";
 
-export const STORAGE_KEY = "kanban_onboarding_completed";
 export const ANIMATION_CYCLE_DURATION = 3000; // Total cycle duration in ms
 
 // Demo columns configuration (matches real columns)

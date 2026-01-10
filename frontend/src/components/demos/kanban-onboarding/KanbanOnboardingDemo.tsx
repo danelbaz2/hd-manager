@@ -1,7 +1,12 @@
 import React, { useCallback, type CSSProperties } from "react";
 import { HelpCircle } from "lucide-react";
-import { useTheme } from "../../../contexts";
-import { STORAGE_KEY, DEMO_COLUMNS } from "./constants";
+import { useTheme, useAuth } from "../../../contexts";
+import { 
+    hasCompletedKanbanOnboarding, 
+    markKanbanOnboardingComplete,
+    resetKanbanOnboarding 
+} from "../../../utils/userStorage";
+import { DEMO_COLUMNS } from "./constants";
 import { useKanbanOnboardingAnimation } from "./useKanbanOnboardingAnimation";
 import { KanbanOnboardingCard } from "./KanbanOnboardingCard";
 import { KanbanOnboardingColumn } from "./KanbanOnboardingColumn";
@@ -13,12 +18,13 @@ interface KanbanOnboardingDemoProps {
 
 const KanbanOnboardingDemo: React.FC<KanbanOnboardingDemoProps> = ({ onDismiss }) => {
     const { isDarkMode } = useTheme();
+    const { user } = useAuth();
     const { containerRef, columnPositions, animState } = useKanbanOnboardingAnimation();
 
     const handleDismiss = useCallback(() => {
-        localStorage.setItem(STORAGE_KEY, "true");
+        markKanbanOnboardingComplete(user?.id);
         onDismiss?.();
-    }, [onDismiss]);
+    }, [onDismiss, user?.id]);
 
     const isDragging = animState.phase === "lifting" || animState.phase === "dragging";
     const showFloatingCard = isDragging || animState.phase === "dropping";
@@ -126,13 +132,21 @@ const KanbanOnboardingDemo: React.FC<KanbanOnboardingDemoProps> = ({ onDismiss }
     );
 };
 
-export const shouldShowOnboarding = (): boolean => {
+/**
+ * Check if kanban onboarding should be shown
+ * @param userId - The user's ID (required for user-specific check)
+ */
+export const shouldShowOnboarding = (userId: string | undefined): boolean => {
     if (typeof window === "undefined") return false;
-    return localStorage.getItem(STORAGE_KEY) !== "true";
+    return !hasCompletedKanbanOnboarding(userId);
 };
 
-export const resetOnboarding = (): void => {
-    localStorage.removeItem(STORAGE_KEY);
+/**
+ * Reset kanban onboarding for testing/debugging
+ * @param userId - The user's ID
+ */
+export const resetOnboarding = (userId: string | undefined): void => {
+    resetKanbanOnboarding(userId);
 };
 
 export default KanbanOnboardingDemo;

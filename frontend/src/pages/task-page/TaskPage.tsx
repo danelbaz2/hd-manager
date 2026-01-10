@@ -420,7 +420,7 @@ const TaskPage: React.FC = () => {
         title="איך עובד לוח המשימות?"
         pageId="kanban"
         onClick={() => setShowKanbanDemo(true)}
-        showPulse={shouldShowOnboarding()}
+        showPulse={shouldShowOnboarding(authUser?.id)}
       />
     </div>
   );

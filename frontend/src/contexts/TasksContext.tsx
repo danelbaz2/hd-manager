@@ -22,7 +22,6 @@ import {
   shouldDoFullSync,
   mergeItems,
 } from "../utils/deltaSync";
-import { setUserTimestamp } from "../utils/activityFeedStorage";
 
 interface TasksContextState {
   tasks: Task[];
@@ -43,7 +42,7 @@ interface TasksProviderProps {
 }
 
 export const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
-  const { isAuthenticated, isLoading: isAuthLoading, user } = useAuth();
+  const { isAuthenticated, isLoading: isAuthLoading } = useAuth();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [isLoadingTasks, setIsLoadingTasks] = useState(false);
 
@@ -135,12 +134,6 @@ export const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
           )
         );
         updateReactQueryCache("UPDATE", fullTask as Task);
-      }
-
-      // Update the latest task update timestamp BEFORE updating history cache
-      // This ensures the unread indicator will show up when returning to home page
-      if (user?.id) {
-        setUserTimestamp(user.id, "latest_task_update", Date.now());
       }
 
       // Always update history cache for real-time activity feed updates

@@ -7,7 +7,6 @@ import React, {
   useRef,
 } from "react";
 import { getCurrentUser, logoutUser, type AuthUser } from "../api/authApi";
-import { clearUserActivityFeedStorage } from "../utils/activityFeedStorage";
 
 const MAX_RETRIES = 3;
 
@@ -160,9 +159,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   // Logout - calls backend to clear cookie
   const logout = useCallback(async () => {
-    // Get user ID before clearing state for localStorage cleanup
-    const userId = user?.id;
-
     // Call backend to clear the HttpOnly cookie
     try {
       await logoutUser();
@@ -173,12 +169,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
     // Clear auth state
     setUser(null);
 
-    // Clear user-specific localStorage data (but keep tour progress)
-    if (userId) {
-      // Clear activity feed timestamps
-      clearUserActivityFeedStorage(userId);
-    }
-  }, [user?.id]);
+    // Note: We intentionally do NOT clear user storage on logout
+    // Activity feed timestamps (lastViewedTeam, lastViewedTasks) should persist
+    // so users don't see already-read items as "new" when they log back in
+  }, []);
 
   const refreshUser = useCallback(async () => {
     try {
