@@ -94,7 +94,7 @@ def create_secondary_tag():
             return jsonify(serialize_doc(updated_tag)), 201
         else:
             # Tag exists and is active
-            return jsonify({"error": "Secondary tag with this name already exists under this primary tag"}), 409
+            return jsonify({"error": f"תגית משנית בשם '{data['name']}' כבר קיימת תחת תגית ראשית זו"}), 409
 
     data['base'] = {
         'isDeleted': False,

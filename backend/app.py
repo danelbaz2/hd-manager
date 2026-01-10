@@ -18,10 +18,16 @@ app = Flask(__name__, static_folder='../frontend/dist', static_url_path='/')
 # Hide basic request logs by default (clean terminal)
 # Configure logging based on environment
 log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
-# Only show request logs (werkzeug) if specifically in DEBUG mode
-# Otherwise keep them quiet (ERROR) as per original design
-system_log_level = logging.INFO if log_level == 'DEBUG' else logging.ERROR
-logging.getLogger('werkzeug').setLevel(system_log_level)
+# Werkzeug logs are always suppressed - we use our own request logger
+logging.getLogger('werkzeug').setLevel(logging.ERROR)
+
+# Initialize our custom request logger if LOG_REQUESTS is enabled
+# This provides clean, human-readable API request logs
+log_requests = os.getenv('LOG_REQUESTS', 'false').lower() == 'true'
+if log_requests:
+    from middleware.request_logger import init_request_logger
+    from utils.logger import logger as app_logger
+    # Note: init_request_logger will be called after app is fully configured
 
 # Parse CORS origins - handle wildcard specially
 cors_origins_env = os.getenv("CORS_ORIGINS", "http://localhost:5173")
@@ -57,6 +63,10 @@ app.register_blueprint(logs.bp)
 # Register SocketIO events (new modular socket system)
 from websocket import register_socket_events
 register_socket_events(socketio)
+
+# Initialize request logger if enabled
+if log_requests:
+    init_request_logger(app, app_logger)
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')

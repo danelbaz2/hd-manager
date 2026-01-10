@@ -72,7 +72,7 @@ def create_primary_tag():
             return jsonify(serialize_doc(updated_tag)), 201
         else:
             # Tag exists and is active
-            return jsonify({"error": "Primary tag with this name already exists"}), 409
+            return jsonify({"error": f"תגית ראשית בשם '{data['name']}' כבר קיימת במערכת"}), 409
 
     data['base'] = {
         'isDeleted': False,

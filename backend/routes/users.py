@@ -12,9 +12,10 @@ from utils.logger import logger
 from utils.error_handlers import handle_client_disconnect
 from middleware.idempotency import idempotency_middleware
 try:
-    from pymongo.errors import _OperationCancelled
+    from pymongo.errors import _OperationCancelled, DuplicateKeyError
 except ImportError:
     _OperationCancelled = Exception
+    DuplicateKeyError = Exception
 
 bp = Blueprint('users', __name__, url_prefix='/api/users')
 
@@ -75,6 +76,11 @@ def create_user():
     
     try:
         mongo.db.users.insert_one(data)
+    except DuplicateKeyError as e:
+        # Handle duplicate username
+        if 'username' in str(e):
+            return jsonify({"error": f"שם המשתמש '{data.get('username')}' כבר קיים במערכת"}), 409
+        return jsonify({"error": "משתמש עם פרטים זהים כבר קיים במערכת"}), 409
     except _OperationCancelled:
         # Check if the document was actually inserted despite the cancellation
         if mongo.db.users.find_one({'_id': data['_id']}):
@@ -144,6 +150,13 @@ def update_user(id):
     
     try:
         mongo.db.users.update_one({'_id': id}, {'$set': data})
+    except DuplicateKeyError as e:
+        # Handle duplicate username on update
+        if 'username' in str(e):
+            logger.info(f"Duplicate username attempt on update: '{data.get('username')}'")
+            return jsonify({"error": f"שם המשתמש '{data.get('username')}' כבר קיים במערכת"}), 409
+        logger.info(f"Duplicate user attempt on update: {str(e)[:100]}")
+        return jsonify({"error": "משתמש עם פרטים זהים כבר קיים במערכת"}), 409
     except _OperationCancelled:
         # Check if the update was applied despite the cancellation
         check_doc = mongo.db.users.find_one({'_id': id})
