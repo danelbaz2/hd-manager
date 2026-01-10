@@ -42,7 +42,7 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
     // Sync local state when prop changes (handles external resets like clearing form)
     useEffect(() => {
         setSelectedPrimaryIds(prev => {
-            const isDifferent =
+        const isDifferent =
                 prev.length !== selectedPrimaryTagIds.length ||
                 !prev.every(id => selectedPrimaryTagIds.includes(id));
 
@@ -81,21 +81,21 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
         standalonePrimaryTags.length > 0 || selectedSecondaryTags.length > 0;
 
     // Auto-select primary tags that have selected secondary tags
+    // Call onChangePrimary directly when adding new primary tags
     useEffect(() => {
         if (activePrimaryIds.length > 0) {
-            setSelectedPrimaryIds((prev) => {
-                const newIds = [...new Set([...prev, ...activePrimaryIds])];
-                return newIds;
-            });
+            // Check if all activePrimaryIds are already selected
+            const allAlreadyIncluded = activePrimaryIds.every(id => selectedPrimaryIds.includes(id));
+            if (!allAlreadyIncluded) {
+                const newIds = [...new Set([...selectedPrimaryIds, ...activePrimaryIds])];
+                setSelectedPrimaryIds(newIds);
+                // Directly notify parent of the change
+                onChangePrimary?.(newIds);
+            }
         }
-    }, [activePrimaryIds]);
-
-    // Propagate primary tag selection changes to parent
-    useEffect(() => {
-        if (onChangePrimary) {
-            onChangePrimary(selectedPrimaryIds);
-        }
-    }, [selectedPrimaryIds, onChangePrimary]);
+    }, [activePrimaryIds]); // eslint-disable-line react-hooks/exhaustive-deps
+    // Note: We intentionally exclude selectedPrimaryIds and onChangePrimary from deps
+    // to avoid loops. This effect only reacts to secondary tag selection changes.
 
     // Filter secondary tags by selected primary tags
     const filteredSecondaryTags = useMemo(() => {
@@ -124,12 +124,16 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
             const secondaryIdsToRemove = secondaryTags
                 .filter((st) => st.primaryTagId === primaryId)
                 .map((st) => st.id);
-            setSelectedPrimaryIds((prev) => prev.filter((id) => id !== primaryId));
+            const newPrimaryIds = selectedPrimaryIds.filter((id) => id !== primaryId);
+            setSelectedPrimaryIds(newPrimaryIds);
+            onChangePrimary?.(newPrimaryIds);
             onChange(
                 selectedSecondaryTagIds.filter((id) => !secondaryIdsToRemove.includes(id))
             );
         } else {
-            setSelectedPrimaryIds((prev) => [...prev, primaryId]);
+            const newPrimaryIds = [...selectedPrimaryIds, primaryId];
+            setSelectedPrimaryIds(newPrimaryIds);
+            onChangePrimary?.(newPrimaryIds);
         }
     };
 
@@ -148,7 +152,9 @@ const TwoTierTagsSelect: React.FC<TwoTierTagsSelectProps> = ({
 
     const removePrimaryTag = (primaryId: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        setSelectedPrimaryIds((prev) => prev.filter((id) => id !== primaryId));
+        const newPrimaryIds = selectedPrimaryIds.filter((id) => id !== primaryId);
+        setSelectedPrimaryIds(newPrimaryIds);
+        onChangePrimary?.(newPrimaryIds);
     };
 
     const getPrimaryTag = (primaryId: string): PrimaryTagData | undefined => {

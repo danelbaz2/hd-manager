@@ -90,15 +90,6 @@ export const MessageItem: React.FC<MessageItemProps> = ({
               >
                 {senderName}
               </span>
-              <span
-                className="text-xs px-2 py-0.5 rounded-full font-medium"
-                style={{
-                  backgroundColor: `${senderColor}20`,
-                  color: senderColor,
-                }}
-              >
-                מנהל
-              </span>
             </div>
             <span
               className={`text-xs ${isDarkMode ? "text-slate-400" : "text-slate-500"

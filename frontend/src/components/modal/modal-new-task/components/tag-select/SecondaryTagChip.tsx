@@ -32,13 +32,15 @@ const SecondaryTagChip: React.FC<SecondaryTagChipProps> = ({
             }}
         >
             {tag.name}
-            <button
-                type="button"
+            <span
+                role="button"
+                tabIndex={0}
                 onClick={onRemove}
-                className="hover:opacity-70 transition-opacity"
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onRemove(e as unknown as React.MouseEvent); }}
+                className="hover:opacity-70 transition-opacity cursor-pointer"
             >
                 <X className="w-3 h-3" />
-            </button>
+            </span>
         </span>
     );
 };
