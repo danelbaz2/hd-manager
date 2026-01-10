@@ -21,6 +21,8 @@ const getStatusStyle = (status?: string) => {
       return { bg: "bg-green-100", text: "text-green-700", label: "פתוח" };
     case "in_progress":
       return { bg: "bg-amber-100", text: "text-amber-700", label: "בטיפול" };
+    case "pending_approval":
+      return { bg: "bg-purple-100", text: "text-purple-700", label: "ממתין לאישור" };
     case "completed":
       return { bg: "bg-slate-100", text: "text-slate-600", label: "סגור" };
     default:

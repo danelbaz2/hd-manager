@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
-import { Tags, ChevronDown, X } from "lucide-react";
+import { Tags, ChevronDown, X, Search } from "lucide-react";
 import type { PrimaryTagData, SecondaryTagData } from "../../schemas/tagTypes";
 import { useTheme } from "../../contexts/ThemeContext";
 
@@ -12,7 +12,7 @@ interface TagFilterFieldProps {
 }
 
 /**
- * TagFilterField - Dropdown tag selector with badge-style tags
+ * TagFilterField - Dropdown tag selector with badge-style tags and search
  * Opens as an overlay to avoid layout shifts
  */
 const TagFilterField: React.FC<TagFilterFieldProps> = ({
@@ -23,8 +23,10 @@ const TagFilterField: React.FC<TagFilterFieldProps> = ({
 }) => {
   const { isDarkMode } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
   const buttonRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const searchInputRef = useRef<HTMLInputElement>(null);
   const [position, setPosition] = useState({ top: 0, right: 0, width: 0 });
 
   const handleToggleTag = (tagId: string) => {
@@ -38,6 +40,35 @@ const TagFilterField: React.FC<TagFilterFieldProps> = ({
   const handleClearAll = () => {
     onChange([]);
   };
+
+  // Filter tags based on search query
+  const filteredPrimaryTags = useMemo(() => {
+    if (!searchQuery.trim()) return primaryTags;
+    const query = searchQuery.toLowerCase().trim();
+    return primaryTags.filter((tag) => 
+      tag.name.toLowerCase().includes(query)
+    );
+  }, [primaryTags, searchQuery]);
+
+  const filteredSecondaryTags = useMemo(() => {
+    if (!searchQuery.trim()) return secondaryTags;
+    const query = searchQuery.toLowerCase().trim();
+    return secondaryTags.filter((tag) => 
+      tag.name.toLowerCase().includes(query)
+    );
+  }, [secondaryTags, searchQuery]);
+
+  // Focus search input when dropdown opens
+  useEffect(() => {
+    if (isOpen && searchInputRef.current) {
+      // Small delay to ensure the portal is rendered
+      setTimeout(() => searchInputRef.current?.focus(), 50);
+    }
+    // Clear search when closing
+    if (!isOpen) {
+      setSearchQuery("");
+    }
+  }, [isOpen]);
 
   // Close on Escape
   useEffect(() => {
@@ -92,6 +123,8 @@ const TagFilterField: React.FC<TagFilterFieldProps> = ({
       ? "בחר תגיות..."
       : `${selectedTagIds.length} תגיות נבחרו`;
 
+  const hasResults = filteredPrimaryTags.length > 0 || filteredSecondaryTags.length > 0;
+
   return (
     <>
       {/* Selector Button */}
@@ -132,12 +165,12 @@ const TagFilterField: React.FC<TagFilterFieldProps> = ({
           <div
             ref={dropdownRef}
             className={`
-                            fixed z-[99999] rounded-xl border shadow-2xl p-4
-                            max-h-[500px] overflow-y-auto
+                            fixed z-[99999] rounded-xl border shadow-2xl
+                            max-h-[500px] overflow-hidden flex flex-col
                             ${
                               isDarkMode
-                                ? "bg-slate-800 border-slate-700 dark-scrollbar"
-                                : "bg-white border-slate-200 light-scrollbar"
+                                ? "bg-slate-800 border-slate-700"
+                                : "bg-white border-slate-200"
                             }
                         `}
             style={{
@@ -147,98 +180,138 @@ const TagFilterField: React.FC<TagFilterFieldProps> = ({
             }}
             dir="rtl"
           >
-            {/* Primary Tags Section */}
-            {primaryTags.length > 0 && (
-              <div className="mb-4">
-                <div
-                  className={`text-xs font-medium mb-2 ${
-                    isDarkMode ? "text-slate-400" : "text-slate-500"
+            {/* Search Input */}
+            <div className={`p-3 border-b ${isDarkMode ? "border-slate-700" : "border-slate-200"}`}>
+              <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${
+                isDarkMode ? "bg-slate-700/50" : "bg-slate-100"
+              }`}>
+                <Search className="w-4 h-4 text-slate-400 shrink-0" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="חפש תגית..."
+                  className={`w-full bg-transparent text-sm outline-none ${
+                    isDarkMode 
+                      ? "text-white placeholder-slate-400" 
+                      : "text-slate-800 placeholder-slate-500"
                   }`}
-                >
-                  בחר קטגוריה
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {primaryTags.map((tag) => {
-                    const isSelected = selectedTagIds.includes(tag.id);
-                    return (
-                      <button
-                        key={tag.id}
-                        onClick={() => handleToggleTag(tag.id)}
-                        className={`
-                                                    px-3 py-1.5 rounded-lg text-xs font-semibold
-                                                    transition-all duration-200
-                                                    ${
-                                                      isSelected
-                                                        ? "ring-[3px] ring-offset-2 scale-[1.05] shadow-lg"
-                                                        : "hover:scale-[1.02] opacity-80 hover:opacity-100"
-                                                    }
-                                                `}
-                        style={{
-                          backgroundColor: tag.color,
-                          color: "#fff",
-                          ...(isSelected && {
-                            boxShadow: isDarkMode
-                              ? `0 0 0 3px ${tag.color}80`
-                              : `0 0 0 3px ${tag.color}60, 0 4px 6px -1px rgba(0, 0, 0, 0.1)`,
-                          }),
-                        }}
-                      >
-                        {tag.name}
-                      </button>
-                    );
-                  })}
-                </div>
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery("")}
+                    className="p-0.5 rounded hover:bg-slate-500/20 transition-colors"
+                  >
+                    <X className="w-3.5 h-3.5 text-slate-400" />
+                  </button>
+                )}
               </div>
-            )}
+            </div>
 
-            {/* Secondary Tags Section */}
-            {secondaryTags.length > 0 && (
-              <div>
-                <div
-                  className={`text-xs font-medium mb-2 ${
-                    isDarkMode ? "text-slate-400" : "text-slate-500"
-                  }`}
-                >
-                  בחר קטגוריה משנית כדי לראות תגיות משניות
+            {/* Tags Content */}
+            <div className={`p-4 overflow-y-auto ${isDarkMode ? "dark-scrollbar" : "light-scrollbar"}`}>
+              {!hasResults ? (
+                <div className={`text-sm text-center py-4 ${isDarkMode ? "text-slate-400" : "text-slate-500"}`}>
+                  לא נמצאו תגיות התואמות לחיפוש
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {secondaryTags.map((tag) => {
-                    const parent = primaryTags.find(
-                      (p) => p.id === tag.primaryTagId
-                    );
-                    const isSelected = selectedTagIds.includes(tag.id);
-                    const color = parent?.color || "#94A3B8";
-
-                    return (
-                      <button
-                        key={tag.id}
-                        onClick={() => handleToggleTag(tag.id)}
-                        className={`
-                                                    px-3 py-1.5 rounded-lg text-xs font-semibold
-                                                    transition-all duration-200
-                                                    ${
-                                                      isSelected
-                                                        ? "ring-[3px] ring-offset-2 scale-[1.05] shadow-lg"
-                                                        : "hover:scale-[1.02] opacity-70 hover:opacity-100"
-                                                    }
-                                                `}
-                        style={{
-                          backgroundColor: `${color}CC`,
-                          color: "#fff",
-                          ...(isSelected && {
-                            boxShadow: isDarkMode
-                              ? `0 0 0 3px ${color}80`
-                              : `0 0 0 3px ${color}60, 0 4px 6px -1px rgba(0, 0, 0, 0.1)`,
-                          }),
-                        }}
+              ) : (
+                <>
+                  {/* Primary Tags Section */}
+                  {filteredPrimaryTags.length > 0 && (
+                    <div className="mb-4">
+                      <div
+                        className={`text-xs font-medium mb-2 ${
+                          isDarkMode ? "text-slate-400" : "text-slate-500"
+                        }`}
                       >
-                        {tag.name}
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+                        קטגוריות ראשיות
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {filteredPrimaryTags.map((tag) => {
+                          const isSelected = selectedTagIds.includes(tag.id);
+                          return (
+                            <button
+                              key={tag.id}
+                              onClick={() => handleToggleTag(tag.id)}
+                              className={`
+                                px-3 py-1.5 rounded-lg text-xs font-semibold
+                                transition-all duration-200
+                                ${
+                                  isSelected
+                                    ? "ring-[3px] ring-offset-2 scale-[1.05] shadow-lg"
+                                    : "hover:scale-[1.02] opacity-80 hover:opacity-100"
+                                }
+                              `}
+                              style={{
+                                backgroundColor: tag.color,
+                                color: "#fff",
+                                ...(isSelected && {
+                                  boxShadow: isDarkMode
+                                    ? `0 0 0 3px ${tag.color}80`
+                                    : `0 0 0 3px ${tag.color}60, 0 4px 6px -1px rgba(0, 0, 0, 0.1)`,
+                                }),
+                              }}
+                            >
+                              {tag.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Secondary Tags Section */}
+                  {filteredSecondaryTags.length > 0 && (
+                    <div>
+                      <div
+                        className={`text-xs font-medium mb-2 ${
+                          isDarkMode ? "text-slate-400" : "text-slate-500"
+                        }`}
+                      >
+                        תגיות משניות
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {filteredSecondaryTags.map((tag) => {
+                          const parent = primaryTags.find(
+                            (p) => p.id === tag.primaryTagId
+                          );
+                          const isSelected = selectedTagIds.includes(tag.id);
+                          const color = parent?.color || "#94A3B8";
+
+                          return (
+                            <button
+                              key={tag.id}
+                              onClick={() => handleToggleTag(tag.id)}
+                              className={`
+                                px-3 py-1.5 rounded-lg text-xs font-semibold
+                                transition-all duration-200
+                                ${
+                                  isSelected
+                                    ? "ring-[3px] ring-offset-2 scale-[1.05] shadow-lg"
+                                    : "hover:scale-[1.02] opacity-70 hover:opacity-100"
+                                }
+                              `}
+                              style={{
+                                backgroundColor: `${color}CC`,
+                                color: "#fff",
+                                ...(isSelected && {
+                                  boxShadow: isDarkMode
+                                    ? `0 0 0 3px ${color}80`
+                                    : `0 0 0 3px ${color}60, 0 4px 6px -1px rgba(0, 0, 0, 0.1)`,
+                                }),
+                              }}
+                            >
+                              {tag.name}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+            </div>
           </div>,
           document.body
         )}

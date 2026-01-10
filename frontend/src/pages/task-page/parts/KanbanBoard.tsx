@@ -56,29 +56,30 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     const priorityOrder: Record<string, number> = {
       high: 1,
       medium: 2,
+      low: 3,
     };
-    // Sort pending and in_progress by priority (high → medium → low)
+
+    // Sort pending and in_progress by priority (high at top → low at bottom)
     grouped.pending.sort((a, b) => {
-      const priorityA = priorityOrder[a.priority || "medium"] || 2;
-      const priorityB = priorityOrder[b.priority || "medium"] || 2;
+      const priorityA = priorityOrder[a.priority || "medium"] ?? 2;
+      const priorityB = priorityOrder[b.priority || "medium"] ?? 2;
       return priorityA - priorityB;
     });
-    grouped.pending_approval.sort((a, b) => {
-      const priorityA = priorityOrder[a.priority || "medium"] || 2;
-      const priorityB = priorityOrder[b.priority || "medium"] || 2;
-      return priorityA - priorityB;
-    });
+
     grouped.in_progress.sort((a, b) => {
-      const priorityA = priorityOrder[a.priority || "medium"] || 2;
-      const priorityB = priorityOrder[b.priority || "medium"] || 2;
+      const priorityA = priorityOrder[a.priority || "medium"] ?? 2;
+      const priorityB = priorityOrder[b.priority || "medium"] ?? 2;
       return priorityA - priorityB;
     });
+
+    // Sort pending_approval by time (oldest first at top, newest at bottom)
     grouped.pending_approval.sort((a, b) => {
-      const priorityA = priorityOrder[a.priority || "medium"] || 2;
-      const priorityB = priorityOrder[b.priority || "medium"] || 2;
-      return priorityA - priorityB;
+      const timeA = a.base?.updatedAt || a.base?.createdAt || 0;
+      const timeB = b.base?.updatedAt || b.base?.createdAt || 0;
+      return timeA - timeB;
     });
-    // Sort completed by updatedAt ascending (oldest first, newest at bottom)
+
+    // Sort completed by time (oldest first at top, newest at bottom)
     grouped.completed.sort((a, b) => {
       const timeA = a.base?.updatedAt || a.base?.createdAt || 0;
       const timeB = b.base?.updatedAt || b.base?.createdAt || 0;
