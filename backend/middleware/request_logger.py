@@ -8,6 +8,27 @@ import time
 from flask import request, g
 from functools import wraps
 
+# Runtime toggle for request logging
+_request_logging_enabled = True
+
+
+def is_request_logging_enabled() -> bool:
+    """Check if request logging is enabled"""
+    return _request_logging_enabled
+
+
+def set_request_logging_enabled(enabled: bool) -> bool:
+    """
+    Enable or disable request logging at runtime.
+    
+    Returns the previous state.
+    """
+    global _request_logging_enabled
+    previous = _request_logging_enabled
+    _request_logging_enabled = enabled
+    return previous
+
+
 # ANSI color codes
 COLORS = {
     'reset': '\033[0m',
@@ -70,6 +91,10 @@ def init_request_logger(app, logger):
     @app.after_request
     def log_request_end(response):
         """Log request details after response"""
+        # Skip if request logging is disabled
+        if not is_request_logging_enabled():
+            return response
+        
         # Skip static files and health checks
         if request.path.startswith('/static') or request.path == '/health':
             return response

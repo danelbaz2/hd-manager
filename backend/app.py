@@ -21,13 +21,15 @@ log_level = os.getenv('LOG_LEVEL', 'INFO').upper()
 # Werkzeug logs are always suppressed - we use our own request logger
 logging.getLogger('werkzeug').setLevel(logging.ERROR)
 
-# Initialize our custom request logger if LOG_REQUESTS is enabled
+# Initialize our custom request logger
 # This provides clean, human-readable API request logs
-log_requests = os.getenv('LOG_REQUESTS', 'false').lower() == 'true'
-if log_requests:
-    from middleware.request_logger import init_request_logger
-    from utils.logger import logger as app_logger
-    # Note: init_request_logger will be called after app is fully configured
+# LOG_REQUESTS controls the initial state (on/off), but can be toggled at runtime
+from middleware.request_logger import init_request_logger, set_request_logging_enabled
+from utils.logger import logger as app_logger
+
+# Set initial state from env var (default: off, can be toggled at runtime)
+initial_log_requests = os.getenv('LOG_REQUESTS', 'false').lower() == 'true'
+set_request_logging_enabled(initial_log_requests)
 
 # Parse CORS origins - handle wildcard specially
 cors_origins_env = os.getenv("CORS_ORIGINS", "http://localhost:5173")
@@ -64,9 +66,8 @@ app.register_blueprint(logs.bp)
 from websocket import register_socket_events
 register_socket_events(socketio)
 
-# Initialize request logger if enabled
-if log_requests:
-    init_request_logger(app, app_logger)
+# Always initialize request logger middleware (state is controlled by the toggle)
+init_request_logger(app, app_logger)
 
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
