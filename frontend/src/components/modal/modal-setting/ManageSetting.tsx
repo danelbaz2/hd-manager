@@ -1,25 +1,50 @@
 import React, { useState, useMemo } from "react";
-import { X, Settings, Users, UserPlus, Tag, UserCog } from "lucide-react";
+import {
+  X,
+  Settings,
+  Users,
+  UserPlus,
+  Tag,
+  UserCog,
+  Building2,
+} from "lucide-react";
 import { useTheme, useAuth } from "../../../contexts";
 import { ModalOverlay } from "../../common/ModalOverlay";
 import ManageUser from "./manage-user/ManageUser.tsx";
 import ManageContact from "./manage-contact/ManageContact.tsx";
 import ManageTagsTwoTier from "./manage-tags";
 import { ProfileSettings } from "./profile-settings";
+import { ManageMilitaryHierarchy } from "./manage-military-hierarchy";
 
 interface ManageSettingProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-type TabType = "users" | "contacts" | "tags" | "profile";
+type TabType = "users" | "contacts" | "tags" | "profile" | "hierarchy";
 
 // All available tabs configuration
 const ALL_TABS = [
   { id: "users" as TabType, label: "עובדים", icon: Users, adminOnly: true },
-  { id: "contacts" as TabType, label: "אנשי קשר", icon: UserPlus, adminOnly: false },
+  {
+    id: "contacts" as TabType,
+    label: "אנשי קשר",
+    icon: UserPlus,
+    adminOnly: false,
+  },
   { id: "tags" as TabType, label: "תגיות", icon: Tag, adminOnly: true },
-  { id: "profile" as TabType, label: "פרופיל", icon: UserCog, adminOnly: false },
+  {
+    id: "hierarchy" as TabType,
+    label: "עץ ציוות",
+    icon: Building2,
+    adminOnly: true,
+  },
+  {
+    id: "profile" as TabType,
+    label: "פרופיל",
+    icon: UserCog,
+    adminOnly: false,
+  },
 ];
 
 const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
@@ -29,7 +54,7 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
 
   // Filter tabs based on user role
   const tabs = useMemo(() => {
-    return ALL_TABS.filter(tab => isAdmin || !tab.adminOnly);
+    return ALL_TABS.filter((tab) => isAdmin || !tab.adminOnly);
   }, [isAdmin]);
 
   // Default to first available tab
@@ -44,6 +69,8 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
         return <ManageContact />;
       case "tags":
         return <ManageTagsTwoTier />;
+      case "hierarchy":
+        return <ManageMilitaryHierarchy />;
       case "profile":
         return <ProfileSettings />;
       default:
@@ -68,10 +95,11 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
           className={`
               absolute top-4 left-4 z-10
               p-2 rounded-lg transition-colors
-              ${isDarkMode
-              ? "hover:bg-slate-700 text-slate-400"
-              : "hover:bg-slate-100 text-slate-500"
-            }
+              ${
+                isDarkMode
+                  ? "hover:bg-slate-700 text-slate-400"
+                  : "hover:bg-slate-100 text-slate-500"
+              }
             `}
         >
           <X size={24} />
@@ -89,10 +117,11 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
               border-l
               p-6
               flex flex-col
-              ${isDarkMode
-              ? "bg-slate-900 border-slate-700"
-              : "bg-slate-50 border-slate-200"
-            }
+              ${
+                isDarkMode
+                  ? "bg-slate-900 border-slate-700"
+                  : "bg-slate-50 border-slate-200"
+              }
             `}
         >
           {/* Sidebar Header */}
@@ -119,12 +148,13 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
                     px-4 py-3 rounded-xl
                     text-sm font-medium
                     transition-all duration-200
-                    ${activeTab === tab.id
-                    ? "bg-blue-500 text-white shadow-lg"
-                    : isDarkMode
-                      ? "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-                      : "text-slate-600 hover:bg-slate-100"
-                  }
+                    ${
+                      activeTab === tab.id
+                        ? "bg-blue-500 text-white shadow-lg"
+                        : isDarkMode
+                        ? "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                        : "text-slate-600 hover:bg-slate-100"
+                    }
                   `}
               >
                 <span>{tab.label}</span>

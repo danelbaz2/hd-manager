@@ -113,9 +113,9 @@ export const ModalOverlay: React.FC<ModalOverlayProps> = ({
       onClick={handleOverlayClick}
       style={{ paddingLeft: offsetLeft }}
     >
-      {/* Backdrop - INSTANT blur, no animation */}
+      {/* Backdrop - Animated blur */}
       <div
-        className="absolute inset-0 bg-black/60 backdrop-blur-md"
+        className={`absolute inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300 ${isContentVisible ? "opacity-100" : "opacity-0"}`}
         onClick={handleBackdropClick}
       />
 
@@ -126,15 +126,12 @@ export const ModalOverlay: React.FC<ModalOverlayProps> = ({
         onKeyDown={handleKeyDown}
         className={`
           relative z-10 w-full ${maxWidthClass} transition-all outline-none
-          ${isContentVisible ? "scale-100 opacity-100" : "scale-95 opacity-0"}
+          ${isContentVisible ? "scale-100 opacity-100 translate-y-0" : "scale-95 opacity-0 translate-y-4"}
         `}
         style={{
           transitionDuration: `${animationDuration}ms`,
-          transform:
-            offsetLeft > 0
-              ? `translateX(${offsetLeft / 2}px) ${isContentVisible ? "scale(1)" : "scale(0.95)"
-              }`
-              : undefined,
+          // Combine custom offset transform with the scale/translate
+          transform: offsetLeft > 0 && !isContentVisible ? undefined : undefined 
         }}
       >
         {children}

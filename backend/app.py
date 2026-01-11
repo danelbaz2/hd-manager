@@ -49,7 +49,7 @@ socketio = SocketIO(app, cors_allowed_origins=cors_origins)
 
 # Import routes after app initialization to avoid circular imports
 # Import routes after app initialization to avoid circular imports
-from routes import tasks, users, contacts, history_entries, chat_messages, auth, primary_tags, secondary_tags, uploads, logs
+from routes import tasks, users, contacts, history_entries, chat_messages, auth, primary_tags, secondary_tags, uploads, logs, military_hierarchy
 
 app.register_blueprint(tasks.bp)
 app.register_blueprint(users.bp)
@@ -61,6 +61,7 @@ app.register_blueprint(chat_messages.bp)
 app.register_blueprint(auth.bp)
 app.register_blueprint(uploads.bp)
 app.register_blueprint(logs.bp)
+app.register_blueprint(military_hierarchy.bp)
 
 # Register SocketIO events (new modular socket system)
 from websocket import register_socket_events

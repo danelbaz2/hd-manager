@@ -5,6 +5,7 @@ import {
   TwoTierTagsSelect,
   UserSelect,
   DatePicker,
+  MilitaryUnitSelect,
 } from "../../modal-new-task/components";
 import type {
   TaskPriority,
@@ -15,6 +16,7 @@ import type {
   PrimaryTagData,
   SecondaryTagData,
 } from "../../../../schemas/tagTypes";
+import { useMilitaryHierarchy } from "../../../../hooks/useMilitaryHierarchy";
 
 interface TaskFormProps {
   title: string;
@@ -82,6 +84,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       optionals.externalId
     );
   });
+
+  // Military hierarchy auto-complete
+  const {
+    handlePikudInputChange,
+    handleUgdaInputChange,
+    handleHativaInputChange,
+    handleGdudInputChange,
+    handlePikudSelect,
+    handleUgdaSelect,
+    handleHativaSelect,
+    handleGdudSelect,
+    suggestions,
+  } = useMilitaryHierarchy({ optionals, setOptionals });
 
   const adjustHeight = (
     el: HTMLTextAreaElement | null,
@@ -239,76 +254,44 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       >
         <div className="overflow-hidden">
           <div className="space-y-4 pt-2">
-            {/* Military Hierarchy */}
+            {/* Military Hierarchy - with autocomplete dropdowns */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              <div>
-                <label
-                  className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"
-                    }`}
-                >
-                  פיקוד
-                </label>
-                <input
-                  type="text"
-                  placeholder="צפון"
-                  value={optionals?.pikud || ""}
-                  onChange={(e) =>
-                    setOptionals({ ...optionals, pikud: e.target.value })
-                  }
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label
-                  className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"
-                    }`}
-                >
-                  אוגדה
-                </label>
-                <input
-                  type="text"
-                  placeholder="91"
-                  value={optionals?.ugda || ""}
-                  onChange={(e) =>
-                    setOptionals({ ...optionals, ugda: e.target.value })
-                  }
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label
-                  className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"
-                    }`}
-                >
-                  חטיבה
-                </label>
-                <input
-                  type="text"
-                  placeholder="300"
-                  value={optionals?.hativa || ""}
-                  onChange={(e) =>
-                    setOptionals({ ...optionals, hativa: e.target.value })
-                  }
-                  className={inputClass}
-                />
-              </div>
-              <div>
-                <label
-                  className={`block text-xs font-medium mb-1 ${isDarkMode ? "text-slate-300" : "text-slate-600"
-                    }`}
-                >
-                  גדוד
-                </label>
-                <input
-                  type="text"
-                  placeholder="299"
-                  value={optionals?.gdud || ""}
-                  onChange={(e) =>
-                    setOptionals({ ...optionals, gdud: e.target.value })
-                  }
-                  className={inputClass}
-                />
-              </div>
+              <MilitaryUnitSelect
+                label="פיקוד"
+                placeholder="צפון"
+                value={optionals?.pikud || ""}
+                options={suggestions.pikud}
+                onInputChange={handlePikudInputChange}
+                onSelect={handlePikudSelect}
+                inputClassName={inputClass}
+              />
+              <MilitaryUnitSelect
+                label="אוגדה"
+                placeholder="91"
+                value={optionals?.ugda || ""}
+                options={suggestions.ugda}
+                onInputChange={handleUgdaInputChange}
+                onSelect={handleUgdaSelect}
+                inputClassName={inputClass}
+              />
+              <MilitaryUnitSelect
+                label="חטיבה"
+                placeholder="7"
+                value={optionals?.hativa || ""}
+                options={suggestions.hativa}
+                onInputChange={handleHativaInputChange}
+                onSelect={handleHativaSelect}
+                inputClassName={inputClass}
+              />
+              <MilitaryUnitSelect
+                label="גדוד"
+                placeholder="71"
+                value={optionals?.gdud || ""}
+                options={suggestions.gdud}
+                onInputChange={handleGdudInputChange}
+                onSelect={handleGdudSelect}
+                inputClassName={inputClass}
+              />
             </div>
 
             {/* External System Integration */}

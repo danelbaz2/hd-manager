@@ -26,6 +26,10 @@ services:
       - CORS_ORIGINS=https://192.168.80.5,https://flow-task
       - MAX_FILE_SIZE_MB=10
       - LOG_LEVEL=INFO
+      - LOG_REQUESTS=false
+      # ADMIN_API_KEY - Used for runtime log control via curl
+      # CHANGE THIS in production!
+      - ADMIN_API_KEY=CHANGE_ME_IN_PRODUCTION
       - UPLOAD_ALLOWED_EXTENSIONS=pdf,doc,docx,xls,xlsx,txt,png,jpg,jpeg,gif
       - MONGO_URI=mongodb://mongodb-server:27017/hd-manager
       - SECRET_KEY=8f3b2c9d1e4a5f6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b
