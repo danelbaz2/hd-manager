@@ -160,13 +160,17 @@ const TaskModal: React.FC = () => {
     }
   }, [task, updateCurrentTask, showSuccess, showError]);
 
+  const { state: tagsModalState, closeTagsModal } = useTagsModal();
+
   useEffect(() => {
     if (!isOpen) {
       setActiveTab("details");
       setPendingStatus(null);
+      // Close TagsModal when TaskModal closes
+      closeTagsModal();
     }
     clearAllAlerts();
-  }, [isOpen, clearAllAlerts]);
+  }, [isOpen, clearAllAlerts, closeTagsModal]);
 
   const handleAddNote = useCallback(
     async (text: string) => {
@@ -217,7 +221,6 @@ const TaskModal: React.FC = () => {
     [users, secondaryTags, primaryTags, isDarkMode, contacts]
   );
 
-  const { state: tagsModalState } = useTagsModal();
   const tagsModalOffset = tagsModalState.isOpen ? 320 : 0;
 
   if (!task) return null;

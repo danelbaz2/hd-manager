@@ -39,14 +39,8 @@ const TagsModal: React.FC = () => {
 
   return (
     <>
-      {/* Subtle backdrop - semi-transparent, doesn't fully block task modal */}
-      <div
-        className={`
-                    fixed inset-0 z-[99998] transition-opacity duration-300
-                    ${isVisible ? "bg-black/20" : "bg-transparent"}
-                `}
-        onClick={closeTagsModal}
-      />
+      {/* No full-screen backdrop - TagsModal stays open when interacting with TaskModal */}
+      {/* Users can close it via X button or when TaskModal closes */}
 
       {/* Modal Panel - Left Side with slide animation */}
       <div
