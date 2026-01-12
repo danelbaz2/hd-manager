@@ -28,6 +28,7 @@ const TagsFilter: React.FC<TagsFilterProps> = ({
 
   const togglePrimary = (id: string) => {
     if (selectedPrimaryIds.includes(id)) {
+      // Deselecting primary tag - also remove all its secondary tags
       onPrimaryChange(selectedPrimaryIds.filter((i) => i !== id));
       const relatedSecondary = secondaryTags
         .filter((st) => st.primaryTagId === id)
@@ -36,7 +37,12 @@ const TagsFilter: React.FC<TagsFilterProps> = ({
         selectedSecondaryIds.filter((i) => !relatedSecondary.includes(i))
       );
     } else {
+      // Selecting primary tag - also select ALL its secondary tags by default
       onPrimaryChange([...selectedPrimaryIds, id]);
+      const relatedSecondary = secondaryTags
+        .filter((st) => st.primaryTagId === id)
+        .map((st) => st.id);
+      onSecondaryChange([...selectedSecondaryIds, ...relatedSecondary]);
     }
   };
 
