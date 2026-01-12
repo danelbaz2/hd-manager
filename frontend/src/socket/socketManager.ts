@@ -165,6 +165,21 @@ class SocketManager {
       }
     });
   }
+
+  /**
+   * Safely emit an event: ensures connection first, returns false if emit was skipped.
+   */
+  async safeEmit(event: string, data?: any): Promise<boolean> {
+    const connected = await this.ensureConnected();
+
+    if (connected && this.socket?.connected) {
+      this.socket.emit(event, data);
+      return true;
+    }
+
+    console.warn('[Socket] Emit skipped - not connected', { event });
+    return false;
+  }
   
   /**
    * Get current socket state.
@@ -184,9 +199,7 @@ class SocketManager {
    * Authenticate with user ID for targeted broadcasts.
    */
   authenticate(userId: string): void {
-    if (this.socket?.connected) {
-      this.socket.emit('authenticate', { userId });
-    }
+    void this.safeEmit('authenticate', { userId });
   }
   
   // ============================================================================
@@ -405,3 +418,8 @@ class SocketManager {
 
 // Export singleton instance
 export const socketManager = new SocketManager();
+
+// Dev helper: expose globally for debugging in the browser console
+if (typeof window !== 'undefined' && import.meta.env.DEV) {
+  (window as any).socketManager = socketManager;
+}
