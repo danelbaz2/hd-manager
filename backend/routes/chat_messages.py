@@ -4,6 +4,7 @@ from models.chat_message_model import ChatMessageModel
 from datetime import datetime
 from bson.objectid import ObjectId
 from utils.jwt_utils import jwt_required, admin_required
+from utils.history import log_history
 from websocket import broadcast_chat_update
 from utils.error_handlers import handle_client_disconnect
 
@@ -41,6 +42,12 @@ def create_message():
     }
     data['_id'] = str(ObjectId())
     mongo.db.ents.insert_one(data)
+    
+    # History logging is best-effort
+    try:
+        log_history('chat_message', data['_id'], 'CREATE', request.user_full_name, None, data, data)
+    except:
+        pass  # Don't fail request if logging fails
     
     # Broadcast to all connected clients for real-time updates
     result = serialize_doc(data.copy())

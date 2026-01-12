@@ -26,8 +26,9 @@ export const UpdateContent: React.FC<UpdateContentProps> = ({
 }) => {
   const textColor = isDarkMode ? "text-slate-300" : "text-slate-600";
 
-  if (entry.action === "NOTE" && entry.note) {
-    return <p className={`text-sm break-words whitespace-pre-line ${textColor}`}>{entry.note}</p>;
+  // Handle notes - support both legacy NOTE action and new note entityType
+  if ((entry.action === "NOTE" || (entry.action === "CREATE" && entry.base?.entityType === "note")) && entry.content) {
+    return <p className={`text-sm break-words whitespace-pre-line ${textColor}`}>{entry.content}</p>;
   }
 
   if (entry.action === "CREATE") {

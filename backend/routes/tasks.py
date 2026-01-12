@@ -353,15 +353,17 @@ def get_task_history(task_id):
     """
     Get the history of a specific task from ents_archive.
     Returns all archive entries for this task, sorted chronologically.
+    Includes both task changes and notes.
     """
     try:
-        # Find all archive entries for this task
+        # Find all archive entries for this task (including notes)
         query = {
             '$or': [
                 {'o.id': task_id},
                 {'n.id': task_id},
                 {'o._id': task_id},
-                {'n._id': task_id}
+                {'n._id': task_id},
+                {'n.taskId': task_id}  # Include notes that reference this task
             ]
         }
         
@@ -375,8 +377,15 @@ def get_task_history(task_id):
             old_data = entry.get('o', {}) or {}
             new_data = entry.get('n', {}) or {}
             
+            # Check if this is a note entity
+            is_note = new_data.get('base', {}).get('entityType') == 'note'
+            
             # Determine the specific action type
-            action_type = determine_action_type(change_data, old_data, new_data)
+            if is_note:
+                # Notes always use 'NOTE' action for display consistency
+                action_type = 'NOTE'
+            else:
+                action_type = determine_action_type(change_data, old_data, new_data)
             
             history_item = {
                 'id': str(entry.get('_id', '')),
@@ -386,10 +395,11 @@ def get_task_history(task_id):
                 'updatedBy': change_data.get('base', {}).get('updatedBy') or 
                             new_data.get('base', {}).get('updatedBy') or
                             new_data.get('base', {}).get('createdBy') or 'מערכת',
-                'changes': {k: v for k, v in change_data.items() if k not in ['id', '_id', 'base', 'action', 'timestamp', 'note', 'file']},
+                'changes': {k: v for k, v in change_data.items() if k not in ['id', '_id', 'base', 'action', 'timestamp', 'content', 'file']},
                 'oldValues': {k: v for k, v in old_data.items() if k not in ['id', '_id', 'base']},
-                'note': change_data.get('note'),
-                'file': change_data.get('file')  # Include file metadata if present
+                'content': change_data.get('content'),
+                'file': change_data.get('file'),  # Include file metadata if present
+                'base': new_data.get('base') if is_note else None  # Include base for note entityType detection
             }
             
             # For CREATE actions, include responsibleUserIds from new_data if present
@@ -415,13 +425,15 @@ def get_all_tasks_history():
     Get history for ALL tasks from ents_archive.
     This is used for global fetch at login/refresh.
     Returns all changes with old and new values for detailed history display.
+    Includes both task changes and notes.
     """
     try:
-        # Find all archive entries for tasks
+        # Find all archive entries for tasks and notes
         query = {
             '$or': [
                 {'o.base.entityType': 'task'},
-                {'n.base.entityType': 'task'}
+                {'n.base.entityType': 'task'},
+                {'n.base.entityType': 'note'}  # Include notes
             ]
         }
         
@@ -466,33 +478,44 @@ def get_all_tasks_history():
             old_data = entry.get('o', {}) or {}
             new_data = entry.get('n', {}) or {}
             
-            # Get task ID from either old or new data
-            task_id = new_data.get('id') or new_data.get('_id') or old_data.get('id') or old_data.get('_id') or ''
+            # Check if this is a note entity
+            is_note = new_data.get('base', {}).get('entityType') == 'note'
+            
+            # Get task ID (for notes, use taskId field; for tasks, use id/_id)
+            if is_note:
+                task_id = new_data.get('taskId', '')
+            else:
+                task_id = new_data.get('id') or new_data.get('_id') or old_data.get('id') or old_data.get('_id') or ''
             
             # Determine the specific action type
-            action_type = determine_action_type(change_data, old_data, new_data)
+            if is_note:
+                # Notes always use 'NOTE' action for display consistency
+                action_type = 'NOTE'
+            else:
+                action_type = determine_action_type(change_data, old_data, new_data)
             
             # Build changes dict with all changed data fields
             changes = {}
             old_values = {}
             
-            for field in DATA_FIELDS:
-                if field in change_data:
-                    changes[field] = change_data[field]
-                    # Get old value from old_data
-                    if old_data and field in old_data:
-                        old_values[field] = old_data[field]
-            
-            # For CREATE, include initial values from new_data
-            if action_type == 'CREATE':
+            if not is_note:
                 for field in DATA_FIELDS:
-                    if field in new_data and new_data[field]:
-                        changes[field] = new_data[field]
-            
-            # For DELETE, include title in oldValues so frontend can display it
-            if action_type == 'DELETE' and old_data:
-                if 'title' in old_data:
-                    old_values['title'] = old_data['title']
+                    if field in change_data:
+                        changes[field] = change_data[field]
+                        # Get old value from old_data
+                        if old_data and field in old_data:
+                            old_values[field] = old_data[field]
+                
+                # For CREATE, include initial values from new_data
+                if action_type == 'CREATE':
+                    for field in DATA_FIELDS:
+                        if field in new_data and new_data[field]:
+                            changes[field] = new_data[field]
+                
+                # For DELETE, include title in oldValues so frontend can display it
+                if action_type == 'DELETE' and old_data:
+                    if 'title' in old_data:
+                        old_values['title'] = old_data['title']
             
             history_item = {
                 'id': str(entry.get('_id', '')),
@@ -504,8 +527,9 @@ def get_all_tasks_history():
                             new_data.get('base', {}).get('createdBy') or 'מערכת',
                 'changes': changes,
                 'oldValues': old_values,
-                'note': change_data.get('note'),
-                'file': change_data.get('file')  # Include file metadata if present
+                'content': change_data.get('content'),
+                'file': change_data.get('file'),  # Include file metadata if present
+                'base': new_data.get('base') if is_note else None  # Include base for note entityType detection
             }
             
             history.append(history_item)
@@ -520,14 +544,14 @@ def get_all_tasks_history():
 def add_task_note(task_id):
     """
     Add a note/comment to a task's history.
-    Creates a new entry in ents_archive with action 'NOTE'.
+    Uses log_history() to create archive entry like other entities.
     """
     try:
         data = request.json
-        note_text = data.get('note', '').strip()
+        content = data.get('content', '').strip()
         
-        if not note_text:
-            return jsonify({'error': 'Note text is required'}), 400
+        if not content:
+            return jsonify({'error': 'Content is required'}), 400
         
         # Verify task exists
         task = mongo.db.ents.find_one({'_id': task_id, 'base.entityType': 'task'})
@@ -535,41 +559,45 @@ def add_task_note(task_id):
             return jsonify({'error': 'Task not found'}), 404
         
         now = int(datetime.now().timestamp() * 1000)
+        note_id = str(ObjectId())
         
-        # Create the history entry for the note
-        entry = {
-            '_id': str(ObjectId()),
-            'o': None,
-            'c': {
-                'action': 'NOTE',
-                'timestamp': now,
-                'note': note_text,
-                'base': {
-                    'updatedBy': request.user_full_name
-                }
-            },
-            'n': {
-                'id': task_id,
-                '_id': task_id,
-                'note': note_text,
-                'base': {
-                    'entityType': 'task',
-                    'updatedBy': request.user_full_name
-                }
+        # Create the note entity with full base fields (like other entities)
+        note_entity = {
+            '_id': note_id,
+            'taskId': task_id,
+            'content': content,
+            'base': {
+                'isDeleted': False,
+                'isActive': True,
+                'createdAt': now,
+                'updatedAt': now,
+                'entityType': 'note',
+                'createdBy': request.user_full_name,
+                'updatedBy': request.user_full_name
             }
         }
         
-        mongo.db.ents_archive.insert_one(entry)
+        # The change_val includes the content for display in history
+        change_val = {
+            'content': content,
+            'base': {
+                'updatedBy': request.user_full_name,
+                'updatedAt': now
+            }
+        }
+        
+        # Use log_history like other entities (creates proper _id: ObjectId)
+        log_history('note', note_id, 'CREATE', request.user_full_name, None, note_entity, change_val, now)
         
         # Return the created note WITH taskId for frontend
         response = {
-            'id': entry['_id'],
+            'id': note_id,
             'taskId': task_id,
-            'action': 'NOTE',
+            'action': 'NOTE',  # Display as NOTE for frontend
             'timestamp': now,
             'updatedBy': request.user_full_name,
             'changes': {},
-            'note': note_text
+            'content': content
         }
         
         # Broadcast the note via WebSocket to all connected clients

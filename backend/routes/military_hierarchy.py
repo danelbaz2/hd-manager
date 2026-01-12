@@ -8,6 +8,7 @@ from flask import Blueprint, jsonify, request
 from database import mongo
 from utils.jwt_utils import jwt_required, admin_required
 from utils.logger import logger
+from utils.history import log_history
 
 bp = Blueprint("military_hierarchy", __name__, url_prefix="/api/military-hierarchy")
 
@@ -75,12 +76,31 @@ def update_hierarchy():
         if not isinstance(hierarchy_data, dict):
             return jsonify({"error": "Hierarchy must be an object"}), 400
         
+        # Capture old state for history logging
+        old_doc = mongo.db.military_hierarchy.find_one({}, {"_id": 0})
+        
         # Upsert the hierarchy (replace if exists, create if not)
         result = mongo.db.military_hierarchy.update_one(
             {},  # Match any document (should only be one)
             {"$set": {"hierarchy": hierarchy_data}},
             upsert=True
         )
+        
+        # History logging is best-effort
+        action = 'CREATE' if result.upserted_id else 'UPDATE'
+        new_doc = {"hierarchy": hierarchy_data}
+        try:
+            log_history(
+                'military_hierarchy', 
+                'singleton', 
+                action,
+                request.username,
+                old_doc,
+                new_doc,
+                {"hierarchy": hierarchy_data}
+            )
+        except:
+            pass  # Don't fail request if logging fails
         
         # Log the change
         logger.warning(

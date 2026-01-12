@@ -209,7 +209,7 @@ export const DEMO_HISTORY: any[] = [
         action: "NOTE",
         timestamp: today - 900000, // 15 mins ago
         updatedBy: "דני לוי",
-        note: "בדקתי את הלוגים, נראה כמו בעיית הרשאות",
+        content: "בדקתי את הלוגים, נראה כמו בעיית הרשאות",
         changes: {},
         oldValues: {}
     },
@@ -237,7 +237,7 @@ export const DEMO_HISTORY: any[] = [
         action: "NOTE",
         timestamp: today - 45000,
         updatedBy: "ישראל ישראלי",
-        note: "להוסיף אנימציות בכניסה",
+        content: "להוסיף אנימציות בכניסה",
         changes: {},
         oldValues: {}
     },
@@ -266,7 +266,7 @@ export const DEMO_HISTORY: any[] = [
         action: "NOTE",
         timestamp: today + dayMs + 7200000, // Tomorrow + 2h
         updatedBy: "מערכת",
-        note: "תזכורת אוטומטית: להכין סביבת בדיקות",
+        content: "תזכורת אוטומטית: להכין סביבת בדיקות",
         changes: {},
         oldValues: {}
     },

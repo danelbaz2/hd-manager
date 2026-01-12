@@ -219,9 +219,13 @@ export interface TaskHistoryEntry {
   updatedBy: string;
   changes: Record<string, unknown>;
   oldValues?: Record<string, unknown>;
-  note?: string;
+  content?: string;
   file?: FileMetadata;
   fullTask?: Task;  // Full task data for real-time updates
+  base?: {
+    entityType?: string;  // Support for note entityType
+    [key: string]: unknown;
+  };
 }
 
 /**
@@ -268,26 +272,26 @@ export const getTaskHistory = async (
  */
 export const addTaskNote = async (
   taskId: string,
-  note: string
+  content: string
 ): Promise<ApiResponse<TaskHistoryEntry>> => {
   return apiRequest<TaskHistoryEntry>(`${API_ENDPOINTS.tasks}/${taskId}/notes`, {
     method: "POST",
-    body: JSON.stringify({ note }),
+    body: JSON.stringify({ content }),
   });
 };
 
 /**
- * Upload a file attachment with optional note
+ * Upload a file attachment with optional content
  */
 export const uploadTaskFile = async (
   taskId: string,
   file: File,
-  note?: string
+  content?: string
 ): Promise<ApiResponse<TaskHistoryEntry>> => {
   const formData = new FormData();
   formData.append("file", file);
-  if (note) {
-    formData.append("note", note);
+  if (content) {
+    formData.append("content", content);
   }
 
   // Get auth token

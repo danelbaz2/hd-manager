@@ -90,8 +90,11 @@ export const buildActivityMessage = (
         return `דחה והחזיר לטיפול את "${title}"`;
     }
 
-    if (entry.action === "NOTE" && entry.note) {
-        return `${actionLabel} "${title}": ${entry.note}`;
+    // Handle notes - support both legacy NOTE action and new note entityType
+    if (entry.action === "NOTE" || (entry.action === "CREATE" && entry.base?.entityType === "note")) {
+        if (entry.content) {
+            return `${actionLabel} "${title}": ${entry.content}`;
+        }
     }
 
     if (entry.action === "UPDATE" && entry.changes) {

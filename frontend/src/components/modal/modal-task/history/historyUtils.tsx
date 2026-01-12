@@ -133,11 +133,11 @@ export const getActionDescription = (
   const responsibleUserIds = changes.responsibleUserIds as string[] | undefined;
 
   // NOTE action
-  if (entry.action === "NOTE" && entry.note) {
+  if (entry.action === "NOTE" && entry.content) {
     const validNames = contacts?.map(c => c.fullName);
     return (
       <MentionText
-        content={entry.note}
+        content={entry.content}
         isDarkMode={isDarkMode}
         onMentionClick={onMentionClick}
         validContactNames={validNames}

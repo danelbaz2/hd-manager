@@ -160,23 +160,29 @@ class HistoryGenerator:
         """Add a NOTE history entry."""
         note_text = random.choice(NOTES_EXAMPLES)
         
+        note_id = str(ObjectId())
         entry = {
-            '_id': str(ObjectId()),
             'o': None,
             'c': {
-                'action': 'NOTE',
+                'action': 'CREATE',
                 'timestamp': timestamp,
-                'note': note_text,
+                'content': note_text,
                 'base': {
-                    'updatedBy': actor_name
+                    'updatedBy': actor_name,
+                    'updatedAt': timestamp
                 }
             },
             'n': {
-                'id': task_id,
-                '_id': task_id,
-                'note': note_text,
+                'id': note_id,
+                'taskId': task_id,
+                'content': note_text,
                 'base': {
-                    'entityType': 'task',
+                    'isDeleted': False,
+                    'isActive': True,
+                    'createdAt': timestamp,
+                    'updatedAt': timestamp,
+                    'entityType': 'note',
+                    'createdBy': actor_name,
                     'updatedBy': actor_name
                 }
             }

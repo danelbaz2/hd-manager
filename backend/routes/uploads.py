@@ -3,6 +3,7 @@ from database import mongo
 from datetime import datetime
 from bson.objectid import ObjectId
 from werkzeug.utils import secure_filename
+from utils.history import log_history
 import os
 
 bp = Blueprint('uploads', __name__, url_prefix='/api/uploads')
@@ -36,7 +37,7 @@ def upload_task_file(task_id):
             return jsonify({'error': 'No file provided'}), 400
         
         file = request.files['file']
-        note_text = request.form.get('note', '').strip()
+        content = request.form.get('content', '').strip()
         
         if file.filename == '':
             return jsonify({'error': 'No file selected'}), 400
@@ -77,42 +78,47 @@ def upload_task_file(task_id):
             'url': f'/static/uploads/task_files/{unique_filename}'
         }
         
-        # Create the history entry for the note with file
-        entry = {
-            '_id': str(ObjectId()),
-            'o': None,
-            'c': {
-                'action': 'NOTE',
-                'timestamp': now,
-                'note': note_text if note_text else f'קובץ מצורף: {original_filename}',
-                'file': file_metadata,
-                'base': {
-                    'updatedBy': request.user_full_name
-                }
-            },
-            'n': {
-                'id': task_id,
-                '_id': task_id,
-                'note': note_text if note_text else f'קובץ מצורף: {original_filename}',
-                'file': file_metadata,
-                'base': {
-                    'entityType': 'task',
-                    'updatedBy': request.user_full_name
-                }
+        # Create note entity with file
+        note_id = str(ObjectId())
+        content_text = content if content else f'קובץ מצורף: {original_filename}'
+        
+        note_entity = {
+            '_id': note_id,
+            'taskId': task_id,
+            'content': content_text,
+            'file': file_metadata,
+            'base': {
+                'isDeleted': False,
+                'isActive': True,
+                'createdAt': now,
+                'updatedAt': now,
+                'entityType': 'note',
+                'createdBy': request.user_full_name,
+                'updatedBy': request.user_full_name
             }
         }
         
-        mongo.db.ents_archive.insert_one(entry)
+        change_val = {
+            'content': content_text,
+            'file': file_metadata,
+            'base': {
+                'updatedBy': request.user_full_name,
+                'updatedAt': now
+            }
+        }
+        
+        # Use log_history for consistent archive entry
+        log_history('note', note_id, 'CREATE', request.user_full_name, None, note_entity, change_val, now)
         
         # Return the created note WITH taskId and file info for frontend
         response = {
-            'id': entry['_id'],
+            'id': note_id,
             'taskId': task_id,
             'action': 'NOTE',
             'timestamp': now,
             'updatedBy': request.user_full_name,
             'changes': {},
-            'note': note_text if note_text else f'קובץ מצורף: {original_filename}',
+            'content': content_text,
             'file': file_metadata
         }
         
