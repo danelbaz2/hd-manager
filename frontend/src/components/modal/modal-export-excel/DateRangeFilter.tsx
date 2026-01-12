@@ -55,7 +55,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
   // Validate end date when start date changes
   const handleStartDateChange = (newStartDate: string) => {
     onStartDateChange(newStartDate);
-    setActivePreset(null); // Clear preset selection when manually changing dates
+    setActivePreset(0); // Clear preset selection when manually changing dates
 
     // If end date exists and is now before the new start date, update end date to match
     if (endDate && newStartDate) {
@@ -70,7 +70,7 @@ const DateRangeFilter: React.FC<DateRangeFilterProps> = ({
 
   // Validate end date - ensure it's not before start date
   const handleEndDateChange = (newEndDate: string) => {
-    setActivePreset(null); // Clear preset selection when manually changing dates
+    setActivePreset(0); // Clear preset selection when manually changing dates
 
     if (!newEndDate) {
       onEndDateChange("");
