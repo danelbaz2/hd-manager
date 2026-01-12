@@ -191,10 +191,18 @@ const TaskModal: React.FC = () => {
 
   const handleMentionClick = useCallback(
     (contactName: string) => {
+      // Toggle: if clicking the same contact name, close the modal
+      if (selectedContact?.fullName.toLowerCase().trim() === contactName.toLowerCase().trim()) {
+        setSelectedContact(null);
+        return;
+      }
+      // Otherwise find and open the contact
       const contact = findContactByName(contactName);
-      if (contact) setSelectedContact(contact);
+      if (contact) {
+        setSelectedContact(contact);
+      }
     },
-    [findContactByName, setSelectedContact]
+    [findContactByName, setSelectedContact, selectedContact?.fullName]
   );
 
   const history = useMemo(
@@ -252,6 +260,7 @@ const TaskModal: React.FC = () => {
           onStatusChangeRequest={handleStatusChangeRequest}
           onApprove={handleApproveTask}
           onReject={handleRejectTask}
+          onTagClick={() => setSelectedContact(null)}
           closeTaskModal={closeTaskModal}
           alerts={alerts}
           dismissAlert={dismissAlert}

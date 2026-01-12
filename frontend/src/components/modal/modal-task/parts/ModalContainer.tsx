@@ -62,6 +62,7 @@ interface ModalContainerProps {
   onStatusChangeRequest: (newStatus: any) => void;
   onApprove?: () => void;
   onReject?: () => void;
+  onTagClick?: () => void;
   closeTaskModal: () => void;
   alerts: any[];
   dismissAlert: (id: number) => void;
@@ -87,6 +88,7 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
   onStatusChangeRequest,
   onApprove,
   onReject,
+  onTagClick,
   closeTaskModal,
   alerts,
   dismissAlert,
@@ -134,6 +136,7 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
           onStatusChangeRequest={onStatusChangeRequest}
           onApprove={onApprove}
           onReject={onReject}
+          onTagClick={onTagClick}
         />
       </div>
       <TaskFooter

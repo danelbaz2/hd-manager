@@ -44,6 +44,16 @@ export const TagsModalProvider: React.FC<{ children: React.ReactNode }> = ({
       contacts: ContactData[],
       _primaryTags: PrimaryTagData[]
     ) => {
+      // Toggle: if clicking the same tag, close the modal
+      if (state.isOpen && state.tag?.id === tag.id) {
+        setState({
+          isOpen: false,
+          tag: null,
+          relatedContacts: [],
+        });
+        return;
+      }
+
       // Find contacts that have this tag (or its parent primary tag)
       const tagIdToMatch = tag.isPrimary ? tag.id : tag.primaryId;
       const relatedContacts = contacts.filter((contact) =>
@@ -56,7 +66,7 @@ export const TagsModalProvider: React.FC<{ children: React.ReactNode }> = ({
         relatedContacts,
       });
     },
-    []
+    [state.isOpen, state.tag?.id]
   );
 
   const closeTagsModal = useCallback(() => {

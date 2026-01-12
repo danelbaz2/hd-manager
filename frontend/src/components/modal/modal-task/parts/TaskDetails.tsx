@@ -31,6 +31,7 @@ interface TaskDetailsProps {
   onStatusChangeRequest: (newStatus: any) => void;
   onApprove?: () => void;
   onReject?: () => void;
+  onTagClick?: () => void;
 }
 
 export const TaskDetails: React.FC<TaskDetailsProps> = ({
@@ -42,6 +43,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
   onStatusChangeRequest,
   onApprove,
   onReject,
+  onTagClick,
 }) => {
   const { user } = useAuth();
   const { data: contactsData = [] } = useContactsQuery();
@@ -137,8 +139,11 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                   position="bottom"
                 >
                   <button
-                    onClick={() => openTagsModal(tag, contacts, primaryTags)}
-                    className="px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-all hover:scale-105 hover:shadow-md"
+                    onClick={() => {
+                      onTagClick?.(); // Close contact modal if open
+                      openTagsModal(tag, contacts, primaryTags);
+                    }}
+                    className="px-3 py-1 rounded-full text-xs font-medium cursor-pointer transition-all hover:shadow-lg hover:brightness-110"
                     style={{
                       backgroundColor: `${tag.color}20`,
                       color: tag.color,

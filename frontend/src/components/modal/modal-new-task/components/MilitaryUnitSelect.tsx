@@ -45,6 +45,7 @@ export const MilitaryUnitSelect: React.FC<MilitaryUnitSelectProps> = ({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const [position, setPosition] = useState({ top: 0, left: 0, width: 0 });
+  const [isPositioned, setIsPositioned] = useState(false);
 
   // Filter options based on current input
   const filteredOptions = useMemo(() => {
@@ -61,32 +62,33 @@ export const MilitaryUnitSelect: React.FC<MilitaryUnitSelectProps> = ({
         left: rect.left,
         width: rect.width,
       });
+      setIsPositioned(true);
+    } else {
+      setIsPositioned(false);
     }
   }, [isOpen]);
 
-  // Handle scroll/resize - close dropdown only if scroll is outside
+  // Update position on scroll (instead of closing) and close on resize
   useEffect(() => {
-    const handleScrollOrResize = (e: Event) => {
-      if (!isOpen) return;
-      
-      // Don't close if scrolling inside the dropdown
-      if (dropdownRef.current && e.target instanceof Node) {
-        if (dropdownRef.current.contains(e.target)) {
-          return; // Scrolling inside dropdown - don't close
-        }
-      }
-      
-      setIsOpen(false);
+    const updatePosition = () => {
+      if (!isOpen || !inputRef.current) return;
+      const rect = inputRef.current.getBoundingClientRect();
+      setPosition({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      });
     };
     
     const handleResize = () => {
       if (isOpen) setIsOpen(false);
     };
     
-    window.addEventListener("scroll", handleScrollOrResize, true);
+    // Update position on scroll (keeps dropdown aligned with input)
+    window.addEventListener("scroll", updatePosition, true);
     window.addEventListener("resize", handleResize);
     return () => {
-      window.removeEventListener("scroll", handleScrollOrResize, true);
+      window.removeEventListener("scroll", updatePosition, true);
       window.removeEventListener("resize", handleResize);
     };
   }, [isOpen]);
@@ -232,8 +234,8 @@ export const MilitaryUnitSelect: React.FC<MilitaryUnitSelectProps> = ({
         </button>
       </div>
 
-      {/* Dropdown Portal */}
-      {isOpen && filteredOptions.length > 0 && createPortal(
+      {/* Dropdown Portal - only render when positioned */}
+      {isOpen && isPositioned && filteredOptions.length > 0 && createPortal(
         <div
           ref={dropdownRef}
           className={`
@@ -309,8 +311,8 @@ export const MilitaryUnitSelect: React.FC<MilitaryUnitSelectProps> = ({
         document.body
       )}
 
-      {/* Empty state when no options match */}
-      {isOpen && value.trim() && filteredOptions.length === 0 && createPortal(
+      {/* Empty state when no options match - only render when positioned */}
+      {isOpen && isPositioned && value.trim() && filteredOptions.length === 0 && createPortal(
         <div
           ref={dropdownRef}
           className={`

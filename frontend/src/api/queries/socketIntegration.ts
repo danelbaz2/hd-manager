@@ -102,6 +102,14 @@ export const invalidateChatQueries = () => {
 };
 
 /**
+ * Invalidate military hierarchy queries
+ * Call this when receiving military_hierarchy_update socket event
+ */
+export const invalidateMilitaryHierarchyQueries = () => {
+  queryClient.invalidateQueries({ queryKey: queryKeys.militaryHierarchy.all });
+};
+
+/**
  * Invalidate all queries (full refresh)
  * Call this on socket reconnect
  */
@@ -132,6 +140,9 @@ export const handleSocketEvent = (eventType: string) => {
       break;
     case "contact_update":
       invalidateContactQueries();
+      break;
+    case "military_hierarchy_update":
+      invalidateMilitaryHierarchyQueries();
       break;
     case "reconnect":
       invalidateAllQueries();

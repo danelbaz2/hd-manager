@@ -63,6 +63,13 @@ export {
   type ChatMessageFormData,
 } from "./chatQueries";
 
+// Military Hierarchy queries
+export {
+  useMilitaryHierarchyQuery,
+  useUpdateMilitaryHierarchyMutation,
+  type MilitaryHierarchy,
+} from "./militaryHierarchyQueries";
+
 // Socket integration
 export {
   invalidateTaskQueries,
@@ -70,6 +77,7 @@ export {
   invalidateTagQueries,
   invalidateContactQueries,
   invalidateChatQueries,
+  invalidateMilitaryHierarchyQueries,
   invalidateAllQueries,
   handleSocketEvent,
   updateReactQueryCache,

@@ -58,4 +58,8 @@ export const queryKeys = {
     all: ["tasks", "history", "all"] as const,
     byTask: (taskId: string) => ["tasks", taskId, "history"] as const,
   },
+  // Military Hierarchy
+  militaryHierarchy: {
+    all: ["militaryHierarchy"] as const,
+  },
 };

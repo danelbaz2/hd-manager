@@ -8,9 +8,14 @@
  * - Click-to-close on backdrop
  * - Smooth content animation only
  * - Prevents scroll on body when open
+ * - Modal stack management for nested modals (only topmost modal closes on Escape)
  */
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
+
+// Global modal stack to track which modals are open (LIFO - Last In First Out)
+const modalStack: Set<string> = new Set();
+let modalIdCounter = 0;
 
 export interface ModalOverlayProps {
   /** Whether the modal is open */
@@ -40,6 +45,19 @@ export const ModalOverlay: React.FC<ModalOverlayProps> = ({
 }) => {
   const [shouldRender, setShouldRender] = useState(false);
   const [isContentVisible, setIsContentVisible] = useState(false);
+  const modalIdRef = useRef<string>(`modal-${++modalIdCounter}`);
+
+  // Register/unregister this modal in the global stack
+  useEffect(() => {
+    if (isOpen) {
+      modalStack.add(modalIdRef.current);
+    } else {
+      modalStack.delete(modalIdRef.current);
+    }
+    return () => {
+      modalStack.delete(modalIdRef.current);
+    };
+  }, [isOpen]);
 
   // Handle open/close lifecycle
   useEffect(() => {
@@ -84,26 +102,60 @@ export const ModalOverlay: React.FC<ModalOverlayProps> = ({
     e.stopPropagation();
   }, []);
 
-  // Focus management and Escape key handling
+  // Focus management - auto-focus modal and first input field
   useEffect(() => {
-    if (isOpen && shouldRender) {
-      // Find the container element
-      const container = document.getElementById("modal-content-container");
-      if (container) {
-        container.focus();
-      }
-    }
-  }, [isOpen, shouldRender]);
+    if (isOpen && shouldRender && isContentVisible) {
+      // Small delay to ensure DOM is ready and animation started
+      const focusTimer = setTimeout(() => {
+        const container = document.getElementById(`modal-content-${modalIdRef.current}`);
+        if (!container) return;
 
-  const handleKeyDown = useCallback(
-    (e: React.KeyboardEvent) => {
-      if (e.key === "Escape" && closeOnBackdropClick) {
-        e.stopPropagation(); // Prevent bubbling to parent modals
-        onClose();
+        // Try to find and focus the first focusable input/textarea/select
+        const firstInput = container.querySelector<HTMLElement>(
+          'input:not([type="hidden"]):not([disabled]), textarea:not([disabled]), select:not([disabled])'
+        );
+
+        if (firstInput) {
+          // Focus the first input field
+          firstInput.focus();
+          // If it's a text input/textarea, select all text for easy editing
+          if (firstInput instanceof HTMLInputElement || firstInput instanceof HTMLTextAreaElement) {
+            firstInput.select();
+          }
+        } else {
+          // No input field found, focus the container for keyboard navigation
+          container.focus();
+        }
+      }, animationDuration + 50); // Wait for animation to complete + small buffer
+
+      return () => clearTimeout(focusTimer);
+    }
+  }, [isOpen, shouldRender, isContentVisible, animationDuration]);
+
+  // Global Escape key handler (works regardless of focus)
+  useEffect(() => {
+    if (!isOpen || !closeOnBackdropClick) return;
+
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        // Check if this modal is the topmost (last in the stack)
+        const stackArray = Array.from(modalStack);
+        const isTopmost = stackArray[stackArray.length - 1] === modalIdRef.current;
+        
+        if (isTopmost) {
+          e.preventDefault();
+          e.stopImmediatePropagation(); // Prevent other listeners from firing
+          onClose();
+        }
       }
-    },
-    [closeOnBackdropClick, onClose]
-  );
+    };
+
+    // Use capture phase to handle the event before it reaches other listeners
+    window.addEventListener("keydown", handleGlobalKeyDown, true);
+    return () => {
+      window.removeEventListener("keydown", handleGlobalKeyDown, true);
+    };
+  }, [isOpen, closeOnBackdropClick, onClose]);
 
   if (!shouldRender) return null;
 
@@ -121,9 +173,8 @@ export const ModalOverlay: React.FC<ModalOverlayProps> = ({
 
       {/* Content container - animated, with configurable max-width */}
       <div
-        id="modal-content-container"
+        id={`modal-content-${modalIdRef.current}`}
         tabIndex={-1}
-        onKeyDown={handleKeyDown}
         className={`
           relative z-10 w-full ${maxWidthClass} transition-all outline-none
           ${isContentVisible ? "scale-100 opacity-100 translate-y-0" : "scale-95 opacity-0 translate-y-4"}

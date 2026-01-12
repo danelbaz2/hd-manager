@@ -41,10 +41,9 @@ export const MentionText: React.FC<MentionTextProps> = ({
                 inline-flex items-center px-2 py-0.5 rounded-lg
                 cursor-pointer transition-all duration-200
                 ${isDarkMode
-                  ? "bg-blue-500/25 text-blue-300 hover:bg-blue-500/40"
-                  : "bg-blue-100 text-blue-700 hover:bg-blue-200"
+                  ? "bg-blue-500/25 text-blue-300 hover:bg-blue-500/40 hover:shadow-lg hover:brightness-110"
+                  : "bg-blue-100 text-blue-700 hover:bg-blue-200 hover:shadow-lg hover:brightness-105"
                 }
-                ${onMentionClick ? "hover:scale-105 hover:shadow-md" : ""}
               `}
             >
               <span className="opacity-70">@</span>

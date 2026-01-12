@@ -52,6 +52,7 @@ interface TaskContentProps {
   onStatusChangeRequest: (newStatus: any) => void;
   onApprove?: () => void;
   onReject?: () => void;
+  onTagClick?: () => void;
 }
 
 export const TaskContent: React.FC<TaskContentProps> = ({
@@ -72,6 +73,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   onStatusChangeRequest,
   onApprove,
   onReject,
+  onTagClick,
 }) => {
   if (isEditMode) {
     return (
@@ -132,6 +134,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
         onStatusChangeRequest={onStatusChangeRequest}
         onApprove={onApprove}
         onReject={onReject}
+        onTagClick={onTagClick}
       />
     </div>
   );
