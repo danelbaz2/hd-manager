@@ -56,6 +56,7 @@ interface ModalContainerProps {
   primaryTags: PrimaryTagData[];
   secondaryTags: SecondaryTagData[];
   isLoadingHistory: boolean;
+  canAddNote: boolean;
   onAddNote: (text: string) => Promise<void>;
   getActionDescription: (e: any, c: any) => React.ReactNode;
   onMentionClick: (contactName: string) => void;
@@ -82,6 +83,7 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
   primaryTags,
   secondaryTags,
   isLoadingHistory,
+  canAddNote,
   onAddNote,
   getActionDescription,
   onMentionClick,
@@ -130,6 +132,7 @@ export const ModalContainer: React.FC<ModalContainerProps> = ({
           secondaryTags={secondaryTags}
           isDarkMode={isDarkMode}
           isLoadingHistory={isLoadingHistory}
+          canAddNote={canAddNote}
           onAddNote={onAddNote}
           getActionDescription={getActionDescription}
           onMentionClick={onMentionClick}

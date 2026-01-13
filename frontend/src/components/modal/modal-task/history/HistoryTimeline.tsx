@@ -21,6 +21,7 @@ interface HistoryTimelineProps {
   contacts: Contact[];
   isDarkMode: boolean;
   isLoading: boolean;
+  canAddNote: boolean;
   onAddNote: (text: string) => Promise<void>;
   getActionDescription: (
     entry: TaskHistoryEntry,
@@ -35,6 +36,7 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
   contacts,
   isDarkMode,
   isLoading,
+  canAddNote,
   onAddNote,
   getActionDescription,
   onMentionClick,
@@ -198,18 +200,20 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
         className="bottom-20"
       />
 
-      {/* Chat Input - Always visible */}
-      <div
-        className="relative z-10 pt-3 mt-auto border-t border-dashed"
-        style={{ borderColor: isDarkMode ? "#475569" : "#CBD5E1" }}
-      >
-        <ChatInput
-          onSend={handleAddNote}
-          isDarkMode={isDarkMode}
-          contacts={contacts}
-          placeholder="כתוב עדכון או הערה..."
-        />
-      </div>
+      {/* Chat Input - Only visible for users with permission */}
+      {canAddNote && (
+        <div
+          className="relative z-10 pt-3 mt-auto border-t border-dashed"
+          style={{ borderColor: isDarkMode ? "#475569" : "#CBD5E1" }}
+        >
+          <ChatInput
+            onSend={handleAddNote}
+            isDarkMode={isDarkMode}
+            contacts={contacts}
+            placeholder="כתוב עדכון או הערה..."
+          />
+        </div>
+      )}
     </div>
   );
 };

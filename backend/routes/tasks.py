@@ -545,6 +545,8 @@ def add_task_note(task_id):
     """
     Add a note/comment to a task's history.
     Uses log_history() to create archive entry like other entities.
+    
+    Permission: Only admins or users assigned to the task can add notes.
     """
     try:
         data = request.json
@@ -557,6 +559,16 @@ def add_task_note(task_id):
         task = mongo.db.ents.find_one({'_id': task_id, 'base.entityType': 'task'})
         if not task:
             return jsonify({'error': 'Task not found'}), 404
+        
+        # Check permission: admin or assigned user only
+        is_admin = request.role == 'admin'
+        responsible_user_ids = task.get('responsibleUserIds', [])
+        # Convert to strings for comparison (user_id may be int or string)
+        responsible_user_ids_str = [str(uid) for uid in responsible_user_ids]
+        is_assigned = str(request.user_id) in responsible_user_ids_str
+        
+        if not is_admin and not is_assigned:
+            return jsonify({'error': 'Permission denied. Only assigned users or admins can add notes.'}), 403
         
         now = int(datetime.now().timestamp() * 1000)
         note_id = str(ObjectId())

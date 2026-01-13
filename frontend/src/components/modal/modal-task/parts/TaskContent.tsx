@@ -46,6 +46,7 @@ interface TaskContentProps {
   secondaryTags: SecondaryTagData[];
   isDarkMode: boolean;
   isLoadingHistory: boolean;
+  canAddNote: boolean;
   onAddNote: (text: string) => Promise<void>;
   getActionDescription: (entry: any, config: any) => React.ReactNode;
   onMentionClick: (contactName: string) => void;
@@ -67,6 +68,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
   secondaryTags,
   isDarkMode,
   isLoadingHistory,
+  canAddNote,
   onAddNote,
   getActionDescription,
   onMentionClick,
@@ -115,6 +117,7 @@ export const TaskContent: React.FC<TaskContentProps> = ({
           contacts={contacts}
           isDarkMode={isDarkMode}
           isLoading={isLoadingHistory}
+          canAddNote={canAddNote}
           onAddNote={onAddNote}
           getActionDescription={getActionDescription}
           onMentionClick={onMentionClick}

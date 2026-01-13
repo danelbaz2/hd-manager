@@ -60,6 +60,14 @@ const TaskModal: React.FC = () => {
   // Confirmation modal state split to allow animation with data
   const [pendingStatus, setPendingStatus] = useState<TaskStatus | null>(null);
   const isAdmin = authUser?.role === "admin";
+  
+  // Permission check: can add notes if admin or assigned to task
+  const canAddNote = useMemo(() => {
+    if (isAdmin) return true;
+    if (!task || !authUser?.id) return false;
+    const responsibleIds = task.responsibleUserIds?.map(String) ?? [];
+    return responsibleIds.includes(String(authUser.id));
+  }, [isAdmin, task, authUser?.id]);
 
   const form = useTaskForm({
     task,
@@ -254,6 +262,7 @@ const TaskModal: React.FC = () => {
           primaryTags={primaryTags}
           secondaryTags={secondaryTags}
           isLoadingHistory={isLoadingHistory}
+          canAddNote={canAddNote}
           onAddNote={handleAddNote}
           getActionDescription={getDesc}
           onMentionClick={handleMentionClick}
