@@ -1,7 +1,7 @@
 /**
  * HistoryTimeline - Displays task history with timeline and chat input
  */
-import React, { useRef, useEffect, useState } from "react";
+import React, { useRef, useEffect, useState, useCallback } from "react";
 import { Loader2 } from "lucide-react";
 import type { TaskHistoryEntry } from "../../../../api/tasksApi";
 import type { UserData } from "../../../../schemas/userTypes";
@@ -10,6 +10,10 @@ import ChatInput from "./ChatInput";
 import { type ActionConfigItem } from "./historyConfig";
 import { ScrollToLatestButton } from "../../../../components/common/ScrollToLatestButton";
 import type { Contact } from "../../../../api/contactsApi";
+
+// Animation timing constants (in ms)
+const ANIMATION_DURATION = 1000;
+const ANIMATION_CLEANUP_DELAY = 1500;
 
 interface HistoryTimelineProps {
   history: TaskHistoryEntry[];
@@ -39,14 +43,36 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
   const [newEntryIds, setNewEntryIds] = useState<Set<string>>(new Set());
   const knownIdsRef = useRef<Set<string>>(new Set());
   const isInitialMount = useRef(true);
-  const pendingOwnEntryRef = useRef(false); // Track if we're expecting our own entry
+  const prevHistoryLengthRef = useRef(history.length);
 
   // Get user by name
   const getUserByName = (name: string): UserData | undefined => {
     return users.find((u) => u.fullName === name);
   };
 
+  /**
+   * Smoothly scrolls to bottom, following content as it expands during animation
+   */
+  const scrollFollowingAnimation = useCallback(() => {
+    if (!scrollRef.current) return;
 
+    const startTime = performance.now();
+
+    const followScroll = () => {
+      if (!scrollRef.current) return;
+
+      const elapsed = performance.now() - startTime;
+      const { scrollHeight, clientHeight } = scrollRef.current;
+      scrollRef.current.scrollTop = scrollHeight - clientHeight;
+
+      if (elapsed < ANIMATION_DURATION) {
+        requestAnimationFrame(followScroll);
+      }
+    };
+
+    // Small delay for DOM to update before starting
+    setTimeout(() => requestAnimationFrame(followScroll), 50);
+  }, []);
 
   // Scroll to bottom on mount (every time this component is rendered/tab is switched)
   useEffect(() => {
@@ -71,66 +97,42 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
   }, []); // Empty deps = run once on mount
 
   // Handle history changes - detect new entries and animate them
-  const prevHistoryLengthRef = useRef(history.length);
-
   useEffect(() => {
     if (isInitialMount.current) return;
 
-    // Detect if history grew
     const historyGrew = history.length > prevHistoryLengthRef.current;
     prevHistoryLengthRef.current = history.length;
 
     // Find entries we haven't seen before
-    const newIds: string[] = [];
-    history.forEach((entry) => {
-      if (!knownIdsRef.current.has(entry.id)) {
-        // If we're expecting our own entry, mark it as known but don't animate
-        if (pendingOwnEntryRef.current) {
-          knownIdsRef.current.add(entry.id);
-          pendingOwnEntryRef.current = false;
-        } else {
-          // This is from someone else - animate it
-          newIds.push(entry.id);
-          knownIdsRef.current.add(entry.id);
-        }
-      }
-    });
-
-    if (newIds.length > 0) {
-      // Mark these entries as new for animation
-      setNewEntryIds((prev) => {
-        const next = new Set(prev);
-        newIds.forEach((id) => next.add(id));
-        return next;
+    const newIds = history
+      .filter((entry) => !knownIdsRef.current.has(entry.id))
+      .map((entry) => {
+        knownIdsRef.current.add(entry.id);
+        return entry.id;
       });
 
-      // Remove "new" status after animation completes
+    if (newIds.length > 0) {
+      // Mark entries as new for animation
+      setNewEntryIds((prev) => new Set([...prev, ...newIds]));
+
+      // Clear animation status after completion
       setTimeout(() => {
         setNewEntryIds((prev) => {
           const next = new Set(prev);
           newIds.forEach((id) => next.delete(id));
           return next;
         });
-      }, 1500);
+      }, ANIMATION_CLEANUP_DELAY);
     }
 
-    // Smooth scroll to bottom whenever history grows (own entries or from others)
-    if (historyGrew && scrollRef.current) {
-      // Use requestAnimationFrame for smoother scrolling after DOM update
-      requestAnimationFrame(() => {
-        if (scrollRef.current) {
-          scrollRef.current.scrollTo({
-            top: scrollRef.current.scrollHeight,
-            behavior: "smooth",
-          });
-        }
-      });
+    // Scroll to follow new content
+    if (historyGrew) {
+      scrollFollowingAnimation();
     }
-  }, [history]);
+  }, [history, scrollFollowingAnimation]);
 
-  // Handle note submission - mark that we're expecting our own entry
+  // Handle note submission
   const handleAddNote = async (text: string) => {
-    pendingOwnEntryRef.current = true;
     await onAddNote(text);
   };
 
@@ -156,18 +158,26 @@ const HistoryTimeline: React.FC<HistoryTimelineProps> = ({
         <div style={{ direction: "rtl" }} className="pr-2">
           {/* History entries */}
           <div className="space-y-0 pb-6">
-            {history.map((entry, index) => (
-              <HistoryEntry
-                key={entry.id || index}
-                entry={entry}
-                isLast={index === history.length - 1}
-                isDarkMode={isDarkMode}
-                user={getUserByName(entry.updatedBy)}
-                getActionDescription={getActionDescription}
-                isNew={newEntryIds.has(entry.id)}
-                onMentionClick={onMentionClick}
-              />
-            ))}
+            {history.map((entry, index) => {
+              const isNew = newEntryIds.has(entry.id);
+              // Check if the NEXT entry is new (so this entry's line should animate)
+              const nextEntry = history[index + 1];
+              const isBeforeNew = nextEntry ? newEntryIds.has(nextEntry.id) : false;
+              
+              return (
+                <HistoryEntry
+                  key={entry.id || index}
+                  entry={entry}
+                  isLast={index === history.length - 1}
+                  isDarkMode={isDarkMode}
+                  user={getUserByName(entry.updatedBy)}
+                  getActionDescription={getActionDescription}
+                  isNew={isNew}
+                  isBeforeNew={isBeforeNew}
+                  onMentionClick={onMentionClick}
+                />
+              );
+            })}
 
             {history.length === 0 && (
               <p

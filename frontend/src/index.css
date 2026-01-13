@@ -331,6 +331,82 @@ html {
   animation: slideIn 0.3s ease-out;
 }
 
+/* ============================================
+   History Timeline Entry Animations
+   All animations synchronized at 1s with same easing
+   ============================================ */
+
+/* Entry expands into layout - uses CSS Grid for dynamic height animation */
+@keyframes entryExpand {
+  0% {
+    grid-template-rows: 0fr;
+  }
+  100% {
+    grid-template-rows: 1fr;
+  }
+}
+
+.animate-entryExpand {
+  display: grid;
+  animation: entryExpand 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  overflow: hidden;
+}
+
+/* Content fades in as entry expands */
+@keyframes entryContent {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.animate-entryContent {
+  animation: entryContent 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Icon rises up from below to meet the dropping line */
+@keyframes iconRise {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-iconRise {
+  animation: iconRise 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Line drops from the previous message icon to meet the rising icon */
+@keyframes lineDropToMeet {
+  0% {
+    transform: scaleY(0);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+.animate-lineGrow {
+  transform-origin: top center;
+  animation: lineDropToMeet 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ============================================
+   End History Timeline Animations
+   ============================================ */
+
 /* Bounce in animation for success checkmark */
 @keyframes bounceIn {
   0% {
