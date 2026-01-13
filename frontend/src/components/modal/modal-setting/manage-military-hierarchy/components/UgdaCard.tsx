@@ -12,6 +12,7 @@ interface UgdaCardProps {
   expanded: boolean;
   expandedNodes: Set<string>;
   highlightedUnits?: Set<string>;
+  newUnits?: Set<string>;
   onToggle: () => void;
   onToggleNode: (nodeId: string) => void;
   onDelete: () => void;
@@ -29,6 +30,7 @@ export const UgdaCard: React.FC<UgdaCardProps> = ({
   expanded,
   expandedNodes,
   highlightedUnits = new Set(),
+  newUnits = new Set(),
   onToggle,
   onToggleNode,
   onDelete,
@@ -41,13 +43,15 @@ export const UgdaCard: React.FC<UgdaCardProps> = ({
   const c = LEVEL_COLORS.ugda[isDarkMode ? "dark" : "light"];
   const hativotCount = Object.keys(ugdaData.hativot).length;
   const isHighlighted = highlightedUnits.has(`ugda-${pikudKey}-${ugdaKey}`);
+  const isNew = newUnits.has(`ugda-${pikudKey}-${ugdaKey}`);
 
   return (
     <div
       className={`
-      rounded-xl border-2 overflow-hidden transition-all duration-300
-      ${
-        isHighlighted
+      rounded-xl border-2 overflow-hidden transition-all duration-300 relative
+      ${isNew
+        ? `${c.bg} border-emerald-400 shadow-[0_0_0_2px_rgba(52,211,153,0.3)]`
+        : isHighlighted
           ? `${c.bg} border-yellow-400 shadow-[0_0_0_2px_rgba(250,204,21,0.3)]`
           : `${c.bg} ${c.border}`
       }
@@ -70,7 +74,7 @@ export const UgdaCard: React.FC<UgdaCardProps> = ({
           >
             <Layers className="w-4 h-4 text-white" />
           </div>
-          <div>
+          <div className="flex items-center gap-2">
             <span
               className={`font-semibold ${c.text} ${
                 isHighlighted
@@ -80,6 +84,11 @@ export const UgdaCard: React.FC<UgdaCardProps> = ({
             >
               אוגדה {ugdaKey}
             </span>
+            {isNew && (
+              <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-white">
+                חדש
+              </span>
+            )}
             <span
               className={`text-xs mr-2 ${
                 isDarkMode ? "text-slate-500" : "text-slate-400"
@@ -88,26 +97,26 @@ export const UgdaCard: React.FC<UgdaCardProps> = ({
               ({hativotCount} חטיבות)
             </span>
           </div>
-        </div>
-        <div
-          className="flex items-center gap-1"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <ActionButton
-            icon={<Plus className="w-3.5 h-3.5" />}
-            onClick={onAddHativa}
-            tooltip="הוסף חטיבה"
-            isDarkMode={isDarkMode}
-            small
-          />
-          <ActionButton
-            icon={<Trash2 className="w-3.5 h-3.5" />}
-            onClick={onDelete}
-            tooltip="מחק אוגדה"
-            isDarkMode={isDarkMode}
-            danger
-            small
-          />
+          <div
+            className="flex items-center gap-1"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ActionButton
+              icon={<Plus className="w-3.5 h-3.5" />}
+              onClick={onAddHativa}
+              tooltip="הוסף חטיבה"
+              isDarkMode={isDarkMode}
+              small
+            />
+            <ActionButton
+              icon={<Trash2 className="w-3.5 h-3.5" />}
+              onClick={onDelete}
+              tooltip="מחק אוגדה"
+              isDarkMode={isDarkMode}
+              danger
+              small
+            />
+          </div>
         </div>
       </div>
 
@@ -136,6 +145,7 @@ export const UgdaCard: React.FC<UgdaCardProps> = ({
                   `hativa-${pikudKey}-${ugdaKey}-${hativaKey}`
                 )}
                 highlightedUnits={highlightedUnits}
+                newUnits={newUnits}
                 onToggle={() =>
                   onToggleNode(`hativa-${pikudKey}-${ugdaKey}-${hativaKey}`)
                 }

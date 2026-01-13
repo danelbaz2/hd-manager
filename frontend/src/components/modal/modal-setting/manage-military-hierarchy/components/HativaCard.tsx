@@ -13,6 +13,7 @@ interface HativaCardProps {
   isDarkMode: boolean;
   expanded: boolean;
   highlightedUnits?: Set<string>;
+  newUnits?: Set<string>;
   onToggle: () => void;
   onDelete: () => void;
   onAddGdud: () => void;
@@ -27,6 +28,7 @@ export const HativaCard: React.FC<HativaCardProps> = ({
   isDarkMode,
   expanded,
   highlightedUnits = new Set(),
+  newUnits = new Set(),
   onToggle,
   onDelete,
   onAddGdud,
@@ -37,13 +39,15 @@ export const HativaCard: React.FC<HativaCardProps> = ({
   const isHighlighted = highlightedUnits.has(
     `hativa-${pikudKey}-${ugdaKey}-${hativaKey}`
   );
+  const isNew = newUnits.has(`hativa-${pikudKey}-${ugdaKey}-${hativaKey}`);
 
   return (
     <div
       className={`
-      rounded-lg border-2 overflow-hidden transition-all
-      ${
-        isHighlighted
+      rounded-lg border-2 overflow-hidden transition-all relative
+      ${isNew
+        ? `${c.bg} border-emerald-400 shadow-[0_0_0_2px_rgba(52,211,153,0.3)]`
+        : isHighlighted
           ? `${c.bg} border-yellow-400 shadow-[0_0_0_2px_rgba(250,204,21,0.3)]`
           : `${c.bg} ${c.border}`
       }
@@ -79,6 +83,11 @@ export const HativaCard: React.FC<HativaCardProps> = ({
           >
             חטיבה {hativaKey}
           </span>
+          {isNew && (
+            <span className="px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-white">
+              חדש
+            </span>
+          )}
           <span
             className={`text-xs ${
               isDarkMode ? "text-slate-500" : "text-slate-400"
@@ -132,6 +141,9 @@ export const HativaCard: React.FC<HativaCardProps> = ({
                   gdudKey={gdudKey}
                   isDarkMode={isDarkMode}
                   isHighlighted={highlightedUnits.has(
+                    `gdud-${pikudKey}-${ugdaKey}-${hativaKey}-${gdudKey}`
+                  )}
+                  isNew={newUnits.has(
                     `gdud-${pikudKey}-${ugdaKey}-${hativaKey}-${gdudKey}`
                   )}
                   onDelete={() => onDeleteGdud(gdudKey)}

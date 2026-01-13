@@ -3,7 +3,8 @@ import { useMilitaryHierarchyQuery, useUpdateMilitaryHierarchyMutation } from '.
 import type { MilitaryHierarchy } from '../../../../../api/militaryHierarchyApi';
 import { useToast } from '../../../../alert-feedback';
 import type { UnitType } from '../constants';
-import { addUnitToHierarchy, deleteUnitFromHierarchy } from '../utils';
+import { addUnitToHierarchy, deleteUnitFromHierarchy, checkUnitExists } from '../utils';
+import { UNIT_LABELS } from '../constants';
 
 export const useManageHierarchy = () => {
   const { data: hierarchy = {}, isLoading, isError, error } = useMilitaryHierarchyQuery();
@@ -12,6 +13,7 @@ export const useManageHierarchy = () => {
 
   const [editedHierarchy, setEditedHierarchy] = useState<MilitaryHierarchy>(hierarchy);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
+  const [newUnits, setNewUnits] = useState<Set<string>>(new Set()); // Track newly added unsaved units
   const [hasChanges, setHasChanges] = useState(false);
   
   // Search State
@@ -185,6 +187,7 @@ export const useManageHierarchy = () => {
     try {
       await updateMutation.mutateAsync(editedHierarchy);
       setHasChanges(false);
+      setNewUnits(new Set()); // Clear new units after save
       showSuccess('נשמר', 'העץ ציוות עודכנה בהצלחה');
     } catch (err) {
       showError('שגיאה', 'שגיאה בשמירת העץ ציוות');
@@ -194,14 +197,38 @@ export const useManageHierarchy = () => {
   const handleCancel = () => {
     setEditedHierarchy(hierarchy);
     setHasChanges(false);
+    setNewUnits(new Set()); // Clear new units on cancel
   };
 
   // CRUD Handlers
   const handleCreateUnit = (name: string) => {
     const { type, pikudKey, ugdaKey, hativaKey } = addModal;
     
+    // Check if unit with this name already exists at the same level
+    const exists = checkUnitExists(editedHierarchy, type, name, { pikudKey, ugdaKey, hativaKey });
+    if (exists) {
+      const unitLabel = UNIT_LABELS[type];
+      showError('שגיאה', `${unitLabel} בשם "${name}" כבר קיים`);
+      return;
+    }
+    
     const newHierarchy = addUnitToHierarchy(editedHierarchy, type, name, { pikudKey, ugdaKey, hativaKey });
     setEditedHierarchy(newHierarchy);
+    
+    // Track this as a new unsaved unit
+    let unitId = '';
+    if (type === 'pikud') {
+      unitId = `pikud-${name}`;
+    } else if (type === 'ugda' && pikudKey) {
+      unitId = `ugda-${pikudKey}-${name}`;
+    } else if (type === 'hativa' && pikudKey && ugdaKey) {
+      unitId = `hativa-${pikudKey}-${ugdaKey}-${name}`;
+    } else if (type === 'gdud' && pikudKey && ugdaKey && hativaKey) {
+      unitId = `gdud-${pikudKey}-${ugdaKey}-${hativaKey}-${name}`;
+    }
+    if (unitId) {
+      setNewUnits(prev => new Set(prev).add(unitId));
+    }
     
     // Auto expand parent node
     if (type === 'ugda' && pikudKey) {
@@ -229,6 +256,7 @@ export const useManageHierarchy = () => {
   return {
     editedHierarchy,
     expandedNodes,
+    newUnits,
     hasChanges,
     isLoading,
     isError,

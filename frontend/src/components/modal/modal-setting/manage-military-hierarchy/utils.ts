@@ -101,3 +101,32 @@ export const deleteUnitFromHierarchy = (
   }
   return newHierarchy;
 };
+
+/**
+ * Check if a unit with the given name already exists at the specified level.
+ * Each level is checked independently (e.g., ugda "98" can exist even if hativa "98" exists).
+ */
+export const checkUnitExists = (
+  hierarchy: MilitaryHierarchy,
+  type: UnitType,
+  name: string,
+  keys: { pikudKey?: string; ugdaKey?: string; hativaKey?: string }
+): boolean => {
+  const { pikudKey, ugdaKey, hativaKey } = keys;
+
+  if (type === 'pikud') {
+    // Check if pikud with this name already exists
+    return name in hierarchy;
+  } else if (type === 'ugda' && pikudKey && hierarchy[pikudKey]) {
+    // Check if ugda with this name exists under the specific pikud
+    return name in hierarchy[pikudKey].ugdot;
+  } else if (type === 'hativa' && pikudKey && ugdaKey && hierarchy[pikudKey]?.ugdot[ugdaKey]) {
+    // Check if hativa with this name exists under the specific ugda
+    return name in hierarchy[pikudKey].ugdot[ugdaKey].hativot;
+  } else if (type === 'gdud' && pikudKey && ugdaKey && hativaKey && hierarchy[pikudKey]?.ugdot[ugdaKey]?.hativot[hativaKey]) {
+    // Check if gdud with this name exists under the specific hativa
+    return name in hierarchy[pikudKey].ugdot[ugdaKey].hativot[hativaKey].gdudim;
+  }
+
+  return false;
+};

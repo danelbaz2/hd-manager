@@ -21,6 +21,7 @@ const ManageMilitaryHierarchy: React.FC = () => {
   const {
     editedHierarchy,
     expandedNodes,
+    newUnits,
     hasChanges,
     isLoading,
     isError,
@@ -136,6 +137,7 @@ const ManageMilitaryHierarchy: React.FC = () => {
               expanded={expandedNodes.has(`pikud-${pikudKey}`)}
               expandedNodes={expandedNodes}
               highlightedUnits={searchResults.matchingUnits}
+              newUnits={newUnits}
               onToggle={() => toggleNode(`pikud-${pikudKey}`)}
               onToggleNode={toggleNode}
               onDelete={() =>
@@ -193,17 +195,17 @@ const ManageMilitaryHierarchy: React.FC = () => {
               }
             />
           ))}
-
-          {/* Save/Cancel Bar - Shows only when changes exist */}
-          <SaveCancelBar
-            isDarkMode={isDarkMode}
-            hasChanges={hasChanges}
-            isSaving={isSaving}
-            onSave={handleSave}
-            onCancel={handleCancel}
-          />
         </div>
       </div>
+
+      {/* Fixed Footer - Save/Cancel Bar */}
+      <SaveCancelBar
+        isDarkMode={isDarkMode}
+        hasChanges={hasChanges}
+        isSaving={isSaving}
+        onSave={handleSave}
+        onCancel={handleCancel}
+      />
 
       {/* Modals */}
       <AddUnitModal
