@@ -1,5 +1,13 @@
 __pycache__/
 *.pyc
 
+# Environment files (contain secrets)
+.env
+.env.local
+.env.*.local
+backend/.env
+docker/.env
+docker/.env.prod
+
 # Uploads
 backend/uploads/profiles/

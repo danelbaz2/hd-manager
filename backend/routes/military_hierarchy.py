@@ -86,7 +86,7 @@ def update_hierarchy():
             upsert=True
         )
         
-        # History logging is best-effort
+        # History logging
         action = 'CREATE' if result.upserted_id else 'UPDATE'
         new_doc = {"hierarchy": hierarchy_data}
         try:
@@ -94,18 +94,14 @@ def update_hierarchy():
                 'military_hierarchy', 
                 'singleton', 
                 action,
-                request.username,
+                request.user_full_name,
                 old_doc,
                 new_doc,
                 {"hierarchy": hierarchy_data}
             )
-        except:
-            pass  # Don't fail request if logging fails
-        
-        # Log the change
-        logger.warning(
-            f"Military hierarchy updated by {request.username}"
-        )
+            logger.info(f"Military hierarchy {action.lower()}d by user {request.user_id}")
+        except Exception as e:
+            logger.error(f"Failed to log military hierarchy history: {str(e)}")
         
         return jsonify({"hierarchy": hierarchy_data}), 200
         

@@ -21,19 +21,27 @@ services:
     ports:
       - "5000:5000"
     environment:
-      - PORT=5000
-      - DEBUG=False
-      - CORS_ORIGINS=https://192.168.80.5,https://flow-task
-      - MAX_FILE_SIZE_MB=10
-      - LOG_LEVEL=INFO
-      - LOG_REQUESTS=false
-      # ADMIN_API_KEY - Used for runtime log control via curl
-      # CHANGE THIS in production!
-      - ADMIN_API_KEY=CHANGE_ME_IN_PRODUCTION
-      - UPLOAD_ALLOWED_EXTENSIONS=pdf,doc,docx,xls,xlsx,txt,png,jpg,jpeg,gif
-      - MONGO_URI=mongodb://mongodb-server:27017/hd-manager
-      - SECRET_KEY=8f3b2c9d1e4a5f6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b
-      - JWT_SECRET_KEY=8f3b2c9d1e4a5f6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a0b
+      # Server Configuration
+      - PORT=${PORT:-5000}
+      - DEBUG=${DEBUG:-False}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+
+      # Security - REQUIRED secrets from .env file
+      - SECRET_KEY=${SECRET_KEY}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - ADMIN_API_KEY=${ADMIN_API_KEY}
+      - API_KEY=${API_KEY}
+
+      # Database
+      - MONGO_URI=${MONGO_URI:-mongodb://mongodb-server:27017/hd-manager}
+
+      # File Uploads
+      - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-10}
+      - UPLOAD_ALLOWED_EXTENSIONS=${UPLOAD_ALLOWED_EXTENSIONS:-pdf,doc,docx,xls,xlsx,txt,png,jpg,jpeg,gif}
+
+      # Logging
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_REQUESTS=${LOG_REQUESTS:-false}
     volumes:
       - uploads:/app/uploads
     depends_on:
@@ -51,18 +59,17 @@ services:
     ports:
       - "443:443"
     environment:
-      # =============================================
-      # CHANGE THESE VALUES FOR YOUR PRODUCTION ENV!
-      # =============================================
-      - VITE_SYSTEM_NAME=Flow Task1123
-      - VITE_API_URL=/api
-      - VITE_API_MAX_RETRIES=2
-      - VITE_API_RETRY_DELAY=500
-      - VITE_SOCKET_TIMEOUT=10000
-      - VITE_IDLE_TIMEOUT=300000
-      # External System URLs - Configure for your disconnected environment
-      - SERVICENOW_URL=https://your-servicenow-instance.com
-      - MARS_URL=https://your-mars-instance.com
+      # Frontend Configuration - from .env file
+      - SYSTEM_NAME=${SYSTEM_NAME:-Flow Task}
+      - API_URL=${API_URL:-/api}
+      - API_MAX_RETRIES=${API_MAX_RETRIES:-2}
+      - API_RETRY_DELAY=${API_RETRY_DELAY:-500}
+      - SOCKET_TIMEOUT=${SOCKET_TIMEOUT:-10000}
+      - IDLE_TIMEOUT=${IDLE_TIMEOUT:-300000}
+      
+      # External System URLs - from .env file
+      - SERVICENOW_URL=${SERVICENOW_URL}
+      - MARS_URL=${MARS_URL}
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./ca:/etc/nginx/ssl:ro

@@ -600,6 +600,7 @@ def add_task_note(task_id):
         
         # Use log_history like other entities (creates proper _id: ObjectId)
         log_history('note', note_id, 'CREATE', request.user_full_name, None, note_entity, change_val, now)
+        logger.info(f"Note added to task {task_id} by user {request.user_id}")
         
         # Return the created note WITH taskId for frontend
         response = {

@@ -8,10 +8,20 @@ from functools import wraps
 from flask import request, jsonify
 
 # Get JWT configuration from environment
-JWT_SECRET_KEY = os.getenv('JWT_SECRET_KEY', 'IA1DE2')
+# SECURITY: JWT_SECRET_KEY is REQUIRED - no fallback to prevent insecure defaults
+JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY')
+if not JWT_SECRET_KEY:
+    raise RuntimeError(
+        "CRITICAL: JWT_SECRET_KEY environment variable is not set! "
+        "Set it in your .env file or environment before running the application."
+    )
 JWT_EXPIRATION_DAYS = int(os.getenv('JWT_EXPIRATION_DAYS', 24))
 JWT_ALGORITHM = 'HS256'
 JWT_COOKIE_NAME = 'jwt_token'  # Name of the HttpOnly cookie
+
+# API Key for external integrations (Postman, scripts, etc.)
+# Optional - if not set, only JWT authentication is available
+API_KEY = os.environ.get('API_KEY')
 
 
 from database import mongo
@@ -106,9 +116,30 @@ def get_token() -> str | None:
     return request.cookies.get(JWT_COOKIE_NAME)
 
 
+def check_api_key() -> bool:
+    """
+    Check if the request contains a valid API key.
+    
+    API key should be sent in the X-API-Key header.
+    Example: X-API-Key: your-super-secret-api-key
+    
+    Returns:
+        True if API key is valid, False otherwise
+    """
+    if not API_KEY:
+        return False  # API key authentication is disabled
+    
+    provided_key = request.headers.get('X-API-Key')
+    return provided_key == API_KEY
+
+
 def jwt_required(f):
     """
-    Decorator to protect routes with JWT authentication
+    Decorator to protect routes with JWT authentication OR API key
+    
+    Supports two authentication methods:
+    1. JWT token (from HttpOnly cookie) - for browser-based apps
+    2. API key (from X-API-Key header) - for Postman, scripts, external tools
     
     Usage:
         @bp.route('/protected')
@@ -119,7 +150,17 @@ def jwt_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        token = get_token()  # Uses cookie or header
+        # Check API key first (for Postman/external tools)
+        if check_api_key():
+            # API key is valid - set request as system/admin user
+            request.user_id = 'system'
+            request.username = 'api_key'
+            request.role = 'admin'
+            request.user_full_name = 'API Key User'
+            return f(*args, **kwargs)
+        
+        # Fall back to JWT authentication
+        token = get_token()  # Uses cookie
         
         if not token:
             return jsonify({'error': 'Authentication required'}), 401
@@ -156,7 +197,7 @@ def jwt_required(f):
 def admin_required(f):
     """
     Decorator to protect routes that require admin role.
-    Includes JWT validation and admin role check.
+    Supports JWT authentication OR API key.
     
     Usage:
         @bp.route('/admin-only')
@@ -171,7 +212,16 @@ def admin_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        token = get_token()  # Uses cookie or header
+        # Check API key first (API key always has admin access)
+        if check_api_key():
+            request.user_id = 'system'
+            request.username = 'api_key'
+            request.role = 'admin'
+            request.user_full_name = 'API Key User'
+            return f(*args, **kwargs)
+        
+        # Fall back to JWT authentication
+        token = get_token()
         
         if not token:
             return jsonify({'error': 'Authentication required'}), 401
@@ -212,9 +262,11 @@ def admin_required(f):
 def self_or_admin_required(f):
     """
     Decorator to protect user update routes.
+    Supports JWT authentication OR API key.
     Allows:
     - Admins to update any user
     - Regular users to only update themselves
+    - API key to update any user (has admin access)
     
     Usage:
         @bp.route('/<id>', methods=['PUT'])
@@ -230,7 +282,16 @@ def self_or_admin_required(f):
     """
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        token = get_token()  # Uses cookie or header
+        # Check API key first (API key always has admin access)
+        if check_api_key():
+            request.user_id = 'system'
+            request.username = 'api_key'
+            request.role = 'admin'
+            request.user_full_name = 'API Key User'
+            return f(*args, **kwargs)
+        
+        # Fall back to JWT authentication
+        token = get_token()
         
         if not token:
             return jsonify({'error': 'Authentication required'}), 401
