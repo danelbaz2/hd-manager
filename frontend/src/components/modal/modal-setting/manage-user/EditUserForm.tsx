@@ -20,7 +20,7 @@ interface EditUserFormProps {
   formData: UserFormData;
   originalData: UserFormData;
   setFormData: React.Dispatch<React.SetStateAction<UserFormData>>;
-  onSave: () => void;
+  onSave: (updatedUsername?: string) => void;
   onCancel: () => void;
 }
 
@@ -39,8 +39,7 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
   const [isSaving, setIsSaving] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  const { alerts, showSuccess, showError, showWarning, dismissAlert } =
-    useToast();
+  const { alerts, showError, showWarning, dismissAlert } = useToast();
 
   const { fileInputRef, isCompressing, handleImageClick, handleImageChange } =
     useImageUpload();
@@ -114,8 +113,11 @@ const EditUserForm: React.FC<EditUserFormProps> = ({
       const response = await updateUser(formData.id!, updatePayload);
 
       if (response.success) {
-        showSuccess("הצלחה", "המשתמש עודכן בהצלחה");
-        onSave();
+        // Pass updated username to parent for toast display
+        const updatedUsername = updatePayload.username
+          ? formData.username
+          : undefined;
+        onSave(updatedUsername);
       } else {
         showError("שגיאה", response.error || "שגיאה בעדכון המשתמש");
         console.error("Failed to update user:", response.error);

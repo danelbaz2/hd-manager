@@ -40,7 +40,14 @@ const ManageUser: React.FC = () => {
     setOriginalData(userData);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = (updatedUsername?: string) => {
+    // Show appropriate success message
+    if (updatedUsername) {
+      showSuccess("הצלחה", `שם המשתמש עודכן בהצלחה ל-'${updatedUsername}'`);
+    } else {
+      showSuccess("הצלחה", "המשתמש עודכן בהצלחה");
+    }
+
     setEditingUserId(null);
     setFormData(DEFAULT_FORM_DATA);
     setOriginalData(DEFAULT_FORM_DATA);

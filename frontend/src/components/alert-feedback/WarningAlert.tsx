@@ -91,6 +91,7 @@ const WarningAlert: React.FC<AlertProps> = ({
             {title}
           </h4>
           <p
+            dir="auto"
             className={`
               mt-1 text-sm leading-relaxed
               ${isDarkMode ? "text-slate-300" : "text-slate-600"}
