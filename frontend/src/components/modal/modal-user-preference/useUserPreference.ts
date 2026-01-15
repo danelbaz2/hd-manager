@@ -96,7 +96,7 @@ export const useUserPreference = (
 
     // Validation
     if (!formData.fullName.trim()) {
-      return false; // This shouldn't happen with proper UI, but safety check
+      return false;
     }
     if (formData.fullName.trim().length < MIN_NAME_LENGTH) {
       return false;
@@ -107,16 +107,28 @@ export const useUserPreference = (
 
     setIsSaving(true);
     try {
-      const updateData: Record<string, unknown> = {
-        fullName: formData.fullName.trim(),
-        nickname: formData.nickname?.trim() || null,
-        color: formData.color,
-        profileImage: formData.profileImage,
-      };
+      const updateData: Record<string, unknown> = {};
 
-      // Only include password if it was changed
+      // Only include fields that have changed
+      if (formData.fullName !== originalData?.fullName) {
+        updateData.fullName = formData.fullName.trim();
+      }
+      if (formData.nickname !== originalData?.nickname) {
+        updateData.nickname = formData.nickname?.trim() || null;
+      }
+      if (formData.color !== originalData?.color) {
+        updateData.color = formData.color;
+      }
+      if (formData.profileImage !== originalData?.profileImage) {
+        updateData.profileImage = formData.profileImage;
+      }
       if (formData.password.length > 0) {
         updateData.password = formData.password;
+      }
+
+      // If no changes, don't make the API call
+      if (Object.keys(updateData).length === 0) {
+        return true;
       }
 
       const response = await updateUser(user.id, updateData);

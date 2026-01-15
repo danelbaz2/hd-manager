@@ -1,20 +1,33 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useMilitaryHierarchyQuery, useUpdateMilitaryHierarchyMutation } from '../../../../../api/queries/militaryHierarchyQueries';
+import { useMilitaryHierarchyQuery, useApplyHierarchyOperationsMutation } from '../../../../../api/queries/militaryHierarchyQueries';
 import type { MilitaryHierarchy } from '../../../../../api/militaryHierarchyApi';
 import { useToast } from '../../../../alert-feedback';
 import type { UnitType } from '../constants';
-import { addUnitToHierarchy, deleteUnitFromHierarchy, checkUnitExists } from '../utils';
+import { checkUnitExists } from '../utils';
 import { UNIT_LABELS } from '../constants';
+
+interface PendingOperation {
+  type: 'create' | 'delete';
+  unitType: UnitType;
+  name?: string;
+  parentKeys: {
+    pikudKey?: string;
+    ugdaKey?: string;
+    hativaKey?: string;
+  };
+}
 
 export const useManageHierarchy = () => {
   const { data: hierarchy = {}, isLoading, isError, error } = useMilitaryHierarchyQuery();
-  const updateMutation = useUpdateMilitaryHierarchyMutation();
+  const operationsMutation = useApplyHierarchyOperationsMutation();
   const { showSuccess, showError, alerts, dismissAlert } = useToast();
 
+  const [originalHierarchy, setOriginalHierarchy] = useState<MilitaryHierarchy>(hierarchy);
   const [editedHierarchy, setEditedHierarchy] = useState<MilitaryHierarchy>(hierarchy);
   const [expandedNodes, setExpandedNodes] = useState<Set<string>>(new Set());
-  const [newUnits, setNewUnits] = useState<Set<string>>(new Set()); // Track newly added unsaved units
+  const [newUnits, setNewUnits] = useState<Set<string>>(new Set());
   const [hasChanges, setHasChanges] = useState(false);
+  const [pendingOperations, setPendingOperations] = useState<PendingOperation[]>([]);
   
   // Search State
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,6 +54,7 @@ export const useManageHierarchy = () => {
   // Sync with fetched data
   useEffect(() => {
     if (!isLoading && hierarchy) {
+      setOriginalHierarchy(hierarchy);
       setEditedHierarchy(hierarchy);
     }
   }, [hierarchy, isLoading]);
@@ -62,8 +76,7 @@ export const useManageHierarchy = () => {
     return { pikudim: Object.keys(editedHierarchy || {}).length, ugdot, hativot, gdudim };
   }, [editedHierarchy]);
 
-  // Search Results - find matching units and their paths
-  // Now searches both the key (e.g., "מרכז") and full display text (e.g., "פיקוד מרכז")
+  // Search Results
   const searchResults = useMemo(() => {
     if (!searchQuery.trim()) {
       return { matchingUnits: new Set<string>(), nodesToExpand: new Set<string>(), count: 0 };
@@ -73,7 +86,6 @@ export const useManageHierarchy = () => {
     const matchingUnits = new Set<string>();
     const nodesToExpand = new Set<string>();
 
-    // Helper to check if text matches query
     const matches = (key: string, prefix: string) => {
       const keyLower = key.toLowerCase();
       const displayText = `${prefix} ${key}`.toLowerCase();
@@ -134,11 +146,11 @@ export const useManageHierarchy = () => {
   const totalExpandableNodes = useMemo(() => {
     let count = 0;
     Object.keys(editedHierarchy).forEach(pikudKey => {
-      count++; // pikud
+      count++;
       Object.keys(editedHierarchy[pikudKey].ugdot).forEach(ugdaKey => {
-        count++; // ugda
+        count++;
         Object.keys(editedHierarchy[pikudKey].ugdot[ugdaKey].hativot).forEach(() => {
-          count++; // hativa
+          count++;
         });
       });
     });
@@ -185,19 +197,47 @@ export const useManageHierarchy = () => {
   // Save/Cancel
   const handleSave = async () => {
     try {
-      await updateMutation.mutateAsync(editedHierarchy);
+      if (pendingOperations.length === 0) {
+        showError('שגיאה', 'אין שינויים לשמור');
+        return;
+      }
+
+      // Execute all pending operations
+      for (const operation of pendingOperations) {
+        if (operation.type === 'create') {
+          await operationsMutation.mutateAsync({
+            unitType: operation.unitType,
+            action: 'create',
+            name: operation.name!,
+            parentKeys: operation.parentKeys
+          });
+        } else if (operation.type === 'delete') {
+          await operationsMutation.mutateAsync({
+            unitType: operation.unitType,
+            action: 'delete',
+            name: operation.name!,
+            parentKeys: operation.parentKeys
+          });
+        }
+      }
+
+      // Update state after all operations succeed
+      setOriginalHierarchy(editedHierarchy);
       setHasChanges(false);
-      setNewUnits(new Set()); // Clear new units after save
+      setNewUnits(new Set());
+      setPendingOperations([]);
       showSuccess('נשמר', 'העץ ציוות עודכנה בהצלחה');
     } catch (err) {
+      console.error('Error saving:', err);
       showError('שגיאה', 'שגיאה בשמירת העץ ציוות');
     }
   };
 
   const handleCancel = () => {
-    setEditedHierarchy(hierarchy);
+    setEditedHierarchy(originalHierarchy);
     setHasChanges(false);
-    setNewUnits(new Set()); // Clear new units on cancel
+    setNewUnits(new Set());
+    setPendingOperations([]);
   };
 
   // CRUD Handlers
@@ -212,45 +252,110 @@ export const useManageHierarchy = () => {
       return;
     }
     
-    const newHierarchy = addUnitToHierarchy(editedHierarchy, type, name, { pikudKey, ugdaKey, hativaKey });
-    setEditedHierarchy(newHierarchy);
-    
-    // Track this as a new unsaved unit
-    let unitId = '';
-    if (type === 'pikud') {
-      unitId = `pikud-${name}`;
-    } else if (type === 'ugda' && pikudKey) {
-      unitId = `ugda-${pikudKey}-${name}`;
-    } else if (type === 'hativa' && pikudKey && ugdaKey) {
-      unitId = `hativa-${pikudKey}-${ugdaKey}-${name}`;
-    } else if (type === 'gdud' && pikudKey && ugdaKey && hativaKey) {
-      unitId = `gdud-${pikudKey}-${ugdaKey}-${hativaKey}-${name}`;
-    }
-    if (unitId) {
-      setNewUnits(prev => new Set(prev).add(unitId));
-    }
-    
-    // Auto expand parent node
-    if (type === 'ugda' && pikudKey) {
-      setExpandedNodes(prev => new Set(prev).add(`pikud-${pikudKey}`));
-    } else if (type === 'hativa' && pikudKey && ugdaKey) {
-      setExpandedNodes(prev => new Set(prev).add(`ugda-${pikudKey}-${ugdaKey}`));
-    } else if (type === 'gdud' && pikudKey && ugdaKey && hativaKey) {
-      setExpandedNodes(prev => new Set(prev).add(`hativa-${pikudKey}-${ugdaKey}-${hativaKey}`));
-    }
+    try {
+      // Update editedHierarchy optimistically
+      const newHierarchy = { ...editedHierarchy };
+      
+      if (type === 'pikud') {
+        newHierarchy[name] = {
+          pikud_id: '',
+          name,
+          ugdot: {}
+        };
+      } else if (type === 'ugda' && pikudKey) {
+        newHierarchy[pikudKey].ugdot[name] = {
+          ugda_id: '',
+          name,
+          hativot: {}
+        };
+      } else if (type === 'hativa' && pikudKey && ugdaKey) {
+        newHierarchy[pikudKey].ugdot[ugdaKey].hativot[name] = {
+          hativa_id: '',
+          name,
+          gdudim: {}
+        };
+      } else if (type === 'gdud' && pikudKey && ugdaKey && hativaKey) {
+        newHierarchy[pikudKey].ugdot[ugdaKey].hativot[hativaKey].gdudim[name] = {
+          gdud_id: '',
+          name
+        };
+      }
+      
+      setEditedHierarchy(newHierarchy);
 
-    setHasChanges(true);
-    setAddModal(prev => ({ ...prev, isOpen: false }));
+      // Add to pending operations
+      setPendingOperations(prev => [...prev, {
+        type: 'create',
+        unitType: type,
+        name,
+        parentKeys: { pikudKey, ugdaKey, hativaKey }
+      }]);
+
+      // Track this as a new unsaved unit
+      let unitId = '';
+      if (type === 'pikud') {
+        unitId = `pikud-${name}`;
+      } else if (type === 'ugda' && pikudKey) {
+        unitId = `ugda-${pikudKey}-${name}`;
+      } else if (type === 'hativa' && pikudKey && ugdaKey) {
+        unitId = `hativa-${pikudKey}-${ugdaKey}-${name}`;
+      } else if (type === 'gdud' && pikudKey && ugdaKey && hativaKey) {
+        unitId = `gdud-${pikudKey}-${ugdaKey}-${hativaKey}-${name}`;
+      }
+      if (unitId) {
+        setNewUnits(prev => new Set(prev).add(unitId));
+      }
+      
+      // Auto expand parent node
+      if (type === 'ugda' && pikudKey) {
+        setExpandedNodes(prev => new Set(prev).add(`pikud-${pikudKey}`));
+      } else if (type === 'hativa' && pikudKey && ugdaKey) {
+        setExpandedNodes(prev => new Set(prev).add(`ugda-${pikudKey}-${ugdaKey}`));
+      } else if (type === 'gdud' && pikudKey && ugdaKey && hativaKey) {
+        setExpandedNodes(prev => new Set(prev).add(`hativa-${pikudKey}-${ugdaKey}-${hativaKey}`));
+      }
+
+      setHasChanges(true);
+      setAddModal(prev => ({ ...prev, isOpen: false }));
+    } catch (err) {
+      console.error('Error creating unit:', err);
+      showError('שגיאה', 'שגיאה ביצירת היחידה');
+    }
   };
 
   const handleDeleteUnit = () => {
-    const { type, pikudKey, ugdaKey, hativaKey, gdudKey } = deleteModal;
+    const { type, pikudKey, ugdaKey, hativaKey, gdudKey, name } = deleteModal;
     
-    const newHierarchy = deleteUnitFromHierarchy(editedHierarchy, type, { pikudKey, ugdaKey, hativaKey, gdudKey });
-    setEditedHierarchy(newHierarchy);
-    
-    setHasChanges(true);
-    setDeleteModal(prev => ({ ...prev, isOpen: false }));
+    try {
+      // Update editedHierarchy optimistically
+      const newHierarchy = { ...editedHierarchy };
+      
+      if (type === 'pikud' && pikudKey) {
+        delete newHierarchy[pikudKey];
+      } else if (type === 'ugda' && pikudKey && ugdaKey) {
+        delete newHierarchy[pikudKey].ugdot[ugdaKey];
+      } else if (type === 'hativa' && pikudKey && ugdaKey && hativaKey) {
+        delete newHierarchy[pikudKey].ugdot[ugdaKey].hativot[hativaKey];
+      } else if (type === 'gdud' && pikudKey && ugdaKey && hativaKey && gdudKey) {
+        delete newHierarchy[pikudKey].ugdot[ugdaKey].hativot[hativaKey].gdudim[gdudKey];
+      }
+      
+      setEditedHierarchy(newHierarchy);
+
+      // Add to pending operations
+      setPendingOperations(prev => [...prev, {
+        type: 'delete',
+        unitType: type,
+        name,
+        parentKeys: { pikudKey, ugdaKey, hativaKey }
+      }]);
+
+      setHasChanges(true);
+      setDeleteModal(prev => ({ ...prev, isOpen: false }));
+    } catch (err) {
+      console.error('Error deleting unit:', err);
+      showError('שגיאה', 'שגיאה במחיקת היחידה');
+    }
   };
 
   return {
@@ -264,7 +369,7 @@ export const useManageHierarchy = () => {
     stats,
     addModal,
     deleteModal,
-    isSaving: updateMutation.isPending,
+    isSaving: operationsMutation.isPending,
     isAllExpanded,
     isAllCollapsed,
     

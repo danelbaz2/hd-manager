@@ -48,3 +48,32 @@ export async function updateMilitaryHierarchy(
     body: JSON.stringify({ hierarchy }),
   });
 }
+
+/**
+ * Create a new unit in the military hierarchy (Admin only)
+ */
+export async function createMilitaryUnit(
+  unitType: 'pikud' | 'ugda' | 'hativa' | 'gdud',
+  name: string,
+  parentKeys?: { pikudKey?: string; ugdaKey?: string; hativaKey?: string }
+): Promise<ApiResponse<MilitaryHierarchyResponse>> {
+  return apiRequest<MilitaryHierarchyResponse>(`${API_BASE_URL}/military-hierarchy/units/${unitType}`, {
+    method: 'POST',
+    body: JSON.stringify({ name, ...parentKeys }),
+  });
+}
+
+/**
+ * Delete a unit from the military hierarchy (Admin only)
+ */
+export async function deleteMilitaryUnit(
+  unitType: 'pikud' | 'ugda' | 'hativa' | 'gdud',
+  name: string,
+  parentKeys?: { pikudKey?: string; ugdaKey?: string; hativaKey?: string }
+): Promise<ApiResponse<MilitaryHierarchyResponse>> {
+  const params = new URLSearchParams({ name, ...parentKeys } as Record<string, string>);
+  return apiRequest<MilitaryHierarchyResponse>(
+    `${API_BASE_URL}/military-hierarchy/units/${unitType}?${params.toString()}`,
+    { method: 'DELETE' }
+  );
+}
