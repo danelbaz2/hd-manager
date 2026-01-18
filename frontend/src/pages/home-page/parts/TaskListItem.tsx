@@ -39,7 +39,7 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
 
   // Get assigned users
   const assignedUsers = users.filter((user) =>
-    task.responsibleUserIds?.includes(user.id)
+    task.responsibleUserIds?.includes(user.id),
   );
 
   // Get user colors for gradient
@@ -47,10 +47,10 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
 
   // Get both primary and secondary tags for this task
   const taskPrimaryTags = primaryTags.filter((t) =>
-    task.primaryTagIds?.includes(t.id)
+    task.primaryTagIds?.includes(t.id),
   );
   const taskSecondaryTags = secondaryTags.filter((t) =>
-    task.secondaryTagIds?.includes(t.id)
+    task.secondaryTagIds?.includes(t.id),
   );
   const allTags = [...taskPrimaryTags, ...taskSecondaryTags];
 
@@ -137,9 +137,9 @@ const TaskListItem: React.FC<TaskListItemProps> = ({
         </span>
       </div>
 
-      {/* Date - Shows days remaining - Hidden on small screens */}
+      {/* Date - Shows days remaining until DEADLINE - Hidden on small screens */}
       {(() => {
-        const daysInfo = getDaysRemaining(task.date);
+        const daysInfo = getDaysRemaining(task.deadline);
         return (
           <div className="hidden md:flex w-20 lg:w-32 shrink-0 items-center justify-center gap-1 lg:gap-1.5">
             <Calendar className={`w-3 h-3 lg:w-4 lg:h-4 ${daysInfo.color}`} />

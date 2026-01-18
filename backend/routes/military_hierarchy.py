@@ -271,8 +271,20 @@ def delete_unit(unit_type):
             upsert=True
         )
         
-        # History logging
+        # History logging - only log the specific change
         new_doc = {"hierarchy": hierarchy}
+        change_data = {
+            "action": "DELETE",
+            "type": unit_type,
+            "name": name
+        }
+        if pikud_key:
+            change_data["pikudKey"] = pikud_key
+        if ugda_key:
+            change_data["ugdaKey"] = ugda_key
+        if hativa_key:
+            change_data["hativaKey"] = hativa_key
+            
         try:
             log_history(
                 'military_hierarchy', 
@@ -281,7 +293,7 @@ def delete_unit(unit_type):
                 request.user_full_name,
                 old_doc,
                 new_doc,
-                {"action": "DELETE", "type": unit_type, "name": name}
+                change_data
             )
             logger.info(f"Military hierarchy unit deleted: {unit_type} '{name}' by user {request.user_id}")
         except Exception as e:
@@ -292,3 +304,139 @@ def delete_unit(unit_type):
     except Exception as e:
         logger.error(f"Error deleting hierarchy unit: {str(e)}")
         return jsonify({"error": "Failed to delete unit"}), 500
+
+
+@bp.route("/units/<unit_type>", methods=["PUT"])
+@admin_required
+def update_unit(unit_type):
+    """
+    Update (rename) a unit in the military hierarchy (Admin only).
+    
+    Request Body:
+        {
+            "oldName": "current_name",
+            "newName": "new_name",
+            "pikudKey": "...",    # Required for all types except pikud
+            "ugdaKey": "...",      # Required for hativa and gdud
+            "hativaKey": "..."     # Required for gdud
+        }
+    
+    Returns:
+        200: Unit updated successfully
+        403: User not admin
+        400: Invalid data
+        404: Unit not found
+    """
+    try:
+        data = request.get_json()
+        old_name = data.get("oldName")
+        new_name = data.get("newName")
+        
+        if not old_name or not new_name:
+            return jsonify({"error": "oldName and newName are required"}), 400
+        
+        if old_name == new_name:
+            return jsonify({"error": "New name must be different from old name"}), 400
+        
+        if unit_type not in ["pikud", "ugda", "hativa", "gdud"]:
+            return jsonify({"error": "Invalid unit type"}), 400
+        
+        pikud_key = data.get("pikudKey")
+        ugda_key = data.get("ugdaKey")
+        hativa_key = data.get("hativaKey")
+        
+        # Get current hierarchy
+        doc = mongo.db.military_hierarchy.find_one({}, {"_id": 0})
+        hierarchy = doc.get("hierarchy", {}) if doc else {}
+        old_doc = {"hierarchy": {k: v for k, v in hierarchy.items()}}
+        
+        # Track if unit was found and updated
+        unit_found = False
+        
+        # Update the unit (rename by moving to new key)
+        if unit_type == "pikud":
+            if old_name in hierarchy:
+                if new_name in hierarchy:
+                    return jsonify({"error": f"Pikud '{new_name}' already exists"}), 409
+                # Move the entire pikud structure to new key
+                hierarchy[new_name] = hierarchy.pop(old_name)
+                hierarchy[new_name]["name"] = new_name
+                unit_found = True
+        elif unit_type == "ugda":
+            if pikud_key and pikud_key in hierarchy and old_name in hierarchy[pikud_key]["ugdot"]:
+                if new_name in hierarchy[pikud_key]["ugdot"]:
+                    return jsonify({"error": f"Ugda '{new_name}' already exists in this pikud"}), 409
+                # Move the ugda structure to new key
+                hierarchy[pikud_key]["ugdot"][new_name] = hierarchy[pikud_key]["ugdot"].pop(old_name)
+                hierarchy[pikud_key]["ugdot"][new_name]["name"] = new_name
+                unit_found = True
+        elif unit_type == "hativa":
+            if (pikud_key and ugda_key and 
+                pikud_key in hierarchy and ugda_key in hierarchy[pikud_key]["ugdot"] and
+                old_name in hierarchy[pikud_key]["ugdot"][ugda_key]["hativot"]):
+                if new_name in hierarchy[pikud_key]["ugdot"][ugda_key]["hativot"]:
+                    return jsonify({"error": f"Hativa '{new_name}' already exists in this ugda"}), 409
+                # Move the hativa structure to new key
+                hierarchy[pikud_key]["ugdot"][ugda_key]["hativot"][new_name] = \
+                    hierarchy[pikud_key]["ugdot"][ugda_key]["hativot"].pop(old_name)
+                hierarchy[pikud_key]["ugdot"][ugda_key]["hativot"][new_name]["name"] = new_name
+                unit_found = True
+        elif unit_type == "gdud":
+            if (pikud_key and ugda_key and hativa_key and
+                pikud_key in hierarchy and 
+                ugda_key in hierarchy[pikud_key]["ugdot"] and
+                hativa_key in hierarchy[pikud_key]["ugdot"][ugda_key]["hativot"] and
+                old_name in hierarchy[pikud_key]["ugdot"][ugda_key]["hativot"][hativa_key]["gdudim"]):
+                if new_name in hierarchy[pikud_key]["ugdot"][ugda_key]["hativot"][hativa_key]["gdudim"]:
+                    return jsonify({"error": f"Gdud '{new_name}' already exists in this hativa"}), 409
+                # Move the gdud structure to new key
+                hierarchy[pikud_key]["ugdot"][ugda_key]["hativot"][hativa_key]["gdudim"][new_name] = \
+                    hierarchy[pikud_key]["ugdot"][ugda_key]["hativot"][hativa_key]["gdudim"].pop(old_name)
+                hierarchy[pikud_key]["ugdot"][ugda_key]["hativot"][hativa_key]["gdudim"][new_name]["name"] = new_name
+                unit_found = True
+        
+        # Return error if unit was not found
+        if not unit_found:
+            return jsonify({"error": f"Unit '{old_name}' not found"}), 404
+        
+        # Update the database
+        mongo.db.military_hierarchy.update_one(
+            {},
+            {"$set": {"hierarchy": hierarchy}},
+            upsert=True
+        )
+        
+        # History logging - only log the specific change
+        new_doc = {"hierarchy": hierarchy}
+        change_data = {
+            "action": "UPDATE",
+            "type": unit_type,
+            "oldName": old_name,
+            "newName": new_name
+        }
+        if pikud_key:
+            change_data["pikudKey"] = pikud_key
+        if ugda_key:
+            change_data["ugdaKey"] = ugda_key
+        if hativa_key:
+            change_data["hativaKey"] = hativa_key
+            
+        try:
+            log_history(
+                'military_hierarchy', 
+                'singleton', 
+                'UPDATE',
+                request.user_full_name,
+                old_doc,
+                new_doc,
+                change_data
+            )
+            logger.info(f"Military hierarchy unit updated: {unit_type} '{old_name}' → '{new_name}' by user {request.user_id}")
+        except Exception as e:
+            logger.error(f"Failed to log military hierarchy update: {str(e)}")
+        
+        return jsonify({"hierarchy": hierarchy}), 200
+        
+    except Exception as e:
+        logger.error(f"Error updating hierarchy unit: {str(e)}")
+        return jsonify({"error": "Failed to update unit"}), 500

@@ -77,3 +77,21 @@ export async function deleteMilitaryUnit(
     { method: 'DELETE' }
   );
 }
+
+/**
+ * Update (rename) a unit in the military hierarchy (Admin only)
+ */
+export async function updateMilitaryUnit(
+  unitType: 'pikud' | 'ugda' | 'hativa' | 'gdud',
+  oldName: string,
+  newName: string,
+  parentKeys?: { pikudKey?: string; ugdaKey?: string; hativaKey?: string }
+): Promise<ApiResponse<MilitaryHierarchyResponse>> {
+  return apiRequest<MilitaryHierarchyResponse>(
+    `${API_BASE_URL}/military-hierarchy/units/${unitType}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify({ oldName, newName, ...parentKeys }),
+    }
+  );
+}

@@ -111,7 +111,7 @@ def get_primary_tag(id):
     """Get a single primary tag by ID"""
     tag = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'primary_tag', 'base.isDeleted': {'$ne': True}})
     if not tag:
-        return jsonify({"error": "Primary tag not found"}), 404
+        return jsonify({"error": "תגית ראשית לא נמצאה"}), 404
     return jsonify(serialize_doc(tag))
 
 
@@ -129,14 +129,23 @@ def update_primary_tag(id):
     # Fetch old document first
     old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'primary_tag'})
     if not old_doc:
-        return jsonify({"error": "Primary tag not found"}), 404
+        return jsonify({"error": "תגית ראשית לא נמצאה"}), 404
         
     now = int(datetime.now().timestamp() * 1000)
-    data['base.updatedAt'] = now
-    data['base.updatedBy'] = getattr(request, 'user_full_name', 'system')
+    
+    # Calculate only actual changes (compare with old document)
+    changes = {}
+    for key, value in data.items():
+        if old_doc.get(key) != value:
+            changes[key] = value
+    
+    # Add metadata to update payload
+    update_payload = changes.copy()
+    update_payload['base.updatedAt'] = now
+    update_payload['base.updatedBy'] = getattr(request, 'user_full_name', 'system')
     
     try:
-        mongo.db.ents.update_one({'_id': id}, {'$set': data})
+        mongo.db.ents.update_one({'_id': id}, {'$set': update_payload})
     except _OperationCancelled:
         # Check if the update was applied despite the cancellation
         check_doc = mongo.db.ents.find_one({'_id': id})
@@ -150,10 +159,17 @@ def update_primary_tag(id):
         
     updated = mongo.db.ents.find_one({'_id': id})
     
+    # Prepare history changes (only changed fields + metadata)
+    history_changes = changes.copy()
+    history_changes['base'] = {
+        'updatedAt': now,
+        'updatedBy': getattr(request, 'user_full_name', 'system')
+    }
+    
     # History logging is best-effort
     try:
-        log_history('primary_tag', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, data)
-        logger.action("Update", "PrimaryTag", id, getattr(request, 'user_id', 'system'), f"Changed: {list(data.keys())}")
+        log_history('primary_tag', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, history_changes)
+        logger.action("Update", "PrimaryTag", id, getattr(request, 'user_id', 'system'), f"Changed: {list(changes.keys())}")
     except:
         pass  # Don't fail request if logging fails
              
@@ -167,7 +183,7 @@ def delete_primary_tag(id):
     """Hard delete a primary tag (removes from collection, saves to archive)"""
     old_doc = mongo.db.ents.find_one({'_id': id, 'base.entityType': 'primary_tag'})
     if not old_doc:
-        return jsonify({"error": "Primary tag not found"}), 404
+        return jsonify({"error": "תגית ראשית לא נמצאה"}), 404
     
     # Check if any secondary tags are using this primary tag
     secondary_count = mongo.db.ents.count_documents({
@@ -178,7 +194,7 @@ def delete_primary_tag(id):
     
     if secondary_count > 0:
         return jsonify({
-            "error": f"Cannot delete primary tag. {secondary_count} secondary tag(s) are using it. Delete them first."
+            "error": f"לא ניתן למחוק תגית ראשית. {secondary_count} תגיות משניות משתמשות בה. יש למחוק אותן תחילה."
         }), 400
     
     now = int(datetime.now().timestamp() * 1000)
@@ -202,7 +218,7 @@ def delete_primary_tag(id):
     try:
         result = mongo.db.ents.delete_one({'_id': id, 'base.entityType': 'primary_tag'})
         if result.deleted_count == 0:
-            return jsonify({"error": "Failed to delete primary tag"}), 500
+            return jsonify({"error": "כשלון במחיקת תגית ראשית"}), 500
     except _OperationCancelled:
         # Check if the delete was applied despite the cancellation
         if not mongo.db.ents.find_one({'_id': id}):
@@ -213,6 +229,6 @@ def delete_primary_tag(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 400
         
-    return jsonify({"message": "Primary tag deleted"}), 200
+    return jsonify({"message": "תגית ראשית נמחקה בהצלחה"}), 200
 
 

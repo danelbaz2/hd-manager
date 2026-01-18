@@ -7,9 +7,13 @@ import {
   updateMilitaryHierarchy,
   createMilitaryUnit,
   deleteMilitaryUnit,
+  updateMilitaryUnit,
   type MilitaryHierarchy
 } from '../militaryHierarchyApi';
 import { queryKeys } from '../queryClient';
+
+// Re-export type for consumers
+export type { MilitaryHierarchy } from '../militaryHierarchyApi';
 
 /**
  * Hook to fetch military hierarchy
@@ -56,15 +60,20 @@ export function useApplyHierarchyOperationsMutation() {
   return useMutation({
     mutationFn: async (params: {
       unitType: 'pikud' | 'ugda' | 'hativa' | 'gdud';
-      action: 'create' | 'delete';
+      action: 'create' | 'delete' | 'update';
       name?: string;
+      oldName?: string;
+      newName?: string;
       parentKeys?: { pikudKey?: string; ugdaKey?: string; hativaKey?: string };
     }) => {
       if (params.action === 'create') {
         return createMilitaryUnit(params.unitType, params.name!, params.parentKeys);
-      } else {
+      } else if (params.action === 'delete') {
         return deleteMilitaryUnit(params.unitType, params.name!, params.parentKeys);
+      } else if (params.action === 'update') {
+        return updateMilitaryUnit(params.unitType, params.oldName!, params.newName!, params.parentKeys);
       }
+      throw new Error('Invalid action');
     },
     onSuccess: (response) => {
       // Invalidate and refetch

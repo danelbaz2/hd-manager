@@ -258,25 +258,21 @@ export const useManageHierarchy = () => {
       
       if (type === 'pikud') {
         newHierarchy[name] = {
-          pikud_id: '',
           name,
           ugdot: {}
         };
       } else if (type === 'ugda' && pikudKey) {
         newHierarchy[pikudKey].ugdot[name] = {
-          ugda_id: '',
           name,
           hativot: {}
         };
       } else if (type === 'hativa' && pikudKey && ugdaKey) {
         newHierarchy[pikudKey].ugdot[ugdaKey].hativot[name] = {
-          hativa_id: '',
           name,
           gdudim: {}
         };
       } else if (type === 'gdud' && pikudKey && ugdaKey && hativaKey) {
         newHierarchy[pikudKey].ugdot[ugdaKey].hativot[hativaKey].gdudim[name] = {
-          gdud_id: '',
           name
         };
       }

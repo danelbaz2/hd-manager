@@ -121,8 +121,6 @@ def update_user(id):
         return jsonify({"error": "User not found"}), 404
     
     now = int(datetime.now().timestamp() * 1000)
-    data['base.updatedAt'] = now
-    data['base.updatedBy'] = getattr(request, 'user_full_name', 'system')
     
     # If password is being updated (and not empty), hash it
     if 'password' in data and data['password']:
@@ -148,8 +146,19 @@ def update_user(id):
             logger.warning(f"Failed to save profile image: {e}")
             del data['profileImage']  # Don't update if save failed
     
+    # Calculate only actual changes (compare with old document)
+    changes = {}
+    for key, value in data.items():
+        if old_doc.get(key) != value:
+            changes[key] = value
+    
+    # Add metadata to update payload
+    update_payload = changes.copy()
+    update_payload['base.updatedAt'] = now
+    update_payload['base.updatedBy'] = getattr(request, 'user_full_name', 'system')
+    
     try:
-        mongo.db.users.update_one({'_id': id}, {'$set': data})
+        mongo.db.users.update_one({'_id': id}, {'$set': update_payload})
     except DuplicateKeyError as e:
         # Handle duplicate username on update
         if 'username' in str(e):
@@ -170,10 +179,17 @@ def update_user(id):
     
     updated = mongo.db.users.find_one({'_id': id})
     
+    # Prepare history changes (only changed fields + metadata)
+    history_changes = changes.copy()
+    history_changes['base'] = {
+        'updatedAt': now,
+        'updatedBy': getattr(request, 'user_full_name', 'system')
+    }
+    
     # History logging is best-effort
     try:
-        log_history('user', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, data)
-        logger.action("Update", "User", id, getattr(request, 'user_id', 'system'), f"Changed: {list(data.keys())}")
+        log_history('user', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, history_changes)
+        logger.action("Update", "User", id, getattr(request, 'user_id', 'system'), f"Changed: {list(changes.keys())}")
     except:
         pass  # Don't fail request if logging fails
     

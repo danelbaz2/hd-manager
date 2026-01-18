@@ -164,11 +164,20 @@ def update_secondary_tag(id):
         return jsonify({"error": "Secondary tag not found"}), 404
         
     now = int(datetime.now().timestamp() * 1000)
-    data['base.updatedAt'] = now
-    data['base.updatedBy'] = getattr(request, 'user_full_name', 'system')
+    
+    # Calculate only actual changes (compare with old document)
+    changes = {}
+    for key, value in data.items():
+        if old_doc.get(key) != value:
+            changes[key] = value
+    
+    # Add metadata to update payload
+    update_payload = changes.copy()
+    update_payload['base.updatedAt'] = now
+    update_payload['base.updatedBy'] = getattr(request, 'user_full_name', 'system')
     
     try:
-        mongo.db.ents.update_one({'_id': id}, {'$set': data})
+        mongo.db.ents.update_one({'_id': id}, {'$set': update_payload})
     except _OperationCancelled:
         # Check if the update was applied despite the cancellation
         check_doc = mongo.db.ents.find_one({'_id': id})
@@ -182,10 +191,17 @@ def update_secondary_tag(id):
         
     updated = mongo.db.ents.find_one({'_id': id})
     
+    # Prepare history changes (only changed fields + metadata)
+    history_changes = changes.copy()
+    history_changes['base'] = {
+        'updatedAt': now,
+        'updatedBy': getattr(request, 'user_full_name', 'system')
+    }
+    
     # History logging is best-effort
     try:
-        log_history('secondary_tag', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, data)
-        logger.action("Update", "SecondaryTag", id, getattr(request, 'user_id', 'system'), f"Changed: {list(data.keys())}")
+        log_history('secondary_tag', id, 'UPDATE', getattr(request, 'user_full_name', 'system'), old_doc, updated, history_changes)
+        logger.action("Update", "SecondaryTag", id, getattr(request, 'user_id', 'system'), f"Changed: {list(changes.keys())}")
     except:
         pass  # Don't fail request if logging fails
              
