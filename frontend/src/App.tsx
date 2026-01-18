@@ -1,4 +1,10 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
 import Layout from "./components/layout/Layout";
 import { ProtectedRoute } from "./auth";
 import HomePage from "./pages/home-page/HomePage";
@@ -6,8 +12,13 @@ import TaskPage from "./pages/task-page/TaskPage";
 import ArchivePage from "./pages/archive-page/ArchivePage";
 import LoginPage from "./pages/login-page/LoginPage";
 import SettingPage from "./pages/setting-page/SettingPage";
+import { getSystemName } from "./config/runtimeConfig";
 
 function App() {
+  // Set document title from runtime config (for Docker deployment)
+  useEffect(() => {
+    document.title = getSystemName();
+  }, []);
   return (
     <Router>
       <Routes>

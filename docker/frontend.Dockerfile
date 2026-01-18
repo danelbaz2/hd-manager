@@ -45,7 +45,9 @@ COPY --from=builder /app/src /source/src
 COPY --from=builder /app/package.json /source/package.json
 
 # Copy entrypoint script for runtime configuration
+# Convert CRLF to LF (Windows line endings to Unix) and make executable
 COPY frontend-entrypoint.sh /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh && chmod +x /entrypoint.sh
 
 # Expose port 80
 EXPOSE 80

@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/x-icon" href="/icon_flow_task.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>%VITE_SYSTEM_NAME%</title>
+    <!-- Runtime config - MUST load before React to set window.__RUNTIME_CONFIG__ -->
+    <script src="/config.js"></script>
+    <title>Flow Task</title>
   </head>
   <body>
     <div id="root"></div>
-    <!-- Runtime config for external URLs - can be replaced at container startup -->
-    <script src="/config.js"></script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

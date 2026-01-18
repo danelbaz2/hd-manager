@@ -14,7 +14,7 @@ echo "=============================================="
 # Define image names
 BACKEND_IMAGE="hd-manager-backend"
 FRONTEND_IMAGE="hd-manager-frontend"
-MONGO_IMAGE="mongo:4.4"
+MONGO_IMAGE="mongo:7.0"
 EXPORT_DIR="./exports"
 
 # Create export directory

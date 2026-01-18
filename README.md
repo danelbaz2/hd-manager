@@ -2,11 +2,12 @@
 
 **HD Manager** is a comprehensive task and contact management system built for the HD team. It provides a modern, intuitive interface for managing tasks, users, contacts, tags, and team communication.
 
-![Version](https://img.shields.io/badge/version-2.0.0-blue)
+![Version](https://img.shields.io/badge/version-2.2.0-blue)
 ![Python](https://img.shields.io/badge/python-3.9+-green)
 ![Node](https://img.shields.io/badge/node-18+-green)
 ![React](https://img.shields.io/badge/react-19.2-blue)
 ![Flask](https://img.shields.io/badge/flask-latest-lightgrey)
+![Docker](https://img.shields.io/badge/docker-ready-blue)
 
 ---
 
@@ -18,7 +19,11 @@
 - ✅ **Contact Management** - Organize persons and companies
 - ✅ **Tag System** - Categorize tasks and contacts with colored tags
 - ✅ **Change History** - Complete audit trail of all modifications
-- ✅ **Team Chat** - Built-in communication interface
+- ✅ **Team Chat** - Built-in real-time communication
+- ✅ **Real-time Updates** - WebSocket-powered live synchronization
+- ✅ **React Query** - Efficient data fetching with caching
+- ✅ **Docker Deployment** - Production-ready containerized setup
+- ✅ **Runtime Configuration** - Environment variables without rebuild
 - ✅ **Dark Mode** - Full theme support throughout the app
 - ✅ **Responsive Design** - Works on desktop, tablet, and mobile
 - ✅ **Type Safety** - Full TypeScript on frontend, Pydantic on backend
@@ -30,7 +35,7 @@
 ### Prerequisites
 
 - **Python** 3.9 or higher
-- **Node.js** 18 or higher  
+- **Node.js** 18 or higher
 - **MongoDB** 5.0 or higher
 - **npm** or **yarn**
 
@@ -80,6 +85,28 @@ npm run dev
 
 Frontend will run on `http://localhost:5173`
 
+### Docker Deployment (Production)
+
+```bash
+# Navigate to docker directory
+cd docker
+
+# Create required volumes (one-time)
+docker volume create mongodb_data
+docker volume create mongodb_config
+docker volume create uploads
+
+# Development: Build and run
+docker-compose up -d
+
+# Production: See docker/DEPLOYMENT_GUIDE.md
+```
+
+For detailed Docker deployment instructions, see:
+
+- **[Deployment Guide](./docker/DEPLOYMENT_GUIDE.md)**
+- **[Environment Variables Guide](./docker/ENVIRONMENT_VARIABLES_GUIDE.md)**
+
 ---
 
 ## 📁 Project Structure
@@ -119,6 +146,7 @@ hd-manager/
 ## 🛠️ Technology Stack
 
 ### Backend
+
 - **Framework**: Flask
 - **Database**: MongoDB with PyMongo
 - **Validation**: Pydantic v2 (strict mode)
@@ -126,12 +154,14 @@ hd-manager/
 - **CORS**: Flask-CORS
 
 ### Frontend
+
 - **Framework**: React 19.2 with TypeScript
 - **Build Tool**: Vite 7.2
 - **Routing**: React Router DOM 7.10
 - **Styling**: TailwindCSS 4.1
 - **Icons**: Lucide React
-- **State**: React Context API
+- **State**: React Query + Context API
+- **WebSocket**: Socket.IO
 
 ---
 
@@ -146,6 +176,7 @@ hd-manager/
 ### Quick Links by Category
 
 #### 📖 Wiki Documentation (General & Architecture)
+
 - **[⚡ Quick Reference](./docs/wiki/overview/QUICK_REFERENCE.md)** - 5-minute overview
 - **[🏗️ Architecture](./docs/wiki/architecture/ARCHITECTURE.md)** - Complete technical architecture
 - **[🔌 API Reference](./docs/wiki/api/API_DOCUMENTATION.md)** - Complete REST API guide
@@ -153,11 +184,13 @@ hd-manager/
 - **[📊 Code Review](./docs/wiki/changes/reviews/2025-12-18-v2.0.0-review.md)** - Comprehensive review
 
 #### 🔧 Backend Documentation
+
 - **[Backend Guide](./docs/backend/README.md)** - Backend architecture & setup
 - **[Individual API Docs](./docs/backend/api/)** - Detailed endpoint documentation
 - **[System Specifications](./docs/backend/system-specification/)** - Requirements & specs
 
 #### ⚡ Frontend Documentation
+
 - **[Frontend Guide](./docs/frontend/README.md)** - Frontend architecture & setup
 
 ### 📂 Documentation Structure
@@ -182,21 +215,25 @@ docs/
 ## 🔑 Key Concepts
 
 ### Task Statuses
+
 - **pending** (פתוח) - New/open task
 - **in_progress** (בטיפול) - Currently being worked on
 - **completed** (סגור) - Finished
 - **cancelled** (מבוטל) - Cancelled
 
 ### Task Priorities
+
 - **low** - Low priority
 - **medium** - Medium priority (default)
 - **high** - High priority
 
 ### User Roles
+
 - **regular** - Standard user with basic permissions
 - **admin** - Administrator with full access
 
 ### Entity Management
+
 - All entities use **soft delete** (not physically removed)
 - Complete **change history** tracked for auditing
 - **Strict validation** prevents invalid data
@@ -251,7 +288,7 @@ All entities are stored in a single MongoDB collection (`ents`) with a common st
     "createdAt": 1702901234000,
     "updatedAt": 1702901234000,
     "lut": 1702901234000
-  },
+  }
   // ... entity-specific fields
 }
 ```
@@ -260,9 +297,15 @@ Change history is stored in `ents_archive` collection:
 
 ```json
 {
-  "o": { /* old state */ },
-  "c": { /* changes + metadata */ },
-  "n": { /* new state */ }
+  "o": {
+    /* old state */
+  },
+  "c": {
+    /* changes + metadata */
+  },
+  "n": {
+    /* new state */
+  }
 }
 ```
 
@@ -321,47 +364,58 @@ GET /api/tasks/?startDate=1702901234000&endDate=1703001234000
 
 ---
 
-## 🆕 What's New in v2.0.0
+## 🆕 What's New in v2.2.0
 
 ### Major Changes
-- ✨ **Task Priority System** - Added priority field with low/medium/high values
-- ♻️ **Frontend Modularization** - Complete restructuring with barrel exports
-- 🔒 **Strict Validation** - Pydantic `extra='forbid'` on all models
-- 🗑️ **Reusable Delete Modal** - Extracted into shared component
-- 🐛 **Kanban Board Fixes** - Corrected drag-and-drop task ID transfer
 
-See [CHANGELOG.md](./CHANGELOG.md) for complete details.
+- 🐳 **Docker Production Setup** - Complete containerized deployment with nginx, runtime config
+- ⚡ **React Query Migration** - Replaced Context-based fetching with React Query for caching
+- 🔌 **WebSocket Improvements** - Real-time sync with RealtimeSyncProvider
+- 🎯 **Runtime Environment Variables** - Configure SYSTEM_NAME, API_URL without rebuilding
+- 🛡️ **Security Enhancements** - JWT authentication, proper CORS handling
+- 📊 **Database Indexes** - Optimized queries with proper MongoDB indexes
+
+### Previous Releases
+
+- **v2.1.0**: JWT Authentication, Loading states, Delta sync
+- **v2.0.0**: Task Priority System, Frontend Modularization, Strict Validation
+
+See [CHANGELOG.md](./docs/wiki/changes/versions/CHANGELOG.md) for complete details.
 
 ---
 
 ## 📖 Code Quality
 
 ### Backend Standards
+
 ✅ All models use Pydantic with strict validation  
 ✅ Consistent error handling and status codes  
 ✅ Complete change history logging  
 ✅ Soft delete pattern for all entities  
-✅ Blueprint-based route organization  
+✅ Blueprint-based route organization
 
 ### Frontend Standards
+
 ✅ TypeScript strict mode  
 ✅ Consistent barrel export pattern  
 ✅ Type-safe API layer  
 ✅ Component-based architecture  
 ✅ Dark mode support  
-✅ Responsive design  
+✅ Responsive design
 
 ---
 
 ## 🧭 Future Roadmap
 
-### v2.1.0 (Planned)
-- [ ] Comprehensive test coverage (pytest + Vitest)
-- [ ] Real-time updates with WebSockets
-- [ ] File upload support
-- [ ] Advanced filtering and search
+### v2.3.0 (Planned)
 
-### v3.0.0 (Planned)
+- [ ] Virtual scrolling for large task lists
+- [ ] Lazy loading for modals
+- [ ] Error boundaries
+- [ ] Performance monitoring
+
+### v3.0.0 (Future)
+
 - [ ] Mobile app (React Native)
 - [ ] Email notifications
 - [ ] Calendar integration

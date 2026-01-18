@@ -2,14 +2,14 @@
 
 **Documentation Hub for HD Manager Project**
 
-**Version**: 2.1.0  
-**Last Updated**: December 22, 2025
+**Version**: 2.2.0  
+**Last Updated**: January 18, 2026
 
 ---
 
 ## 📚 Documentation Organization
 
-All documentation is organized into three main categories:
+All documentation is organized into four main categories:
 
 ```
 docs/
@@ -27,8 +27,14 @@ docs/
 │   ├── system-specification/       Requirements & specifications
 │   └── github/                     GitHub wiki pages
 │
-└── frontend/                       # ⚡ Frontend Documentation
-    └── README.md                   Frontend architecture & setup
+├── frontend/                       # ⚡ Frontend Documentation
+│   └── README.md                   Frontend architecture & setup
+│
+../docker/                          # 🐳 Docker Deployment
+├── DEPLOYMENT_GUIDE.md             Deployment instructions
+├── ENVIRONMENT_VARIABLES_GUIDE.md  Environment configuration
+├── docker-compose.yml              Development setup
+└── docker-compose.prod.yml         Production setup
 ```
 
 ---
@@ -53,14 +59,15 @@ docs/
 
 ### Navigation
 
-| Document | Category | Description | Read Time |
-|----------|----------|-------------|-----------|
-| [Quick Reference](wiki/overview/QUICK_REFERENCE.md) | Overview | 5-min summary of all changes | 5 min |
-| [Architecture](wiki/architecture/ARCHITECTURE.md) | Technical | Complete system architecture | 30 min |
-| [API Documentation](wiki/api/API_DOCUMENTATION.md) | Integration | Full REST API reference | 20 min |
-| [Changelog](wiki/changes/versions/CHANGELOG.md) | History | Version history (v1.0 → v2.1) | 15 min |
-| [Code Review v2.1.0](wiki/changes/reviews/2025-12-22-v2.1.0-review.md) | History | Latest v2.1 review (JWT, Loader) | 30 min |
-| [Code Review v2.0.0](wiki/changes/reviews/2025-12-18-v2.0.0-review.md) | History | v2.0 review | 20 min |
+| Document                                                               | Category    | Description                   | Read Time |
+| ---------------------------------------------------------------------- | ----------- | ----------------------------- | --------- |
+| [Quick Reference](wiki/overview/QUICK_REFERENCE.md)                    | Overview    | 5-min summary of all changes  | 5 min     |
+| [Architecture](wiki/architecture/ARCHITECTURE.md)                      | Technical   | Complete system architecture  | 30 min    |
+| [API Documentation](wiki/api/API_DOCUMENTATION.md)                     | Integration | Full REST API reference       | 20 min    |
+| [Changelog](wiki/changes/versions/CHANGELOG.md)                        | History     | Version history (v1.0 → v2.2) | 15 min    |
+| [Code Review Jan 2026](wiki/changes/reviews/2026-01-13-code-review.md) | History     | Latest code quality review    | 15 min    |
+| [Code Review v2.1.0](wiki/changes/reviews/2025-12-22-v2.1.0-review.md) | History     | v2.1 review (JWT, Loader)     | 30 min    |
+| [Code Review v2.0.0](wiki/changes/reviews/2025-12-18-v2.0.0-review.md) | History     | v2.0 review                   | 20 min    |
 
 ### Structure
 
@@ -77,9 +84,10 @@ wiki/
 │
 ├── changes/                        # Version history
 │   ├── versions/
-│   │   └── CHANGELOG.md           v1.0.0 → v2.1.0
+│   │   └── CHANGELOG.md           v1.0.0 → v2.2.0
 │   └── reviews/
-│       ├── 2025-12-22-v2.1.0-review.md  # NEW
+│       ├── 2026-01-13-code-review.md     # Latest review
+│       ├── 2025-12-22-v2.1.0-review.md
 │       └── 2025-12-18-v2.0.0-review.md
 │
 ├── STRUCTURE.md                    # Documentation structure guide
@@ -97,9 +105,10 @@ wiki/
 
 ### Main Documents
 
-| Document | Description |
-|----------|-------------|
-| [Backend README](backend/README.md) | Backend architecture, setup, and best practices |
+| Document                                  | Description                                     |
+| ----------------------------------------- | ----------------------------------------------- |
+| [Backend README](backend/README.md)       | Backend architecture, setup, and best practices |
+| [API Key Guide](backend/API_KEY_GUIDE.md) | Guide for API key authentication (Postman, etc) |
 
 ### API Documentation (Individual Endpoints)
 
@@ -107,14 +116,14 @@ wiki/
 
 Detailed documentation for each API endpoint:
 
-| Document | Endpoint | Description |
-|----------|----------|-------------|
-| [Tasks API](backend/api/Tasks-API.md) | `/api/tasks` | Task management endpoints |
-| [Users API](backend/api/Users-API.md) | `/api/users` | User management endpoints |
-| [Tags API](backend/api/Tags-API.md) | `/api/tags` | Tag management endpoints |
-| [Contacts API](backend/api/Contacts-API.md) | `/api/contacts` | Contact management endpoints |
-| [Chat API](backend/api/ChatMessages-API.md) | `/api/chat-messages` | Chat functionality |
-| [Auth API](backend/api/Auth-API.md) | `/api/auth` | Authentication endpoints |
+| Document                                    | Endpoint             | Description                  |
+| ------------------------------------------- | -------------------- | ---------------------------- |
+| [Tasks API](backend/api/Tasks-API.md)       | `/api/tasks`         | Task management endpoints    |
+| [Users API](backend/api/Users-API.md)       | `/api/users`         | User management endpoints    |
+| [Tags API](backend/api/Tags-API.md)         | `/api/tags`          | Tag management endpoints     |
+| [Contacts API](backend/api/Contacts-API.md) | `/api/contacts`      | Contact management endpoints |
+| [Chat API](backend/api/ChatMessages-API.md) | `/api/chat-messages` | Chat functionality           |
+| [Auth API](backend/api/Auth-API.md)         | `/api/auth`          | Authentication endpoints     |
 
 **Note**: For a consolidated API reference, see [Complete API Documentation](wiki/api/API_DOCUMENTATION.md)
 
@@ -122,18 +131,18 @@ Detailed documentation for each API endpoint:
 
 **Location**: `docs/backend/system-specification/`
 
-| Document | Description |
-|----------|-------------|
+| Document                                                                 | Description                       |
+| ------------------------------------------------------------------------ | --------------------------------- |
 | [HD Manager SRS](backend/system-specification/HD-Manager-SRS-Updated.md) | System Requirements Specification |
-| [SRS Change Log](backend/system-specification/SRS-Change-Log.md) | Requirements change history |
+| [SRS Change Log](backend/system-specification/SRS-Change-Log.md)         | Requirements change history       |
 
 ### GitHub Wiki
 
 **Location**: `docs/backend/github/`
 
-| Document | Description |
-|----------|-------------|
-| [Home](backend/github/Home.md) | GitHub wiki home page |
+| Document                              | Description                    |
+| ------------------------------------- | ------------------------------ |
+| [Home](backend/github/Home.md)        | GitHub wiki home page          |
 | [Sidebar](backend/github/_Sidebar.md) | GitHub wiki sidebar navigation |
 
 ### Structure
@@ -141,6 +150,7 @@ Detailed documentation for each API endpoint:
 ```
 backend/
 ├── README.md                       # Backend documentation hub
+├── API_KEY_GUIDE.md                # API key authentication guide
 │
 ├── api/                            # Individual API docs
 │   ├── Tasks-API.md
@@ -172,8 +182,8 @@ backend/
 
 ### Main Documents
 
-| Document | Description |
-|----------|-------------|
+| Document                              | Description                                      |
+| ------------------------------------- | ------------------------------------------------ |
 | [Frontend README](frontend/README.md) | Frontend architecture, setup, and best practices |
 
 ### Topics Covered
@@ -201,17 +211,20 @@ frontend/
 ### By Experience Level
 
 #### Beginner (New to Project)
+
 1. [Main README](../README.md) - Setup & overview
 2. [Quick Reference](wiki/overview/QUICK_REFERENCE.md) - What's in the project
 3. [Architecture](wiki/architecture/ARCHITECTURE.md) - How it works
 4. Your role's docs ([Frontend](frontend/README.md) or [Backend](backend/README.md))
 
 #### Intermediate (Ready to Develop)
+
 1. [Frontend README](frontend/README.md) or [Backend README](backend/README.md)
 2. [API Documentation](wiki/api/API_DOCUMENTATION.md) - Integration
 3. [Code Review](wiki/changes/reviews/2025-12-18-v2.0.0-review.md) - Conventions
 
 #### Advanced (Understanding Decisions)
+
 1. [Architecture](wiki/architecture/ARCHITECTURE.md) - Design patterns
 2. [Changelog](wiki/changes/versions/CHANGELOG.md) - Evolution
 3. [Code Review](wiki/changes/reviews/2025-12-18-v2.0.0-review.md) - Rationale
@@ -223,48 +236,49 @@ frontend/
 
 ### By Task
 
-| What You Need | Where to Go |
-|---------------|-------------|
-| **Set up the project** | [Main README](../README.md) |
-| **5-min overview** | [Quick Reference](wiki/overview/QUICK_REFERENCE.md) |
-| **Understand architecture** | [Architecture](wiki/architecture/ARCHITECTURE.md) |
-| **Backend setup** | [Backend README](backend/README.md) |
-| **Frontend setup** | [Frontend README](frontend/README.md) |
-| **API integration** | [API Documentation](wiki/api/API_DOCUMENTATION.md) |
-| **Specific API endpoint** | [Backend API docs](backend/api/) |
-| **What changed in v2.0** | [Changelog](wiki/changes/versions/CHANGELOG.md) |
-| **Why things changed** | [Code Review](wiki/changes/reviews/2025-12-18-v2.0.0-review.md) |
-| **System requirements** | [SRS](backend/system-specification/HD-Manager-SRS-Updated.md) |
+| What You Need               | Where to Go                                                     |
+| --------------------------- | --------------------------------------------------------------- |
+| **Set up the project**      | [Main README](../README.md)                                     |
+| **5-min overview**          | [Quick Reference](wiki/overview/QUICK_REFERENCE.md)             |
+| **Understand architecture** | [Architecture](wiki/architecture/ARCHITECTURE.md)               |
+| **Backend setup**           | [Backend README](backend/README.md)                             |
+| **Frontend setup**          | [Frontend README](frontend/README.md)                           |
+| **API integration**         | [API Documentation](wiki/api/API_DOCUMENTATION.md)              |
+| **Specific API endpoint**   | [Backend API docs](backend/api/)                                |
+| **What changed in v2.0**    | [Changelog](wiki/changes/versions/CHANGELOG.md)                 |
+| **Why things changed**      | [Code Review](wiki/changes/reviews/2025-12-18-v2.0.0-review.md) |
+| **System requirements**     | [SRS](backend/system-specification/HD-Manager-SRS-Updated.md)   |
 
 ### By Role
 
-| Your Role | Recommended Path |
-|-----------|------------------|
-| **Frontend Developer** | README → Quick Ref → [Frontend Docs](frontend/README.md) → [API Docs](wiki/api/API_DOCUMENTATION.md) |
-| **Backend Developer** | README → Quick Ref → [Backend Docs](backend/README.md) → [API Docs](backend/api/) |
-| **Full-Stack Developer** | README → [Architecture](wiki/architecture/ARCHITECTURE.md) → Both Frontend/Backend |
-| **API Consumer** | [API Documentation](wiki/api/API_DOCUMENTATION.md) → [API Endpoints](backend/api/) |
-| **Project Manager** | [Quick Ref](wiki/overview/QUICK_REFERENCE.md) → [Changelog](wiki/changes/versions/CHANGELOG.md) → [SRS](backend/system-specification/) |
-| **Code Reviewer** | [Code Review](wiki/changes/reviews/2025-12-18-v2.0.0-review.md) → [Architecture](wiki/architecture/ARCHITECTURE.md) |
+| Your Role                | Recommended Path                                                                                                                       |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **Frontend Developer**   | README → Quick Ref → [Frontend Docs](frontend/README.md) → [API Docs](wiki/api/API_DOCUMENTATION.md)                                   |
+| **Backend Developer**    | README → Quick Ref → [Backend Docs](backend/README.md) → [API Docs](backend/api/)                                                      |
+| **Full-Stack Developer** | README → [Architecture](wiki/architecture/ARCHITECTURE.md) → Both Frontend/Backend                                                     |
+| **API Consumer**         | [API Documentation](wiki/api/API_DOCUMENTATION.md) → [API Endpoints](backend/api/)                                                     |
+| **Project Manager**      | [Quick Ref](wiki/overview/QUICK_REFERENCE.md) → [Changelog](wiki/changes/versions/CHANGELOG.md) → [SRS](backend/system-specification/) |
+| **Code Reviewer**        | [Code Review](wiki/changes/reviews/2025-12-18-v2.0.0-review.md) → [Architecture](wiki/architecture/ARCHITECTURE.md)                    |
 
 ---
 
 ## 📊 Documentation Statistics
 
-| Category | Files | Size | Purpose |
-|----------|-------|------|---------|
-| **Wiki** | 6 files | ~90KB | General project docs |
-| **Backend** | 13+ files | ~50KB+ | Backend-specific docs |
-| **Frontend** | 1 file | ~14KB | Frontend-specific docs |
-| **Total** | **20+ files** | **~150KB+** | Complete coverage |
+| Category     | Files         | Size        | Purpose                |
+| ------------ | ------------- | ----------- | ---------------------- |
+| **Wiki**     | 6 files       | ~90KB       | General project docs   |
+| **Backend**  | 13+ files     | ~50KB+      | Backend-specific docs  |
+| **Frontend** | 1 file        | ~14KB       | Frontend-specific docs |
+| **Total**    | **20+ files** | **~150KB+** | Complete coverage      |
 
 ---
 
 ## 🔍 Special Topics
 
 ### GitHub Wiki
+
 - **Home Page**: [github/Home.md](backend/github/Home.md)
-- **Sidebar**: [github/_Sidebar.md](backend/github/_Sidebar.md)
+- **Sidebar**: [github/\_Sidebar.md](backend/github/_Sidebar.md)
 - **Purpose**: Public-facing wiki content
 
 ### API Documentation Comparison
@@ -290,18 +304,21 @@ frontend/
 ## 📝 Documentation Standards
 
 ### Format
+
 - **Markdown** for all documentation
 - **Code examples** with syntax highlighting
 - **Tables** for structured information
 - **Emoji icons** for quick visual scanning
 
 ### Organization
+
 - **Categorized** by purpose (wiki, backend, frontend)
 - **Cross-referenced** with links
 - **Dated** for version tracking
 - **Hierarchical** folder structure
 
 ### Maintenance
+
 - Update with code changes
 - Date major revisions
 - Keep examples current
@@ -312,6 +329,7 @@ frontend/
 ## 🚀 Future Documentation
 
 ### Planned Additions
+
 - [ ] Testing guide (frontend + backend)
 - [ ] Deployment guide
 - [ ] Contributing guide
@@ -320,6 +338,7 @@ frontend/
 - [ ] Performance optimization guide
 
 ### Where They'll Go
+
 ```
 docs/
 ├── wiki/
@@ -338,12 +357,14 @@ docs/
 ## 📞 Support & Contribution
 
 ### Need Help?
+
 1. Search this documentation
 2. Check relevant section (wiki/backend/frontend)
 3. Review related documents
 4. Contact HD development team
 
 ### Contributing to Docs
+
 1. Follow existing structure
 2. Use markdown format
 3. Add cross-references
@@ -355,20 +376,24 @@ docs/
 ## 🔗 Quick Links
 
 ### Essential Documentation
+
 - [📖 Main README](../README.md)
 - [⚡ Quick Reference](wiki/overview/QUICK_REFERENCE.md)
 - [🏗️ Architecture](wiki/architecture/ARCHITECTURE.md)
 - [🔌 API Reference](wiki/api/API_DOCUMENTATION.md)
 
 ### Setup Guides
+
 - [🔧 Backend Setup](backend/README.md)
 - [⚡ Frontend Setup](frontend/README.md)
 
 ### History & Changes
+
 - [📜 Changelog](wiki/changes/versions/CHANGELOG.md)
 - [📊 Code Review](wiki/changes/reviews/2025-12-18-v2.0.0-review.md)
 
 ### Specifications
+
 - [📋 System Requirements](backend/system-specification/HD-Manager-SRS-Updated.md)
 
 ---
@@ -401,6 +426,6 @@ docs/
 
 ---
 
-**Last Updated**: December 22, 2025  
-**Documentation Version**: 2.1.0  
+**Last Updated**: January 18, 2026  
+**Documentation Version**: 2.2.0  
 **Maintained by**: HD Development Team
