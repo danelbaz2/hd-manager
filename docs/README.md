@@ -7,6 +7,41 @@
 
 ---
 
+## 🎯 Project Overview
+
+**HD Manager** is a comprehensive task and contact management system built for the HD team. It provides a modern, intuitive interface for managing daily operations with real-time collaboration features.
+
+### Key Features
+
+| Feature                    | Description                                                         |
+| -------------------------- | ------------------------------------------------------------------- |
+| 📋 **Task Management**     | Create, update, track, and prioritize tasks with full audit history |
+| 🗂️ **Kanban Board**        | Drag-and-drop interface with task approval workflow                 |
+| 👥 **User Management**     | Multi-user support with role-based access (admin/regular)           |
+| 📇 **Contact Management**  | Organize persons and companies with tag associations                |
+| 🏷️ **Two-Tier Tag System** | Primary and secondary tags for flexible categorization              |
+| 💬 **Team Chat**           | Built-in real-time team communication                               |
+| 🔄 **Real-time Updates**   | WebSocket-powered live synchronization across clients               |
+| 🌙 **Dark Mode**           | Full theme support throughout the application                       |
+| 📱 **Responsive Design**   | Works on desktop, tablet, and mobile                                |
+
+### Technology Stack
+
+| Layer              | Technologies                                                              |
+| ------------------ | ------------------------------------------------------------------------- |
+| **Frontend**       | React 19.2, TypeScript, Vite 7.2, TailwindCSS 4.1, React Query, Socket.IO |
+| **Backend**        | Python 3.9+, Flask, Pydantic v2, MongoDB, WebSocket                       |
+| **Infrastructure** | Docker, Nginx, MongoDB 7.0                                                |
+| **Authentication** | JWT (HttpOnly cookies), bcrypt password hashing                           |
+
+### Recent Updates (v2.2.0)
+
+- ✅ Docker production setup with runtime configuration
+- ✅ React Query migration for efficient data caching
+- ✅ Task approval workflow (pending → pending_approval → completed)
+- ✅ File attachments for task notes
+- ✅ Activity-based WebSocket connection management
+
 ## 📚 Documentation Organization
 
 All documentation is organized into four main categories:
@@ -65,6 +100,7 @@ docs/
 | [Architecture](wiki/architecture/ARCHITECTURE.md)                      | Technical   | Complete system architecture  | 30 min    |
 | [API Documentation](wiki/api/API_DOCUMENTATION.md)                     | Integration | Full REST API reference       | 20 min    |
 | [Changelog](wiki/changes/versions/CHANGELOG.md)                        | History     | Version history (v1.0 → v2.2) | 15 min    |
+| [Production Checklist](PROD_MERGE_CHECKLIST.md)                        | DevOps      | Pre-production review items   | 10 min    |
 | [Code Review Jan 2026](wiki/changes/reviews/2026-01-13-code-review.md) | History     | Latest code quality review    | 15 min    |
 | [Code Review v2.1.0](wiki/changes/reviews/2025-12-22-v2.1.0-review.md) | History     | v2.1 review (JWT, Loader)     | 30 min    |
 | [Code Review v2.0.0](wiki/changes/reviews/2025-12-18-v2.0.0-review.md) | History     | v2.0 review                   | 20 min    |
@@ -89,9 +125,6 @@ wiki/
 │       ├── 2026-01-13-code-review.md     # Latest review
 │       ├── 2025-12-22-v2.1.0-review.md
 │       └── 2025-12-18-v2.0.0-review.md
-│
-├── STRUCTURE.md                    # Documentation structure guide
-└── ORGANIZATION_COMPLETE.md        # Organization summary
 ```
 
 **When to use**: General project information, architecture overview, complete API reference
@@ -387,10 +420,16 @@ docs/
 - [🔧 Backend Setup](backend/README.md)
 - [⚡ Frontend Setup](frontend/README.md)
 
+### Deployment & Production
+
+- [🐳 Deployment Guide](../docker/DEPLOYMENT_GUIDE.md)
+- [⚙️ Environment Variables](../docker/ENVIRONMENT_VARIABLES_GUIDE.md)
+- [✅ Production Checklist](PROD_MERGE_CHECKLIST.md)
+
 ### History & Changes
 
 - [📜 Changelog](wiki/changes/versions/CHANGELOG.md)
-- [📊 Code Review](wiki/changes/reviews/2025-12-18-v2.0.0-review.md)
+- [📊 Code Review](wiki/changes/reviews/2026-01-13-code-review.md)
 
 ### Specifications
 

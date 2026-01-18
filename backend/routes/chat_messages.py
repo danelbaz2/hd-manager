@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from database import mongo
 from models.chat_message_model import ChatMessageModel
-from datetime import datetime
 from bson.objectid import ObjectId
 from utils.jwt_utils import jwt_required, admin_required
 from utils.history import log_history
+from utils.timestamp import get_timestamp_ms
 from websocket import broadcast_chat_update
 from utils.error_handlers import handle_client_disconnect
 
@@ -30,7 +30,7 @@ def create_message():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-    now = int(datetime.now().timestamp() * 1000)
+    now = get_timestamp_ms()
     data['base'] = {
         'isDeleted': False,
         'isActive': True,

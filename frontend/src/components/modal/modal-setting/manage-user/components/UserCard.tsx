@@ -32,18 +32,18 @@ const UserCard: React.FC<UserCardProps> = ({
       ? 0.1
       : 0.08
     : isDarkMode
-    ? 0.06
-    : 0.04;
+      ? 0.06
+      : 0.04;
 
   const borderOpacity = isEditing
     ? 0.5
     : isHovered
-    ? isDarkMode
-      ? 0.3
-      : 0.25
-    : isDarkMode
-    ? 0.2
-    : 0.15;
+      ? isDarkMode
+        ? 0.3
+        : 0.25
+      : isDarkMode
+        ? 0.2
+        : 0.15;
 
   return (
     <div
@@ -53,7 +53,6 @@ const UserCard: React.FC<UserCardProps> = ({
         borderColor: hexWithAlpha(user.color, borderOpacity),
         transition: "background-color 400ms ease, border-color 400ms ease",
       }}
-      onClick={() => console.log(user)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
@@ -95,8 +94,8 @@ const UserCard: React.FC<UserCardProps> = ({
                 isEditing
                   ? "bg-blue-500 text-white"
                   : isDarkMode
-                  ? "text-blue-400 hover:bg-blue-900/30"
-                  : "text-blue-500 hover:bg-blue-50"
+                    ? "text-blue-400 hover:bg-blue-900/30"
+                    : "text-blue-500 hover:bg-blue-50"
               }
             `}
           >
@@ -131,8 +130,8 @@ const UserCard: React.FC<UserCardProps> = ({
                     ? "bg-blue-900/50 text-blue-300"
                     : "bg-blue-100 text-blue-700"
                   : isDarkMode
-                  ? "bg-slate-600 text-slate-300"
-                  : "bg-slate-200 text-slate-600"
+                    ? "bg-slate-600 text-slate-300"
+                    : "bg-slate-200 text-slate-600"
               }
             `}
           >

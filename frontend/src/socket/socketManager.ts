@@ -84,7 +84,6 @@ class SocketManager {
    */
   connect(): void {
     if (this.socket?.connected) {
-      console.log('[Socket] Already connected');
       return;
     }
     
@@ -123,7 +122,6 @@ class SocketManager {
     
     // If we're idle and disconnected, reconnect
     if (this.isIdle || !this.socket) {
-      console.log('%c[Socket] 🔄 Reconnecting for critical operation...', 'color: #f59e0b; font-weight: bold;');
       this.isIdle = false;
       this.connect();
     }
@@ -131,7 +129,6 @@ class SocketManager {
     // Wait for connection with socket connect event
     return new Promise((resolve) => {
       const timeout = setTimeout(() => {
-        console.log('%c[Socket] ⚠️ Connection timeout after 5 seconds', 'color: #ef4444; font-weight: bold;');
         resolve(false);
       }, 5000); // 5 second timeout
       
@@ -139,7 +136,6 @@ class SocketManager {
       if (this.socket) {
         const onConnect = () => {
           clearTimeout(timeout);
-          console.log('%c[Socket] ✅ Reconnected successfully', 'color: #22c55e; font-weight: bold;');
           this.socket?.off('connect', onConnect);
           resolve(true);
         };
@@ -157,7 +153,6 @@ class SocketManager {
         const handler = (status: ConnectionStatus) => {
           if (status === 'connected') {
             clearTimeout(timeout);
-            console.log('%c[Socket] ✅ Reconnected successfully', 'color: #22c55e; font-weight: bold;');
             this.offConnectionChange(handler);
             resolve(true);
           }
@@ -254,7 +249,6 @@ class SocketManager {
     if (!this.socket) return;
     
     this.socket.on('connect', () => {
-      console.log('[Socket] Connected');
       this.updateState({ 
         status: 'connected', 
         isConnected: true,
@@ -269,8 +263,7 @@ class SocketManager {
       this.resetIdleTimer();
     });
     
-    this.socket.on('disconnect', (reason) => {
-      console.log('[Socket] Disconnected:', reason);
+    this.socket.on('disconnect', () => {
       this.updateState({ 
         status: 'disconnected', 
         isConnected: false,
@@ -307,14 +300,12 @@ class SocketManager {
   
   private handleReconnect(): void {
     if (this.isIdle) {
-      console.log('[Socket] Idle, not reconnecting automatically');
       return;
     }
     
     const { maxReconnectAttempts, reconnectDelayMs } = this.config;
     
     if (this.state.reconnectAttempts >= maxReconnectAttempts) {
-      console.log('[Socket] Max reconnect attempts reached');
       return;
     }
     
@@ -325,8 +316,6 @@ class SocketManager {
       status: 'reconnecting',
       reconnectAttempts: attempts,
     });
-    
-    console.log(`[Socket] Reconnecting in ${delay}ms (attempt ${attempts})`);
     
     setTimeout(() => {
       if (!this.isIdle && !this.socket?.connected) {
@@ -370,7 +359,6 @@ class SocketManager {
     
     // If we were idle and disconnected, reconnect
     if (this.isIdle && !this.socket?.connected) {
-      console.log('%c[Socket] 👆 User activity detected after idle, reconnecting...', 'color: #3b82f6; font-weight: bold;');
       this.isIdle = false;
       this.connect();
       return;
@@ -408,7 +396,6 @@ class SocketManager {
   }
   
   private handleIdleTimeout(): void {
-    console.log('%c[Socket] 💤 User idle for 5 minutes, disconnecting...', 'color: #a855f7; font-weight: bold;');
     this.isIdle = true;
     
     if (this.socket) {

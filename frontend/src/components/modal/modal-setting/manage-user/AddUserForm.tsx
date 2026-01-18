@@ -50,7 +50,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
       e,
       (base64) => setFormData({ ...formData, profileImage: base64 }),
       (msg) => showError("שגיאה בתמונה", msg),
-      (msg) => showWarning("שגיאה", msg)
+      (msg) => showWarning("שגיאה", msg),
     );
   };
 
@@ -58,7 +58,6 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
   const handleAddClick = async () => {
     // Check ref-based lock first (synchronous, prevents race condition)
     if (isSubmittingRef.current) {
-      console.log("Submission already in progress, ignoring click");
       return;
     }
 
@@ -73,7 +72,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     if (formData.fullName.trim().length < MIN_NAME_LENGTH) {
       showWarning(
         "שם קצר מדי",
-        `שם מלא חייב להכיל לפחות ${MIN_NAME_LENGTH} תווים`
+        `שם מלא חייב להכיל לפחות ${MIN_NAME_LENGTH} תווים`,
       );
       return;
     }
@@ -84,7 +83,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
     if (formData.username.trim().length < MIN_USERNAME_LENGTH) {
       showWarning(
         "שם משתמש קצר מדי",
-        `שם משתמש חייב להכיל לפחות ${MIN_USERNAME_LENGTH} תווים`
+        `שם משתמש חייב להכיל לפחות ${MIN_USERNAME_LENGTH} תווים`,
       );
       return;
     }
@@ -106,7 +105,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
       if (response.success) {
         showSuccess(
           "המשתמש נוצר בהצלחה! 🎉",
-          `העובד ${formData.fullName} נוסף למערכת`
+          `העובד ${formData.fullName} נוסף למערכת`,
         );
         // WebSocket will update the users list automatically
         // No need to call refreshUsers() - just reset the form
@@ -117,14 +116,13 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         }, 1500);
       } else if (response.aborted) {
         // Request was aborted - silently ignore, WebSocket will handle UI update if user was created
-        console.log("User creation request was aborted");
         isSubmittingRef.current = false;
         setIsSubmitting(false);
         // Don't show any message or call onAdd - we don't know if it succeeded
       } else {
         showError(
           "שגיאה ביצירת המשתמש",
-          response.error || "אירעה שגיאה, נסה שוב"
+          response.error || "אירעה שגיאה, נסה שוב",
         );
         // Reset lock on error to allow retry
         isSubmittingRef.current = false;
@@ -134,7 +132,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
       console.error("Error creating user:", error);
       showError(
         "שגיאה בלתי צפויה",
-        "אירעה שגיאה בלתי צפויה, נסה שוב מאוחר יותר"
+        "אירעה שגיאה בלתי צפויה, נסה שוב מאוחר יותר",
       );
       // Reset lock on error to allow retry
       isSubmittingRef.current = false;
@@ -155,7 +153,7 @@ const AddUserForm: React.FC<AddUserFormProps> = ({
         style={{
           backgroundColor: hexWithAlpha(
             formData.color,
-            isDarkMode ? 0.1 : 0.08
+            isDarkMode ? 0.1 : 0.08,
           ),
           borderColor: hexWithAlpha(formData.color, isDarkMode ? 0.3 : 0.25),
         }}

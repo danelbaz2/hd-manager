@@ -45,11 +45,10 @@ const ContactCard: React.FC<ContactCardProps> = ({
               ? "bg-blue-900/20 border-blue-500/50"
               : "bg-blue-50 border-blue-200"
             : isDarkMode
-            ? "bg-slate-700/30 border-slate-600 hover:bg-slate-700/50"
-            : "bg-white border-slate-200 hover:bg-slate-50"
+              ? "bg-slate-700/30 border-slate-600 hover:bg-slate-700/50"
+              : "bg-white border-slate-200 hover:bg-slate-50"
         }
       `}
-      onClick={() => console.log(contact)}
     >
       {/* Actions */}
       <div className="flex items-center gap-2">
@@ -83,8 +82,8 @@ const ContactCard: React.FC<ContactCardProps> = ({
                 isEditing
                   ? "bg-blue-500 text-white"
                   : isDarkMode
-                  ? "text-blue-400 hover:bg-blue-900/30"
-                  : "text-blue-500 hover:bg-blue-50"
+                    ? "text-blue-400 hover:bg-blue-900/30"
+                    : "text-blue-500 hover:bg-blue-50"
               }
             `}
           >

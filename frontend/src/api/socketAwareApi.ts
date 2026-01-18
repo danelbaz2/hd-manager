@@ -21,7 +21,6 @@ export async function withSocketConnection<T>(
 ): Promise<T> {
   // Ensure socket is connected before mutation
   const isConnected = await socketManager.ensureConnected();
-  console.log('[API] Socket connected:', isConnected);
   
   if (!isConnected) {
     console.warn('[API] Socket not connected, mutation may not broadcast');

@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { compressImage, getBase64SizeKB } from "../../../../../utils/imageCompression";
+import { compressImage } from "../../../../../utils/imageCompression";
 
 export interface UseImageUploadOptions {
   maxWidth?: number;
@@ -63,12 +63,6 @@ export const useImageUpload = (
         quality: mergedOptions.quality,
         format: mergedOptions.format,
       });
-
-      const originalSizeKB = Math.round(file.size / 1024);
-      const compressedSizeKB = getBase64SizeKB(compressedBase64);
-      console.log(
-        `Image compressed: ${originalSizeKB}KB → ${compressedSizeKB}KB`
-      );
 
       onSuccess(compressedBase64);
     } catch (error) {

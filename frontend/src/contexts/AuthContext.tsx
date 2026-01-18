@@ -78,15 +78,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           // This is a network/abort error (likely from rapid refresh)
           console.warn(
             "Transient error during auth check, retrying:",
-            errorMessage
+            errorMessage,
           );
 
           // Retry after a short delay if we haven't exceeded max retries
           if (retryCountRef.current < MAX_RETRIES && isMountedRef.current) {
             retryCountRef.current++;
-            console.log(
-              `Retrying auth check (attempt ${retryCountRef.current}/${MAX_RETRIES})...`
-            );
             setTimeout(() => {
               if (isMountedRef.current) {
                 initAuth();
@@ -94,12 +91,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
             }, 1000); // Wait 1 second before retrying
           } else {
             // Max retries exceeded
-            console.log("Max retries exceeded");
             setIsLoading(false);
           }
         } else {
           // This is an actual auth failure (no valid cookie/session)
-          console.log("No valid session, user not authenticated");
           setIsLoading(false);
         }
       }
@@ -115,13 +110,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
       if (isTransientError(errorMessage)) {
         console.warn(
           "Transient error during auth check, retrying:",
-          errorMessage
+          errorMessage,
         );
         // Retry after a short delay
         if (retryCountRef.current < MAX_RETRIES && isMountedRef.current) {
           retryCountRef.current++;
           console.log(
-            `Retrying auth check (attempt ${retryCountRef.current}/${MAX_RETRIES})...`
+            `Retrying auth check (attempt ${retryCountRef.current}/${MAX_RETRIES})...`,
           );
           setTimeout(() => {
             if (isMountedRef.current) {
@@ -210,4 +205,3 @@ export const useAuth = () => {
   }
   return context;
 };
-

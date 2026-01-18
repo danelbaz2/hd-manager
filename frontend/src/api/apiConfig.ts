@@ -91,7 +91,6 @@ export async function apiRequest<T>(
     } catch (error) {
       // Handle AbortError silently - don't retry
       if (error instanceof Error && error.name === "AbortError") {
-        console.log("API request aborted (this is usually fine):", url);
         return {
           success: false,
           aborted: true,
@@ -107,7 +106,6 @@ export async function apiRequest<T>(
         lastError.message.includes("Network request failed");
 
       if (isNetworkError && attempt < getMaxRetries()) {
-        console.log(`API request failed (attempt ${attempt + 1}/${getMaxRetries() + 1}), retrying in ${getRetryDelayMs()}ms...`, url);
         await delay(getRetryDelayMs() * (attempt + 1)); // Exponential backoff
         continue; // Retry
       }

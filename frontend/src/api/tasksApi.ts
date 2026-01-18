@@ -111,8 +111,6 @@ export const createTask = async (taskData: TaskFormData): Promise<ApiResponse<Ta
       response.message = "Task created successfully";
     }
 
-    console.log('[API] Task created:', response);
-
     return response;
   });
 };

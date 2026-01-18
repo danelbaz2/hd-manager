@@ -1,9 +1,9 @@
 from flask import Blueprint, request, jsonify, current_app, send_from_directory
 from database import mongo
-from datetime import datetime
 from bson.objectid import ObjectId
 from werkzeug.utils import secure_filename
 from utils.history import log_history
+from utils.timestamp import get_timestamp_ms
 import os
 
 bp = Blueprint('uploads', __name__, url_prefix='/api/uploads')
@@ -59,7 +59,7 @@ def upload_task_file(task_id):
             return jsonify({'error': 'Task not found'}), 404
         
         # Generate unique filename
-        now = int(datetime.now().timestamp() * 1000)
+        now = get_timestamp_ms()
         original_filename = secure_filename(file.filename)
         file_ext = original_filename.rsplit('.', 1)[1].lower() if '.' in original_filename else ''
         unique_filename = f"{task_id}_{now}.{file_ext}"

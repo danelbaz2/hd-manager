@@ -1,7 +1,7 @@
 /**
  * TasksContext - Manages tasks state
  * Split from SettingsContext for better performance
- * 
+ *
  * Also tracks the latest task update timestamp for unread notification purposes
  */
 import React, {
@@ -32,7 +32,7 @@ interface TasksContextState {
 const defaultValue: TasksContextState = {
   tasks: [],
   isLoadingTasks: false,
-  refreshTasks: async () => { },
+  refreshTasks: async () => {},
 };
 
 const TasksContext = createContext<TasksContextState>(defaultValue);
@@ -55,16 +55,13 @@ export const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
       const shouldDelta = useDelta && lastSync && !shouldDoFullSync();
 
       const response = await getAllTasks(
-        shouldDelta ? { since: lastSync } : undefined
+        shouldDelta ? { since: lastSync } : undefined,
       );
 
       if (response.success && response.data) {
         if (shouldDelta && response.data.length > 0) {
           // Delta sync: merge updated tasks with existing
           setTasks((prev) => mergeItems(prev, response.data!));
-          console.log(
-            `[DeltaSync] Merged ${response.data.length} updated tasks`
-          );
         } else if (!shouldDelta) {
           // Full sync: replace all tasks
           setTasks(response.data);
@@ -130,8 +127,8 @@ export const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
       ) {
         setTasks((prev) =>
           prev.map((t) =>
-            t.id === taskId ? { ...t, ...(fullTask as Task) } : t
-          )
+            t.id === taskId ? { ...t, ...(fullTask as Task) } : t,
+          ),
         );
         updateReactQueryCache("UPDATE", fullTask as Task);
       }
@@ -148,7 +145,6 @@ export const TasksProvider: React.FC<TasksProviderProps> = ({ children }) => {
     if (isAuthenticated && isConnected) {
       const lastSync = getLastSyncTimestamp();
       if (lastSync && !shouldDoFullSync()) {
-        console.log(`[TasksContext] Socket reconnected, using delta sync...`);
         refreshTasks(true, true); // Silent + delta mode
       } else {
         refreshTasks(true);
@@ -174,6 +170,5 @@ export const useTasks = (): TasksContextState => {
   }
   return context;
 };
-
 
 export default TasksContext;

@@ -160,7 +160,6 @@ export const useTaskForm = ({
   const handleSubmit = async () => {
     // Check ref-based lock first (synchronous, prevents race condition)
     if (isSubmittingRef.current) {
-      console.log("Submission already in progress, ignoring click");
       return;
     }
 
@@ -207,7 +206,6 @@ export const useTaskForm = ({
         optionals,
       };
 
-      console.log("Creating task with data:", taskData);
       await createMutation.mutateAsync(taskData);
 
       showSuccess("משימה נוצרה! 🎉", `המשימה "${title}" נוצרה בהצלחה`);
@@ -240,7 +238,6 @@ export const useTaskForm = ({
       // Check if it's a network error that may have still succeeded
       if (error instanceof Error && (error.name === "AbortError" || errorMessage.includes("Failed to fetch"))) {
         // The request might have succeeded - close modal silently
-        console.log("Network error, but task may have been created");
         isSubmittingRef.current = false;
         setIsSubmitting(false);
       } else {

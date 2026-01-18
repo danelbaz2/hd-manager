@@ -332,7 +332,5 @@ export const migrateOldStorage = (userId: string | undefined): void => {
         localStorage.removeItem(`${oldTourPrefix}settings_${userId}`);
         localStorage.removeItem(`${oldTourPrefix}archive_${userId}`);
         localStorage.removeItem("kanban_onboarding_completed");
-        
-        console.log("Migrated user storage to new format for user:", userId);
     }
 };

@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, List, Layers, LogOut, Archive } from "lucide-react";
-import { useTheme } from "../../../contexts/ThemeContext";
+import { useTheme, useAuth } from "../../../contexts";
 import { getSystemName } from "../../../config/runtimeConfig";
 
 interface MenuBarProps {
@@ -18,9 +18,10 @@ const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { isDarkMode } = useTheme();
+  const { logout } = useAuth();
 
-  const handleLogout = () => {
-    // TODO: Add logout logic (clear tokens, etc.)
+  const handleLogout = async () => {
+    await logout(); // Clear auth context and call backend to clear HttpOnly cookie
     navigate("/login");
   };
 
@@ -77,8 +78,8 @@ const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
                     ? "bg-blue-900/30 text-blue-400"
                     : "bg-blue-50 text-blue-600"
                   : isDarkMode
-                  ? "text-slate-400 hover:bg-slate-700/50"
-                  : "text-slate-600 hover:bg-slate-100"
+                    ? "text-slate-400 hover:bg-slate-700/50"
+                    : "text-slate-600 hover:bg-slate-100"
               }
             `}
           >

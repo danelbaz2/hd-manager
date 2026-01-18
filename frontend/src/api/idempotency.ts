@@ -55,14 +55,12 @@ export async function withIdempotency<T>(
   // Check if request is already in flight
   const inFlight = inFlightRequests.get(key);
   if (inFlight) {
-    console.log(`[Idempotency] Request ${key} already in flight, waiting...`);
     return inFlight as Promise<T>;
   }
   
   // Check if request was recently completed
   const completed = completedRequests.get(key);
   if (completed && Date.now() - completed.timestamp < DEDUP_WINDOW_MS) {
-    console.log(`[Idempotency] Request ${key} recently completed, returning cached result`);
     return completed.result as T;
   }
   

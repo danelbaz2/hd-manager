@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify
 from database import mongo
-from datetime import datetime
 from models.secondary_tag_model import SecondaryTagModel, SecondaryTagUpdateModel
 from bson.objectid import ObjectId
 from utils.history import log_history
 from utils.jwt_utils import jwt_required, admin_required
 from utils.error_handlers import handle_client_disconnect
+from utils.timestamp import get_timestamp_ms
 from middleware.idempotency import idempotency_middleware
 from utils.logger import logger
 try:
@@ -58,7 +58,7 @@ def create_secondary_tag():
     if not primary_tag:
         return jsonify({"error": "Primary tag not found"}), 400
 
-    now = int(datetime.now().timestamp() * 1000)
+    now = get_timestamp_ms()
 
     # Check for existing secondary tag with same name under same primary
     existing_tag = mongo.db.ents.find_one({
@@ -163,7 +163,7 @@ def update_secondary_tag(id):
     if not old_doc:
         return jsonify({"error": "Secondary tag not found"}), 404
         
-    now = int(datetime.now().timestamp() * 1000)
+    now = get_timestamp_ms()
     
     # Calculate only actual changes (compare with old document)
     changes = {}
@@ -217,7 +217,7 @@ def delete_secondary_tag(id):
     if not old_doc:
         return jsonify({"error": "Secondary tag not found"}), 404
     
-    now = int(datetime.now().timestamp() * 1000)
+    now = get_timestamp_ms()
     
     # Create deleted state snapshot
     deleted_state = old_doc.copy()

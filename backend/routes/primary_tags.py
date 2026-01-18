@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify
 from database import mongo
-from datetime import datetime
 from models.primary_tag_model import PrimaryTagModel, PrimaryTagUpdateModel
 from bson.objectid import ObjectId
 from utils.history import log_history
 from utils.jwt_utils import jwt_required, admin_required
 from utils.error_handlers import handle_client_disconnect
+from utils.timestamp import get_timestamp_ms
 from middleware.idempotency import idempotency_middleware
 from utils.logger import logger
 try:
@@ -37,7 +37,7 @@ def create_primary_tag():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-    now = int(datetime.now().timestamp() * 1000)
+    now = get_timestamp_ms()
 
     # Check for existing tag with same name
     existing_tag = mongo.db.ents.find_one({
@@ -131,7 +131,7 @@ def update_primary_tag(id):
     if not old_doc:
         return jsonify({"error": "תגית ראשית לא נמצאה"}), 404
         
-    now = int(datetime.now().timestamp() * 1000)
+    now = get_timestamp_ms()
     
     # Calculate only actual changes (compare with old document)
     changes = {}
@@ -197,7 +197,7 @@ def delete_primary_tag(id):
             "error": f"לא ניתן למחוק תגית ראשית. {secondary_count} תגיות משניות משתמשות בה. יש למחוק אותן תחילה."
         }), 400
     
-    now = int(datetime.now().timestamp() * 1000)
+    now = get_timestamp_ms()
     
     # Create deleted state snapshot
     deleted_state = old_doc.copy()

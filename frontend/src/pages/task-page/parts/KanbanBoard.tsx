@@ -90,12 +90,6 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
   // Handle drop - task ID is passed directly from the column
   const handleDrop = (taskId: string, targetStatus: TaskStatus) => {
-    console.log(
-      "[KanbanBoard] handleDrop called - taskId:",
-      taskId,
-      "targetStatus:",
-      targetStatus
-    );
     if (taskId) {
       onTaskStatusChange(taskId, targetStatus);
     }
@@ -106,7 +100,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({
     (request: DropConfirmRequest) => {
       setConfirmRequest(request);
     },
-    []
+    [],
   );
 
   // Handle confirmation

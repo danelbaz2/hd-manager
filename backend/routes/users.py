@@ -1,11 +1,11 @@
 from flask import Blueprint, request, jsonify
 from database import mongo
-from datetime import datetime
 from bson.objectid import ObjectId
 from models.user_model import UserModel, UserUpdateModel
 from utils.history import log_history
 from utils.jwt_utils import jwt_required, admin_required, self_or_admin_required
 from utils.profile_image import save_profile_image_from_base64, delete_profile_image, is_base64_image, get_full_profile_url
+from utils.timestamp import get_timestamp_ms
 from websocket import broadcast_user_update
 import bcrypt
 from utils.logger import logger
@@ -43,7 +43,7 @@ def create_user():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-    now = int(datetime.now().timestamp() * 1000)
+    now = get_timestamp_ms()
     data['base'] = {
         'isDeleted': False,
         'isActive': True,
@@ -120,7 +120,7 @@ def update_user(id):
     if not old_doc:
         return jsonify({"error": "User not found"}), 404
     
-    now = int(datetime.now().timestamp() * 1000)
+    now = get_timestamp_ms()
     
     # If password is being updated (and not empty), hash it
     if 'password' in data and data['password']:
@@ -210,7 +210,7 @@ def delete_user(id):
     if not old_doc:
         return jsonify({"error": "User not found"}), 404
     
-    now = int(datetime.now().timestamp() * 1000)
+    now = get_timestamp_ms()
     
     # Create a snapshot of the document as it would look after deletion (marked deleted)
     deleted_state = old_doc.copy()

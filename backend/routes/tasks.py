@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from database import mongo
-from datetime import datetime
 from models.task_model import TaskModel, TaskUpdateModel
 from bson.objectid import ObjectId
 from utils.history import log_history
 from utils.error_handlers import handle_client_disconnect
+from utils.timestamp import get_timestamp_ms
 from middleware.idempotency import idempotency_middleware
 try:
     from pymongo.errors import _OperationCancelled
@@ -124,7 +124,7 @@ def create_task():
     except Exception as e:
         return jsonify({"error": str(e)}), 400
 
-    now = int(datetime.now().timestamp() * 1000)
+    now = get_timestamp_ms()
     data['base'] = {
         'isDeleted': False,
         'isActive': True,
@@ -182,7 +182,7 @@ def update_task(id):
         if old_doc.get(key) != value:
             changes[key] = value
 
-    now = int(datetime.now().timestamp() * 1000)
+    now = get_timestamp_ms()
     
     # Prepare update payload
     update_payload = changes.copy()
@@ -230,7 +230,7 @@ def delete_task(id):
         if not old_doc:
             return jsonify({"error": "Task not found"}), 404
 
-        now = int(datetime.now().timestamp() * 1000)
+        now = get_timestamp_ms()
         
         # Create a snapshot of the document as it would look after deletion
         deleted_state = old_doc.copy()
@@ -273,7 +273,7 @@ def approve_task(id):
         if old_doc.get('status') != 'pending_approval':
             return jsonify({"error": "Task is not pending approval"}), 400
 
-        now = int(datetime.now().timestamp() * 1000)
+        now = get_timestamp_ms()
         mongo.db.ents.update_one({'_id': id}, {'$set': {
             'status': 'completed',
             'base.updatedAt': now,
@@ -315,7 +315,7 @@ def reject_task(id):
         if old_doc.get('status') != 'pending_approval':
             return jsonify({"error": "Task is not pending approval"}), 400
 
-        now = int(datetime.now().timestamp() * 1000)
+        now = get_timestamp_ms()
         mongo.db.ents.update_one({'_id': id}, {'$set': {
             'status': 'in_progress',
             'base.updatedAt': now,
@@ -570,7 +570,7 @@ def add_task_note(task_id):
         if not is_admin and not is_assigned:
             return jsonify({'error': 'Permission denied. Only assigned users or admins can add notes.'}), 403
         
-        now = int(datetime.now().timestamp() * 1000)
+        now = get_timestamp_ms()
         note_id = str(ObjectId())
         
         # Create the note entity with full base fields (like other entities)
