@@ -3,7 +3,15 @@ import { StatusBadgeDropdown } from "./StatusBadgeDropdown";
 import { useAuth } from "../../../../contexts/AuthContext";
 import { useContactsQuery } from "../../../../api/queries";
 import { mapContactsToData } from "../../../../api/typeMappers";
-import { FileText, Calendar, Clock, Users, CheckCircle2, XCircle, ShieldCheck } from "lucide-react";
+import {
+  FileText,
+  Calendar,
+  Clock,
+  Users,
+  CheckCircle2,
+  XCircle,
+  ShieldCheck,
+} from "lucide-react";
 import { Tooltip } from "../../../tags-tooltip";
 import { useTagsModal } from "../../modal-tags";
 import {
@@ -20,7 +28,10 @@ import {
   getLighterColor,
   TAG_COLORS,
 } from "../../../../schemas/tagTypes";
-import { getServiceNowIncidentUrl, getMarsItemUrl } from "../../../../config/externalUrls";
+import {
+  getServiceNowIncidentUrl,
+  getMarsItemUrl,
+} from "../../../../config/runtimeConfig";
 
 interface TaskDetailsProps {
   task: Task;
@@ -47,7 +58,10 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
 }) => {
   const { user } = useAuth();
   const { data: contactsData = [] } = useContactsQuery();
-  const contacts = useMemo(() => mapContactsToData(contactsData), [contactsData]);
+  const contacts = useMemo(
+    () => mapContactsToData(contactsData),
+    [contactsData]
+  );
   const { openTagsModal } = useTagsModal();
 
   const canChangeStatus = useMemo(() => {
@@ -55,7 +69,8 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
     // Admin can always change status (uses approve/reject for pending_approval)
     if (user.role === "admin") return true;
     // Non-admin: pending_approval and completed are locked
-    if (task.status === "pending_approval" || task.status === "completed") return false;
+    if (task.status === "pending_approval" || task.status === "completed")
+      return false;
     // Non-admin: can change if responsible
     if (task.responsibleUserIds && task.responsibleUserIds.includes(user.id))
       return true;
@@ -122,10 +137,11 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       {/* Task ID & Tags */}
       <div className="flex items-center justify-between">
         <span
-          className={`text-xs font-mono px-2 py-1 rounded ${isDarkMode
-            ? "bg-slate-700 text-slate-400"
-            : "bg-slate-100 text-slate-500"
-            }`}
+          className={`text-xs font-mono px-2 py-1 rounded ${
+            isDarkMode
+              ? "bg-slate-700 text-slate-400"
+              : "bg-slate-100 text-slate-500"
+          }`}
         >
           ID-{task.id ? task.id.slice(-6).toLowerCase() : "???"}
         </span>
@@ -159,8 +175,9 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
 
       {/* Title */}
       <h2
-        className={`text-2xl font-bold break-words whitespace-pre-line ${isDarkMode ? "text-white" : "text-slate-800"
-          }`}
+        className={`text-2xl font-bold break-words whitespace-pre-line ${
+          isDarkMode ? "text-white" : "text-slate-800"
+        }`}
       >
         {task.title}
       </h2>
@@ -171,8 +188,11 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
         {task.status === "pending_approval" && user?.role === "admin" ? (
           <div className="flex items-center gap-2">
             {/* Status indicator */}
-            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${isDarkMode ? "bg-purple-500/20" : "bg-purple-50"
-              }`}>
+            <div
+              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+                isDarkMode ? "bg-purple-500/20" : "bg-purple-50"
+              }`}
+            >
               <ShieldCheck className="w-4 h-4 text-purple-500" />
               <span className="text-xs font-semibold text-purple-500">
                 ממתין לאישור
@@ -181,10 +201,11 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
             {/* Approve button */}
             <button
               onClick={onApprove}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:scale-105 ${isDarkMode
-                ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
-                : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
-                }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:scale-105 ${
+                isDarkMode
+                  ? "bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30"
+                  : "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
+              }`}
             >
               <CheckCircle2 className="w-4 h-4" />
               אשר וסגור
@@ -192,10 +213,11 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
             {/* Reject button */}
             <button
               onClick={onReject}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:scale-105 ${isDarkMode
-                ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
-                : "bg-red-50 text-red-600 hover:bg-red-100"
-                }`}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all hover:scale-105 ${
+                isDarkMode
+                  ? "bg-red-500/20 text-red-400 hover:bg-red-500/30"
+                  : "bg-red-50 text-red-600 hover:bg-red-100"
+              }`}
             >
               <XCircle className="w-4 h-4" />
               דחה והחזר
@@ -203,8 +225,11 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
           </div>
         ) : task.status === "pending_approval" ? (
           // Non-admin viewing pending_approval - show locked status
-          <div className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${isDarkMode ? "bg-purple-500/20" : "bg-purple-50"
-            }`}>
+          <div
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg ${
+              isDarkMode ? "bg-purple-500/20" : "bg-purple-50"
+            }`}
+          >
             <ShieldCheck className="w-4 h-4 text-purple-500" />
             <span className="text-xs font-semibold text-purple-500">
               ממתין לאישור מנהל
@@ -234,24 +259,28 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       {/* Description */}
       {task.description && (
         <div
-          className={`p-4 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
-            }`}
+          className={`p-4 rounded-xl ${
+            isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+          }`}
         >
           <div className="flex items-center gap-2 mb-2">
             <FileText
-              className={`w-4 h-4 ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                }`}
+              className={`w-4 h-4 ${
+                isDarkMode ? "text-slate-400" : "text-slate-500"
+              }`}
             />
             <span
-              className={`text-sm font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                }`}
+              className={`text-sm font-medium ${
+                isDarkMode ? "text-slate-400" : "text-slate-500"
+              }`}
             >
               תיאור
             </span>
           </div>
           <p
-            className={`text-sm leading-relaxed break-words whitespace-pre-line ${isDarkMode ? "text-slate-300" : "text-slate-600"
-              }`}
+            className={`text-sm leading-relaxed break-words whitespace-pre-line ${
+              isDarkMode ? "text-slate-300" : "text-slate-600"
+            }`}
           >
             {task.description}
           </p>
@@ -262,24 +291,28 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       <div className="grid grid-cols-2 gap-4">
         {task.date && (
           <div
-            className={`p-3 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
-              }`}
+            className={`p-3 rounded-xl ${
+              isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+            }`}
           >
             <div className="flex items-center gap-2 mb-1">
               <Calendar
-                className={`w-4 h-4 ${isDarkMode ? "text-blue-400" : "text-blue-500"
-                  }`}
+                className={`w-4 h-4 ${
+                  isDarkMode ? "text-blue-400" : "text-blue-500"
+                }`}
               />
               <span
-                className={`text-xs font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                  }`}
+                className={`text-xs font-medium ${
+                  isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
               >
                 תאריך התחלה
               </span>
             </div>
             <p
-              className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-slate-800"
-                }`}
+              className={`text-sm font-semibold ${
+                isDarkMode ? "text-white" : "text-slate-800"
+              }`}
             >
               {new Date(task.date).toLocaleDateString("he-IL")}
             </p>
@@ -287,24 +320,28 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
         )}
         {task.deadline && (
           <div
-            className={`p-3 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
-              }`}
+            className={`p-3 rounded-xl ${
+              isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+            }`}
           >
             <div className="flex items-center gap-2 mb-1">
               <Clock
-                className={`w-4 h-4 ${isDarkMode ? "text-amber-400" : "text-amber-500"
-                  }`}
+                className={`w-4 h-4 ${
+                  isDarkMode ? "text-amber-400" : "text-amber-500"
+                }`}
               />
               <span
-                className={`text-xs font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                  }`}
+                className={`text-xs font-medium ${
+                  isDarkMode ? "text-slate-400" : "text-slate-500"
+                }`}
               >
                 תאריך יעד
               </span>
             </div>
             <p
-              className={`text-sm font-semibold ${isDarkMode ? "text-white" : "text-slate-800"
-                }`}
+              className={`text-sm font-semibold ${
+                isDarkMode ? "text-white" : "text-slate-800"
+              }`}
             >
               {new Date(task.deadline).toLocaleDateString("he-IL")}
             </p>
@@ -313,19 +350,24 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       </div>
 
       {/* Optional Fields Display */}
-      {task.optionals && Object.values(task.optionals).some(v => v) && (
+      {task.optionals && Object.values(task.optionals).some((v) => v) && (
         <div
-          className={`p-5 rounded-2xl border ${isDarkMode ? "bg-slate-800/50 border-slate-700" : "bg-white border-slate-100 shadow-sm"
-            }`}
+          className={`p-5 rounded-2xl border ${
+            isDarkMode
+              ? "bg-slate-800/50 border-slate-700"
+              : "bg-white border-slate-100 shadow-sm"
+          }`}
         >
           <div className="flex items-center gap-2 mb-4">
             <ShieldCheck
-              className={`w-4 h-4 ${isDarkMode ? "text-indigo-400" : "text-indigo-500"
-                }`}
+              className={`w-4 h-4 ${
+                isDarkMode ? "text-indigo-400" : "text-indigo-500"
+              }`}
             />
             <span
-              className={`text-sm font-semibold tracking-wide ${isDarkMode ? "text-slate-200" : "text-slate-700"
-                }`}
+              className={`text-sm font-semibold tracking-wide ${
+                isDarkMode ? "text-slate-200" : "text-slate-700"
+              }`}
             >
               פרטים נוספים
             </span>
@@ -333,21 +375,49 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
 
           <div className="flex flex-col gap-4">
             {/* Organizational Units */}
-            {(task.optionals.pikud || task.optionals.ugda || task.optionals.hativa || task.optionals.gdud) && (
+            {(task.optionals.pikud ||
+              task.optionals.ugda ||
+              task.optionals.hativa ||
+              task.optionals.gdud) && (
               <div className="flex flex-wrap gap-2 items-center">
                 {[
                   { label: "פיקוד", value: task.optionals.pikud },
                   { label: "אוגדה", value: task.optionals.ugda },
                   { label: "חטיבה", value: task.optionals.hativa },
                   { label: "גדוד", value: task.optionals.gdud },
-                ].map((item) => item.value && (
-                  <div key={item.label} className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${isDarkMode ? "bg-slate-800 border-slate-700" : "bg-slate-50/50 border-slate-200"
-                    }`}>
-                    <span className={`text-xs ${isDarkMode ? "text-slate-500" : "text-slate-400"}`}>{item.label}</span>
-                    <div className={`w-px h-3 ${isDarkMode ? "bg-slate-700" : "bg-slate-300"}`} />
-                    <span className={`text-sm font-medium ${isDarkMode ? "text-slate-300" : "text-slate-700"}`}>{item.value}</span>
-                  </div>
-                ))}
+                ].map(
+                  (item) =>
+                    item.value && (
+                      <div
+                        key={item.label}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-lg border ${
+                          isDarkMode
+                            ? "bg-slate-800 border-slate-700"
+                            : "bg-slate-50/50 border-slate-200"
+                        }`}
+                      >
+                        <span
+                          className={`text-xs ${
+                            isDarkMode ? "text-slate-500" : "text-slate-400"
+                          }`}
+                        >
+                          {item.label}
+                        </span>
+                        <div
+                          className={`w-px h-3 ${
+                            isDarkMode ? "bg-slate-700" : "bg-slate-300"
+                          }`}
+                        />
+                        <span
+                          className={`text-sm font-medium ${
+                            isDarkMode ? "text-slate-300" : "text-slate-700"
+                          }`}
+                        >
+                          {item.value}
+                        </span>
+                      </div>
+                    )
+                )}
               </div>
             )}
 
@@ -355,64 +425,90 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
             {/* External System */}
             {task.optionals.externalSystem && (
               <div
-                className={`flex items-center gap-2 p-2 rounded-lg border transition-all w-fit ${task.optionals.externalSystem === 'SNOW'
-                  ? isDarkMode
-                    ? "bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20"
-                    : "bg-blue-50 border-blue-100 hover:bg-blue-100/50"
-                  : isDarkMode
+                className={`flex items-center gap-2 p-2 rounded-lg border transition-all w-fit ${
+                  task.optionals.externalSystem === "SNOW"
+                    ? isDarkMode
+                      ? "bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20"
+                      : "bg-blue-50 border-blue-100 hover:bg-blue-100/50"
+                    : isDarkMode
                     ? "bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20"
                     : "bg-emerald-50 border-emerald-100 hover:bg-emerald-100/50"
-                  }`}
+                }`}
               >
                 {/* System Icon */}
                 <div
-                  className={`p-1.5 rounded-md shadow-sm shrink-0 ${task.optionals.externalSystem === 'SNOW'
-                    ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white"
-                    : "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white"
-                    }`}
+                  className={`p-1.5 rounded-md shadow-sm shrink-0 ${
+                    task.optionals.externalSystem === "SNOW"
+                      ? "bg-gradient-to-br from-blue-500 to-blue-600 text-white"
+                      : "bg-gradient-to-br from-emerald-500 to-emerald-600 text-white"
+                  }`}
                 >
                   <span className="text-[10px] font-bold leading-none block px-0.5">
-                    {task.optionals.externalSystem === 'SNOW' ? 'SNOW' : 'MARS'}
+                    {task.optionals.externalSystem === "SNOW" ? "SNOW" : "MARS"}
                   </span>
                 </div>
 
                 {/* ID Display */}
                 {/* ID Display */}
                 <div className="flex items-center" dir="ltr">
-                  {task.optionals.externalSystem === 'SNOW' ? (
-                    <div className={`flex items-stretch rounded-lg overflow-hidden border ml-1 ${isDarkMode ? "border-slate-600 shadow-sm" : "border-slate-300 shadow-sm"
-                      }`}>
+                  {task.optionals.externalSystem === "SNOW" ? (
+                    <div
+                      className={`flex items-stretch rounded-lg overflow-hidden border ml-1 ${
+                        isDarkMode
+                          ? "border-slate-600 shadow-sm"
+                          : "border-slate-300 shadow-sm"
+                      }`}
+                    >
                       {/* Prefix Block */}
-                      <div className={`flex items-center px-2 py-1 text-xs font-bold border-r tracking-wider ${isDarkMode ? "bg-blue-900/40 text-blue-100 border-slate-600" : "bg-blue-100 text-blue-700 border-slate-300"
-                        }`}>
+                      <div
+                        className={`flex items-center px-2 py-1 text-xs font-bold border-r tracking-wider ${
+                          isDarkMode
+                            ? "bg-blue-900/40 text-blue-100 border-slate-600"
+                            : "bg-blue-100 text-blue-700 border-slate-300"
+                        }`}
+                      >
                         INC
                       </div>
                       {/* ID Number Link */}
                       {(() => {
-                        const idDigits = task.optionals.externalId ? task.optionals.externalId.replace(/^INC/, '') : '';
-                        const url = getServiceNowIncidentUrl(task.optionals.externalId || '');
+                        const idDigits = task.optionals.externalId
+                          ? task.optionals.externalId.replace(/^INC/, "")
+                          : "";
+                        const url = getServiceNowIncidentUrl(
+                          task.optionals.externalId || ""
+                        );
 
                         return idDigits ? (
-                          <Tooltip content="תלחץ עליי אני מת על גיל פלג" position="top">
+                          <Tooltip
+                            content="תלחץ עליי אני מת על גיל פלג"
+                            position="top"
+                          >
                             <a
                               href={url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className={`block px-2 py-1 text-sm font-mono font-bold hover:underline transition-colors ${isDarkMode ? "text-blue-300 bg-slate-800/30 hover:bg-slate-700/50" : "text-blue-700 bg-white hover:bg-blue-50"
-                                }`}
+                              className={`block px-2 py-1 text-sm font-mono font-bold hover:underline transition-colors ${
+                                isDarkMode
+                                  ? "text-blue-300 bg-slate-800/30 hover:bg-slate-700/50"
+                                  : "text-blue-700 bg-white hover:bg-blue-50"
+                              }`}
                             >
                               {idDigits}
                             </a>
                           </Tooltip>
                         ) : (
-                          <span className="px-2 py-1 text-sm italic text-slate-400 bg-transparent">---</span>
+                          <span className="px-2 py-1 text-sm italic text-slate-400 bg-transparent">
+                            ---
+                          </span>
                         );
                       })()}
                     </div>
                   ) : (
                     /* MARS Display - Standard Badge */
                     (() => {
-                      const url = getMarsItemUrl(task.optionals.externalId || '');
+                      const url = getMarsItemUrl(
+                        task.optionals.externalId || ""
+                      );
                       const hasId = !!task.optionals.externalId;
 
                       return hasId ? (
@@ -421,14 +517,19 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                             href={url}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className={`text-sm font-mono font-bold hover:underline ml-1 ${isDarkMode ? "text-emerald-400" : "text-emerald-700"
-                              }`}
+                            className={`text-sm font-mono font-bold hover:underline ml-1 ${
+                              isDarkMode
+                                ? "text-emerald-400"
+                                : "text-emerald-700"
+                            }`}
                           >
                             {task.optionals.externalId}
                           </a>
                         </Tooltip>
                       ) : (
-                        <span className="text-sm italic text-slate-500">ללא מזהה</span>
+                        <span className="text-sm italic text-slate-500">
+                          ללא מזהה
+                        </span>
                       );
                     })()
                   )}
@@ -442,17 +543,20 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
       {/* Responsible Users */}
       {task.responsibleUserIds && task.responsibleUserIds.length > 0 && (
         <div
-          className={`p-4 rounded-xl ${isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
-            }`}
+          className={`p-4 rounded-xl ${
+            isDarkMode ? "bg-slate-700/30" : "bg-slate-50"
+          }`}
         >
           <div className="flex items-center gap-2 mb-3">
             <Users
-              className={`w-4 h-4 ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                }`}
+              className={`w-4 h-4 ${
+                isDarkMode ? "text-slate-400" : "text-slate-500"
+              }`}
             />
             <span
-              className={`text-sm font-medium ${isDarkMode ? "text-slate-400" : "text-slate-500"
-                }`}
+              className={`text-sm font-medium ${
+                isDarkMode ? "text-slate-400" : "text-slate-500"
+              }`}
             >
               אחראים
             </span>
@@ -464,8 +568,9 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
               return (
                 <div
                   key={userId}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-xl ${isDarkMode ? "bg-slate-600/50" : "bg-white shadow-sm"
-                    }`}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-xl ${
+                    isDarkMode ? "bg-slate-600/50" : "bg-white shadow-sm"
+                  }`}
                 >
                   {user.profileImage ? (
                     <img
@@ -484,8 +589,9 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                     </div>
                   )}
                   <span
-                    className={`text-sm font-medium ${isDarkMode ? "text-white" : "text-slate-700"
-                      }`}
+                    className={`text-sm font-medium ${
+                      isDarkMode ? "text-white" : "text-slate-700"
+                    }`}
                   >
                     {user.fullName}
                   </span>

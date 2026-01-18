@@ -4,6 +4,7 @@
 
 import type { TaskHistoryEntry } from '../api/tasksApi';
 import type { UserData } from '../schemas/userTypes';
+import { getApiUrl } from '../config/runtimeConfig';
 
 // ============================================================================
 // Connection State
@@ -101,7 +102,7 @@ export interface SocketConfig {
 
 // Get socket URL from API URL
 const getSocketUrl = (): string => {
-  const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+  const apiUrl = getApiUrl();
   
   // If it's a relative URL like '/api', use empty string (same origin)
   if (apiUrl.startsWith('/')) {

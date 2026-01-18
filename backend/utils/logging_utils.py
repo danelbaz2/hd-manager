@@ -13,6 +13,37 @@ def is_request_logging_enabled():
     except ImportError:
         return True  # Default to enabled if middleware not available
 
+
+class RequestLoggingFilter(logging.Filter):
+    """
+    Filter that suppresses access logs when request logging is disabled.
+    
+    This is the PROPER way to suppress logs - returning empty string from
+    a formatter still prints a blank line, but a filter completely blocks
+    the record from being processed.
+    """
+    
+    def filter(self, record):
+        """
+        Returns True if the record should be logged, False to suppress it.
+        """
+        # Check if this is an access log by examining the logger name or message
+        source = record.name
+        message = record.getMessage() if hasattr(record, 'msg') else ''
+        
+        is_access_log = (
+            "handler" in source or 
+            "access" in source or
+            (hasattr(record, 'msg') and "HTTP" in str(record.msg))
+        )
+        
+        # If it's an access log and request logging is disabled, suppress it
+        if is_access_log and not is_request_logging_enabled():
+            return False  # Completely suppress this log
+        
+        return True  # Allow the log through
+
+
 class UniformFormatter(logging.Formatter):
     """
     Custom formatter to match the requested format:
@@ -56,10 +87,6 @@ class UniformFormatter(logging.Formatter):
         # Pattern matches: IP - - [Date] "METHOD URL PROTO" STATUS SIZE DURATION
         # We rely on source name or regex match
         if "handler" in source or (source == "access" and "HTTP" in message):
-             # SKIP these logs if request logging is disabled
-             if not is_request_logging_enabled():
-                 return ""  # Return empty string to skip this log
-                 
              # Regex to extract parts
              match = re.match(r'^(\S+) - - \[.*?\] "(.*?) (.*?) .*?" (\d+) (\S+) ?(.*)?', message)
              if match:
@@ -118,9 +145,10 @@ def setup_access_logging():
         for handler in root_logger.handlers:
             root_logger.removeHandler(handler)
             
-    # Add our uniform handler
+    # Add our uniform handler with the request logging filter
     handler = logging.StreamHandler(sys.stdout)
     handler.setFormatter(UniformFormatter())
+    handler.addFilter(RequestLoggingFilter())  # <-- This properly suppresses access logs
     root_logger.addHandler(handler)
     
     # Configure gevent access logger to propagate to root

@@ -1,12 +1,13 @@
 import React from "react";
 import { Layers } from "lucide-react";
+import { getSystemName } from "../../config/runtimeConfig";
 
 interface LoginHeaderProps {
   isDarkMode: boolean;
 }
 
 const LoginHeader: React.FC<LoginHeaderProps> = ({ isDarkMode }) => {
-  const systemName = import.meta.env.VITE_SYSTEM_NAME || "Flow Task";
+  const systemName = getSystemName();
 
   return (
     <>

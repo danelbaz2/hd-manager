@@ -1,9 +1,27 @@
 // Base API configuration and shared types
+import { getApiUrl, getApiMaxRetries, getApiRetryDelay } from '../config/runtimeConfig';
 
-// Get base API URL from environment variable (includes /api)
-export const API_BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+// Get base API URL - uses runtime config (can be changed after Docker build)
+// Note: Using getter function to ensure value is read at runtime
+export function getApiBaseUrl(): string {
+  return getApiUrl();
+}
 
-// API Endpoints
+// For backwards compatibility, export as const but components should prefer getApiBaseUrl()
+export const API_BASE_URL = getApiUrl();
+
+// API Endpoints - use getters for runtime resolution
+export const getApiEndpoints = () => ({
+  users: `${getApiBaseUrl()}/users`,
+  tasks: `${getApiBaseUrl()}/tasks`,
+  tags: `${getApiBaseUrl()}/tags`,
+  contacts: `${getApiBaseUrl()}/contacts`,
+  historyEntries: `${getApiBaseUrl()}/history-entries`,
+  chatMessages: `${getApiBaseUrl()}/chat`,
+  uploads: `${getApiBaseUrl()}/uploads`,
+} as const);
+
+// For backwards compatibility
 export const API_ENDPOINTS = {
   users: `${API_BASE_URL}/users`,
   tasks: `${API_BASE_URL}/tasks`,
@@ -23,10 +41,9 @@ export interface ApiResponse<T> {
   aborted?: boolean;  // Flag to indicate request was aborted (not a real error)
 }
 
-// Retry configuration
-// Retry configuration
-const MAX_RETRIES = Number(import.meta.env.VITE_API_MAX_RETRIES) || 2;
-const RETRY_DELAY_MS = Number(import.meta.env.VITE_API_RETRY_DELAY) || 500;
+// Retry configuration - uses runtime config (can be changed after Docker build)
+const getMaxRetries = () => getApiMaxRetries();
+const getRetryDelayMs = () => getApiRetryDelay();
 
 // Helper: delay function
 const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
@@ -55,7 +72,7 @@ export async function apiRequest<T>(
   // Retry logic for network errors
   let lastError: Error | null = null;
 
-  for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
+  for (let attempt = 0; attempt <= getMaxRetries(); attempt++) {
     try {
       const response = await fetch(url, requestOptions);
       const data = await response.json();
@@ -89,9 +106,9 @@ export async function apiRequest<T>(
         lastError.message.includes("NetworkError") ||
         lastError.message.includes("Network request failed");
 
-      if (isNetworkError && attempt < MAX_RETRIES) {
-        console.log(`API request failed (attempt ${attempt + 1}/${MAX_RETRIES + 1}), retrying in ${RETRY_DELAY_MS}ms...`, url);
-        await delay(RETRY_DELAY_MS * (attempt + 1)); // Exponential backoff
+      if (isNetworkError && attempt < getMaxRetries()) {
+        console.log(`API request failed (attempt ${attempt + 1}/${getMaxRetries() + 1}), retrying in ${getRetryDelayMs()}ms...`, url);
+        await delay(getRetryDelayMs() * (attempt + 1)); // Exponential backoff
         continue; // Retry
       }
 

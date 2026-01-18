@@ -10,6 +10,7 @@
  */
 
 import { io, Socket } from 'socket.io-client';
+import { getIdleTimeout, getSocketTimeout } from '../config/runtimeConfig';
 import {
   type ConnectionStatus,
   type SocketConfig,
@@ -58,7 +59,7 @@ class SocketManager {
   ];
   
   constructor(config: Partial<SocketConfig> = {}) {
-    const defaultIdleTimeout = Number(import.meta.env.VITE_IDLE_TIMEOUT) || 300000; // 5 mins
+    const defaultIdleTimeout = getIdleTimeout();
     this.config = { 
       ...DEFAULT_SOCKET_CONFIG, 
       idleTimeoutMs: defaultIdleTimeout,
@@ -243,7 +244,7 @@ class SocketManager {
       transports: ['websocket', 'polling'],
       autoConnect: true,
       reconnection: false, // We handle reconnection manually based on activity
-      timeout: Number(import.meta.env.VITE_SOCKET_TIMEOUT) || 10000,
+      timeout: getSocketTimeout(),
     });
     
     this.setupSocketListeners();

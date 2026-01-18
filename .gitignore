@@ -11,3 +11,4 @@ docker/.env.prod
 
 # Uploads
 backend/uploads/profiles/
+docker/exports/
