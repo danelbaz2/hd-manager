@@ -62,4 +62,8 @@ export const queryKeys = {
   militaryHierarchy: {
     all: ["militaryHierarchy"] as const,
   },
+  // Chat Messages
+  chatMessages: {
+    all: ["chatMessages"] as const,
+  },
 };

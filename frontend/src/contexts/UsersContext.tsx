@@ -13,7 +13,7 @@ import React, {
 import { getAllUsers, type User } from "../api/usersApi";
 import { type UserData } from "../schemas/userTypes";
 import { useAuth } from "./AuthContext";
-import { useSocket } from "../socket";
+import { useSocket } from "../lib/socket";
 import { invalidateUserQueries } from "../api/queries";
 
 // Helper function to convert API User to UserData

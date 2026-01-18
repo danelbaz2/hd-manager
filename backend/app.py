@@ -72,7 +72,7 @@ app.register_blueprint(logs.bp)
 app.register_blueprint(military_hierarchy.bp)
 
 # Register SocketIO events (new modular socket system)
-from websocket import register_socket_events
+from core.websocket import register_socket_events
 register_socket_events(socketio)
 
 # Always initialize request logger middleware (state is controlled by the toggle)

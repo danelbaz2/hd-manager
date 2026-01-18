@@ -6,7 +6,7 @@ from utils.history import log_history
 from utils.jwt_utils import jwt_required, admin_required, self_or_admin_required
 from utils.profile_image import save_profile_image_from_base64, delete_profile_image, is_base64_image, get_full_profile_url
 from utils.timestamp import get_timestamp_ms
-from websocket import broadcast_user_update
+from core.websocket import broadcast_user_update
 import bcrypt
 from utils.logger import logger
 from utils.error_handlers import handle_client_disconnect

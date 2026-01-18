@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import type { Task, TaskHistoryEntry } from "../../../api/tasksApi";
-import { socketManager } from "../../../socket/socketManager";
+import { socketManager } from "../../../lib/socket/socketManager";
 
 interface TaskModalContextType {
     isOpen: boolean;

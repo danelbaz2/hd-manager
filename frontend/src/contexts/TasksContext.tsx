@@ -14,7 +14,7 @@ import React, {
 } from "react";
 import { getAllTasks, type Task, type TaskHistoryEntry } from "../api/tasksApi";
 import { useAuth } from "./AuthContext";
-import { useSocket } from "../socket";
+import { useSocket } from "../lib/socket";
 import { updateReactQueryCache, updateHistoryCache } from "../api/queries";
 import {
   getLastSyncTimestamp,

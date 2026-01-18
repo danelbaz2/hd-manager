@@ -31,7 +31,7 @@ import {
 import {
   getServiceNowIncidentUrl,
   getMarsItemUrl,
-} from "../../../../config/runtimeConfig";
+} from "../../../../lib/config/runtimeConfig";
 
 interface TaskDetailsProps {
   task: Task;

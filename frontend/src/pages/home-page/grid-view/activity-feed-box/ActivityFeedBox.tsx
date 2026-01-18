@@ -20,11 +20,11 @@ import {
 import { useTaskModal } from "../../../../components/modal/modal-task";
 import { type Task } from "../../../../api/tasksApi";
 import { type UserData } from "../../../../schemas/userTypes";
-import { useTour } from "../../../../components/demos/tour-provider";
+import { useTour } from "../../../../components/onboarding/tour-provider";
 import {
   DEMO_TASKS,
   DEMO_HISTORY,
-} from "../../../../components/demos/shared/tourData";
+} from "../../../../components/onboarding/shared/tourData";
 import { UpdatesTask } from "./updates-task";
 import { UpdateTeam } from "./update-team";
 import { type TeamMessage } from "../../../../schemas/teamMessageTypes";

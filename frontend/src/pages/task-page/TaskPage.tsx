@@ -16,13 +16,13 @@ import { mapUsersToUserData } from "../../api/typeMappers";
 import { KanbanBoard } from "./parts";
 import { updateTask, type Task, type TaskStatus } from "../../api/tasksApi";
 import { useTaskModal } from "../../components/modal/modal-task";
-import { useTour } from "../../components/demos/tour-provider";
-import { PageHelpButton } from "../../components/demos/page-help-button";
-import { DEMO_TASKS, DEMO_USERS } from "../../components/demos/shared/tourData";
+import { useTour } from "../../components/onboarding/tour-provider";
+import { PageHelpButton } from "../../components/onboarding/page-help-button";
+import { DEMO_TASKS, DEMO_USERS } from "../../components/onboarding/shared/tourData";
 import {
   KanbanOnboardingDemo,
   shouldShowOnboarding,
-} from "../../components/demos/kanban-onboarding";
+} from "../../components/onboarding/kanban-onboarding";
 import type { UserData } from "../../schemas/userTypes";
 
 interface LocationState {

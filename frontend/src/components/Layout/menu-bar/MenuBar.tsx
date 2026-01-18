@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, List, Layers, LogOut, Archive } from "lucide-react";
 import { useTheme, useAuth } from "../../../contexts";
-import { getSystemName } from "../../../config/runtimeConfig";
+import { getSystemName } from "../../../lib/config/runtimeConfig";
 
 interface MenuBarProps {
   className?: string;

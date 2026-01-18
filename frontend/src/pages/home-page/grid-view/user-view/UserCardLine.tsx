@@ -2,7 +2,7 @@ import React from "react";
 import { User, Circle, Clock, CheckCircle2, ShieldCheck } from "lucide-react";
 import { useTheme, useAuth } from "../../../../contexts";
 import { type UserData } from "../../../../schemas/userTypes";
-import { useTour } from "../../../../components/demos/tour-provider";
+import { useTour } from "../../../../components/onboarding/tour-provider";
 
 interface TaskCounts {
   open: number;

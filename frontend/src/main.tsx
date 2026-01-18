@@ -12,15 +12,15 @@ import {
   AuthProvider,
   SocketProvider,
 } from "./contexts";
-import { RealtimeSyncProvider } from "./socket";
+import { RealtimeSyncProvider } from "./lib/socket";
 import { TaskModalProvider, TaskModal } from "./components/modal/modal-task";
 import { TagsModalProvider, TagsModal } from "./components/modal/modal-tags";
 import {
   CloseTaskModalProvider,
   CloseTaskModal,
 } from "./components/modal/modal-close-task";
-import { TourProvider } from "./components/demos/tour-provider";
-import { TourOverlay } from "./components/demos/tour-overlay";
+import { TourProvider } from "./components/onboarding/tour-provider";
+import { TourOverlay } from "./components/onboarding/tour-overlay";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>

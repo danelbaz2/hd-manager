@@ -5,7 +5,7 @@ from bson.objectid import ObjectId
 from utils.jwt_utils import jwt_required, admin_required
 from utils.history import log_history
 from utils.timestamp import get_timestamp_ms
-from websocket import broadcast_chat_update
+from core.websocket import broadcast_chat_update
 from utils.error_handlers import handle_client_disconnect
 
 bp = Blueprint('chat_messages', __name__, url_prefix='/api/chat')

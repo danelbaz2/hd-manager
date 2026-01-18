@@ -24,6 +24,6 @@ export { useHistory } from "./HistoryContext";
 export { ChatProvider } from "./ChatContext";
 
 // Socket (re-export from socket module for convenience)
-export { SocketProvider, useSocket } from "../socket";
-export { useChatSync, useChatUpdates } from "../socket";
-export { useTaskUpdates, useUserUpdates } from "../socket";
+export { SocketProvider, useSocket } from "../lib/socket";
+export { useChatSync, useChatUpdates } from "../lib/socket";
+export { useTaskUpdates, useUserUpdates } from "../lib/socket";

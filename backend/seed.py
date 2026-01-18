@@ -22,7 +22,7 @@ from bson.objectid import ObjectId
 import bcrypt
 
 from utils.history import log_history
-from _seed_data import (
+from scripts.seed_data import (
     get_users_data,
     get_init_primary_tags_data,
     get_init_secondary_tags_data,

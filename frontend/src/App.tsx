@@ -12,7 +12,7 @@ import TaskPage from "./pages/task-page/TaskPage";
 import ArchivePage from "./pages/archive-page/ArchivePage";
 import LoginPage from "./pages/login-page/LoginPage";
 import SettingPage from "./pages/setting-page/SettingPage";
-import { getSystemName } from "./config/runtimeConfig";
+import { getSystemName } from "./lib/config/runtimeConfig";
 
 function App() {
   // Set document title from runtime config (for Docker deployment)

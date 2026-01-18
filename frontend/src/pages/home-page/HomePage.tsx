@@ -27,8 +27,8 @@ import { TagsView } from "./tags-view";
 import { filterTasksByDateRange } from "./shared";
 import { useTaskModal } from "../../components/modal/modal-task";
 import { type Task, type TaskStatus } from "../../api/tasksApi";
-import { useTour } from "../../components/demos/tour-provider";
-import { PageHelpButton } from "../../components/demos/page-help-button";
+import { useTour } from "../../components/onboarding/tour-provider";
+import { PageHelpButton } from "../../components/onboarding/page-help-button";
 import {
   DEMO_TASKS,
   DEMO_USERS,
@@ -36,7 +36,7 @@ import {
   DEMO_PRIMARY_TAGS,
   DEMO_SECONDARY_TAGS,
   DEMO_TEAM_UPDATES,
-} from "../../components/demos/shared/tourData";
+} from "../../components/onboarding/shared/tourData";
 import type { UserData } from "../../schemas/userTypes";
 
 const HomePage: React.FC = () => {

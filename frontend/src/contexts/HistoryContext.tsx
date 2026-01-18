@@ -12,7 +12,7 @@ import React, {
 } from "react";
 import { getAllTasksHistory, type TaskHistoryEntry } from "../api/tasksApi";
 import { useAuth } from "./AuthContext";
-import { useSocket } from "../socket";
+import { useSocket } from "../lib/socket";
 
 interface HistoryContextState {
   taskHistory: TaskHistoryEntry[];

@@ -1,6 +1,6 @@
 import React from "react";
 import { Layers } from "lucide-react";
-import { getSystemName } from "../../config/runtimeConfig";
+import { getSystemName } from "../../lib/config/runtimeConfig";
 
 interface LoginHeaderProps {
   isDarkMode: boolean;

@@ -6,7 +6,7 @@
  * mutations so that the user receives the broadcast update.
  */
 
-import { socketManager } from '../socket/socketManager';
+import { socketManager } from '../lib/socket/socketManager';
 import { withIdempotency, generateIdempotencyKey } from './idempotency';
 
 /**

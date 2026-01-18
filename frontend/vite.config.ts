@@ -25,6 +25,20 @@ export default defineConfig(({ mode }) => {
         }
       }
     ],
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, './src'),
+        '@lib': path.resolve(__dirname, './src/lib'),
+        '@components': path.resolve(__dirname, './src/components'),
+        '@features': path.resolve(__dirname, './src/features'),
+        '@pages': path.resolve(__dirname, './src/pages'),
+        '@hooks': path.resolve(__dirname, './src/hooks'),
+        '@contexts': path.resolve(__dirname, './src/contexts'),
+        '@api': path.resolve(__dirname, './src/api'),
+        '@schemas': path.resolve(__dirname, './src/schemas'),
+        '@assets': path.resolve(__dirname, './src/assets'),
+      },
+    },
     define: {
       // Make root .env variables available
       'import.meta.env.VITE_SYSTEM_NAME': JSON.stringify(env.VITE_SYSTEM_NAME || 'Flow Task'),

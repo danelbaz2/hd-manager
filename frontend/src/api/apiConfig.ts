@@ -1,5 +1,5 @@
 // Base API configuration and shared types
-import { getApiUrl, getApiMaxRetries, getApiRetryDelay } from '../config/runtimeConfig';
+import { getApiUrl, getApiMaxRetries, getApiRetryDelay } from '../lib/config/runtimeConfig';
 
 // Get base API URL - uses runtime config (can be changed after Docker build)
 // Note: Using getter function to ensure value is read at runtime
