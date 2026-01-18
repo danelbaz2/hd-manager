@@ -14,7 +14,7 @@ echo "=============================================="
 # Define image names
 BACKEND_IMAGE="hd-manager-backend"
 FRONTEND_IMAGE="hd-manager-frontend"
-MONGO_IMAGE="mongo:7.0"
+MONGO_IMAGE="mongo:4.4"
 EXPORT_DIR="./exports"
 
 # Create export directory
@@ -26,7 +26,11 @@ docker build -t $BACKEND_IMAGE:latest -f backend.Dockerfile ../backend
 
 echo ""
 echo "[2/6] Building frontend image..."
+# Copy entrypoint script to frontend directory (needed for Docker build context)
+cp frontend-entrypoint.sh ../frontend/frontend-entrypoint.sh
 docker build -t $FRONTEND_IMAGE:latest -f frontend.Dockerfile ../frontend
+# Clean up copied file
+rm -f ../frontend/frontend-entrypoint.sh
 
 echo ""
 echo "[3/6] Pulling MongoDB image..."
@@ -44,8 +48,8 @@ echo "     Created: $EXPORT_DIR/hd-manager-frontend.tar"
 
 echo ""
 echo "[6/6] Saving MongoDB image to tar..."
-docker save -o $EXPORT_DIR/mongo-7.0.tar $MONGO_IMAGE
-echo "     Created: $EXPORT_DIR/mongo-7.0.tar"
+docker save -o $EXPORT_DIR/mongo-4.4.tar $MONGO_IMAGE
+echo "     Created: $EXPORT_DIR/mongo-4.4.tar"
 
 echo ""
 echo "=============================================="
@@ -55,7 +59,7 @@ echo ""
 echo "Files to copy to Linux VM:"
 echo "  - $EXPORT_DIR/hd-manager-backend.tar"
 echo "  - $EXPORT_DIR/hd-manager-frontend.tar"
-echo "  - $EXPORT_DIR/mongo-7.0.tar"
+echo "  - $EXPORT_DIR/mongo-4.4.tar"
 echo "  - docker-compose.prod.yml"
 echo "  - nginx/nginx.conf"
 echo "  - ca/server.crt"
@@ -66,7 +70,7 @@ echo ""
 echo "  # 1. Load the images"
 echo "  docker load -i hd-manager-backend.tar"
 echo "  docker load -i hd-manager-frontend.tar"
-echo "  docker load -i mongo-7.0.tar"
+echo "  docker load -i mongo-4.4.tar"
 echo ""
 echo "  # 2. Create external volumes (REQUIRED - only once)"
 echo "  docker volume create mongodb_data"

@@ -46,7 +46,6 @@ COPY --from=builder /app/package.json /source/package.json
 
 # Copy entrypoint script for runtime configuration
 COPY frontend-entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
 
 # Expose port 80
 EXPOSE 80

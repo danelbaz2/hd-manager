@@ -4,6 +4,15 @@ import os
 import re
 from datetime import datetime
 
+# Import request logging state checker
+def is_request_logging_enabled():
+    """Check if request logging is enabled - import from middleware or return True"""
+    try:
+        from middleware.request_logger import is_request_logging_enabled as check_enabled
+        return check_enabled()
+    except ImportError:
+        return True  # Default to enabled if middleware not available
+
 class UniformFormatter(logging.Formatter):
     """
     Custom formatter to match the requested format:
@@ -47,6 +56,10 @@ class UniformFormatter(logging.Formatter):
         # Pattern matches: IP - - [Date] "METHOD URL PROTO" STATUS SIZE DURATION
         # We rely on source name or regex match
         if "handler" in source or (source == "access" and "HTTP" in message):
+             # SKIP these logs if request logging is disabled
+             if not is_request_logging_enabled():
+                 return ""  # Return empty string to skip this log
+                 
              # Regex to extract parts
              match = re.match(r'^(\S+) - - \[.*?\] "(.*?) (.*?) .*?" (\d+) (\S+) ?(.*)?', message)
              if match:

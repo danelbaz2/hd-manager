@@ -28,19 +28,24 @@ function getRuntimeConfig(key: keyof RuntimeConfig, defaultValue: string): strin
     return defaultValue;
 }
 
-// External system URLs - configurable at runtime for disconnected deployments
+// External system URLs - use getters to read values at runtime (not at import time)
+// This ensures config.js values are picked up after the script loads
 export const EXTERNAL_URLS = {
     /**
      * ServiceNow base URL
      * Configure via docker-compose environment: SERVICENOW_URL
      */
-    SERVICENOW: getRuntimeConfig('SERVICENOW_URL', 'https://servicenow.com'),
+    get SERVICENOW(): string {
+        return getRuntimeConfig('SERVICENOW_URL', 'https://servicenow.com');
+    },
 
     /**
      * MARS system base URL
      * Configure via docker-compose environment: MARS_URL
      */
-    MARS: getRuntimeConfig('MARS_URL', 'https://mars-system.com'),
+    get MARS(): string {
+        return getRuntimeConfig('MARS_URL', 'https://mars-system.com');
+    },
 } as const;
 
 /**

@@ -8,8 +8,8 @@ import time
 from flask import request, g
 from functools import wraps
 
-# Runtime toggle for request logging
-_request_logging_enabled = True
+# Runtime toggle for request logging (default: OFF for production)
+_request_logging_enabled = False
 
 
 def is_request_logging_enabled() -> bool:
