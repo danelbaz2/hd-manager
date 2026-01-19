@@ -1,5 +1,11 @@
+# Python
 __pycache__/
 *.pyc
+*.pyo
+backend/.venv/
+
+# Node
+frontend/node_modules/
 
 # Environment files (contain secrets)
 .env
@@ -9,6 +15,14 @@ backend/.env
 docker/.env
 docker/.env.prod
 
-# Uploads
+# Uploads & Exports
 backend/uploads/profiles/
 docker/exports/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

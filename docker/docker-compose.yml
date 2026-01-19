@@ -27,23 +27,26 @@ services:
       - PORT=${PORT:-5000}
       - DEBUG=${DEBUG:-True}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost,https://localhost}
-      
+
       # Security - from .env file
       - SECRET_KEY=${SECRET_KEY}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - ADMIN_API_KEY=${ADMIN_API_KEY:-dev-admin-key}
       - API_KEY=${API_KEY}
-      
+
       # Database
       - MONGO_URI=${MONGO_URI:-mongodb://mongodb-server:27017/hd-manager}
-      
+
       # File Uploads
       - MAX_FILE_SIZE_MB=${MAX_FILE_SIZE_MB:-10}
       - UPLOAD_ALLOWED_EXTENSIONS=${UPLOAD_ALLOWED_EXTENSIONS:-pdf,doc,docx,xls,xlsx,txt,png,jpg,jpeg,gif}
-      
+
       # Logging
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       - LOG_REQUESTS=${LOG_REQUESTS:-false}
+
+      # Health Monitoring
+      - DB_HEALTH_CHECK_INTERVAL=${DB_HEALTH_CHECK_INTERVAL:-5}
     volumes:
       - uploads:/app/uploads
     depends_on:

@@ -60,15 +60,16 @@ docker-compose -f docker-compose.prod.yml up -d
 
 ### Optional
 
-| Variable        | Default                 | Description          |
-| --------------- | ----------------------- | -------------------- |
-| `PORT`          | `5000`                  | Backend port         |
-| `CORS_ORIGINS`  | `http://localhost:5173` | Allowed origins      |
-| `LOG_REQUESTS`  | `false`                 | Enable request logs  |
-| `LOG_LEVEL`     | `INFO`                  | Logging level        |
-| `DEBUG`         | `false`                 | Flask debug mode     |
-| `SSL_CERT_PATH` | -                       | SSL certificate path |
-| `SSL_KEY_PATH`  | -                       | SSL key path         |
+| Variable                   | Default                 | Description                    |
+| -------------------------- | ----------------------- | ------------------------------ |
+| `PORT`                     | `5000`                  | Backend port                   |
+| `CORS_ORIGINS`             | `http://localhost:5173` | Allowed origins                |
+| `LOG_REQUESTS`             | `false`                 | Enable request logs            |
+| `LOG_LEVEL`                | `INFO`                  | Logging level                  |
+| `DB_HEALTH_CHECK_INTERVAL` | `5`                     | DB health check interval (sec) |
+| `DEBUG`                    | `false`                 | Flask debug mode               |
+| `SSL_CERT_PATH`            | -                       | SSL certificate path           |
+| `SSL_KEY_PATH`             | -                       | SSL key path                   |
 
 ---
 
@@ -87,8 +88,22 @@ Or use a reverse proxy (nginx recommended).
 
 ## 📊 Health Checks
 
-- Backend: `GET /api/auth/validate` (returns 401 if no auth, 200 if valid)
-- Frontend: Served via nginx, check HTTP 200 on `/`
+### Endpoint
+
+```
+GET /api/health
+```
+
+Returns `200` (healthy) or `503` (database disconnected).
+
+### Background Monitor
+
+The backend automatically monitors MongoDB connection:
+
+- Checks every **5 seconds** (configurable via `DB_HEALTH_CHECK_INTERVAL`)
+- Logs `ERROR` immediately when connection is lost
+- Logs `ERROR` every 5s while disconnected
+- Logs `INFO` when connection is restored
 
 ---
 
@@ -113,8 +128,13 @@ Toggle request logging at runtime:
 
 ```bash
 # Enable
-curl -X POST http://localhost:5000/api/logs/enable
+curl http://localhost:5000/api/logger/requests/on/{API_KEY}
 
 # Disable
-curl -X POST http://localhost:5000/api/logs/disable
+curl http://localhost:5000/api/logger/requests/off/{API_KEY}
+
+# Change log level
+curl http://localhost:5000/api/logger/{DEBUG|INFO|WARNING|ERROR}/{API_KEY}
 ```
+
+Default `API_KEY`: \*\*\*\* (or set via `ADMIN_API_KEY` env var)
