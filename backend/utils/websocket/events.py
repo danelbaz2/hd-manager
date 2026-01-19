@@ -132,6 +132,3 @@ def register_socket_events(socketio):
             pass  # Silently ignore
         else:
             _log_event('ERROR', f'Socket error: {type(e).__name__}', str(e))
-    
-    # Use print for startup message to avoid formatter issues
-    print("\033[36m[Socket]\033[0m Socket events registered successfully")
