@@ -102,32 +102,16 @@ const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
         ))}
       </nav>
 
-      {/* Bottom Section */}
-      <div className="space-y-2">
-        {/* Logout Button */}
-        <button
-          onClick={handleLogout}
-          className={`
-            flex items-center justify-end
-            gap-3 lg:gap-4
-            px-3 lg:px-4 xl:px-6
-            py-2.5 lg:py-3
-            rounded-xl w-full transition-all
-            ${
-              isDarkMode
-                ? "text-red-400 hover:bg-red-900/20"
-                : "text-red-500 hover:bg-red-50"
-            }
-          `}
-        >
-          <span className="text-sm lg:text-base xl:text-lg font-medium">
-            יציאה
-          </span>
-          <LogOut
-            className="w-4 h-4 lg:w-5 lg:h-5 xl:w-6 xl:h-6 transform rotate-180"
-            strokeWidth={2}
-          />
-        </button>
+      {/* Copyright Footer */}
+      <div
+        className={`mt-auto pt-4 border-t text-center text-xs ${
+          isDarkMode
+            ? "border-slate-700 text-slate-500"
+            : "border-slate-200 text-slate-400"
+        }`}
+      >
+        <p>© {new Date().getFullYear()} All Rights Reserved ©</p>
+        <p className="mt-1">Ilay Admoni & Dan Elbaz</p>
       </div>
     </aside>
   );
