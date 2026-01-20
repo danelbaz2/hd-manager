@@ -20,7 +20,7 @@ import {
   STATUS_COLORS,
   type TaskPriority,
 } from "../../../../schemas/taskTypes";
-import type { Task } from "../../../../api/tasksApi";
+import { getSingleEntity, type Task } from "../../../../api/tasksApi";
 import type { UserData } from "../../../../schemas/userTypes";
 import {
   type PrimaryTagData,
@@ -60,7 +60,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
   const { data: contactsData = [] } = useContactsQuery();
   const contacts = useMemo(
     () => mapContactsToData(contactsData),
-    [contactsData]
+    [contactsData],
   );
   const { openTagsModal } = useTagsModal();
 
@@ -92,7 +92,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
         const secondaryTag = secondaryTags.find((st) => st.id === tagId);
         if (!secondaryTag) return null;
         const primaryTag = primaryTags.find(
-          (pt) => pt.id === secondaryTag.primaryTagId
+          (pt) => pt.id === secondaryTag.primaryTagId,
         );
         return {
           id: secondaryTag.id,
@@ -109,7 +109,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
 
     // 2. Identify which primary tags correspond to selected secondary tags
     const primaryIdsWithSecondary = new Set(
-      displayedSecondaryTags.map((t) => t.primaryId)
+      displayedSecondaryTags.map((t) => t.primaryId),
     );
 
     // 3. Find standalone primary tags (those selected but having no secondary tags)
@@ -132,11 +132,22 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
     return [...displayedPrimaryTags, ...displayedSecondaryTags];
   }, [task.secondaryTagIds, task.primaryTagIds, secondaryTags, primaryTags]);
 
+  // Debug: allow fetching raw entity only once per session
+  const hasFetchedEntity = React.useRef(false);
+
+  const handleEntityDebug = () => {
+    if (!hasFetchedEntity.current) {
+      getSingleEntity(task.id);
+      hasFetchedEntity.current = true;
+    }
+  };
+
   return (
     <div className="space-y-5 h-full overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:'none'] [scrollbar-width:'none']">
       {/* Task ID & Tags */}
       <div className="flex items-center justify-between">
         <span
+          onClick={handleEntityDebug}
           className={`text-xs font-mono px-2 py-1 rounded ${
             isDarkMode
               ? "bg-slate-700 text-slate-400"
@@ -168,7 +179,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                     {tag.name}
                   </button>
                 </Tooltip>
-              )
+              ),
           )}
         </div>
       </div>
@@ -416,7 +427,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                           {item.value}
                         </span>
                       </div>
-                    )
+                    ),
                 )}
               </div>
             )}
@@ -431,8 +442,8 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                       ? "bg-blue-500/10 border-blue-500/20 hover:bg-blue-500/20"
                       : "bg-blue-50 border-blue-100 hover:bg-blue-100/50"
                     : isDarkMode
-                    ? "bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20"
-                    : "bg-emerald-50 border-emerald-100 hover:bg-emerald-100/50"
+                      ? "bg-emerald-500/10 border-emerald-500/20 hover:bg-emerald-500/20"
+                      : "bg-emerald-50 border-emerald-100 hover:bg-emerald-100/50"
                 }`}
               >
                 {/* System Icon */}
@@ -475,7 +486,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                           ? task.optionals.externalId.replace(/^INC/, "")
                           : "";
                         const url = getServiceNowIncidentUrl(
-                          task.optionals.externalId || ""
+                          task.optionals.externalId || "",
                         );
 
                         return idDigits ? (
@@ -507,7 +518,7 @@ export const TaskDetails: React.FC<TaskDetailsProps> = ({
                     /* MARS Display - Standard Badge */
                     (() => {
                       const url = getMarsItemUrl(
-                        task.optionals.externalId || ""
+                        task.optionals.externalId || "",
                       );
                       const hasId = !!task.optionals.externalId;
 

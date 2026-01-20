@@ -114,6 +114,32 @@ def get_task_by_id(id):
     
     return jsonify(serialize_doc(task))
 
+@bp.route('/getSingleEntity', methods=['POST'])
+@jwt_required
+def get_single_entity():
+    """
+    Debug endpoint: Get raw task entity from database.
+    Returns the complete document as stored in MongoDB.
+    Useful for inspecting the actual DB state from browser Network tab.
+    """
+    data = request.json or {}
+    entity_id = data.get('id')
+    
+    if not entity_id:
+        return jsonify({"error": "ID is required"}), 400
+    
+    task = mongo.db.ents.find_one({
+        '_id': entity_id, 
+        'base.entityType': 'task'
+    })
+    
+    if not task:
+        return jsonify({"error": "Entity not found", "id": entity_id}), 404
+    
+    # Return raw document (convert _id to id for consistency)
+    task['id'] = task.pop('_id')
+    return jsonify(task)
+
 @bp.route('/', methods=['POST'])
 @jwt_required
 @idempotency_middleware

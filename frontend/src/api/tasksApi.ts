@@ -97,6 +97,16 @@ export const getTaskById = async (taskId: string): Promise<ApiResponse<Task>> =>
 };
 
 /**
+ * Debug: Get raw entity from database (for Network tab inspection)
+ */
+export const getSingleEntity = async (entityId: string): Promise<ApiResponse<unknown>> => {
+  return apiRequest<unknown>(`${API_ENDPOINTS.tasks}/getSingleEntity`, {
+    method: "POST",
+    body: JSON.stringify({ id: entityId }),
+  });
+};
+
+/**
  * Create a new task with idempotency protection
  */
 export const createTask = async (taskData: TaskFormData): Promise<ApiResponse<Task>> => {
