@@ -61,22 +61,30 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
   const defaultTab = tabs[0]?.id || "contacts";
   const [activeTab, setActiveTab] = useState<TabType>(defaultTab);
 
-  const renderContent = () => {
-    switch (activeTab) {
-      case "users":
-        return <ManageUser />;
-      case "contacts":
-        return <ManageContact />;
-      case "tags":
-        return <ManageTagsTwoTier />;
-      case "hierarchy":
-        return <ManageMilitaryHierarchy />;
-      case "profile":
-        return <ProfileSettings />;
-      default:
-        return <ManageUser />;
-    }
-  };
+  // Render all admin tabs if admin, otherwise only non-admin tabs
+  // Components stay mounted to preserve state
+  const adminTabs = isAdmin ? (
+    <>
+      <div
+        className="flex-1 flex flex-col overflow-hidden"
+        style={{ display: activeTab === "users" ? "flex" : "none" }}
+      >
+        <ManageUser />
+      </div>
+      <div
+        className="flex-1 flex flex-col overflow-hidden"
+        style={{ display: activeTab === "tags" ? "flex" : "none" }}
+      >
+        <ManageTagsTwoTier />
+      </div>
+      <div
+        className="flex-1 flex flex-col overflow-hidden"
+        style={{ display: activeTab === "hierarchy" ? "flex" : "none" }}
+      >
+        <ManageMilitaryHierarchy />
+      </div>
+    </>
+  ) : null;
 
   return (
     <ModalOverlay isOpen={isOpen} onClose={onClose} maxWidthClass="max-w-5xl">
@@ -105,9 +113,24 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
           <X size={24} />
         </button>
 
-        {/* Main Content Area */}
+        {/* Main Content Area - All tabs rendered but hidden/shown */}
         <div className="flex-1 flex flex-col overflow-hidden">
-          {renderContent()}
+          {/* Admin-only tabs */}
+          {adminTabs}
+
+          {/* Non-admin tabs (always rendered) */}
+          <div
+            className="flex-1 flex flex-col overflow-hidden"
+            style={{ display: activeTab === "contacts" ? "flex" : "none" }}
+          >
+            <ManageContact />
+          </div>
+          <div
+            className="flex-1 flex flex-col overflow-hidden"
+            style={{ display: activeTab === "profile" ? "flex" : "none" }}
+          >
+            <ProfileSettings />
+          </div>
         </div>
 
         {/* Right Sidebar */}
@@ -152,8 +175,8 @@ const ManageSetting: React.FC<ManageSettingProps> = ({ isOpen, onClose }) => {
                       activeTab === tab.id
                         ? "bg-blue-500 text-white shadow-lg"
                         : isDarkMode
-                        ? "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
-                        : "text-slate-600 hover:bg-slate-100"
+                          ? "text-slate-400 hover:bg-slate-800 hover:text-slate-200"
+                          : "text-slate-600 hover:bg-slate-100"
                     }
                   `}
               >
