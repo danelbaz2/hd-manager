@@ -70,9 +70,9 @@ def _get_health_client():
         uri = os.getenv('MONGO_URI', 'mongodb://127.0.0.1:27017/hd_manager')
         _health_client = MongoClient(
             uri,
-            serverSelectionTimeoutMS=1000,
-            connectTimeoutMS=1000,
-            socketTimeoutMS=1000
+            serverSelectionTimeoutMS=5000,
+            connectTimeoutMS=5000,
+            socketTimeoutMS=5000
         )
     return _health_client
 
