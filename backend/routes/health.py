@@ -108,9 +108,9 @@ def _monitor_loop(app):
                     _was_connected = True
                 else:
                     if _was_connected:
-                        logger.error(f"[DATABASE] Connection to MongoDB LOST - \033[31m{error}\033[0m")
+                        logger.debug(f"[DATABASE] Connection to MongoDB LOST - \033[31m{error}\033[0m")
                     else:
-                        logger.error(f"[DATABASE] MongoDB still disconnected - \033[31m{error}\033[0m")
+                        logger.debug(f"[DATABASE] MongoDB still disconnected - \033[31m{error}\033[0m")
                     _was_connected = False
                     
         except Exception as e:
