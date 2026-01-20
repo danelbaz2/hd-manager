@@ -46,11 +46,17 @@ const MenuBar: React.FC<MenuBarProps> = ({ className }) => {
     >
       {/* Logo/Header */}
       <div className="flex items-center justify-center gap-2 lg:gap-3 mb-6 lg:mb-8 px-2">
-        <h1 className="text-lg lg:text-xl xl:text-2xl font-bold text-blue-600 tracking-wide">
+        <h1
+          className={`text-lg lg:text-xl xl:text-2xl font-bold tracking-wide ${
+            isDarkMode ? "text-blue-400" : "text-blue-600"
+          }`}
+        >
           {getSystemName()}{" "}
         </h1>
         <Layers
-          className="text-blue-600 w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7"
+          className={`w-5 h-5 lg:w-6 lg:h-6 xl:w-7 xl:h-7 ${
+            isDarkMode ? "text-blue-400" : "text-blue-600"
+          }`}
           strokeWidth={2}
         />
       </div>
