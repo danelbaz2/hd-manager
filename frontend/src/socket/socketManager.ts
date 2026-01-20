@@ -51,7 +51,7 @@ class SocketManager {
   // Activity events to track
   private readonly ACTIVITY_EVENTS = [
     'mousedown',
-    'mousemove', 
+    'mousemove',
     'keydown',
     'touchstart',
     'scroll',
@@ -344,6 +344,13 @@ class SocketManager {
       window.addEventListener(event, this.handleActivity, { passive: true });
     });
     
+    // Pre-emptively reconnect when window regains focus
+    // This way socket is often already connected when user performs an action
+    window.addEventListener('focus', this.handleWindowFocus);
+    
+    // Also handle visibility change (tab becomes visible)
+    document.addEventListener('visibilitychange', this.handleVisibilityChange);
+    
     this.resetIdleTimer();
   }
   
@@ -353,6 +360,10 @@ class SocketManager {
     this.ACTIVITY_EVENTS.forEach(event => {
       window.removeEventListener(event, this.handleActivity);
     });
+    
+    // Remove focus/visibility listeners
+    window.removeEventListener('focus', this.handleWindowFocus);
+    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
   }
   
   private handleActivity = (): void => {
@@ -402,6 +413,30 @@ class SocketManager {
       this.socket.disconnect();
     }
   }
+  
+  /**
+   * Handle window focus - pre-emptively reconnect so socket is ready
+   * when user performs an action.
+   */
+  private handleWindowFocus = (): void => {
+    if (this.isIdle && !this.socket?.connected) {
+      this.isIdle = false;
+      this.connect();
+    }
+  };
+  
+  /**
+   * Handle visibility change - reconnect when tab becomes visible.
+   * This catches cases where focus event doesn't fire (e.g., mobile).
+   */
+  private handleVisibilityChange = (): void => {
+    if (document.visibilityState === 'visible') {
+      if (this.isIdle && !this.socket?.connected) {
+        this.isIdle = false;
+        this.connect();
+      }
+    }
+  };
 }
 
 // Export singleton instance

@@ -10,8 +10,16 @@ import { socketManager } from '../socket/socketManager';
 import { withIdempotency, generateIdempotencyKey } from './idempotency';
 
 /**
- * Ensures socket is connected before executing a mutation.
- * If not connected, attempts to reconnect first.
+ * Executes a mutation with non-blocking socket reconnection.
+ * 
+ * The mutation executes immediately via HTTP - it doesn't wait for socket.
+ * If disconnected, the socket reconnects in the background so subsequent
+ * real-time broadcasts will work.
+ * 
+ * This approach ensures:
+ * - User actions are instant (no perceived delay)
+ * - HTTP mutations always work (don't depend on socket)
+ * - Socket catches up for future real-time updates
  * 
  * @param mutationFn - The mutation function to execute
  * @returns The result of the mutation
@@ -19,13 +27,14 @@ import { withIdempotency, generateIdempotencyKey } from './idempotency';
 export async function withSocketConnection<T>(
   mutationFn: () => Promise<T>
 ): Promise<T> {
-  // Ensure socket is connected before mutation
-  const isConnected = await socketManager.ensureConnected();
-  
-  if (!isConnected) {
-    console.warn('[API] Socket not connected, mutation may not broadcast');
+  // Start socket reconnection in background (non-blocking)
+  if (!socketManager.isConnected) {
+    // Fire-and-forget: reconnect without waiting
+    socketManager.connect();
+    console.debug('[API] Socket reconnecting in background');
   }
   
+  // Execute mutation immediately - HTTP doesn't need socket
   return mutationFn();
 }
 

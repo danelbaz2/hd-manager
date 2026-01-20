@@ -115,7 +115,7 @@ const getSocketUrl = (): string => {
 
 export const DEFAULT_SOCKET_CONFIG: SocketConfig = {
   url: getSocketUrl(),
-  idleTimeoutMs: 300 * 1000, // disconnect after 5 minutes of inactivity
+  idleTimeoutMs: 300 * 1000, // 5 minutes
   activityDebounceMs: 1000,
   autoReconnectOnActivity: true,
   maxReconnectAttempts: 10,
